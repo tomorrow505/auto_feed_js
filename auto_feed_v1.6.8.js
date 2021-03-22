@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         auto_seed
+// @name         auto_feed
 // @author       tomorrow505
 // @thanks       感谢宝大、86大佬、贝壳大佬提供邀请码;感谢宝大、86大佬提供友情赞助;感谢手大、kmeng、黑白等大佬赠予PTP积分.（ID：tomorrow505, 感谢支持）
 // @contributor  daoshuailx/hollips/kmeng/wyyqyl
