@@ -111,7 +111,9 @@ PT站一键转载脚本
 
 为了这个脚本也花了很多时间，如果你喜欢这个脚本，请捐赠我作为更新维护的动力吧。
 
- Alipay                                      | WeChat                             
- :-: :-: | :-:
- ![](http://tomorrow505.xyz/img/ali_pay.png) | ![](http://tomorrow505.xyz/img/wechat_pay.png) 
+|                   Alipay                    |                     WeChat                     |
+| :-----------------------------------------: | :--------------------------------------------: |
+| ![](http://tomorrow505.xyz/img/ali_pay.png) | ![](http://tomorrow505.xyz/img/wechat_pay.png) |
+
+ 
 
