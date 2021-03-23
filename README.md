@@ -122,7 +122,7 @@ PT站一键转载脚本
 
 |                   Alipay                    |                     WeChat                     |
 | :-----------------------------------------: | :--------------------------------------------: |
-| ![](http://tomorrow505.xyz/img/ali_pay.png) | ![](http://tomorrow505.xyz/img/wechat.png) |
+| ![](http://tomorrow505.xyz/img/ali_pay.png) | ![](http://tomorrow505.xyz/img/wechat_pay.png) |
 
  
 
