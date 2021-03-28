@@ -1620,6 +1620,14 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         input_box.style.backgroundColor = '#4d5656';
         input_box.style.color = 'white';
     }
+
+    if (site == 'TorrentLeech' &&  $('#off').css('display') == 'none') {
+        input_box.style.color = 'black';
+        textarea.style.color = 'black';
+        douban_button.style.color = 'black';
+        ptgen_button.style.color = 'black';
+        search_button.style.color = 'black';
+    }
 }
 
 function get_size_from_descr(descr){
@@ -4463,7 +4471,7 @@ setTimeout(function(){
         var allinput = document.getElementsByTagName("input");
         for (i = 0; i < allinput.length; i++) {
             if (allinput[i].name == 'name') { //填充标题
-                if (forward_site.match(/(HDChina|NanYang|CMCT|iTS)/i)) {
+                if (['HDChina', 'NanYang', 'CMCT', 'iTS'].indexOf(forward_site) > -1) {
                     allinput[i].value = raw_info.name.replace(/\s/g, ".");
                 } else if (forward_site == 'TTG') {
                     raw_info.name = raw_info.name.replace(/(5\.1|2\.0|7\.1|1\.0)/, function(data){
