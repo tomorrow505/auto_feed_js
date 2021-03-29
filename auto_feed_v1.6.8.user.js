@@ -236,7 +236,7 @@ const reg_team_name = {
     'PuTao': /-putao/i,
     'NanYang': /-nytv/i,
     'TLFbits': /-tlf/i,
-    'HDDolby': /-DBTV/i,
+    'HDDolby': /-DBTV|Dream$|.*@dream/i,
     'FRDS': /-FRDS|@FRDS/i,
     'BeiTai': /-BeiTai/i
 };
