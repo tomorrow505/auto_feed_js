@@ -4177,6 +4177,12 @@ setTimeout(function(){
             raw_info.small_descr = raw_info.small_descr.replace(/(\/[\s])/ig, '/');
         }
 
+        if (raw_info.descr.match(/rgb\(\d.*?\)/)){
+            raw_info.descr = raw_info.descr.replace(/rgb\(\d.*?\)/g, function(data){
+                return rgb_2_hex(data);
+            })
+        }
+
         if (upload_site.match(/music/i) && forward_site == 'LemonHD'){
             LemonHD_music = true;
         } else if (raw_info.origin_site == 'OpenCD' || raw_info.origin_site == 'RED') {
