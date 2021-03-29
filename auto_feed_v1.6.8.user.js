@@ -2,7 +2,7 @@
 // @name         auto_feed
 // @author       tomorrow505
 // @thanks       感谢宝大、86大佬、贝壳大佬提供邀请码;感谢宝大、86大佬提供友情赞助;感谢手大、kmeng、黑白等大佬赠予PTP积分.（ID：tomorrow505, 感谢支持）
-// @contributor  daoshuailx/hollips/kmeng/wyyqyl
+// @contributor  daoshuailx/hollips/kmeng/wyyqyl/shmt86
 // @description  PT一键转种脚本
 // @include      https://blutopia.xyz/torrents?imdb=tt*
 // @namespace    Violentmonkey Scripts
@@ -676,7 +676,7 @@ function walkDOM(n) {
             n.innerHTML = '';
         } else if (n.nodeName == 'SPAN') {
             if (n.style.color != '') {
-                n.innerHTML = '[color=' + n.style.color + ']' + n.innerHTML + '[/color]';
+                n.innerHTML = '[color=' + rgb_2_hex(n.style.color) + ']' + n.innerHTML + '[/color]';
             }
         } else if (n.nodeName == 'U'){
             n.innerHTML = '[u]' + n.innerHTML + '[/u]';
@@ -4175,12 +4175,6 @@ setTimeout(function(){
             }
             raw_info.small_descr = tmp_small_descr.replace(/([\s]\/)/ig, '/');
             raw_info.small_descr = raw_info.small_descr.replace(/(\/[\s])/ig, '/');
-        }
-
-        if (raw_info.descr.match(/rgb\(\d.*?\)/)){
-            raw_info.descr = raw_info.descr.replace(/rgb\(\d.*?\)/g, function(data){
-                return rgb_2_hex(data);
-            })
         }
 
         if (upload_site.match(/music/i) && forward_site == 'LemonHD'){
