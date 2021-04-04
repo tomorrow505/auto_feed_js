@@ -151,7 +151,7 @@ const apis = ['https://ptgen.rhilip.info', 'https://api.rhilip.info/tool/moviein
 const api_chosen = 0;
 
 //设置依托站点，可以选择【PTer/LemonHD/HDDolby/CMCT/PThome/OurBits/TCCF/TJUPT】
-const default_setting_host = 'Pter';
+const default_setting_host = 'PTer';
 var setting_host = GM_getValue('setting_host') === undefined ? default_setting_host: GM_getValue('setting_host');
 
 //用来转存海报使用的ptpimg的key,打开首页即可获取
