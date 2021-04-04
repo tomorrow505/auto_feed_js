@@ -8,7 +8,7 @@
 // @namespace    http://tomorrow505.xyz/
 // @include      http*://*/*details*.php*
 // @include      http*://*/upload*php*
-// @include      http*://ptpimg.me/index.php
+// @include      http*://ptpimg.me*
 // @include      https://hd-space.org/index.php?page=upload
 // @include      https://hdcity.city/upload*
 // @include      https://hdbits.org/upload*
@@ -345,7 +345,7 @@ if (site_url.match(/^.{3,30}userdetail/i)) {
     return;
 }
 
-if (site_url.match(/ptpimg.me\/index.php/)) {
+if (site_url.match(/^https?:\/\/ptpimg.me/)) {
     var s=document.createElement('span');
     document.body.appendChild(s);
     s.setAttribute('style', 'text-align: center; width: 100%; display: inline-block;');
