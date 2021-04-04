@@ -5,7 +5,7 @@
 // @contributor  daoshuailx/hollips/kmeng/wyyqyl/shmt86
 // @description  PT一键转种脚本
 // @include      https://blutopia.xyz/torrents?imdb=tt*
-// @namespace    Violentmonkey Scripts
+// @namespace    http://tomorrow505.xyz/
 // @include      http*://*/*details*.php*
 // @include      http*://*/upload*php*
 // @include      http*://ptpimg.me/index.php
@@ -49,7 +49,7 @@
 // @require      https://greasyfork.org/scripts/424304-imgcheckbox/code/imgCheckbox.js?version=917156
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      v1.7.0
+// @version      1.7.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
