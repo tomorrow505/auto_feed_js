@@ -2267,6 +2267,8 @@ if (site_url.match(/https:\/\/.*?usercp.php\?action=personal(#setting|#rehostimg
         for (key in show_search_urls) {
             if ($(`input[show=${key}]`).prop('checked')){
                 show_search_urls[key] = 1;
+            } else {
+                show_search_urls[key] = 0;
             }
         }
         GM_setValue('show_search_urls', JSON.stringify(show_search_urls));
