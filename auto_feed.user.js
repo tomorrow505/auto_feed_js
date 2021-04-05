@@ -350,6 +350,10 @@ if (site_url.match(/^https?:\/\/ptpimg.me/)) {
     document.body.appendChild(s);
     s.setAttribute('style', 'text-align: center; width: 100%; display: inline-block;');
     s.innerHTML = 'API Key: ' + document.getElementById('api_key').value;
+    if (!used_ptp_img_key) {
+        used_ptp_img_key = document.getElementById('api_key').value;
+        GM_setValue('used_ptp_img_key', used_ptp_img_key);
+    }
 }
 
 //用于修改hdf的显示样式，不喜欢可以删除或者注释掉
@@ -10052,7 +10056,7 @@ setTimeout(function(){
             } else {
                 search_imdb = 'http://api.tmdb.org/3/search/multi?api_key={key}&language=zh-CN&query={name}&page=1&include_adult=true';
             }
-            search_imdb = search_imdb.format({'key': uese_tmdb_key, 'name': search_name});
+            search_imdb = search_imdb.format({'key': used_tmdb_key, 'name': search_name});
             getJson(search_imdb, null, function(data){
                 if (data.results.length > 2) {
                     if (raw_info.type == '剧集') {
