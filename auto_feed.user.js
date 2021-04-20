@@ -50,9 +50,10 @@
 // @require      http://code.jquery.com/ui/1.9.2/jquery-ui.js
 // @resource     css http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css
 // @require      https://greasyfork.org/scripts/424304-imgcheckbox/code/imgCheckbox.js?version=917156
+// @resource     douban https://greasyfork.org/scripts/425243-get-douban-info/code/get_douban_info.js?version=923616
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.7.3
+// @version      1.7.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -147,7 +148,8 @@
     20210406：加入部分站点禁转资源判断，部分站点转入限制判断; 修复部分bug; 加入catbox到单图转存图床支持。
     20210411：简单适配PTP的转入, 修复部分bug, 取消对elite-tracker的支持。
     20210413：支持设置页面对支持站点重新排序，拖拽后点击保存即可。
-    20210414：简单适配NPUPT的转入转出(电影剧集纪录片等), 简单支持HDAI的转入。
+    20210414：简单适配NPUPT的转入转出(电影剧集纪录片等), 简单支持HDAI的转入->20210419: 修复部分bug。
+    20210419：借鉴https://greasyfork.org/zh-CN/scripts/38878-电影信息查询脚本，获取豆瓣信息增加豆瓣页面直接爬取。
 
 任务：
     完善mediainfo和截图分离函数，大部分外站都需要分离操作；柠檬动漫和音乐改版之后代码需要重新整理。
@@ -164,7 +166,7 @@ GM_addStyle(style);
 
 //提供可用的获取豆瓣信息两个api，从0-1选择。主要应用于外站，
 const apis = ['https://ptgen.rhilip.info', 'https://api.rhilip.info/tool/movieinfo/gen'];
-const api_chosen = 0;
+var api_chosen = GM_getValue('api_chosen') === undefined ? 0: GM_getValue('api_chosen');
 
 //设置依托站点，可以选择【PTer/LemonHD/HDDolby/CMCT/PThome/OurBits/TCCF/TJUPT】
 const default_setting_host = 'PTer';
@@ -1473,6 +1475,7 @@ function create_site_url_for_douban_info(raw_info, is_douban_search_needed){
                     var response = JSON.parse(res.responseText);
                     if (response.length > 0) {
                         raw_info.dburl = 'https://movie.douban.com/subject/' + response[0].id;
+                        console.log(raw_info.dburl);
                         resolve(raw_info);
                     } else {
                         reject();
@@ -2062,7 +2065,7 @@ function get_search_name(name) {
         search_name = name.split(/S\d{1,3}/i)[0];
         search_name = search_name.replace(/(19|20)\d{2}/ig, '').trim(); 
     } else{
-        if (name.match(/\d{4}/)){
+        if (name.match(/(19|20)\d{2}/)){
             search_name = name.split(/(19|20)\d{2}/)[0];
         }
     }
@@ -2308,6 +2311,14 @@ if (site_url.match(/https:\/\/.*?usercp.php\?action=personal(#setting|#rehostimg
     $('#setting').append(`<br><br>`);
     
     //**************************************************** 4 ***************************************************************************
+    $('#setting').append(`<b>选择PTGen的API节点(适用于外站)：</b>`);
+    $('#setting').append(`<input type="radio" name="ptgen" value="0">ptgen.rhilip.info`);
+    $('#setting').append(`<input type="radio" name="ptgen" value="1">api.rhilip.info</div>`);
+    $('#setting').append(`<input type="radio" name="ptgen" value="2">豆瓣页面爬取</div>`);
+    $(`input:radio[value="${api_chosen}"]`).prop('checked', true);
+    $('#setting').append(`<br><br>`);
+
+
     $('#setting').append(`<b>快速搜索站点设置(每个一行,可自行添加)</b></br>`);
     $('#setting').append(`<textarea name="set_jump_href" style="width:700px" rows="13"></textarea><br><br>`);
     $('textarea[name="set_jump_href"]').val(used_search_list.join('\n'));
@@ -2361,6 +2372,7 @@ if (site_url.match(/https:\/\/.*?usercp.php\?action=personal(#setting|#rehostimg
         GM_setValue('used_common_sites', JSON.stringify(used_common_sites.join(',')));
 
         GM_setValue('setting_host', $('input[name="setting_site"]:checked').val());
+        GM_setValue('api_chosen', $('input[name="ptgen"]:checked').val());
 
         for (key in show_search_urls) {
             if ($(`input[show=${key}]`).prop('checked')){
@@ -2415,7 +2427,7 @@ if (site_url.match(/https:\/\/.*?usercp.php\?action=personal(#setting|#rehostimg
         var rehost_site = $('input[name="rehost_site"]:checked').val();
         var img_url = $('input[name="img_url"]').val();
         if (used_rehost_img_info[rehost_site]['api-key'] || rehost_site == 'catbox') {
-            if (!img_url.match(/https:\/\/.*?(png|jpg|webp)/)) {
+            if (!img_url.match(/https?:\/\/.*?(png|jpg|webp)/)) {
                 alert('请输入图片链接！！');
                 return;
             }
@@ -4901,37 +4913,42 @@ setTimeout(function(){
                         };
                         url_to_search = '?site=douban&sid=' + raw_info.url.match(/tt\d+/)[0];
                     }
-                    getJson(apis[api_chosen] + url_to_search, null, function(res){
-                        var douban_info = res.success ? res.format : "";
-                        douban_info = douban_info.replace("[/img][/center]", "[/img]");
-                        douban_info = douban_info.replace("hongleyou.cn", "doubanio.com");
-                        if (douban_info != '') {
-                            raw_info.descr = douban_info + '\n\n' + raw_info.descr;
+                    if (api_chosen < 2) {
+                        getJson(apis[api_chosen] + url_to_search, null, function(res){
+                            var douban_info = res.success ? res.format : "";
+                            douban_info = douban_info.replace("[/img][/center]", "[/img]");
+                            douban_info = douban_info.replace("hongleyou.cn", "doubanio.com");
+                            if (douban_info != '') {
+                                raw_info.descr = douban_info + '\n\n' + raw_info.descr;
 
-                            if (is_douban_needed && raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
-                                raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
-                            }
-                            if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}纪录片/i)) {
-                                raw_info.type = '纪录';
-                            } else if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}动画/i)) {
-                                raw_info.type = '动漫';
-                            }
-                            set_jump_href(raw_info, 1);
-                            jump_str = dictToString(raw_info);
-                            douban_button.value = '获取成功';
-                            $('#textarea').val(douban_info);
-                            GM_setClipboard(douban_info);
-
-                            tag_aa = forward_r.getElementsByClassName('forward_a');
-                            for (i = 0; i < tag_aa.length; i++) {
-                                if (['常用站点', 'PTgen', '简化MI', '脚本设置', '单图转存', '转存PTP'].indexOf(tag_aa[i].textContent) < 0){
-                                    tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
+                                if (is_douban_needed && raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
+                                    raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
                                 }
+                                if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}纪录片/i)) {
+                                    raw_info.type = '纪录';
+                                } else if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}动画/i)) {
+                                    raw_info.type = '动漫';
+                                }
+                                set_jump_href(raw_info, 1);
+                                jump_str = dictToString(raw_info);
+                                douban_button.value = '获取成功';
+                                $('#textarea').val(douban_info);
+                                GM_setClipboard(douban_info);
+
+                                tag_aa = forward_r.getElementsByClassName('forward_a');
+                                for (i = 0; i < tag_aa.length; i++) {
+                                    if (['常用站点', 'PTgen', '简化MI', '脚本设置', '单图转存', '转存PTP'].indexOf(tag_aa[i].textContent) < 0){
+                                        tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
+                                    }
+                                }
+                            } else {
+                                douban_button.value = '获取失败';
                             }
-                        } else {
-                            douban_button.value = '获取失败';
-                        }
-                    });
+                        });
+                    } else {
+                        var douban_script = GM_getResourceText("douban");
+                        eval(douban_script);
+                    }
                 })
                 .catch(function(err){
                     console.log(err);
@@ -5314,7 +5331,7 @@ setTimeout(function(){
         var allinput = document.getElementsByTagName("input");
         for (i = 0; i < allinput.length; i++) {
             if (allinput[i].name == 'name') { //填充标题
-                if (['HDChina', 'NanYang', 'CMCT', 'iTS'].indexOf(forward_site) > -1) {
+                if (['HDChina', 'NanYang', 'CMCT', 'iTS', 'NPUPT'].indexOf(forward_site) > -1) {
                     allinput[i].value = raw_info.name.replace(/\s/g, ".");
                 } else if (forward_site == 'TTG') {
                     raw_info.name = raw_info.name.replace(/(5\.1|2\.0|7\.1|1\.0)/, function(data){
@@ -5544,7 +5561,7 @@ setTimeout(function(){
             } else if (forward_site == 'BLU' || forward_site == 'HDPost') {
                 torrent_box.parentNode.innerHTML = '<input class="upload-form-file" type="file" accept=".torrent" name="torrent" id="torrent" required="">';
             } else if (forward_site == 'HDai') {
-                torrent_box.parentNode.innerHTML = '<button type="button" lay-verify="isUpload" id="torrent1" class="layui-btn"><i class="layui-icon"></i>上传种子</button><input type="file" class="layui-upload-file" id="torrent2" name="file" accept=".torrent">';
+                torrent_box.parentNode.innerHTML = '<button type="button" id="torrent1" class="layui-btn"><i class="layui-icon"></i>上传种子</button><input type="file" class="layui-upload-file" id="torrent2" name="file" accept=".torrent">';
                 $('#torrent1').click(function(){
                     $('#torrent2').click();
                     $('#torrent2').change(function(){
@@ -5924,7 +5941,6 @@ setTimeout(function(){
                 descr_box[0].value = cmctinfos.trim();
             }
             descr_box[2].value = raw_info.descr;
-            
             $('#upload').after(`<button type="button" id="clear" class="layui-btn">清空附加信息</button>`);
             $('#clear').click(function(){
                 descr_box[2].value = '';
@@ -7615,6 +7631,7 @@ setTimeout(function(){
         }
 
         else if (forward_site == 'NPUPT') {
+            delete Array.prototype.remove;
             var evt = document.createEvent("HTMLEvents");
             evt.initEvent("change", false, true);
             //类型
@@ -8944,7 +8961,6 @@ setTimeout(function(){
             var browsecat = document.getElementById('browsecat');
             var type_dict = {'电影': 2, '剧集': 3, '动漫': 5, '综艺': 6, '音乐': 8, '纪录': 4,
                              '体育': 7, '软件': 9, '学习': 1, '': 9, '游戏': 9};
-            //如果当前类型在上述字典中
             browsecat.options[9].selected = true;//默认其他
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
