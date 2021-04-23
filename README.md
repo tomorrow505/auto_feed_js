@@ -120,7 +120,7 @@ PT站一键转载脚本
 
 ### 支持站点
 ----
-[![17.png](https://www.z4a.net/images/2021/04/03/17.png)](https://www.z4a.net/image/gmAFqb)
+[![23.png](https://www.z4a.net/images/2021/04/23/23.png)](https://www.z4a.net/image/gxrdbA)
 
 
 ### 使用介绍
