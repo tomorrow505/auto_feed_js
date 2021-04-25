@@ -1674,19 +1674,18 @@ function get_bluray_name_from_descr(descr, name) {
 
 //从简介拆分出来mediainfo和截图
 function get_mediainfo_picture_from_descr(descr){
-
     var info = {'mediainfo': '', 'pic_info': ''};
-
     var img_info = '';
     var img_urls = descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/ig);
+    console.log(img_urls)
     for (i=0; i<img_urls.length; i++){
         if (descr.indexOf(img_urls[i])<10){
         } else{
             descr = descr.replace(img_urls[i], '');
-            img_info += img_urls[i].match(/\[img\].*?\[\/img\]/)[0];
+            img_info += img_urls[i].match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/)[0];
         }
     }
-    descr = descr + '\n\n' +img_info
+    descr = descr + '\n\n' +img_info;
 
     //获取mediainfo,这里可以扩展匹配不同情形
     if (descr.match(/DISC INFO:|.MPLS|Video Codec/i)){
@@ -1700,25 +1699,14 @@ function get_mediainfo_picture_from_descr(descr){
     }
     cmctinfos = cmctinfos.replace(/\[\/quote\]/i, '');
     cmctinfos = cmctinfos.replace(/\[\/?(font|size|quote).{0,80}?\]/ig, '');
-
     //获取图片
-    cmctimgs = descr.replace(descr.slice(0,descr.search(/\[\/quote\]/)+7), '');
-    var tmp_text = '';
-    while (cmctimgs.match(/\[quote\]/)) {
-        tmp_text = cmctimgs.replace(cmctimgs.slice(0,cmctimgs.search(/\[quote\]/)+7), '');
-        if (!tmp_text.match(/\[img\].*?\[\/img\]/)){
-            break;
-        } else {
-            cmctimgs = tmp_text;
-        }
-    }
+    cmctimgs = descr.split(/\[\/quote\]/).pop();
     cmctimgs = cmctimgs.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
     if (cmctimgs){
         cmctimgs = cmctimgs.join(' ');
     } else {
         cmctimgs = '';
     }
-
     info.mediainfo = cmctinfos.trim();
     info.pic_info = cmctimgs.trim();
 
@@ -5352,15 +5340,16 @@ setTimeout(function(){
                 }
                 if ($('#douban_api').prop('checked')){
                     const url_prex = 'https://movie.douban.com/j/subject_suggest?q=';
-                    const douban_prex = 'https://movie.douban.com/subject/';
                     var search_url = url_prex + search_name;
                     var textarea = document.getElementById('textarea');
                     getJson(search_url, null, function(data){
                         if (data.length > 0) {
                             textarea.value = `搜索的影视名称为：${raw_info.name}\n`;
                             for(i=0;i<data.length;i++){
-                                textarea.value +=  `${data[i].sub_title}---${data[i].title}: ${douban_prex}${data[i].id}/\n`;
+                                textarea.value += `${data[i].sub_title}---${data[i].title}: ${douban_prex}${data[i].id}/\n`;
                             }
+                        } else {
+                            textarea.value += "暂时没有搜索结果！！";
                         }
                     });
 
@@ -8568,6 +8557,19 @@ setTimeout(function(){
             if (team_dict.hasOwnProperty(raw_info.source_sel)){
                 var index = team_dict[raw_info.source_sel];
                 team_box.options[index].selected = true;
+            }
+            if (raw_info.source_sel == '欧美') {
+                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                if (reg_region) {
+                    var region = reg_region[2];
+                    if (region.match('美国')) {
+                        team_box.options[2].selected = true;
+                    } else if (region.match('英国')) {
+                        team_box.options[3].selected = true;
+                    } else {
+                        team_box.options[8].selected = true;
+                    }
+                }
             }
         }
 
