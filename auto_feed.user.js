@@ -56,7 +56,7 @@
 // @resource     ptpdouban https://greasyfork.org/scripts/425274-ptp-douban-info/code/ptp_douban_info.js
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.7.6
+// @version      1.7.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
