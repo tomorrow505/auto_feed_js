@@ -4,7 +4,7 @@
 <a href="https://karagarga.in/browse.php?search={imdbid}&search_type=imdb" target="_blank">KG</a>
 <a href="http://cinemageddon.net/browse.php?search={imdbid}&proj=0&descr=1" target="_blank">CG</a>
 <a href="https://beyond-hd.me/torrents?imdb={imdbid}" target="_blank">BHD</a>
-<a href="https://blutopia.xyz/torrents?imdb={imdbid}#page/1" target="_blank">BLU</a>
+<a href="https://blutopia.xyz/torrents?imdbid={imdbno}&perPage=25" target="_blank">BLU</a>
 <a href="https://filelist.io/browse.php?search={imdbid}" target="_blank">FileList</a>
 <a href="https://avistaz.to/torrents?in=1&search={search_name}" target="_blank">AVZ</a>
 <a href="https://privatehd.to/torrents?in=1&search={search_name}" target="_blank">PHD</a>
