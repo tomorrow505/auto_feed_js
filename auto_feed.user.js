@@ -2351,26 +2351,33 @@ function getData(imdb_url, callback) {
                 var raw_data = {};
                 var data = {'data': {}};
                 raw_data.title = $("title", html).text().replace("(豆瓣)", "").trim();
-                raw_data.image = $('#mainpic img', html)[0].src.replace(
-                    /^.+(p\d+).+$/,
-                    (_, p1) => `https://img9.doubanio.com/view/photo/l_ratio_poster/public/${p1}.jpg`
-                );
+                try { 
+                    raw_data.image = $('#mainpic img', html)[0].src.replace(
+                        /^.+(p\d+).+$/,
+                        (_, p1) => `https://img9.doubanio.com/view/photo/l_ratio_poster/public/${p1}.jpg`
+                    );
+                } catch(e) {raw_data.image = 'null'}
+
                 raw_data.id = douban_url.match(/subject\/(\d+)/)[1];
-                raw_data.year = parseInt($('#content>h1>span.year', html).text().slice(1, -1));
+                try { raw_data.year = parseInt($('#content>h1>span.year', html).text().slice(1, -1)); } catch(e) {raw_data.year = ''}
                 try { raw_data.aka = $('#info span.pl:contains("又名")', html)[0].nextSibling.textContent.trim(); } catch(e) {raw_data.aka = 'null'}
-                raw_data.average = parseFloat($('#interest_sectl', html).find('[property="v:average"]').text());
-                raw_data.votes = parseInt($('#interest_sectl', html).find('[property="v:votes"]').text());
-                raw_data.genre = $('#info span[property="v:genre"]', html).toArray().map(e => e.innerText.trim()).join('/');
-                raw_data.region = $('#info span.pl:contains("制片国家/地区")', html)[0].nextSibling.textContent.trim();
-                raw_data.director = $('#info span.pl:contains("导演")', html)[0].nextSibling.nextSibling.textContent.trim();
-                raw_data.language = $('#info span.pl:contains("语言")', html)[0].nextSibling.textContent.trim();
-                raw_data.releaseDate = $('#info span[property="v:initialReleaseDate"]', html).toArray().map(e => e.innerText.trim()).sort((a, b) => new Date(a) - new Date(b)).join('/');
-                raw_data.runtime = $('span[property="v:runtime"]', html).text();
-                raw_data.cast = $('#info span.pl:contains("主演")', html)[0].nextSibling.nextSibling.textContent.trim();
-                raw_data.summary = Array.from($('#link-report>[property="v:summary"],#link-report>span.all.hidden', html)[0].childNodes)
-                    .filter(e => e.nodeType === 3)
-                    .map(e => e.textContent.trim())
-                    .join('\n');
+                try { raw_data.average = parseFloat($('#interest_sectl', html).find('[property="v:average"]').text()); } catch(e) {raw_data.average = ''}
+                try { raw_data.votes = parseInt($('#interest_sectl', html).find('[property="v:votes"]').text()); } catch(e) {raw_data.votes = ''}
+                try { raw_data.genre = $('#info span[property="v:genre"]', html).toArray().map(e => e.innerText.trim()).join('/');  } catch(e) {raw_data.genre = ''}
+                try { raw_data.region = $('#info span.pl:contains("制片国家/地区")', html)[0].nextSibling.textContent.trim(); } catch(e) {raw_data.region = ''}
+                try { raw_data.director = $('#info span.pl:contains("导演")', html)[0].nextSibling.nextSibling.textContent.trim(); } catch(e) {raw_data.director = ''}
+                try { raw_data.language = $('#info span.pl:contains("语言")', html)[0].nextSibling.textContent.trim(); } catch(e) {raw_data.language = ''}
+                try { raw_data.releaseDate = $('#info span[property="v:initialReleaseDate"]', html).toArray().map(e => e.innerText.trim()).sort((a, b) => new Date(a) - new Date(b)).join('/'); } catch(e) {raw_data.releaseDate = ''}
+                try { raw_data.runtime = $('span[property="v:runtime"]', html).text(); } catch(e) {raw_data.runtime = ''}
+                try { raw_data.cast = $('#info span.pl:contains("主演")', html)[0].nextSibling.nextSibling.textContent.trim(); } catch(e) {raw_data.cast = ''}
+                try { 
+                    raw_data.summary = Array.from($('#link-report>[property="v:summary"],#link-report>span.all.hidden', html)[0].childNodes)
+                        .filter(e => e.nodeType === 3)
+                        .map(e => e.textContent.trim())
+                        .join('\n');
+                } catch(e) {
+                    raw_data.summary = '';
+                }
                 data.data = raw_data;
                 callback(data)
             });
@@ -5237,7 +5244,7 @@ setTimeout(function(){
                         if (!score.replace('分', '')) score = '暂无评分';
                         if (data.data.votes) score += `|${data.data.votes}人`;
                         $('h1.movie-heading').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank" style="display: inline; width: auto; border-bottom: 0px !important; text-decoration: none; color: #d3d3d3; font-weight: bold;">${data.data.title.split(' ')[0]}[${score}]</a>`)
-                        if (origin_site == 'HDOli') {
+                        if (origin_site == 'HDOli' || origin_site == 'BLU') {
                             $('div.movie-overview').text(data.data.summary.replace(/ 　　/g, ''));
                         } else {
                             $('span.movie-overview').text(data.data.summary.replace(/ 　　/g, ''));
@@ -9499,7 +9506,7 @@ setTimeout(function(){
                 team_box.options[index].selected = true;
             }
             
-          //制作组 略
+		  //制作组 略
 
           //简介
             var info = get_mediainfo_picture_from_descr(raw_info.descr);
@@ -10235,7 +10242,7 @@ setTimeout(function(){
                 case 'H265': case 'X265': codec_box.options[1].selected = true; break;
                 case 'H264': case 'X264': codec_box.options[2].selected = true; break;
                 case 'VP9': codec_box.options[3].selected = true; break;
-                case 'VP10': codec_box.options[4].selected = true; break;
+				case 'VP10': codec_box.options[4].selected = true; break;
                 case 'AV1': codec_box.options[5].selected = true;
             }
 
@@ -10249,8 +10256,8 @@ setTimeout(function(){
                 case 'DTS-HDMA': audiocodec_box.options[3].selected = true; break;
                 case 'TrueHD': audiocodec_box.options[4].selected = true; break;
                 case 'AC3': audiocodec_box.options[5].selected = true; break;
-                case 'DTS:X': audiocodec_box.options[6].selected = true; break;
-                case 'DTS': audiocodec_box.options[7].selected = true; break;
+				case 'DTS:X': audiocodec_box.options[6].selected = true; break;
+				case 'DTS': audiocodec_box.options[7].selected = true; break;
                 case 'AAC': audiocodec_box.options[8].selected = true;
             }
 
