@@ -47,8 +47,6 @@
 // @exclude      https://bt.byr.cn/upload.php*
 // @require      https://code.jquery.com/jquery-1.12.4.js
 // @require      http://code.jquery.com/ui/1.9.2/jquery-ui.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.26.5/js/jquery.tablesorter.min.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.26.5/js/jquery.tablesorter.widgets.min.js
 // @resource     css http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css
 // @require      https://gitee.com/tomorrow505/img-checkbox/raw/master/imgCheckbox.js
 // @resource     douban https://greasyfork.org/scripts/425243-get-douban-info/code/get_douban_info.js?version=947881
