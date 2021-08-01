@@ -50,13 +50,13 @@
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.26.5/js/jquery.tablesorter.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.26.5/js/jquery.tablesorter.widgets.min.js
 // @resource     css http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css
-// @require      https://greasyfork.org/scripts/424304-imgcheckbox/code/imgCheckbox.js?version=917156
+// @require      https://gitee.com/tomorrow505/img-checkbox/raw/master/imgCheckbox.js
 // @resource     douban https://greasyfork.org/scripts/425243-get-douban-info/code/get_douban_info.js?version=947881
 // @resource     ptpname https://greasyfork.org/scripts/425272-ptp-show-name/code/ptp_show_name.js?version=936321
 // @resource     ptpdouban https://greasyfork.org/scripts/425274-ptp-douban-info/code/ptp_douban_info.js?version=947269
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.7.9
+// @version      1.8.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -169,6 +169,8 @@
     20210622：修复外站中文不显示的bug (API挂了)。
 
     20210707：加入支持海豹，修复部分bug.
+    20210713：大白兔增加禁转提示……
+    20210714：皮转到海豹添加字幕信息。其它待定。
 
 任务：
     完善mediainfo和截图分离函数，大部分外站都需要分离操作；柠檬动漫和音乐改版之后代码需要重新整理。
@@ -956,6 +958,7 @@ var raw_info = {
     'mediainfo_cmct': '', //适用于春天的info
     'imgs_cmct': '', //适用于春天的截图
     'full_mediainfo': '', //完整的mediainfo有的站点有长短两种，如：铂金家、猫、春天
+    'subtitles': [], //针对皮转海豹，字幕
 
     'youtube_url': '', //用于发布iTS
     'ptp_poster': '',  //用于发布iTS
@@ -2252,7 +2255,7 @@ function set_jump_href(raw_info, mode) {
                         forward_url = used_site_info[key].url + 'torrents_doc.php?search={url}&search_area=imdb&suggest=4'.format({'url': url});
                     } else if (key == 'LemonHD') {
                         forward_url = used_site_info[key].url + 'torrents_other.php?search={url}&search_area=imdb&suggest=4'.format({'url': url});
-                    } else if (key == 'PTP') {
+                    } else if (key == 'PTP' || key == 'GPW') {
                         forward_url = used_site_info[key].url + 'torrents.php?searchstr={url}'.format({'url': url});
                     } else if (key == 'HDB') {
                         forward_url = used_site_info[key].url + 'browse.php?search={url}'.format({'url': url});
@@ -2649,7 +2652,7 @@ if (site_url.match(/^https?:\/\/hdbits.org\/browse.php*/)) {
                 break;
         }
     });
-    $('#torrent-list > tbody > tr > td').css({'border': '1px solid LightSteelBlue'})
+    $('#torrent-list > tbody > tr > td').css({'border': '1px solid LightSteelBlue'});
 }
 
 if (site_url.match(/^https:\/\/passthepopcorn\.me\/torrents\.php.*/i) && show_search_urls['PTP']) {
@@ -4641,6 +4644,16 @@ setTimeout(function(){
 
         if (origin_site == 'PTP') {
             var torrent_box = document.getElementById("torrent_" + torrent_id);
+            var subtitle_box = $(torrent_box).find('#subtitle_manager');
+            subtitle_box.find('img').map((idnex, e)=>{
+                if ($(e).attr('title') != "No Subtitles"){
+                    raw_info.subtitles.push($(e).attr('title'));
+                }
+            });
+            if ($('#trumpable_'+torrent_id).length && $('#trumpable_'+torrent_id).text().match('Hardcoded Subtitles')) {
+                raw_info.subtitles.push('Hardcoded');
+            }
+
             var torrent_div = torrent_box.getElementsByClassName("bbcode-table-guard");
             torrent_div = torrent_div[torrent_div.length-1];
 
@@ -5768,6 +5781,8 @@ setTimeout(function(){
         //判断是否禁转
         var if_exclusive = false;
         if (origin_site == 'LemonHD' && $('#outer').find('.tag_jz').length) {
+            if_exclusive = true;
+        } else if (origin_site == 'HaresClub' && ( $('#outer').find('.jz').length || $('#outer').find('.xz').length)) {
             if_exclusive = true;
         } else if (origin_site == 'PTer' && $('#kdescr').parent().parent().parent().find('a[href*="tag_exclusive=yes"]').length) {
             if_exclusive = true;
@@ -11775,6 +11790,7 @@ setTimeout(function(){
                 }
 
                 var infos = get_mediainfo_picture_from_descr(raw_info.descr);
+                infos.mediainfo = infos.mediainfo.replace(/ \n/g, '\n');
                 $('textarea[name="mediainfo"]').val(infos.mediainfo);
                 $('textarea[name="mediainfo"]').css({'height': '400px'});
                 $('textarea[name="release_desc"]').val(infos.pic_info);
@@ -11876,8 +11892,7 @@ setTimeout(function(){
                 $('textarea[name="descr"]').val(infos.mediainfo + '\n\n' + infos.pic_info);
                 $('textarea[name="descr"]').css({'height': '300px'});
             } else {
-                infos.mediainfo = infos.mediainfo.replace(/ +/g, ' ');
-                // console.log(infos.mediainfo)
+                infos.mediainfo = infos.mediainfo.replace(/ \n/g, '\n');
                 $('textarea[name="techinfo"]').val(infos.mediainfo);
                 $('textarea[name="techinfo"]').css({'height': '800px'});
                 $('textarea[name="descr"]').val(infos.pic_info);
@@ -12341,6 +12356,7 @@ setTimeout(function(){
                     $('#release_desc').val(infos.mediainfo + '\n\n' + infos.pic_info);
                 }
             } catch (err) {
+                raw_info.descr = raw_info.descr.replace(/\[\/?.{1,20}\]\n?/g, '');
                 $('#release_desc').val(raw_info.descr);
             }
 
@@ -12362,6 +12378,23 @@ setTimeout(function(){
         }
 
         else if (forward_site == 'GPW') {
+
+            function get_subtitles_from_descr(descr) {
+                var subtitles = [];
+                descr.match(/Text.*?\nID[\s\S]*?Forced/g).map(function(item){
+                    try{
+                        var e = item.match(/Language.*?:(.*)/)[1].trim().toLowerCase();
+                        if (e == 'chinese' && item.match(/Simplified/)) {
+                            subtitles.push('chinese_simplified');
+                        } else if (e == 'chinese' && item.match(/Traditional/)) {
+                            subtitles.push('chinese_traditional');
+                        } else {
+                            subtitles.push(e);
+                        }
+                    } catch(err) {}
+                });
+                return subtitles;
+            }
 
             if (raw_info.url) {
                 $('#imdb').val(raw_info.url);
@@ -12468,6 +12501,39 @@ setTimeout(function(){
                 $('#container').val('MPG');
             } else if (raw_info.descr.match(/MPLS/i)) {
                 $('#container').val('m2ts');
+            }
+
+            if (raw_info.subtitles.split(',').length && raw_info.subtitles.split(',')[0]) {
+                raw_info.subtitles = raw_info.subtitles.split(',');
+                if (raw_info.subtitles.indexOf('Hardcoded') > -1) {
+                    $('#hardcoded_subtitles').attr('checked', true);
+                } else {
+                    $('#mixed_subtitles').attr('checked', true);
+                }
+                raw_info.subtitles.map(function(item) {
+                    if (item == 'Chinese') { // 默认简体
+                        $('#chinese_simplified').attr('checked', true);
+                    } else {
+                        try {
+                            $('#'+item.toLowerCase()).attr('checked', true);
+                        } catch (err) {}
+                    }
+                });
+                $('#other_subtitles').removeClass('hidden');
+            } else {
+                $('#type_of_subtitles').append(`<input type="button" value="辅助" id="help" class="button_preview_1 bbcode-preview-button">`);
+                $('#help').click(()=>{
+                    var subtitles = get_subtitles_from_descr($('textarea[name="mediainfo[]"]').val())
+                    if (subtitles.length) {
+                        $('#mixed_subtitles').attr('checked', true);
+                        $('#other_subtitles').removeClass('hidden');
+                        subtitles.map(function(item) {
+                            try {
+                                $('#'+item.toLowerCase()).attr('checked', true);
+                            } catch (err) {}
+                        })
+                    }
+                })
             }
         }
 
