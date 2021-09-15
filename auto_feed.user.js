@@ -2251,6 +2251,16 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         select_img.style.marginRight = '-1px';
         select_img.checked = true;
 
+        select_img.addEventListener('click', function(e){
+        if (e.target.checked) {
+            location.reload();
+        } else {
+            $('span.imgCheckbox0').map((index, e)=>{
+                $(e).replaceWith(e.innerHTML)
+            });
+        }
+    }, false);
+
         download_button.type = "button";
         download_button.id = 'download_pngs';
         download_button.value = '转存截图';
@@ -2347,15 +2357,6 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
             $('#textarea').slideDown();
         } else {
             $('#textarea').slideUp();
-        }
-    }, false);
-    select_img.addEventListener('click', function(e){
-        if (e.target.checked) {
-            location.reload();
-        } else {
-            $('span.imgCheckbox0').map((index, e)=>{
-                $(e).replaceWith(e.innerHTML)
-            });
         }
     }, false);
 
