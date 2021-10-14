@@ -59,7 +59,7 @@
 // @resource     ptpdouban https://gitee.com/tomorrow505/auto-feed-helper/raw/master/ptp_douban_info.js
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.8.5
+// @version      1.8.6
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -180,6 +180,8 @@
 
     20210910：修复大白兔转出部分bug，修复FL转出部分bug，修复BLU界面调整导致的bug，修复北邮人换域名导致的bug~
     20210914：转存截图添加复选框，取消选择则图片可以回复预览功能，再度选中则页面刷新进行恢复。
+
+    20211011：修复岛选择组名remux的bug，修复hdcity发布mediainfo的bug。
 
 */
 
@@ -1781,12 +1783,12 @@ String.prototype.get_type = function() {
         result = '电影';
     } else if (result.match(/(Animations|动漫|動畫|动画|Anime)/i)) {
         result = '动漫';
+    } else if (result.match(/(TV.*Show|综艺)/i)) {
+        result = '综艺';
     } else if (result.match(/(Docu|纪录)/i)) {
         result = '纪录';
     } else if (result.match(/(TV.*Series|剧|TV-PACK|TV-Episode|TV)/i)) {
         result = '剧集';
-    } else if (result.match(/(TV.*Show|综艺)/i)) {
-        result = '综艺';
     } else if (result.match(/(Music|音乐)/i)) {
         result = '音乐';
     } else if (result.match(/(Sport|体育)/i)) {
@@ -2059,7 +2061,7 @@ function get_bluray_name_from_descr(descr, name) {
         name = name.replace(/UNCUT/i,"Uncut");
         name = name.replace(/COMPLETE[\s\S]{0,20}BLURAY/,temp_title);
     }  else {
-        name = name + '.' + temp_title + "-UNTOUCHED";
+        name = name + '.' + temp_title + "-NoGroup";
     }
 
     return name;
@@ -2628,6 +2630,9 @@ function getData(imdb_url, callback) {
     getDoc(search_url, null, function(doc) {
         if ($('ul.search_results_subjects', doc).length) {
             var douban_url = 'https://movie.douban.com/subject/' + $('ul.search_results_subjects', doc).find('a').attr('href').match(/subject\/(\d+)/)[1];
+            if (douban_url.search('35580200') > -1) {
+                return;
+            }
             getDoc(douban_url, null, function(html) {
                 var raw_data = {};
                 var data = {'data': {}};
@@ -3769,6 +3774,11 @@ setTimeout(function(){
                     descr = document.getElementById("kdescr").parentNode;
                     frds_nfo = document.getElementById("knfo");
                 }
+                if (site_url.match(/detailsgame/)) {
+                    descr = document.getElementById("kdescription");
+                    raw_info.type = '游戏';
+                    try{ raw_info.small_descr = document.getElementsByTagName('h1')[1].textContent; } catch(err) {}
+                }
             }
 
             if (origin_site == 'PThome') {
@@ -4618,7 +4628,6 @@ setTimeout(function(){
                     insert_row = table.insertRow(i / 2 + 1);
                     douban_box = table.insertRow(i / 2 + 1);
                 }
-                // console.log(i, tds[i].textContent, raw_info.type)
             }
 
             if (origin_site == 'HDT') {
@@ -4813,7 +4822,7 @@ setTimeout(function(){
                     if (raw_info.name.match(/DRs$/i)){
                         raw_info.name = get_bluray_name_from_descr(raw_info.descr, raw_info.name);
                         raw_info.name = raw_info.name.replace(/\.•\./g, '.').replace(/.BD(50|25).*?DRs/g, '').replace(/â€¢./g, '');
-                        raw_info.name = raw_info.name.replace('UNTOUCHED', 'DRs');
+                        raw_info.name = raw_info.name.replace('NoGroup', 'DRs');
                     }
                 }
             }
@@ -4840,7 +4849,7 @@ setTimeout(function(){
                     }
                 }
             } else {
-                if (['行为', '小货车', '行為', '种子认领', '簡介', '操作', 'Action', 'Tagline', 'Tools:'].indexOf(tds[i].textContent.trim()) >-1 && origin_site != 'KG') {
+                if (['行为', '小货车', '行為', '种子认领', '簡介', '操作', 'Action', 'Tagline', 'Tools:', '设备'].indexOf(tds[i].textContent.trim()) >-1 && origin_site != 'KG') {
                     if (!is_inserted){
                         if (origin_site != 'MTV') {
                             table = tds[i].parentNode.parentNode;
@@ -5217,7 +5226,7 @@ setTimeout(function(){
 
                 var team = document.getElementById('group_torrent_header_' + torrent_id).getAttribute('data-releasegroup');
                 if (team) {
-                    raw_info.name = raw_info.name.replace('UNTOUCHED', team);
+                    raw_info.name = raw_info.name.replace('NoGroup', team);
                 }
             }
             else {
@@ -8734,7 +8743,7 @@ setTimeout(function(){
             }
 
             $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
+                if (raw_info.name.match(e.innerText) && e.innerText != 'REMUX') {
                     $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
                 }
             });
@@ -8920,7 +8929,7 @@ setTimeout(function(){
                 case '动漫': set_selected_option_by_value('browsecat', '405'); break;
                 //太乱，随便匹配一个
                 case '音乐': set_selected_option_by_value('browsecat', '408'); break;
-
+                case '游戏': set_selected_option_by_value('browsecat', '410'); break;
                 case '体育': set_selected_option_by_value('browsecat', '407'); break;
                 case '软件': set_selected_option_by_value('browsecat', '411'); break;
                 case '学习': set_selected_option_by_value('browsecat', '412');
@@ -13276,12 +13285,18 @@ setTimeout(function(){
                 if (raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i)){
                     document.getElementsByName('posterimg')[0].value = raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i)[1];
                 }
-                $('#descr').val(raw_info.descr);
 
 
-                var info = get_mediainfo_picture_from_descr(raw_info.descr);
-                var cmctinfos = info.mediainfo;
-                $('#mediainfo').val(cmctinfos);
+                try{
+                    var info = get_mediainfo_picture_from_descr(raw_info.descr);
+                    var cmctinfos = info.mediainfo;
+                    $('#mediainfo').val(cmctinfos);
+                    $('#descr').val(raw_info.descr.replace(cmctinfos, '').replace(/\[quote\]\s*\[\/quote\]/, ''));
+                } catch(err) {
+                    console.log(err)
+                    $('#descr').val(raw_info.descr);
+                }
+
                 var browsecat = document.getElementById('browsecat');
                 var type_dict = {'电影': 1, '剧集': 2, '动漫': 4, '综艺': 5, '音乐': 6, '纪录': 3,
                                  '体育': 7, '软件': 11, '学习': 10, '': 12};
