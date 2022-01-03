@@ -59,7 +59,7 @@
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.2
+// @version      1.9.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -188,6 +188,8 @@
     20211118：修复iTS转入，请配合iTS Upload Helper使用。
 
     20211215：支持audience转入转出; 修复部分音频不匹配bug。
+    20211227：修复kg部分bug，增加豆瓣页面跳转开关，在脚本设置页面进行设置，修复豆瓣页面部分bug。
+    20220103：增加新春祝福选项，默认开启，在脚本设置页面进行设置。
 
 
 */
@@ -691,6 +693,42 @@ var used_tmdb_key = GM_getValue('used_tmdb_key') === undefined ? '': GM_getValue
 
 //是否匿名，默认开启匿名选项
 var if_uplver = GM_getValue('if_uplver') === undefined ? 1: GM_getValue('if_uplver');
+
+var if_douban_jump = GM_getValue('if_douban_jump') === undefined ? 1: GM_getValue('if_douban_jump');
+
+//是否开启新春祝福，默认开启
+var new_year_wishes = GM_getValue('new_year_wishes') === undefined ? 1: GM_getValue('new_year_wishes');
+
+if (new_year_wishes == 1) {
+    var a = new Array("新年快乐", "大吉大利", "事事顺心", "事业有成", "万事顺遂", "心想事成", "幸福围绕" ,"健康相伴", "好运无限", "前程似锦", "笑口常开", "幸福安康");
+    var a_idx = 0;
+    $("body").click(function(e) {
+        a_idx = Math.ceil(Math.random()*a.length-1);
+        if (a_idx < 0) { a_idx = 0 }
+        var $i = $("<span/>").text(a[a_idx]);
+        var x = e.pageX, y = e.pageY;
+        $i.css({
+            "z-index": 999999999999999999999,
+            "top": y - 20,
+            "left": x,
+            "position": "absolute",
+            "font-weight": "bold",
+            "color": "#ff6651"
+        });
+        $("body").append($i);
+        $i.animate(
+            {
+                "top": y - 180,
+                "opacity": 0
+            },
+            1500,
+            function() {
+                $i.remove();
+            }
+        );
+    });
+}
+
 
 //额外的功能选项
 const default_extra_settings = {
@@ -1622,6 +1660,7 @@ function deal_with_title(title){
     title = title.replace(/H ?(26[45])/i, "H.$1").replace(/x265[.-]10bit/i, 'x265 10bit');
     title = title.replace(/\s+\[2?x?(免费|free)\].*$|\(限时.*\)|\(限時.*\)/ig, '').replace(/\[.*?\]/ig, '').replace(/剩余时间.*/i, '');
     title = title.replace(/\(|\)/ig, '').replace(/ - /, '-').trim();
+    title = title.replace('_10_', '(_10_)');
     return title;
 }
 
@@ -3975,9 +4014,19 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         $(`input[name="anonymous"]`).prop('checked', true);
     }
 
+    $('#setting').append(`<input type="checkbox" name="new_year_wishes" value="yes">是否开启新春祝福功能，默认开启。<br><br>`);
+    if (new_year_wishes) {
+        $(`input[name="new_year_wishes"]`).prop('checked', true);
+    }
+
     //**************************************************** 3.2 *************************************************************************
 
-    $('#setting').append(`<input type="checkbox" name="hdb_hide_douban" value="yes">是否折叠HDB中文豆瓣信息。<br><br>`);
+    $('#setting').append(`<input type="checkbox" name="douban_jump" value="yes">是否显示豆瓣页面跳转选项，默认开启。`);
+    if (if_douban_jump) {
+        $(`input[name="douban_jump"]`).prop('checked', true);
+    }
+
+    $('#setting').append(`<input type="checkbox" name="hdb_hide_douban" value="yes">是否折叠HDB中文豆瓣信息，默认展开。<br><br>`);
     if (hdb_hide_douban) {
         $(`input[name="hdb_hide_douban"]`).prop('checked', true);
     }
@@ -4052,6 +4101,12 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         //处理匿名
         if_uplver = $(`input[name="anonymous"]`).prop('checked') ? 1: 0;
         GM_setValue('if_uplver', if_uplver);
+
+        new_year_wishes = $(`input[name="new_year_wishes"]`).prop('checked') ? 1: 0;
+        GM_setValue('new_year_wishes', new_year_wishes);
+
+        if_douban_jump = $(`input[name="douban_jump"]`).prop('checked') ? 1: 0;
+        GM_setValue('if_douban_jump', if_douban_jump);
 
         hdb_hide_douban = $(`input[name="hdb_hide_douban"]`).prop('checked') ? 1: 0;
         GM_setValue('hdb_hide_douban', hdb_hide_douban);
@@ -4144,12 +4199,22 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         });
     });
     var id_scroll = site_url.split('#')[1];
+    if (id_scroll.match(/\?/)) {
+        url = id_scroll.split('?')[1];
+        id_scroll = id_scroll.split('?')[0];
+        if (url.match(/tt/)) {
+            url = 'https://www.imdb.com/title/' + url + '/';
+        } else {
+            url = 'https://movie.douban.com/subject/' + url + '/';
+        }
+        $('input[name=url]').val(url);
+    }
     document.querySelector(`#${id_scroll}`).scrollIntoView();
     return;
 }
 
 //添加豆瓣到ptgen跳转
-if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i)){
+if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jump){
     $(document).ready(function () {
         var douban_button = document.createElement("input");
         douban_button.type = "button";
@@ -4170,6 +4235,13 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i)){
                 var imdbno = imdbid.substring(2);
                 var search_name = $('h1').text().trim().match(/[a-z ]{2,200}/i)[0];
                 search_name = search_name.replace(/season/i, '');
+                if (!search_name.trim()) {
+                    try{
+                        search_name = $('#info span.pl:contains("又名")')[0]
+                        .nextSibling.textContent.trim()
+                        .split(" / ")[0];
+                    } catch(err) {}
+                }
                 var $container = $('h1');
                 add_search_urls($container, imdbid, imdbno, search_name, 2);
             }
@@ -7414,7 +7486,12 @@ setTimeout(function(){
         var ptgen = document.createElement('a');
         ptgen.innerHTML = 'PTgen';
         ptgen.id = 'ptgen';
-        ptgen.href = setting_host_list[setting_host] + '#ptgen';
+        ptgen.href = setting_host_list[setting_host] + '#ptgen?';
+        if (raw_info.dburl) {
+            ptgen.href += raw_info.dburl.match(/\d+/)[0];
+        } else if (raw_info.url) {
+            ptgen.href += raw_info.url.match(/tt\d+/)[0];
+        }
         ptgen.target = '_blank';
         forward_r.appendChild(ptgen);
 
@@ -15104,12 +15181,12 @@ setTimeout(function(){
                     poster_url = 'https://www.imdb.com/' + $('div[class*=Media__PosterContainer] > div > a', doc).last().attr('href');
                 }
                 var poster = await getPoster(poster_url);
-                console.log($('div[class*=Media__PosterContainer] > div > a', doc).length)
+                // console.log($('div[class*=Media__PosterContainer] > div > a', doc).length)
                 descr = descr.format({'poster': poster});
                 descr = descr.format({'title': $('h1:eq(0)', doc).text().trim()});
                 descr = descr.format({'genres': Array.from($('div[class*=GenresAndPlot]', doc).find('a')).map(function(e){
                     return $(e).text();
-                }).join(', ')});
+                }).join(', ').replace(/, Read all/g, '')});
 
                 descr = descr.format({'date': $('li.ipc-metadata-list__item:contains("Release date")', doc).find('div').find('li').text()});
                 descr = descr.format({'score': $('div.AggregateRatingButton__ContentWrap-sc-1ll29m0-0:eq(0)', doc).text()});
@@ -15129,8 +15206,9 @@ setTimeout(function(){
                 descr = descr.format({'cast': actors});
 
                 var imdb_descr = $('span.GenresAndPlot__TextContainerBreakpointXS_TO_M-cum89p-0:eq(0)', doc).text().trim();
-                if (imdb_descr.match(/See full summary/)){
-                    var full_descr_url = 'https://www.imdb.com' + $('span.GenresAndPlot__TextContainerBreakpointXS_TO_M-cum89p-0:eq(0)', doc).find('a').attr('href');
+                if (imdb_descr.match(/Read all/)){
+                    var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span.GenresAndPlot__TextContainerBreakpointXS_TO_M-cum89p-0:eq(0)', doc).find('a').attr('href');
+                    console.log(full_descr_url)
                     imdb_descr = await getFullDescr(full_descr_url);
                 } else if (imdb_descr.match(/Add a Plot/)) {
                     imdb_descr =  `No data from IMDB: ${raw_info.url}`;
