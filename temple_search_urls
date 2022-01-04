@@ -19,8 +19,11 @@
 <a href="https://springsunday.net/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">CMCT</a>
 <a href="https://hdsky.me/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">HDSky</a>
 <a href="https://search.douban.com/movie/subject_search?search_text={imdbid}&cat=1002" target="_blank">Douban</a>
-<a href="https://www.imdb.com/title/{imdbid}" target="_blank">IMDB</a>
+<a href="https://www.imdb.com/title/{imdbid}/" target="_blank">IMDB</a>
 <a href="https://www.themoviedb.org/search?query={search_name}" target="_blank">TMDB</a>
 <a href="https://thetvdb.com/search?query={search_name}" target="_blank">TVDB</a>
 <a href="https://anidb.net/search/anime/?adb.search={search_name}" target="_blank">Anidb</a>
 <a href="https://www.blu-ray.com/search/?quicksearch=1&quicksearch_country=all&quicksearch_keyword={search_name}&section=bluraymovies" target="_blank">bluraymovie</a>
+<a href="https://hudbt.hust.edu.cn/torrents.php?inclbookmarked=0&search_area=4&incldead=1&search={imdbid}" target="_blank">HUDBT</a>
+<a href="https://audiences.me/torrents.php?cat401=1&cat402=1&cat403=1&incldead=0&spstate=0&inclbookmarked=0&search={imdbid}&search_area=4"  target="_blank">ADE</a>
+<a href="https://hd-only.org/torrents.php?searchstr={search_name}" target="_blank">HDO</a>
