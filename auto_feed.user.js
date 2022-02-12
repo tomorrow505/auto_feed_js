@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         auto_feed
 // @author       tomorrow505
-// @thanks       感谢宝大、86大佬、贝壳等大佬提供邀请码;感谢宝大、86大佬提供友情赞助;感谢手大、kmeng、黑白、甘蔗等大佬赠予PTP积分.（ID：tomorrow505, 感谢支持）
+// @thanks       感谢宝大、86大佬、贝壳等大佬提供邀请码;感谢宝大、86大佬提供友情赞助;感谢86大佬、手大、kmeng、黑白、甘蔗等大佬赠予PTP积分.（ID：tomorrow505, 感谢支持）
 // @contributor  daoshuailx/hollips/kmeng/wyyqyl/shmt86
 // @description  PT一键转种脚本
 // @include      https://blutopia.xyz/torrents?imdb=tt*
