@@ -6,10 +6,7 @@
 // @description  PT一键转种脚本
 // @include      https://blutopia.xyz/torrents?imdb=tt*
 // @namespace    https://greasyfork.org/zh-CN/scripts/424132-auto-feed
-// @updateURL    https://greasyfork.org/zh-CN/scripts/424132-auto-feed
-// @installURL   https://greasyfork.org/zh-CN/scripts/424132-auto-feed
-// @downloadURL  https://greasyfork.org/zh-CN/scripts/424132-auto-feed
-// @include      http*://*/*details*.php*
+// @include      http*://*details*.php*
 // @include      http*://*/upload*php*
 // @include      http*://*/offer*php*
 // @include      http*://ptpimg.me*
@@ -54,12 +51,13 @@
 // @require      https://code.jquery.com/jquery-1.12.4.js
 // @require      http://code.jquery.com/ui/1.9.2/jquery-ui.js
 // @resource     css http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css
+// @resource     uploadbtn https://gitee.com/tomorrow505/auto-feed-helper/raw/master/upload_btn.js
 // @require      https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js
 // @require      https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.3
+// @version      1.9.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -298,7 +296,7 @@ if (location.href.match(/^https:\/\/greatposterwall.com\/torrents.php.*?|^https:
 
     if (!location.href.match(/id=\d+/)) {
         $('td.td_info[colspan="3"]').each((index,e)=>{
-            var torrent = $(e).find('a.torrent_specs');
+            var torrent = $(e).find('a[href*="torrentid"]');
             var url = torrent.attr('href');
             var node_length = torrent.contents().length;
             torrent.contents().map((index,e)=>{
@@ -312,11 +310,12 @@ if (location.href.match(/^https:\/\/greatposterwall.com\/torrents.php.*?|^https:
             });
             var id = url.match(/torrentid=(\d+)/)[1];
             getDoc(url, null, function(data){
-                var torrent_tr = $(`#torrent_torrent_${id}`, data);
+                var torrent_tr = $(`#torrent_detail_${id}`, data);
                 var torrent_td = torrent_tr.find('table[class="filelist_table"]', data).find('tr:last').find('td:first');
                 email = torrent_td.find('a[class="__cf_email__"]');
                 get_email(email);
                 torrent_name = torrent_td.text();
+                console.log(torrent_name);
                 torrent_name = get_group_name(torrent_name, torrent_info);
                 if (torrent_name == 'Unknown'){
                     email = torrent_tr.find('div.filelist_path').find('a[class="__cf_email__"]');
@@ -344,7 +343,7 @@ if (location.href.match(/^https:\/\/greatposterwall.com\/torrents.php.*?|^https:
             if ($(e).attr('data-processing') != undefined) {
                 var torrent_info = $(e).find('td.td_info > a').text();
                 var id = $(e).attr('id').match(/\d+/)[0];
-                var torrent_tr = $(`#torrent_torrent_${id}`);
+                var torrent_tr = $(`#torrent_detail_${id}`);
                 var torrent_name = torrent_tr.find('div[class*="info-bbcode"]').parent().find('a:eq(0)').text();
                 torrent_name = get_group_name(torrent_name, torrent_info);
                 if (torrent_name == 'Unknown'){
@@ -696,38 +695,6 @@ var if_uplver = GM_getValue('if_uplver') === undefined ? 1: GM_getValue('if_uplv
 
 var if_douban_jump = GM_getValue('if_douban_jump') === undefined ? 1: GM_getValue('if_douban_jump');
 
-//是否开启新春祝福，默认开启
-var new_year_wishes = GM_getValue('new_year_wishes') === undefined ? 1: GM_getValue('new_year_wishes');
-
-if (new_year_wishes == 1) {
-    var a = new Array("新年快乐", "大吉大利", "事事顺心", "事业有成", "万事顺遂", "心想事成", "幸福围绕" ,"健康相伴", "好运无限", "前程似锦", "笑口常开", "幸福安康");
-    var a_idx = 0;
-    $("body").click(function(e) {
-        a_idx = Math.ceil(Math.random()*a.length-1);
-        if (a_idx < 0) { a_idx = 0 }
-        var $i = $("<span/>").text(a[a_idx]);
-        var x = e.pageX, y = e.pageY;
-        $i.css({
-            "z-index": 999999999999999999999,
-            "top": y - 20,
-            "left": x,
-            "position": "absolute",
-            "font-weight": "bold",
-            "color": "#ff6651"
-        });
-        $("body").append($i);
-        $i.animate(
-            {
-                "top": y - 180,
-                "opacity": 0
-            },
-            1500,
-            function() {
-                $i.remove();
-            }
-        );
-    });
-}
 
 
 //额外的功能选项
@@ -1404,7 +1371,7 @@ function walkDOM(n) {
             if (!site_url.match(/hudbt/i) || n.nodeName != 'BLOCKQUOTE'){
                 n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
             }
-            if (n.nodeName == 'FIELDSET' && n.textContent.match(/(温馨提示|郑重声明|您的保种|商业盈利|相关推荐|自动发布|仅供测试宽带)/g)) {
+            if (n.nodeName == 'FIELDSET' && n.textContent.match(/(温馨提示|郑重声明|您的保种|商业盈利|相关推荐|自动发布|仅供测试宽带|本站仅负责连接)/g)) {
                 n.innerHTML = '';
             }
         } else if (n.nodeName == 'DIV' && n.innerHTML == '代码') {
@@ -1726,11 +1693,11 @@ String.prototype.medium_sel = function() { //媒介
         result = 'HDTV';
     } else if (result.match(/(Remux)/i) && ! result.match(/Encode/)) {
         result = 'Remux';
-    } else if (result.match(/(UHD|UltraHD)/i)) {
+    } else if (result.match(/(UHD|UltraHD)/i) && !result.match(/(x|H)(264|265)/i)) {
         result = 'UHD';
     } else if (result.match(/(Blu-ray|.MPLS|Bluray原盘)/i)) {
         result = 'Blu-ray';
-    } else if (result.match(/(Encode|BDRIP|webrip|BluRay)/i)) {
+    } else if (result.match(/(Encode|BDRIP|webrip|BluRay)/i) || result.match(/(x|H)(264|265)/i)) {
         result = 'Encode';
     } else if (result.match(/(DVDRip|DVD)/i)) {
         result = 'DVD';
@@ -1906,8 +1873,9 @@ String.prototype.get_label = function(){
     if (my_string.match(/(粤.{0,3}语|粤.{0,3}配|Audio.*cantonese)/i)){
         labels.yy = true;
     }
-    if (my_string.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream)/i)){
+    if (my_string.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i)){
         labels.diy = true;
+        console.log(my_string.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i))
     }
     if (my_string.match(/hdr10/i)) {
         labels.hdr10 = true;
@@ -3415,10 +3383,10 @@ if (site_url.match(/^https:\/\/passthepopcorn\.me\/torrents\.php.*/i) && show_se
         try{
             var $container = $(this).find('td:eq(1)');
             var search_name = $container.find('span.basic-movie-list__movie__title-row:eq(0)').find('a').first().text();
-            var imdbid = $(this).html().match(/http:\/\/www\.imdb\.com\/title\/(tt\d+)/i)[1];
+            var imdbid = $(this).html().match(/https?:\/\/www\.imdb\.com\/title\/(tt\d+)/i)[1];
             var imdbno = imdbid.substring(2);
             add_search_urls($container, imdbid, imdbno, search_name, 3);
-        } catch(Err) {}
+        } catch(Err) {console.log(Err)}
     });
 }
 
@@ -5979,7 +5947,7 @@ setTimeout(function(){
                     raw_info.type = '剧集';
                 }
 
-                if (tds[i].innerHTML.match(`torrent_(torrent_)?${torrent_id}`) || (['BTN','jpop'].indexOf(origin_site) >-1 && tds[i].parentNode.innerHTML.match('id=' + torrent_id))) {
+                if (tds[i].innerHTML.match(`torrent_(torrent_|detail_)?${torrent_id}`) || (['BTN','jpop'].indexOf(origin_site) >-1 && tds[i].parentNode.innerHTML.match('id=' + torrent_id))) {
                     table = tds[i].parentNode.parentNode;
                     if (origin_site == 'HDF' || origin_site == 'UHD') {
                         if(tds[i].parentNode.textContent.match(/s\d{1,3}/i)) {
@@ -6629,7 +6597,7 @@ setTimeout(function(){
         }
 
         if (origin_site == 'GPW') {
-            var torrent_box = document.getElementById("torrent_torrent_" + torrent_id);
+            var torrent_box = document.getElementById("torrent_detail_" + torrent_id);
             raw_info.name = $(torrent_box).find('a[data-action="toggle-mediainfo"]').text();
             if (!raw_info.name) {
                 raw_info.name = $(torrent_box).find('table.filelist_table').find('tr:eq(1)').find('td:eq(0)').text().replace(/\[|\]|\(|\)|mkv$|mp4$/g, '').trim();
@@ -8696,7 +8664,7 @@ setTimeout(function(){
                 if (forward_site == 'PTer') {
                     try{
                         raw_info.descr.match(/\[quote\][\s\S]*?\[\/quote\]/g).map((e)=> {
-                            if (e.match(/General/)) {
+                            if (e.match(/General.{0,2}\n/)) {
                                 var ee = e.replace('[quote]', '[hide=mediainfo]').replace('[/quote]', '[/hide]');
                                 raw_info.descr = raw_info.descr.replace(e, ee);
                             } else if (e.match(/Disc Title|Disc Info/)) {
@@ -8735,6 +8703,9 @@ setTimeout(function(){
         //-------------------------------------------勾选国语粤语中字等标签--------------------------------------------------------
         var label_str = raw_info.small_descr + raw_info.name + raw_info.descr;
         var labels = label_str.get_label();
+        if (raw_info.name.match(/(x|H)(264|265)/i)) {
+            labels.diy = false;
+        }
         try {
             switch (forward_site){
                 case 'PTer':
