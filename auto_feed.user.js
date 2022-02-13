@@ -32,6 +32,7 @@
 // @include      http*://cinemaz.to/torrent/*
 // @include      http*://passthepopcorn.me/torrents.php?id*
 // @include      http*://*php?id=*&torrentid=*
+// @include      http*://www.morethantv.me/torrents.php?id=*
 // @include      https://*php?torrentid=*&id=*
 // @include      https://hdbits.org/details.php?id=*
 // @include      https://hdf.world/torrents.php*
@@ -947,7 +948,7 @@ const o_site_info = {
     'PHD': 'https://privatehd.to/',
     'PTP': 'https://passthepopcorn.me/',
     'HDT': 'https://hd-torrents.org/',
-    'MTV': 'https://www.morethan.tv/',
+    'MTV': 'https://www.morethantv.me/',
     'BHD': 'https://beyond-hd.me/',
     'UHD': 'https://uhdbits.org/',
     'BLU': 'https://blutopia.xyz/',
@@ -1547,6 +1548,9 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^http(s*):\/\/passthepopcorn.me.*torrentid.*/i)) {
         return 1;
     }
+    if (site_url.match(/^http(s*):\/\/www.morethantv.me.*torrentinfo.*/i)) {
+        return 1;
+    }
     if (site_url.match(/^http(s*):\/\/hd-only.org.*torrentid.*/i)) {
         return 1;
     }
@@ -1685,7 +1689,7 @@ String.prototype.format = function(args) {
 //下面几个函数为字符串赋予获取各种编码信息的方法——适用于页面基本信息和字符串
 String.prototype.medium_sel = function() { //媒介
     var result = this;
-    if (result.match(/(Webdl|Web-dl)/i)) {
+    if (result.match(/(Webdl|Web-dl|WEB)/i)) {
         result = 'WEB-DL';
     } else if (result.match(/(UHDTV)/i)) {
         result = 'UHDTV';
@@ -2587,6 +2591,8 @@ function set_jump_href(raw_info, mode) {
                         forward_url = used_site_info[key].url + 'Torrents.index?keyword={name}&keyword_area=1'.format({'name': search_name});
                     } else if (key == 'PTP' || key == 'GPW') {
                         forward_url = used_site_info[key].url + 'torrents.php?searchstr={url}'.format({'url': search_name});
+                    } else if (key == 'HDB') {
+                        forward_url = used_site_info[key].url + 'browse.php?descriptions=0&season_packs=0&from=&to=&imdbgt=0&imdblt=10&imdb=&primary_language=&country=&yeargt=&yearlt=&tagsearchtype=or&search={name}'.format({'name': search_name});
                     } else {
                         forward_url = used_site_info[key].url + 'torrents.php?incldead=0&spstate=0&inclbookmarked=0&search={name}&search_area=0&search_mode=0'.format({'name': search_name});
                     }
@@ -3982,10 +3988,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         $(`input[name="anonymous"]`).prop('checked', true);
     }
 
-    $('#setting').append(`<input type="checkbox" name="new_year_wishes" value="yes">是否开启新春祝福功能，默认开启。<br><br>`);
-    if (new_year_wishes) {
-        $(`input[name="new_year_wishes"]`).prop('checked', true);
-    }
 
     //**************************************************** 3.2 *************************************************************************
 
@@ -4069,9 +4071,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         //处理匿名
         if_uplver = $(`input[name="anonymous"]`).prop('checked') ? 1: 0;
         GM_setValue('if_uplver', if_uplver);
-
-        new_year_wishes = $(`input[name="new_year_wishes"]`).prop('checked') ? 1: 0;
-        GM_setValue('new_year_wishes', new_year_wishes);
 
         if_douban_jump = $(`input[name="douban_jump"]`).prop('checked') ? 1: 0;
         GM_setValue('if_douban_jump', if_douban_jump);
@@ -5294,12 +5293,10 @@ setTimeout(function(){
         }
 
         if (origin_site == 'MTV') {
-            if (site_url.match(/torrentid=(\d+)/)) {
-                torrent_id = site_url.match(/torrentid=(\d+)/)[1];
+            if (site_url.match(/torrentinfo(\d+)/)) {
+                torrent_id = site_url.match(/torrentinfo(\d+)/)[1];
             }
-            var imdb_box = document.getElementsByClassName('box torrent_description')[0];
-            raw_info.url = match_link('imdb', imdb_box.innerHTML);
-            tbody = document.getElementById('torrent_details');
+            tbody = document.getElementsByClassName('torrent_table')[0];
         }
 
         if (origin_site == 'BHD'){
@@ -5946,7 +5943,6 @@ setTimeout(function(){
                 } else if (origin_site == 'BTN' || origin_site == 'MTV'){
                     raw_info.type = '剧集';
                 }
-
                 if (tds[i].innerHTML.match(`torrent_(torrent_|detail_)?${torrent_id}`) || (['BTN','jpop'].indexOf(origin_site) >-1 && tds[i].parentNode.innerHTML.match('id=' + torrent_id))) {
                     table = tds[i].parentNode.parentNode;
                     if (origin_site == 'HDF' || origin_site == 'UHD') {
@@ -6982,29 +6978,19 @@ setTimeout(function(){
         }
 
         if (origin_site == 'MTV'){
-            var file_box = document.getElementById('files_' + torrent_id);
-            var filelist_path = file_box.getElementsByClassName('filelist_path')[0];
-            if (filelist_path.innerHTML){
-                raw_info.name = filelist_path.innerHTML.replace(/\//g, '').trim();
-            } else {
-                var h2 = document.getElementsByTagName('h2')[0];
-                raw_info.name = h2.getElementsByTagName('span')[0].textContent;
-            }
-            var torrent_info_box = document.getElementById('torrent_' + torrent_id);
-            var torrent_info = torrent_info_box.getElementsByClassName('hidden spoiler');
-            var img_info = '';
-            var text_info = '';
-            for (i=0; i< torrent_info.length; i++){
-                text_info = torrent_info[i].previousElementSibling.previousElementSibling;
-                if (text_info.textContent == 'Screenshots'){
-                    img_info = walkDOM(torrent_info[i]);
-                    img_info = img_info.replace('[url=javascript:void(0);]Show[/url]', '');
-                }
-                if (torrent_info[i].previousElementSibling.textContent == '[url=javascript:void(0);]Show[/url]'){
-                    torrent_info[i].previousElementSibling.textContent = 'Show';
-                }
-            }
-            raw_info.descr = img_info;
+            raw_info.name = $(`a[href*=torrentinfo${torrent_id}]`).text();
+            var mediainfo = $(`#content${torrent_id}`).find('div.mediainfo').text();
+            img_info = '';
+            $(`#content${torrent_id}`).find('a').has('img').each((index, e)=>{
+                var img = '[url={i}][img]{g}[/img][/url] '.format({'i': $(e).attr('href'), 'g': $(e).find('img').attr('src')});
+                img_info += img;
+            });
+            raw_info.descr = '[quote]\n{mediainfo}\n[/quote]\n\n'.format({'mediainfo': mediainfo}) + img_info;
+
+            var index = $('table.torrent_table').find(`#torrent${torrent_id}`).index();
+            insert_row = tbody.insertRow(index + 1);
+            search_row = tbody.insertRow(index + 1);
+            douban_box = tbody.insertRow(index + 1);
         }
 
         if (origin_site == 'KG') {
@@ -7641,6 +7627,10 @@ setTimeout(function(){
 
                 raw_info.descr = thanks_str.format({'site': origin_site, 'descr': raw_info.descr});
             }, 1000);
+        }
+
+        if(origin_site == 'MTV') {
+            $('img.round_icon').hide();
         }
 
         //判断是否禁转
