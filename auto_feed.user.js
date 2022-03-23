@@ -9771,7 +9771,7 @@ setTimeout(function(){
             switch(raw_info.medium_sel){
                 case 'UHD':
                     if (raw_info.name.match(/DIY|@/i)){
-                        medium_box.options[1].selected = true;
+                        medium_box.options[2].selected = true;
                     } else{
                         medium_box.options[1].selected = true;
                     }
@@ -9786,8 +9786,8 @@ setTimeout(function(){
 
                 case 'DVD': medium_box.options[9].selected = true; break;
                 case 'Remux': medium_box.options[5].selected = true; break;
-                case 'HDTV': medium_box.options[6].selected = true; break;
-                case 'Encode': medium_box.options[7].selected = true; break;
+                case 'HDTV': medium_box.value = 5; break;
+                case 'Encode': medium_box.value = 15; break;
                 case 'WEB-DL': medium_box.options[8].selected = true;
             }
 
@@ -9873,6 +9873,9 @@ setTimeout(function(){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.options[index].selected = true;
             }
+
+            // 制作组
+            document.getElementsByName('team_sel')[0].value = 5;
         }
 
         else if (forward_site == 'HDHome'){
