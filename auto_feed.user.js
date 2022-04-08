@@ -7,6 +7,7 @@
 // @include      https://blutopia.xyz/torrents?imdb=tt*
 // @namespace    https://greasyfork.org/zh-CN/scripts/424132-auto-feed
 // @include      http*://*details*.php*
+// @match        https://*/detail*.php*
 // @include      http*://*/upload*php*
 // @include      http*://*/offer*php*
 // @include      http*://ptpimg.me*
@@ -58,7 +59,7 @@
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.4.5
+// @version      1.9.4.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -188,9 +189,8 @@
 
     20211215：支持audience转入转出; 修复部分音频不匹配bug。
     20211227：修复kg部分bug，增加豆瓣页面跳转开关，在脚本设置页面进行设置，修复豆瓣页面部分bug。
-    20220103：增加新春祝福选项，默认开启，在脚本设置页面进行设置。 已废弃。
 
-    20220314：修复一些bug。
+    20220408：修复部分bug，部分更新。
 
 
 */
@@ -840,7 +840,9 @@ const default_search_list = [
     `<a href="https://www.cinematik.net/browse.php?support=dvd%7Cbd&incldead=0&search={imdbid}&srchdtls=1" target="_blank">Tik</a>`,
     `<a href="https://lemonhd.org/torrents.php?search={imdbid}&search_area=imdb&suggest=4" target="_blank">Lemon</a>`,
     `<a href="https://search.douban.com/movie/subject_search?search_text={imdbid}" target="_blank">Douban</a>`,
-    `<a href="https://uhdbits.org/torrents.php?searchstr={imdbid}" target="_blank">UHD</a>`
+    `<a href="https://uhdbits.org/torrents.php?searchstr={imdbid}" target="_blank">UHD</a>`,
+    `<a href="http://zmk.pw/search?q={search_name}" target="_blank">ZMK</a>`,
+    `<a href="https://assrt.net/sub/?searchword={search_name}" target="_blank">SSW</a>`,
 ];
 
 var used_search_list = GM_getValue('used_search_list') === undefined ? default_search_list : JSON.parse(GM_getValue('used_search_list')).split(',');
@@ -1640,7 +1642,7 @@ function deal_with_title(title){
     title = title.replace(/\./g, ' ').replace(/torrent$/g, '').replace(/mkv$|mp4$/i, '').trim();
     if (title.match(/[^\d](2 0|5 1|7 1|1 0|6 1)/)) {
         title = title.replace(/[^\d](2 0|5 1|7 1|1 0|6 1)/, function(data){
-            return data.slice(0,2)+'.'+ data.slice(3,data.length);
+            return data.slice(0,2) + '.'+ data.slice(3,data.length);
         });
     }
     title = title.replace(/H ?(26[45])/i, "H.$1").replace(/x265[.-]10bit/i, 'x265 10bit');
@@ -8270,13 +8272,18 @@ setTimeout(function(){
     ******************************************************************************************************************/
     else if (judge_if_the_site_as_source() == 0) {
         var upload_site = site_url.split(seperator)[0]; //转发的站点
+        var forward_site = find_origin_site(upload_site);
         var transfer_mode = 0; // 0表示直接转，1表示候选
         if (upload_site.match(/offers?.php/)) {
             transfer_mode = 1;
         }
 
         if ($('td:contains(你没有发布种子的权限)').length) {
-            upload_site = upload_site.replace('upload.php', 'offers.php?add_offer=1');
+            if (forward_site == "CMCT") {
+                upload_site = upload_site.replace('upload.php', 'upload.php?offer=1');
+            } else {
+                upload_site = upload_site.replace('upload.php', 'offers.php?add_offer=1');
+            }
             location.href = encodeURI(upload_site + seperator + site_url.split(seperator)[1]);
             return;
         }
@@ -8287,7 +8294,6 @@ setTimeout(function(){
             raw_info.descr = raw_info.descr.replace(/ /g, ' ');
         }
         raw_info.descr = raw_info.descr.replace(/\[b\]\[\/b\]/g, '');
-        var forward_site = find_origin_site(upload_site);
         var LemonHD_music = false, LemonHD_animate = false, LemonHD_documentary = false;
         var search_name = get_search_name(raw_info.name);
 
@@ -9035,16 +9041,6 @@ setTimeout(function(){
                 var index = team_dict[raw_info.source_sel];
                 team_box.val(index);
             }
-            var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
-            if (reg_region) {
-                var regions = reg_region[2].trim().split('/');
-                for (var idx = 0; idx < regions.length; ++idx) {
-                    if (regions[idx].trim().match(/(美国|英国)/)) {
-                        team_box.val(4);
-                        break;
-                    }
-                }
-            }
         }
 
         else if (forward_site == 'MTeam'){
@@ -9771,7 +9767,7 @@ setTimeout(function(){
             switch(raw_info.medium_sel){
                 case 'UHD':
                     if (raw_info.name.match(/DIY|@/i)){
-                        medium_box.options[1].selected = true;
+                        medium_box.options[2].selected = true;
                     } else{
                         medium_box.options[1].selected = true;
                     }
@@ -9786,8 +9782,20 @@ setTimeout(function(){
 
                 case 'DVD': medium_box.options[9].selected = true; break;
                 case 'Remux': medium_box.options[5].selected = true; break;
-                case 'HDTV': medium_box.options[6].selected = true; break;
-                case 'Encode': medium_box.options[7].selected = true; break;
+                case 'HDTV': 
+                    if (forward_site == "PThome") {
+                        medium_box.options[6].selected = true;
+                    } else {
+                        medium_box.options[7].selected = true;
+                    }
+                    break;
+                case 'Encode': 
+                    if (forward_site == "PThome") {
+                        medium_box.options[7].selected = true;
+                    } else {
+                        medium_box.options[6].selected = true;
+                    }
+                    break;
                 case 'WEB-DL': medium_box.options[8].selected = true;
             }
 
@@ -9863,6 +9871,12 @@ setTimeout(function(){
                     audiocodec_box.options[2].selected = true;
                 }
             }
+            $('select[name="team_sel"]').val("5");
+            $('select[name="team_sel"]>option').map(function(index,e){
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
 
             //分辨率
             var standard_box = document.getElementsByName('standard_sel')[0];
