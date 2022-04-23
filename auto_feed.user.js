@@ -52,13 +52,12 @@
 // @require      https://code.jquery.com/jquery-1.12.4.js
 // @require      http://code.jquery.com/ui/1.9.2/jquery-ui.js
 // @resource     css http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css
-// @resource     uploadbtn https://gitee.com/tomorrow505/auto-feed-helper/raw/master/upload_btn.js
 // @require      https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js
 // @require      https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.4.8
+// @version      1.9.4.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -191,6 +190,7 @@
 
     20220408：修复部分bug，部分更新。
     20220418：支持SC转入转出，支持MTV转入转出，修复部分bug。
+    20220423：支持NBL转出，修复部分MTV的转出bug。
 
 
 */
@@ -768,6 +768,7 @@ const default_site_info = {
     'MTeam': {'url': 'https://kp.m-team.cc/', 'enable': 1},
     'MTV': {'url': 'https://www.morethantv.me/', 'enable': 1},
     'NanYang': {'url': 'https://nanyangpt.com/', 'enable': 1},
+    'NBL': {'url': 'https://nebulance.io/', 'enable': 1},
     'NPUPT': {'url': 'https://npupt.com/', 'enable': 1},
     'Oshen': {'url': 'http://www.oshen.win/', 'enable': 1},
     'OurBits': {'url': 'https://ourbits.club/', 'enable': 1},
@@ -983,7 +984,8 @@ const o_site_info = {
     'CNZ': 'https://cinemaz.to/',
     'GPW': 'https://greatposterwall.com/',
     'HD-Only': 'https://hd-only.org/',
-    'Telly': 'https://telly.wtf/'
+    'Telly': 'https://telly.wtf/',
+    'NBL': 'https://nebulance.io/'
 };
 
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
@@ -5349,10 +5351,16 @@ setTimeout(function(){
                                 var imdbno = imdbid.substring(2);
                                 var container = $('#forward_r');
                                 add_search_urls(container, imdbid, imdbno, search_name, 0);
+                                jump_str = dictToString(raw_info);
+                                tag_aa = forward_r.getElementsByClassName('forward_a');
+                                for (i = 0; i < tag_aa.length; i++) {
+                                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP'].indexOf(tag_aa[i].textContent) < 0){
+                                        tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
+                                    }
+                                }
                             } catch(err){}
                             break;
                         }
-
                     }
                 });
             }, 2000);
@@ -7098,11 +7106,17 @@ setTimeout(function(){
                 img_info += img;
             });
             $(`#content${torrent_id}`).find('img').each((index, e)=>{
-                var img = '[img]{g}[/img] '.format({'g': $(e).attr('src')});
-                if (!img_info.match(img) && img.match(/http/)) {
+                if ($(e).attr('data-src') !== undefined) {
+                    var img = '[img]{g}[/img] '.format({'g': $(e).attr('data-src')});
+                }
+                if ($(e).attr('src') !== undefined) {
+                    var img = '[img]{g}[/img] '.format({'g': $(e).attr('src')});
+                }
+                if ($(e).parent()[0].nodeName != 'A' && img.match(/http/)) {
                     img_info += img;
                 }
             });
+            console.log(img_info);
             raw_info.descr = '[quote]\n{mediainfo}\n[/quote]\n\n'.format({'mediainfo': mediainfo}) + img_info;
             var index = $('table.torrent_table').find(`#torrent${torrent_id}`).index();
             insert_row = tbody.insertRow(index + 1);
@@ -8903,7 +8917,7 @@ setTimeout(function(){
 
         //填写简介，一般都是textarea，特殊情况后续处理--CMCT改版兼容
         var descr_box = document.getElementsByTagName('textarea');
-        if (['CMCT', 'PTsbao', 'HDPost','HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'HDai', 'GPW', 'HaresClub', 'HDTime', 'HD-Only', 'HDfans', 'SC', 'MTV'].indexOf(forward_site) < 0){
+        if (['CMCT', 'PTsbao', 'HDPost','HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'HDai', 'GPW', 'HaresClub', 'HDTime', 'HD-Only', 'HDfans', 'SC', 'MTV', 'NBL'].indexOf(forward_site) < 0){
             if (forward_site == 'HDT') {
                 descr_box[0].style.height = '600px';
                 var mediainfo_hdt = get_mediainfo_picture_from_descr(raw_info.descr);
@@ -14932,7 +14946,7 @@ setTimeout(function(){
             $('#preview').click(()=>{
                 window.open($('#image').val(), '_blank');
             });
-            $('#desc').after(`<div id="noimg" style="display:none"><br><br>简介中没有合适的截图，请提交到ptp图床，一行一个地址 (不要缩略图)：<textarea style="background-color:black; color:grey" class="long" rows='10' id="t1"></textarea><input type="button" value="go-ptp" id="goptp"><textarea class='long' rows='10' style="background-color:black;color:grey" id="t2"></textarea></div>`);
+            $('#desc').after(`<div id="noimg" style="display:none"><br><br><font color="red">简介中没有合适的截图，请提交到ptp图床，一行一个地址 (不要缩略图)：</font><textarea style="background-color:black; color:grey" class="long" rows='10' id="t1"></textarea><input type="button" value="go-ptp" id="goptp"><textarea class='long' rows='10' style="background-color:black;color:grey" id="t2"></textarea></div>`);
             var descr = `[mediainfo]\n{mediainfo}\n[/mediainfo]\n\n[screens]\n[spoiler]\n{poster}[/spoiler]\n`;
             var container = $('textarea[name="desc"]');
             container.css({"height": "600px"});
@@ -15002,21 +15016,42 @@ setTimeout(function(){
                 }
             });
 
-            $('#groupDesc').after(`<input type="button" value="fill-info" id="fill_info"><input type="button" value="search" id="search"><font color="red">3.加载种子后依次点击fill-info, search按钮, 后者会同时打开多个搜索页面，请<a style="text-decoration: underline;color:red" href="https://support.google.com/chrome/answer/95472?hl=zh-Hans&co=GENIE.Platform%3DDesktop" target="_blank">关闭拦截窗口</a>。搜索后将对应ID补充完整，点击上传。</font>`);
-            $('#fill_info').click(()=>{
-                var category = $('#category').val();
-                if (category < 3) {
-                    $('#groupDesc').val(`[spoiler=Cover][img]${$('#image').val()}[/img][/spoiler]
+            var movie_info = `[spoiler=Cover][img]${$('#image').val()}[/img][/spoiler]
 [url=https://www.themoviedb.org/movie/~~MOVIE DB ID~~]The MovieDB[/url]
 [url=https://www.thetvdb.com/movies/~~TVDB ID~~]TVdb[/url]
-[url=https://www.imdb.com/title/~~IMDB ID~~]IMDB[/url]
-`);
-                } else {
-                    $('#groupDesc').val(`[spoiler=Cover][img]${$('#image').val()}[/img][/spoiler]
+[url=https://www.imdb.com/title/~~IMDB ID~~]IMDB[/url]`;
+
+            var tv_info = `[spoiler=Cover][img]${$('#image').val()}[/img][/spoiler]
 [url=https://next-episode.net/~~Next-Episode ID~~]Next-Episode[/url]
 [url=https://www.thetvdb.com/series/~~TVDB ID~~]TVdb[/url]
 [url=https://www.imdb.com/title/~~IMDB ID~~]IMDB[/url]
-[url=https://www.tvmaze.com/show/~~TVM ID~~]TV Maze[/url]`)
+[url=https://www.tvmaze.com/show/~~TVM ID~~]TV Maze[/url]`;
+
+            if (raw_info.url) {
+                console.log(raw_info.url)
+                var search_name = get_search_name(raw_info.name);
+                getJson('https://api.tvmaze.com/search/shows?q='+search_name, null, (data)=>{
+                    if (data.length) {
+                        data.map((item)=>{
+                            item = item.show;
+                            if (raw_info.url.match(item.externals.imdb)) {
+                                tv_info = tv_info.replace(/~~TVM ID~~/, item.id);
+                                tv_info = tv_info.replace(/~~TVDB ID~~/, item.externals.thetvdb);
+                                movie_info = movie_info.replace(/~~TVDB ID~~/, item.externals.thetvdb);
+                            }
+                        })
+                    }
+                });
+            }
+
+            $('#groupDesc').after(`<input type="button" value="fill-info" id="fill_info"><input type="button" value="search" id="search"><font color="red">3.加载种子后依次点击fill-info, search按钮, 后者会同时打开多个搜索页面，请<a style="text-decoration: underline;color:red" href="https://support.google.com/chrome/answer/95472?hl=zh-Hans&co=GENIE.Platform%3DDesktop" target="_blank">关闭拦截窗口</a>。搜索后将对应ID补充完整，点击上传。</font>`);
+            $('#fill_info').click(()=>{
+                var category = $('#category').val();
+                
+                if (category < 3) {
+                    $('#groupDesc').val(movie_info);
+                } else {
+                    $('#groupDesc').val(tv_info);
                 }
                 if (raw_info.url) {
                     $('#groupDesc').val($('#groupDesc').val().replace(/~~IMDB ID~~/, raw_info.url.match(/tt\d+/)[0]));
@@ -15502,6 +15537,87 @@ setTimeout(function(){
                 $('input[value="Prévisualiser"]').val('Preview');
 
             }, 2000);
+        }
+
+        else if (forward_site == 'NBL') {
+            $('#categorywrap').show();
+            if (raw_info.name.match(/S\d+[^E]|complete/i)) {
+                $('#category').val("3");
+            } else {
+                $('#category').val("1");
+            }
+            $('#tvmaze').show();
+            var search_name = get_search_name(raw_info.name);
+            getJson('https://api.tvmaze.com/search/shows?q='+search_name, null, (data)=>{
+                if (data.length) {
+
+                    $('#tvmaze>td:last').append(`</br></br><font color="red" size="1">请点击对应剧照填充id:</font></br>`);
+
+                    GM_addStyle(
+                        `div.img {
+                            margin: 5px;
+                            border: 1px solid #ccc;
+                            float: left;
+                            width: 120px;
+                        }
+
+                        div.img:hover {
+                            border: 1px solid #777;
+                        }
+
+                        div.img img {
+                            width: 100%;
+                            height: auto;
+                        }
+
+                        div.desc {
+                            padding: 15px;
+                            text-align: center;
+                        }`
+                    );
+
+                    data.map((item)=>{
+                        item = item.show;
+                        console.log(item)
+                        try{
+                            var html = `<div class="responsive">
+                                            <div class='img'>
+                                                <img src=${item.image.medium} style="width:120px" name="tvmaze" id=${item.id} />
+                                                <div class="desc">
+                                                    <a href=${item.url} target="_blank">${item.name} [${item.premiered.match(/\d{4}/)[0]}]</a>
+                                                </div>
+                                            </div>
+                                        </div>`;
+                            $('#tvmaze>td:last').append(html);
+                        } catch(err) {}
+                        console.log(raw_info.url)
+                        if (item.externals.imdb && raw_info.url) {
+                            if (raw_info.url.match(item.externals.imdb)) {
+                                $('#tvmazeid').val(item.id);
+                            }
+                        }
+                    })
+                    $('img[name=tvmaze]').click((e)=>{
+                        $('#tvmazeid').val($(e.target).attr('id'));
+                    })
+                }
+            });
+            $('#mediainfowrap').show();
+            try{
+                var infos = get_mediainfo_picture_from_descr(raw_info.descr);
+                if (raw_info.full_mediainfo){
+                    $('#media').val(raw_info.full_mediainfo);
+                } else {
+                    $('#media').val(infos.mediainfo.replace(/\[.*?\]/g, ''));
+                }
+            } catch(err) {
+                if (raw_info.full_mediainfo){
+                    $('#media').val(raw_info.full_mediainfo);
+                } else {
+                    $('#media').val(raw_info.descr.replace(/\[.*?\]/g, ''));
+                }
+            }
+            $('#checkbutton').show();
         }
 
     } else if (judge_if_the_site_as_source() == 2) { //HDCity
