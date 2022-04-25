@@ -8,7 +8,7 @@
 <a href="https://filelist.io/browse.php?search={imdbid}" target="_blank">FileList</a>
 <a href="https://avistaz.to/torrents?in=1&search={search_name}" target="_blank">AVZ</a>
 <a href="https://privatehd.to/torrents?in=1&search={search_name}" target="_blank">PHD</a>
-<a href="https://pt.hdpost.top/torrents?imdb={imdbid}#page/1" target="_blank">HDPost</a>
+<a href="https://pt.hdpost.top/torrents?imdbId={imdbid}#page/1" target="_blank">HDPost</a>
 <a href="https://xthor.tk/browse.php?sch={search_name}" target="_blank">xTHOR</a>
 <a href="https://www.cinematik.net/browse.php?support=dvd%7Cbd&incldead=0&search={imdbid}&srchdtls=1" target="_blank">Tik</a>
 <a href="https://uhdbits.org/torrents.php?searchstr={imdbid}" target="_blank">UHD</a>
@@ -27,3 +27,5 @@
 <a href="https://hudbt.hust.edu.cn/torrents.php?inclbookmarked=0&search_area=4&incldead=1&search={imdbid}" target="_blank">HUDBT</a>
 <a href="https://audiences.me/torrents.php?cat401=1&cat402=1&cat403=1&incldead=0&spstate=0&inclbookmarked=0&search={imdbid}&search_area=4"  target="_blank">ADE</a>
 <a href="https://hd-only.org/torrents.php?searchstr={search_name}" target="_blank">HDO</a>
+<a href="http://zmk.pw/search?q={search_name}" target="_blank">ZMK</a>
+<a href="https://assrt.net/sub/?searchword={search_name}" target="_blank">SSW</a>
