@@ -64,7 +64,7 @@
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.5.2
+// @version      1.9.5.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -7742,15 +7742,17 @@ setTimeout(function(){
 
         switch (origin_site) {
             case 'PTer':
-                if ($('a.chs_tag-gy').length) {
-                    raw_info.labels += 1;
-                }
-                if ($('a.chs_tag-yy').length) {
-                    raw_info.labels += 10;
-                }
-                if ($('a.chs_tag-sub').length) {
-                    raw_info.labels += 100;
-                }
+                try {
+                    if (!$('a.chs_tag-gy').is(":hidden")) {
+                        raw_info.labels += 1;
+                    }
+                    if (!$('a.chs_tag-yy').is(":hidden")) {
+                        raw_info.labels += 10;
+                    }
+                    if (!$('a.chs_tag-sub').is(":hidden")) {
+                        raw_info.labels += 100;
+                    }
+                } catch (err) {}
                 break;
             case 'HDDolby': case 'PThome': case 'HDHome': case 'Audiences':
                 if ($('span.tgy').length) {
