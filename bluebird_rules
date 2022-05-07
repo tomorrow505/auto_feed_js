@@ -1,0 +1,77 @@
+<table class="main" width="100%" border="0" cellspacing="0" cellpadding="0"><tbody><tr><td class="embedded">
+
+<h2>1. General rules - <font color="#004E98">For non-compliance - removal from the tracker!</font></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="10"><tbody><tr><td>
+<ul>
+<li>1.1 These rules are non-negotiable and are mandatory for all users of the tracker of any rank without exception (the Administration and the Directorate - as the persons establishing these rules - act at their own discretion). If you don't like these rules and want different rules for yourself - you can always create your own site and do whatever you like there.</li>
+<li>1.2 <b>The word of the Administration is the law for tracker users!</b> There are no exceptions to this rule - BlueBird is a private bittorrent tracker, and its policy is determined solely by the owners of the resource.</li>
+<li>1.3 <a name="warning"></a>A bad violator of the tracker rules gets a warning (<img src="pic/warned16.gif"> ). This means that there will be no <b>next</b> warning! The user will simply be removed from the tracker. In the event of a warning, VIP and other privileged statuses and classes are not restored.</li>
+<li>1.4 In case of persistent violation of the rules, the repeat offender will be banned - access to the tracker from its IP address will be closed.</li>
+<li>1.5 Don't register multiple accounts for yourself - we check our database regularly and we can easily identify these kind of craftsmen.</li>
+<li>1.6 Communication and written content on BlueBird (in comments, chants, profile, etc.) is in <b>standard language</b>. You can use other languages &ZeroWidthSpace;&ZeroWidthSpace;only if absolutely necessary. If there is no Russian keyboard layout, use <i>transliteration</i> or <i>virtual keyboard</i>.
+</li><li>1.7 We welcome any suggestions and comments aimed at improving the performance of our tracker. We also ask you to inform the Directorate of any errors and inaccuracies in the operation of the site. All private problems are recommended to be solved in <b>private correspondence</b> using the system of private messages.
+</li><li>1.8 Use only <b>work</b> email address for registration. You can also always change it in your user profile. All accounts with non-working mailboxes / consisting of meaningless letter combinations will be deleted immediately, just like nicknames that will directly or latently offend users, consist of swear words, etc., or are consonant / similar to resource administration nicknames. We do not recommend the free email services <u>Mail.ru</u> or <u>hotmail.com</u> due to their aggressive anti-spam systems. If you do not receive a registration/re-registration confirmation email for a long time, see <a href="./faq.php">FAQ</a> or use another email service. In turn, we assure you that your postal address, as well as any other of your personal information, will not be used for any other purpose and will never be transferred to third parties. We recommend that you also specify an additional contact method (number <a href="http://www.icq.com">ICQ</a>, name in <a href="http://www.skype.com">Skype</a> or <a href="http://www.msn.com">MSN</a>) with you if the need arises. </li>
+<li>1.9 If you anywhere on the web show a disrespectful attitude towards our resource, allow yourself to insult our users, spread slander about releases, question the Rules, etc., then what are you forgetting here? Such accounts will be disabled.</li>
+
+</ul></td></tr></tbody></table>
+
+<h2>2. Download rules - <font color="#004E98">It couldn't be more important!</font></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="10"><tbody><tr><td>
+<ul>
+<li>2.1 The site administration treats our users with respect and does not intend to limit the ability to use the "default" tracker. We hope that you will treat other users distributing and the Administration in the same way.</li>
+<li>2.2 The optimal ratio "Downloaded/Uploaded", as well as "TimeSid Rating" is equal to 1, that is, how much you downloaded - how much you gave away. <font color="#c31700">If your rating drops below 0.5, you will automatically receive a warning for 4 weeks with the opportunity to rehabilitate. If the rating is increased to 0.55, the warning will be removed automatically.</font> Strive to support it if you want a long and cloudless life on our tracker, as well as on any other: do not close your BitTorrent client as long as possible! In case you are the only seed (owner of the full copy) on the giveaway, please stay on the giveaway, even if your ratings are above 1 - today you helped someone, tomorrow he will help you. If it happens that you cannot seed, please write to the author of the publication.</li>
+<li>2.2.1 By violating the above paragraph, you thereby neglect the rules of the community, in which it is customary not only to take, but also to share with others. The last person to leave the hand = a warning. For systematic leaving the hand, if you are the only seeder - ban.</li>
+<li>2.3 Forbidden: distribution "by" the tracker; simultaneous downloading and distribution of the same torrent from the same IP - such actions are equated with cheating.</li>
+<li>2.4 For frequent hit&amp;run (downloaded and "dumped" from the distribution when activated: you can see the icons of "little men, symbolizing the possibility of leaving the distribution and, before switching on - the Administration makes a mass mailing) you can get a warning, for a systematic one - a ban .Regardless of whether the automatic check and warning module works or not, users who regularly leave distributions may receive a warning / ban.</li>
+<li>2.4.1 <b>Q: How do I not get a warning for a hit&amp;run?<br>
+A: Be guided by the following optimal coefficients:</b><br>
+<font color="#c31700"><b>seed rating up to 0.3</b> - recommended seeding time is 3 days (if the rating does not rise);<br>
+<b>seed rating from 0.3 to 0.75</b> -recommended seeding time is 2 days (if the rating does not rise);<br>
+<b>seed rating from 0.75 to 1.0</b> - recommended seeding time is 1 day (if the rating does not rise);<br>
+<b>rating on distribution from 1.0</b> - on the good will of the seeder;<br></font>
+<br>
+<br><font color="#1ac503"><b>NB! Please do not confuse your overall rating with the rating on each individual hand.</b><br></font>
+<br>
+<br><font color="#c31700">Don't be afraid to turn off your computer, but don't forget to turn it back on =) (moderators do not issue a warning immediately, but check the status of your downloads several times before issuing a warning for this violation, taking into account other seeded torrents including)</font>
+</li>
+<li>2.5 If you're having general download problems (the tracker doesn't display your stats correctly, you can't connect to the tracker, your download speed is very slow), please read our <a href="./faq.php">FAQ</a> - you will find in them all the information you need. If you have any questions about a specific hand, please contact the distributor, not the administration, using the system of Private Messages or Comments on the hand.</li><li>2.6 Do not download torrent files "for future use", use "bookmarks". Users who have a lot of downloaded torrent files and at the same time the releases themselves have not been downloaded, as well as many distributions that have not been downloaded, will be disabled.</li>
+</ul></td></tr></tbody></table>
+
+
+<h2>3. Rules for commenting on torrents and communication on the tracker<!-- - <font color=#004E98>Please follow these guidelines or else you might end up with a warning!</font>--></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="10"><tbody><tr><td>
+<ul>
+<li>3.1 Comments containing interesting information and / or friendly, witty and funny - are not a flood, and we are only happy for them!</li>
+<li>3.2 The torrent comment system is designed to: (1) express your <i>respect</i> and <i>thank you</i> to the giver, (2) ask your <i>specific technical question</i> i&gt; regarding a giveaway or release,(3) provide <i>interesting information</i> related to the giveaway.
+</li><li>3.2.1 If you do not intend to join the distribution, do not comment on it.
+</li><li>3.2.2 No language other than literary in comments.
+</li><li>3.2.3 Flaming, flooding and overposting are prohibited.
+</li><li>3.2.4 Racial strife, disputes related to nationality / nationality, negative statements in this regard are unacceptable, as well as trolling users in comments / anti-respects.
+</li><li>3.2.5 Images larger than 300*200 px, as well as long links, are not welcome and are usually removed from "chants"/comments. Frequent relapse, as a rule, indicates the young age of the person placing the picture in the absence of a more or less logical textual connection, and given that the allowable age from which registration is allowed with us is over 13 years old, the administration may decide to impose certain restrictions until the user reaches the allowable age.
+</li><li>3.2.6 "Clinging" (jerking) in the chat of other users, inarticulate gushing thoughts that you understand alone with or without signs of alcohol / drug intoxication, etc. behavior when receiving 5 complaints from other users can lead to a "gag".
+</li><li>3.3 It is forbidden to give a negative rating without motivation (as well as the use of "bot" programs for rating) in the release - it is equated to unreasonable and an attempt to "shit". You can put any rating, but if it is negative, please motivate it.
+</li><li>3.4 Highly discouraged and in most cases punishable with a warning comment regarding the status of the distribution, its availability and speed (+ see the paragraph below: "dislike ...").
+</li><li>3.5 Links to other trackers and warez portals, distribution of warez, as well as any kind of advertising (hidden or open) are prohibited. Sending personal messages to users, involving the collection of funds for any projects, the purchase of discs, voiceovers, subtitles, etc., as well as any kind of "polls / appeals with a future perspective" - &ZeroWidthSpace;&ZeroWidthSpace;is the exclusive prerogative of the Site Administration, such amateur activity with the side of other users is prohibited (if you receive such messages, please inform the Administration). <br>
+</li><li>3.6 We are not a political resource: any kind of links, discussions, conclusions <b>prohibited</b>. The violator is first issued a gag or warning for a week, a second violation will result in a similar life penalty.<br>
+</li><li>3.7 CAPS, FACILITIES or highlighting comments in bold, large print, or other colors are not welcome in comments. Highlighting comments is the prerogative of the administration.
+</li><li>3.8 The administration disapproves of begging for coins/keys/invites and complicity (responding to such requests), regardless of the reasons that prompted the user to such an act. This violation is punishable by a warning to a ban.
+</li><li>3.9 Comments related to certain playback/quality issues of releases from the Blu-ray Disc/Rip category are only accepted with the indication:<br>
+* Name and exact version of the player (firmware for hardware players);<br>
+* Release playback method (opening from folder/image/file/streaming, image "mounting" method);<br>
+With audio / video streams and subtitles: as a sample, screenshot, timing;<br>
+</li><li>3.9.1 In case of an incomplete description of the problem, the administration makes a remark in the comments with a request to supplement the information. In the absence of the latter for several hours, the comment with an incomplete description of the problem is deleted by the administration;
+</li><li>3.9.2 Every comment related to unsuccessful playback attempts by DB players not intended for this (especially TV) are deleted as absurd and illogical.<br>
+</li><li>3.9.3 If you allow yourself to discuss our releases anywhere, then please do so in full: both in cases of unsuccessful reproduction and in cases of successful reproduction, it will be objective. In the case of a one-sided and only negative highlighting of the subject, a completely logical question arises about intentional discrediting (otherwise, why not review "when everything is OK" is logical, isn't it?). Such accounts will be disabled to make room for those users who are able to create judgments not only negatively. <br>
+</li><li>3.9.4 Paranoids, fanatics, just stupid people and all kinds of couch "experts": comments on the tracker are not a platform for satisfying your needs. Therefore, when writing a comment in which there will be outright nonsense (even despite the fact / of course, that it doesn’t seem so to you), remember that the mediocre waste of the Administration’s time on such a thing is fraught for you from receiving a warning - to disabling your account (depending on the degree / persistence / imposing such nonsense). <br>
+</li><li>3.9.5 Links to "open after time" hands with a "lock" will be updated when at least three applicants are recruited.<br>
+</li><li>3.10 Remember, the giveaways on our tracker are in no way intended to meet your personal needs: if you don't like the giveaway, try looking elsewhere.</li>
+</ul></td></tr></tbody></table>
+
+<h2>4. Avatar Recommendations - <font color="#004E98">Please follow the rules below</font></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="10"><tbody><tr><td>
+<ul>
+<li>4.1 .gif, .jpg and .png formats are allowed.</li>
+<li>4.2 Recommended settings: <b>100 X 100 pixels</b> wide and no larger than 150 KB</li>
+<li>4.3 Do not use offensive material (namely: religious and political material, material depicting cruelty, violence and pornography). Doubt? Ask <a href="staff.php">Admin</a>.</li>
+
+</ul></td></tr></tbody></table></td></tr></tbody></table>
