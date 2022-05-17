@@ -1,4 +1,5 @@
-# auto_feed_js ![](https://img.shields.io/github/forks/tomorrow505/auto_feed_js)![](https://img.shields.io/github/stars/tomorrow505/auto_feed_js)![](https://img.shields.io/github/license/tomorrow505/auto_feed_js)
+<center># auto_feed_js 
+![](https://img.shields.io/github/forks/tomorrow505/auto_feed_js)![](https://img.shields.io/github/stars/tomorrow505/auto_feed_js)![](https://img.shields.io/github/license/tomorrow505/auto_feed_js)</center>
 PT站一键转载脚本
 
 ### 使用介绍
