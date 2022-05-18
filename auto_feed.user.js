@@ -6215,7 +6215,14 @@ setTimeout(function(){
                 if (origin_site == 'FRDS') {
                     descr = document.getElementById("kdescr").parentNode;
                     frds_nfo = document.getElementById("knfo");
-                    raw_info.url = match_link('imdb', $('#kimdb').html());
+                    if( $('#kimdb').length > 0 )
+                    {
+                        raw_info.url = match_link('imdb', $('#kimdb').html());
+                    }
+                    if( $('#kdouban').length > 0 )
+                    {
+                        raw_info.dburl = match_link('douban', $('#kdouban').html());
+                    }
                     douban_button_needed = true;
                 }
                 if (site_url.match(/detailsgame/)) {
