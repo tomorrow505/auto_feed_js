@@ -2,10 +2,9 @@
 PT站一键转载脚本
 
 ### 使用介绍
-
 ----
 
-本脚本使用详情已经汇总归纳：[使用教程](https://github.com/tomorrow505/auto_feed_js/wiki)
+使用教程：[项目wiki](https://github.com/tomorrow505/auto_feed_js/wiki)
 
 安装地址：https://greasyfork.org/zh-CN/scripts/424132-auto-feed
 
@@ -13,7 +12,7 @@ PT站一键转载脚本
 
 ----
 
-如果你喜欢这个脚本，请捐赠我作为更新维护的动力吧。
+开发不易，如果你喜欢这个脚本，请捐赠我作为更新维护的动力吧。
 
 |                   Alipay                    |                     WeChat                     |
 | :-----------------------------------------: | :--------------------------------------------: |
