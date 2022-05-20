@@ -1,4 +1,4 @@
-# auto_feed_js 
+# auto-feed
 PT站一键转载脚本
 
 ### 使用介绍
