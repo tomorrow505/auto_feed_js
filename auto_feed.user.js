@@ -11,7 +11,8 @@
 // @match        http*://*/detail*.php*
 // @match        http*://*/upload*php*
 // @match        https://*/upload/*
-// @match        https://open.cd/plugin_upload.php*
+// @match        https://open.cd/plugin_uploadp*
+// @match        https://*.open.cd/plugin_uploadp*
 // @match        http*://*/offer*php*
 // @match        https://xthor.tk/*
 // @match        https://hdf.world/*
@@ -65,7 +66,6 @@
 // @match        https://lemonhd.org/torrents_movie.php*
 // @exclude      http*bitpt.cn*
 // @exclude      https://bt.byr.cn/upload.php*
-// @match        https://*open.cd/plugin_upload.php*
 // @match        https://lemonhd.org/upload_music.php*
 // @include      http*://*redacted.ch/upload.php*
 // @include      http*://*redacted.ch/requests.php*
@@ -76,10 +76,10 @@
 // @require      https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js
 // @require      https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
-// @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052034
+// @require https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.5.6
+// @version      1.9.5.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -227,7 +227,7 @@
     20220513：优化RED和jpop转柠檬和皇后的代码逻辑，集成音乐转载脚本pth_yadg适配皇后和柠檬。
     20220518：支持海豚、lztr转出到皇后柠檬。支持部分内站间不下载种子直接发布，出现跨源请求询问是否信任一律选择允许此域名。
     20220519：支持大部分站点转发内站不需要下载种子，xthor直接生成nfo,不需要手动上传。
-
+    20220521：支持OPS转发，修复部分bug...支持北洋皇后双域名。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -876,6 +876,18 @@ if (if_new_site_added) {
     GM_setValue('site_order', JSON.stringify(site_order.join(',')));
 }
 
+// 修正北洋和皇后有www和不带www两个域名。
+console.log(site_url)
+if (site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd)\//)) {
+    var site_domain = site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd)\//)[0];
+    if (site_domain.match(/tjupt/)) {
+        used_site_info.TJUPT.url = site_domain;
+    } else {
+        used_site_info.OpenCD.url = site_domain;
+    }
+    GM_setValue('used_site_info', JSON.stringify(used_site_info));
+}
+
 //支持快速搜索的默认站点列表，可自行添加，举例：imdbid表示tt123456, imdbno表示123456，search_name表示the big bang thoery
 const default_search_list = [
     `<a href="https://passthepopcorn.me/torrents.php?searchstr={imdbid}" target="_blank">PTP</a>`,
@@ -1033,7 +1045,6 @@ const o_site_info = {
     'SC': 'https://secret-cinema.pw/',
     'iTS': 'https://shadowthein.net/',
     'HDRoute': 'http://hdroute.org/',
-    'MTTV': 'https://pt.nwsuaf6.edu.cn/',
     'ACM': 'https://asiancinema.me/',
     'HDOli': 'https://hd-olimpo.club/',
     'Tik': 'https://www.cinematik.net/',
@@ -1051,7 +1062,8 @@ const o_site_info = {
     'bwtorrents': 'https://bwtorrents.tv/',
     'openlook': 'https://openlook.me/',
     'lztr': 'https://lztr.me/',
-    'dicmusic': 'https://dicmusic.club/'
+    'dicmusic': 'https://dicmusic.club/',
+    'OPS': 'https://orpheus.network/'
 };
 
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
@@ -1249,7 +1261,7 @@ var raw_info = {
     'labels': 0
 };
 
-var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'dicmusic'];
+var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'dicmusic', 'OPS', 'jpop'];
 
 Array.prototype.remove = function(val) {
     var index = this.indexOf(val);
@@ -1657,7 +1669,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https?:\/\/.*\/(upload|offer).*?(php)?#seperator#/i)) {
         return 0;
     }
-    if (site_url.match(/^https:\/\/open.cd\/plugin_upload.php#seperator#/i)) {
+    if (site_url.match(/^https:\/\/.*open.cd\/plugin_upload.php#seperator#/i)) {
         return 0;
     }
     if (site_url.match(/^https?:\/\/(avistaz|privatehd|cinemaz).to\/upload\/torrent\/\d+/i)) {
@@ -1756,7 +1768,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^http(s*):\/\/jpopsuki.eu\/torrents.php\?id=\d+&torrentid=\d+/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/(redacted.ch|lztr.me|dicmusic.club)\/torrents.php\?id=\d+&torrentid=\d+/i)) {
+    if (site_url.match(/^http(s*):\/\/(redacted.ch|lztr.me|dicmusic.club|orpheus.network)\/torrents.php\?id=\d+&torrentid=\d+/i)) {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/www\.torrentleech\.org\/torrent\/*/i)) {
@@ -1854,6 +1866,7 @@ String.prototype.format = function(args) {
 
 //下面几个函数为字符串赋予获取各种编码信息的方法——适用于页面基本信息和字符串
 String.prototype.medium_sel = function() { //媒介
+    console.log(this)
     var result = this;
     if (result.match(/(Webdl|Web-dl|WEB)/i)) {
         result = 'WEB-DL';
@@ -1863,17 +1876,18 @@ String.prototype.medium_sel = function() { //媒介
         result = 'HDTV';
     } else if (result.match(/(Remux)/i) && ! result.match(/Encode/)) {
         result = 'Remux';
-    } else if (result.match(/(Blu-ray|.MPLS|Bluray原盘)/i) && !result.match(/(x|H)(264|265)|Encode|BDRIP|webrip|BluRay/i)) {
+    } else if (result.match(/(Blu-ray|.MPLS|Bluray原盘)/i) && !result.match(/Encode/i)) {
         result = 'Blu-ray';
     } else if (result.match(/(Encode|BDRIP|webrip|BluRay)/i) || result.match(/(x|H).?(264|265)/i)) {
         result = 'Encode';
-    } else if (result.match(/(UHD|UltraHD)/i) && !result.match(/(x|H)(264|265)|Encode|BDRIP|webrip|BluRay/i)) {
+    } else if (result.match(/(UHD|UltraHD)/i) && !result.match(/Encode/i)) {
         result = 'UHD';
     } else if (result.match(/(DVDRip|DVD)/i)) {
         result = 'DVD';
     } else {
         result = '';
     }
+    console.log(result)
     return result;
 };
 
@@ -2260,16 +2274,16 @@ function get_bluray_name_from_descr(descr, name) {
     }
 
     //音频编码
-    if(descr.match(/DTS:X[\s\S]{0,200}7.1/i)) {
+    if(descr.match(/DTS:X[\s\S]{0,200}?7.1/i)) {
         temp_title = temp_title+"DTS-HD.MA.7.1";
-    } else if(descr.match(/TrueHD[\s\S]{0,200}(7\.1|5\.1|2\.0|1\.0)/i)){
-        temp_title = temp_title+"TrueHD." + descr.match(/TrueHD[\s\S]{0,200}(7\.1|5\.1|2\.0|1\.0)/i)[1];
-    } else if(descr.match(/DTS-HD[\s\S]{0,200}(7\.1|5\.1|2\.0|1\.0)/i)){
-        temp_title = temp_title+"DTS-HD.MA." + descr.match(/DTS-HD[\s\S]{0,200}(7\.1|5\.1|2\.0|1\.0)/i)[1];
-    } else if(descr.match(/LPCM[\s\S]{0,200}(7\.1|5\.1|2\.0|1\.0)/i)){
-        temp_title = temp_title+"LPCM." + descr.match(/LPCM[\s\S]{0,200}(7\.1|5\.1|2\.0|1\.0)/i)[1];
-    } else if(descr.match(/Dolby Digital[\s\S]{0,200}(7\.1|5\.1|2\.0|1\.0)/i)){
-        temp_title = temp_title+"DD." + descr.match(/Dolby Digital[\s\S]{0,200}(7\.1|5\.1|2\.0|1\.0)/i)[1];
+    } else if(descr.match(/TrueHD[\s\S]{0,200}?(7\.1|5\.1|2\.0|1\.0)/i)){
+        temp_title = temp_title+"TrueHD." + descr.match(/TrueHD[\s\S]{0,200}?(7\.1|5\.1|2\.0|1\.0)/i)[1];
+    } else if(descr.match(/DTS-HD[\s\S]{0,200}?(7\.1|5\.1|2\.0|1\.0)/i)){
+        temp_title = temp_title+"DTS-HD.MA." + descr.match(/DTS-HD[\s\S]{0,200}?(7\.1|5\.1|2\.0|1\.0)/i)[1];
+    } else if(descr.match(/LPCM[\s\S]{0,200}?(7\.1|5\.1|2\.0|1\.0)/i)){
+        temp_title = temp_title+"LPCM." + descr.match(/LPCM[\s\S]{0,200}?(7\.1|5\.1|2\.0|1\.0)/i)[1];
+    } else if(descr.match(/Dolby Digital[\s\S]{0,200}?(7\.1|5\.1|2\.0|1\.0)/i)){
+        temp_title = temp_title+"DD." + descr.match(/Dolby Digital[\s\S]{0,200}?(7\.1|5\.1|2\.0|1\.0)/i)[1];
     }
 
     if (raw_info.name.match(/Blu-ray|DTS-HD|TrueHD|LPCM|HEVC|Bluray/)){
@@ -2853,7 +2867,7 @@ function page_parser(responseText) {
 function get_search_name(name) {
     search_name = name;
     if (raw_info !== undefined && raw_info.type == '音乐') {
-        search_name = name.split('-').pop().replace(/\d{4}.*/, '');
+        search_name = name.split('-').pop().replace(/\d{4}.*|\*/g, '').trim();
         return search_name;
     }
     if (name.match(/S\d{1,3}/i)){
@@ -4388,7 +4402,8 @@ if (site_url.match(/^https:\/\/xthor.tk\/.*/)) {
         $('.btn[value*="Générer une prez Allociné"]').val("生成描述文本");
 
         $('input[name=nfo]').parent().append(`<br><textarea id="pasteNfo" rows="15" style="width:600px"></textarea><br><input type="button" id="genNfo" value="生成nfo并上传">`);
-        $('#genNfo').click(()=>{
+        $('#genNfo').click((e)=>{
+            e.preventDefault();
             var r = $('#pasteNfo').val();
             if (!r) {
                 return;
@@ -7071,8 +7086,12 @@ setTimeout(function(){
             raw_info.name = raw_info.name.replace(/\[|\]/g, '*');
             var cover = $('p.thumbnail-container').find('img').attr('onclick').match(/http.*(jpg|png|jpeg|webp)/)[0];
             console.log(cover);
-            var mediainfo = $('div:contains("Album Info"):last').parent().find('div.body');
-            raw_info.tracklist = mediainfo.text();
+
+            var mediainfo = $('div').has("strong:contains(Info)").last().parent().find('div.body');
+            raw_info.tracklist = walkDOM(mediainfo[0].cloneNode(true));
+
+            console.log(raw_info.tracklist)
+
             raw_info.descr = '[img]' + cover + '[/img]\n\n';
             raw_info.type = '音乐';
             tbody = document.getElementsByClassName('torrent_table')[0];
@@ -7098,6 +7117,49 @@ setTimeout(function(){
             raw_info.torrent_url = `https://lztr.me/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
         }
 
+        if (origin_site == 'OPS') {
+            if (site_url.match(/torrentid=(\d+)/)) {
+                torrent_id = site_url.match(/torrentid=(\d+)/)[1];
+            }
+            raw_info.name = document.getElementsByTagName('h2')[0].textContent.replace(/–/g, '-');
+            raw_info.name = raw_info.name.replace(/\[|\]/g, '*');
+            var cover = $('#cover_div_0').find('img').attr('onclick').match(/http.*(jpg|png|jpeg|webp)/)[0];
+            var mediainfo = $('div.torrent_description').find('div.body');
+            raw_info.tracklist = walkDOM(mediainfo[0].cloneNode(true)).trim();
+
+            if ($(mediainfo).find('ol.postlist').length) {
+                $(mediainfo).find('ol.postlist').find('li').map((index,e)=>{
+                    if (index == 0) {
+                        raw_info.tracklist = raw_info.tracklist.split($(e).text())[0];
+                    }
+                    raw_info.tracklist += `\n${index+1} ${$(e).text()}`;
+                });
+            }
+            console.log(raw_info.tracklist);
+            raw_info.descr = '[img]' + cover + '[/img]\n\n';
+            raw_info.type = '音乐';
+            tbody = document.getElementsByClassName('torrent_table')[0];
+            raw_info.edition_info = $(`#torrent${torrent_id}`).prev().text().trim();
+            console.log(raw_info.edition_info);
+            raw_info.small_descr = $(`#torrent${torrent_id}`).find('a:eq(5)').text().replace('▶ ', '');
+            console.log(raw_info.small_descr);
+            raw_info.descr += $(`#torrent_${torrent_id}`).find('blockquote:last').text();
+            console.log(raw_info.descr);
+            raw_info.music_type = Array.from($('div.box_tags').find('a[href*="taglist"]').map((index,e)=>{
+                return $(e).text();
+            })).join(',');
+            console.log(raw_info.music_type);
+            raw_info.file_list = Array.from($(`#files_${torrent_id}`).find('tr:gt(0)').map((index,e)=>{
+                return $(e).find('td:eq(0)').text();
+            }));
+            raw_info.file_list = raw_info.file_list.filter((item)=>{
+                if (item.match(/\.(flac|wav)/i)) {
+                    return item;
+                }
+            }).join('\n');
+            raw_info.torrent_url = `https://orpheus.network/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+        }
+
         if (origin_site == 'dicmusic') {
             if (site_url.match(/torrentid=(\d+)/)) {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
@@ -7107,7 +7169,7 @@ setTimeout(function(){
             raw_info.name = raw_info.name.replace(/\[|\]/g, '*');
             var cover = $('#cover_div_0').find('img').attr('onclick').match(/http.*(jpg|png|jpeg|webp)/)[0];
             var mediainfo = $('div.torrent_description').find('div:eq(1)');
-            raw_info.tracklist = mediainfo.text();
+            raw_info.tracklist = walkDOM(mediainfo[0].cloneNode(true)).trim();
             if ($(mediainfo).find('ol.postlist').length) {
                 $(mediainfo).find('ol.postlist').find('li').map((index,e)=>{
                     if (index == 0) {
@@ -7150,7 +7212,6 @@ setTimeout(function(){
             }).join('\n');
             console.log(raw_info.file_list);
             raw_info.torrent_url = `https://dicmusic.club/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
-
         }
 
         if (origin_site == 'jpop') {
@@ -7179,6 +7240,9 @@ setTimeout(function(){
                     raw_info.file_list += tds[i].textContent + '\n';
                 }
             }
+            raw_info.small_descr = $(`a[href*="download&id=${torrent_id}"]`).parent().parent().find('a:eq(3)').text().replace('» ', '');
+            console.log(raw_info.small_descr)
+
             raw_info.tracklist = info;
             var label_box = document.getElementsByClassName('box')[3];
             var label_info = label_box.getElementsByTagName('ul')[0].textContent;
@@ -7657,7 +7721,7 @@ setTimeout(function(){
                 }
             }
 
-            if (['PTP', 'MTV', 'UHD', 'HDF', 'RED' , 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'dicmusic'].indexOf(origin_site) > -1) {
+            if (['PTP', 'MTV', 'UHD', 'HDF', 'RED' , 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'dicmusic', 'OPS'].indexOf(origin_site) > -1) {
                 if (origin_site == 'PTP' || origin_site == 'UHD' || origin_site == 'GPW' || origin_site == 'SC' || origin_site == 'ANT') {
                     raw_info.type = '电影';
                 } else if (origin_site == 'BTN' || origin_site == 'MTV'){
@@ -7818,7 +7882,7 @@ setTimeout(function(){
                     }
                 }
             } else {
-                if (['行为', '小货车', '行為', '种子认领', '簡介', '操作', 'Action', 'Tagline', 'Tools:', '设备'].indexOf(tds[i].textContent.trim()) >-1 && origin_site != 'KG') {
+                if (['行为', '小货车', '行為', '种子认领', '簡介', '简介', '操作', 'Action', 'Tagline', 'Tools:', '设备'].indexOf(tds[i].textContent.trim()) >-1 && origin_site != 'KG') {
                     if (!is_inserted){
                         if (origin_site != 'MTV') {
                             table = tds[i].parentNode.parentNode;
@@ -9132,7 +9196,7 @@ setTimeout(function(){
     *                                       part 4 源网页转发跳转及功能部署                                             *
     ******************************************************************************************************************/
         var forward_l, forward_r;
-        if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'dicmusic'].indexOf(origin_site) > -1) {
+        if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'dicmusic', 'OPS'].indexOf(origin_site) > -1) {
             forward_r = insert_row.insertCell(0);
             forward_r.colSpan="5";
             forward_r.style.paddingLeft = '12px'; forward_r.style.paddingTop = '10px';
@@ -10434,7 +10498,7 @@ setTimeout(function(){
 
         if (upload_site.match(/music/i) && forward_site == 'LemonHD'){
             LemonHD_music = true;
-        } else if (raw_info.origin_site == 'OpenCD' || raw_info.origin_site == 'RED' || raw_info.origin_site == 'lztr' || raw_info.origin_site == 'dicmusic') {
+        } else if (['RED', 'jpop', 'lztr','dicmusic', 'OPS'].indexOf(raw_info.origin_site) > 0) {
             raw_info.name = raw_info.name.replace(/\*/g, '');
             if (raw_info.tracklist) {
                 raw_info.tracklist = '[quote=Tracklist]' + raw_info.tracklist + '[/quote]';
@@ -10518,12 +10582,16 @@ setTimeout(function(){
             }
             console.log(raw_info)
             raw_info.name = raw_info.name.trim();
+            if (raw_info.origin_site == 'OPS') {
+                raw_info.name = raw_info.name.replace(/–/g, '-');
+            }
             var info_text = raw_info.name.split('*');
             var author_name = info_text[0];
             var music_name = '待填';
             if (author_name.split('-').length > 1) {
                 music_name = author_name.split('-').pop().trim();
             }
+            
             var year = '';
             if (raw_info.name.match(/(19|20)\d+/)){
                 year = raw_info.name.match(/(19|20)\d+/)[0];
@@ -10538,7 +10606,7 @@ setTimeout(function(){
                     $(e).find('td:last').css({"border-right": "none"});
                 });
             });
-            if (raw_info.origin_site == 'RED' || raw_info.origin_site == 'jpop' || raw_info.origin_site == 'lztr' || raw_info.origin_site == 'dicmusic') {
+            if (['RED', 'jpop', 'lztr','dicmusic', 'OPS'].indexOf(raw_info.origin_site) > 0) {
                 if (raw_info.origin_site == 'RED') {
                     try{
                         raw_info.music_type = raw_info.descr.match(/标签： (.*)/)[1].split(' | ');
@@ -10574,6 +10642,11 @@ setTimeout(function(){
                     });
                     raw_info.music_type = music_type;
                 } catch(err) {}
+
+                var name_dict = {
+                    "RED": 'Redacted', 'OPS': 'Orpheus', 'jpop': 'Jpopsuki', 'dicmusic': 'DICMusic', 'lztr': 'LzTr'
+                }
+                $('#frname').val(name_dict[raw_info.origin_site]);
             }
             console.log(raw_info.music_type)
             if (raw_info.origin_site == 'jpop') {
@@ -10587,7 +10660,7 @@ setTimeout(function(){
                 raw_info.descr = raw_info.descr.replace(raw_info.tracklist, '');
                 raw_info.name = raw_info.name.replace(/(Album|Single)$/, '');
                 $('#artist').val(author); $('#year').val(year); $('#browsecat').val(408); $('#resource_name').val(music_name); $('#share_rule').val(3);
-                $(`tr:contains(標題):eq(1)`).after(`<tr>
+                $(`#name`).parent().parent().after(`<tr>
                     <td class="rowhead nowrap rowtitle">豆瓣搜索:</td>
                     <td><input id="douban"/></td>
                     <td><input id="douban_button" type="button" value="搜索"></td>
@@ -10652,7 +10725,9 @@ setTimeout(function(){
                             var torrent = table.find(`a[href*="details_music.php?id=${tid}"]`).parent().next();
                             torrent.find('a').map((index,e)=>{
                                 var source = $(`a.tag:contains(${$(e).text()})`);
-                                addTag(source);
+                                if (source.length) {
+                                    addTag(source);
+                                }
                                 var type_text = $(e).text();
                                 if (type_text == '摇滚(rock)') {
                                     type_text = '摇滚(Rock)';
@@ -10669,7 +10744,7 @@ setTimeout(function(){
                             }
                         }
                     });
-                } else if (raw_info.origin_site == "RED" || raw_info.origin_site == 'jpop' || raw_info.origin_site == 'lztr' || raw_info.origin_site == 'dicmusic') {
+                } else if (['RED', 'jpop', 'lztr','dicmusic', 'OPS'].indexOf(raw_info.origin_site) > 0) {
                     $('a.tag:contains("大陆")').wait(function(){
                         raw_info.music_type.map(item=>{
                             var source = $(`a.tag:contains(${item})`);
@@ -10691,9 +10766,16 @@ setTimeout(function(){
                 }
                 try{
                     if (raw_info.tracklist) {
-                        $('textarea[name="track_list"]').val(raw_info.tracklist.replace(/\.(flac|wav)|\[.*?\]/g, ''));
+                        raw_info.tracklist = raw_info.tracklist.replace(/\[.*?\]/g, function(data) {
+                            if (data.match(/url/)) {
+                                return data;
+                            } else {
+                                return '';
+                            }
+                        }).trim();
+                        $('textarea[name="track_list"]').val(raw_info.tracklist.replace(/\.(flac|wav)/g, ''));
                         $('#descr').wait(function(){ 
-                            $('#descr').val(raw_info.tracklist.replace(/\[.*?\]/g, ''));
+                            $('#descr').val(raw_info.tracklist);
                             $('#descr').parent().append(`<a style="text-decoration:none;" href="#" id="file2descr"><font color="red">从简介导入</font></a>`);
                             $('#file2descr').click((e)=>{
                                 e.preventDefault();
@@ -10719,6 +10801,9 @@ setTimeout(function(){
                         });
                     }
                 } catch (err) {}
+                var evt = document.createEvent("HTMLEvents");
+                evt.initEvent("change", false, true);
+                document.getElementById('audio_mode').dispatchEvent(evt);
             } else {
                 raw_info.descr = raw_info.descr.replace(/^\[img\].*?\[\/img\]([\n\s]*)/, '');
                 $('input[name="artists[]"]').val(author);
@@ -10737,6 +10822,8 @@ setTimeout(function(){
                     $('input[name=discogs_url]').val(raw_info.tracklist.match(/https:\/\/www.discogs.com\/release\/.*/)[0]);
                 }
             }
+        } else if (raw_info.origin_site == 'OpenCD') {
+            raw_info.descr += '\n\n' + '[quote]' + raw_info.tracklist + '[/quote]'
         }
 
         if (LemonHD_animate) {
@@ -11077,7 +11164,7 @@ setTimeout(function(){
 
         var allinput = document.getElementsByTagName("input");
         for (i = 0; i < allinput.length; i++) {
-            if (allinput[i].name == 'name' && forward_site != 'GPW') { //填充标题
+            if (allinput[i].name == 'name' && forward_site != 'GPW' && forward_site != 'OpenCD') { //填充标题
                 if (['HDChina', 'NanYang', 'CMCT', 'iTS', 'NPUPT', 'xthor'].indexOf(forward_site) > -1) {
                     allinput[i].value = raw_info.name.replace(/\s/g, ".");
                 } else if (forward_site == 'TTG') {
@@ -11090,12 +11177,9 @@ setTimeout(function(){
                 } else if (forward_site == 'PuTao'){
                     raw_info.name = '[{chinese}] {english}'.format({
                         'english': raw_info.name,
-                        'chinese': get_small_descr_from_descr(raw_info.descr, raw_info.name).split('/')[0].trim()
+                        'chinese': get_small_descr_from_descr(raw_info.descr, raw_info.name).split('/')[0].split(/\| 类别/)[0].trim()
                     });
                     allinput[i].value = raw_info.name;
-                } else if (forward_site == 'OpenCD') {
-                    allinput[i].value = (raw_info.name + ' ' + $('#standard option:selected').text() + ' ' + $('#audio_mode option:selected').text()).trim().replace('  ', ' ');
-                    $('#name').removeClass('readonly').removeAttr('readonly');
                 } else {
                     allinput[i].value = raw_info.name;
                 }
@@ -11216,7 +11300,7 @@ setTimeout(function(){
                     all_types.map((item)=>{
                         addTag(info[item]);
                     });
-                } else if (raw_info.origin_site == 'RED' || raw_info.origin_site == 'jpop' || raw_info.origin_site == 'lztr' || raw_info.origin_site == 'dicmusic') {
+                } else if (['RED', 'jpop', 'lztr','dicmusic', 'OPS'].indexOf(raw_info.origin_site) > 0) {
                     raw_info.music_type.map((item)=>{
                         if (info.hasOwnProperty(item)) {
                             addTag(info[item]);
@@ -11271,16 +11355,22 @@ setTimeout(function(){
                     if (labels.diy){ document.getElementById('tagDIY').checked=true; }
                     break;
                 case 'HaiDan':
-                    if (labels.diy){ document.getElementsByName('tag_list[]')[1].checked=true; }
-                    if (labels.gy){ document.getElementsByName('tag_list[]')[2].checked=true; }
-                    if (labels.yy){ document.getElementsByName('tag_list[]')[4].checked=true; }
-                    if (labels.zz){ document.getElementsByName('tag_list[]')[0].checked=true; }
-                    if (!labels.diy && raw_info.descr.match(/disc info| mpls/i)) {
-                        document.getElementsByName('tag_list[]')[3].checked=true;
+                    if (labels.diy){ $('input[name="tag_list[]"][value=4]').attr('checked', true); }
+                    if (labels.gy){ $('input[name="tag_list[]"][value=5]').attr('checked', true); }
+                    if (labels.yy){ $('input[name="tag_list[]"][value=10]').attr('checked', true); }
+                    if (labels.zz){ $('input[name="tag_list[]"][value=3]').attr('checked', true); }
+                    if (!labels.diy && raw_info.descr.match(/disc info|mpls/i)) {
+                        $('input[name="tag_list[]"][value=7]').attr('checked', true);
                     }
                     if (!labels.gy && !labels.yy) {
-                        document.getElementsByName('tag_list[]')[5].checked=true;
+                        $('input[name="tag_list[]"][value=11]').attr('checked', true);
                     }
+                    if (labels.hdr10) { $('input[name="tag_list[]"][value=16]').attr('checked', true); }
+                    if (labels.db) { $('input[name="tag_list[]"][value=15]').attr('checked', true);}
+                    if (raw_info.name.match(/\.3D\.| 3D /)) {
+                        $('input[name="tag_list[]"][value=14]').attr('checked', true);
+                    }
+                    break;
                     break;
                 case 'MTeam':
                     if (labels.gy){ document.getElementById('l_dub').checked=true; }
@@ -11458,6 +11548,8 @@ setTimeout(function(){
                 })
             } else if (forward_site != 'xthor') {
                 torrent_box.parentNode.innerHTML = '<input type="file" class="file" id="torrent" name="file" accept=".torrent">';
+            } else if (forward_site == 'xthor') {
+                $('#torrent').removeAttr("onchange");
             }
         } catch(err){}
 
@@ -11810,12 +11902,17 @@ setTimeout(function(){
             } else {
                 descr_box[0].value = cmctinfos.trim();
             }
-            descr_box[2].value = raw_info.descr;
-            $('#upload').after(`<button type="button" id="clear" class="layui-btn">清空附加信息</button>`);
-            $('#clear').click(function(){
-                descr_box[2].value = '';
-                descr_box[2].style.height = '200px';
-            });
+
+
+            $('textarea[name=screenshot]').parent().parent().after(`
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">源简介-辅助填写</label>
+                    <div class="layui-input-block">
+                        <textarea name="originDescr" placeholder="源站点的简介过来的，辅助填写。" class="layui-textarea" style="height: 600px;"></textarea>
+                    </div>
+                </div>
+            `);
+            $('textarea[name=originDescr]').val(raw_info.descr);
 
             $('select[name="team_sel"]>option').map(function(index,e){
                 if (raw_info.name.match(e.innerText)) {
@@ -13207,7 +13304,7 @@ setTimeout(function(){
                 case 'MP3': audiocodec_box.options[12].selected = true; break;
                 case 'M4A': audiocodec_box.options[13].selected = true;
             }
-            if (raw_info.name.match(/DDP|DD+|EAC3/i)) {
+            if (raw_info.name.match(/DDP|DD\+|EAC3/i)) {
                 audiocodec_box.options[6].selected = true;
             }
 
@@ -14057,10 +14154,15 @@ setTimeout(function(){
             //剧集
             if (raw_info.type == '剧集') {
                 if (raw_info.name.match(/S(\d+)E(\d+)/i)) {
-                    document.getElementById('season').value = numToChinese(raw_info.name.match(/S(\d+)E(\d+)/i)[1]);
-                    document.getElementById('episode').value =  numToChinese(raw_info.name.match(/S(\d+)E(\d+)/i)[2]);
+                    document.getElementById('season').value = raw_info.name.match(/S(\d+)E(\d+)/i)[1];
+                    document.getElementById('episode').value =  raw_info.name.match(/S(\d+)E(\d+)/i)[2];
                 } else if (raw_info.name.match(/S(\d+)/i)) {
-                    document.getElementById('season').value = numToChinese(raw_info.name.match(/S(\d+)/i)[1]);
+                    document.getElementById('season').value = raw_info.name.match(/S(\d+)/i)[1];
+                } else if (raw_info.name.match(/COMPLETE/i) || raw_info.small_descr.match(/全\d+集/)) {
+                    document.getElementById('season').value = '1';
+                } else if (raw_info.name.match(/E\d+(-E\d+)?/)) {
+                    document.getElementById('season').value = '1';
+                    document.getElementById('episode').value = raw_info.name.match(/E\d+(-E\d+)?/)[0].replace(/E/g, '');
                 }
             }
 
@@ -15721,19 +15823,20 @@ setTimeout(function(){
                 case 'XVID': codec_box.options[3].selected = true;
             }
             //音频编码
-            var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
+            var audiocodec_box = $('select[name=audiocodec_sel]');
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': audiocodec_box.options[9].selected = true; break;
-                case 'DTS-HDMA:X 7.1': audiocodec_box.options[9].selected = true; break;
-                case 'DTS-HDMA': audiocodec_box.options[9].selected = true; break;
-                case 'TrueHD': audiocodec_box.options[10].selected = true; break;
-                case 'Atmos': audiocodec_box.options[10].selected = true; break;
-                case 'DTS': audiocodec_box.options[3].selected = true; break;
-                case 'AC3': audiocodec_box.options[8].selected = true; break;
-                case 'AAC': audiocodec_box.options[6].selected = true; break;
-                case 'Flac': audiocodec_box.options[1].selected = true; break;
-                case 'APE': audiocodec_box.options[2].selected = true; break;
-                case 'WAV': audiocodec_box.options[3].selected = true;
+                case 'DTS-HD': audiocodec_box.val(9); break;
+                case 'DTS-HDMA:X 7.1': audiocodec_box.val(9); break;
+                case 'DTS-HDMA': audiocodec_box.val(9); break;
+                case 'TrueHD': audiocodec_box.val(10); break;
+                case 'Atmos': audiocodec_box.val(10); break;
+                case 'DTS': audiocodec_box.val(3); break;
+                case 'AC3': audiocodec_box.val(8); break;
+                case 'AAC': audiocodec_box.val(6); break;
+                case 'Flac': audiocodec_box.val(1); break;
+                case 'APE': audiocodec_box.val(2); break;
+                case 'LPCM': audiocodec_box.val(11); break;
+                case 'WAV': audiocodec_box.val(7);
             }
             //分辨率
             var standard_box = document.getElementsByName('standard_sel')[0];
@@ -15750,11 +15853,6 @@ setTimeout(function(){
                 }
             });
             $('input[name="pt_gen"]').val(raw_info.dburl? raw_info.dburl: raw_info.url);
-            if (raw_info.name.match(/complete/i) && raw_info.type == '剧集' && raw_info.source_sel == '大陆') {
-                $('input[name="tags[]:contains("合集")"]').attr("checked", true);
-            } else if (raw_info.name.match(/S\d+[^E]/i) && (raw_info.type == '剧集' || raw_info.type == '综艺' || raw_info.type == '纪录' || raw_info.type == '动漫')) {
-                check_label(document.getElementsByName("tags[]"), "11");
-            }
         }
 
         else if (forward_site == 'CarPt') {
@@ -17636,7 +17734,8 @@ setTimeout(function(){
                         $('input[value=3]').attr('checked', true);
                     }
                     $('#title').parent().append(`<button href="#" id="rename"><font color="red">rename title</font></button>`);
-                    $('#rename').click(()=>{
+                    $('#rename').click((e)=>{
+                        e.preventDefault();
                         $('#title').val(raw_info.name.replace(/ /g, '.'));
                     })
                 }
@@ -18666,7 +18765,8 @@ setTimeout(function(){
         else if (forward_site == 'xthor') {
             $('input[name=url]').val(raw_info.url);
             $('input[name=url]').after(`<br><font color="red">IMDB不好用的时候试试：</font><input type="button" id="getTMDB" value="IMDB获取TMDB" /><font color="red">或者</font><input type="button" id="searchTMDB" value="直接搜索TMDB" />`);
-            $('#getTMDB').click(()=>{
+            $('#getTMDB').click((e)=>{
+                e.preventDefault();
                 if (!$('input[name=url]').val()) {
                     alert("请输入IMDB链接");
                 } else {
@@ -18684,7 +18784,8 @@ setTimeout(function(){
                     })
                 }
             });
-            $('#searchTMDB').click(()=>{
+            $('#searchTMDB').click((e)=>{
+                e.preventDefault();
                 window.open(`https://www.themoviedb.org/search?language=en-US&query=` + get_search_name(raw_info.name), "_blank");
             });
 
