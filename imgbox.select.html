@@ -1,0 +1,370 @@
+<div class="boxed-content">
+  <div class="row-fluid">
+    <div class="span4">
+      <label class="control-label span12 label-text-left">Content Type</label>
+    </div>
+    <div class="span8">
+      <select class="selectpicker span12" data-style="btn-inverse" id="dropdown-content-type" name="content-type" style="display: none;">
+        <option selected value="0">SELECT CONTENT TYPE</option>
+        <option value="1">Family Safe Content</option>
+        <option value="2">Adult Content</option>
+      </select>
+      <div class="btn-group bootstrap-select span12">
+        <button type="button" class="btn dropdown-toggle selectpicker btn-inverse" data-toggle="dropdown" data-id="dropdown-content-type">
+          <span class="filter-option pull-left">Family Safe Content</span> 
+          <span class="caret">
+          </span>
+        </button>
+        <div class="dropdown-menu open" style="max-height: 745px; overflow: hidden; min-height: 0px;">
+          <ul class="dropdown-menu inner selectpicker" role="menu" style="max-height: 733px; overflow-y: auto;">
+            <li rel="0" class="">
+              <a tabindex="0" class="" style="">
+                <span class="text">SELECT CONTENT TYPE</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="1" class="selected">
+              <a tabindex="0" class="" style="">
+                <span class="text">Family Safe Content</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="2">
+              <a tabindex="0" class="" style="">
+                <span class="text">Adult Content</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row-fluid margin-top-10">
+    <div class="span4">
+      <label class="control-label span12 label-text-left">Thumbnail</label>
+    </div>
+    <div class="span8">
+      <select class="selectpicker span12" data-style="btn-inverse" id="thumbnail-option" name="thumbnail-option" style="display: none;">
+        <optgroup label="SQUARE (center cropped)">
+          <option value="100c">100x100 pixel (square)</option>
+          <option value="150c">150x150 pixel (square)</option>
+          <option value="200c">200x200 pixel (square)</option>
+          <option value="250c">250x250 pixel (square)</option>
+          <option value="300c">300x300 pixel (square)</option>
+          <option value="350c">350x350 pixel (square)</option>
+          <option value="500c">500x500 pixel (square)</option>
+          <option value="800c">800x800 pixel (square)</option>
+        </optgroup>
+        <optgroup label="RESIZED (keep aspect ratio)">
+          <option value="100r">100x100 pixel (resized)</option>
+          <option value="150r">150x150 pixel (resized)</option>
+          <option value="200r">200x200 pixel (resized)</option>
+          <option value="250r">250x250 pixel (resized)</option>
+          <option value="300r">300x300 pixel (resized)</option>
+          <option selected value="350r">350x350 pixel (resized)</option>
+          <option value="500r">500x500 pixel (resized)</option>
+          <option value="800r">800x800 pixel (resized)</option>
+        </optgroup>
+      </select>
+      <div class="btn-group bootstrap-select span12">
+        <button type="button" class="btn dropdown-toggle selectpicker btn-inverse" data-toggle="dropdown" data-id="thumbnail-option">
+          <span class="filter-option pull-left">350x350 pixel (resized)</span> 
+          <span class="caret">
+          </span>
+        </button>
+        <div class="dropdown-menu open">
+          <ul class="dropdown-menu inner selectpicker" role="menu">
+            <li rel="0">
+              <dt>
+                <span class="text">SQUARE (center cropped)</span>
+              </dt>
+              <a tabindex="0" class="opt " style="">
+                <span class="text">100x100 pixel (square)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="1">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">150x150 pixel (square)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="2">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">200x200 pixel (square)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="3">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">250x250 pixel (square)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="4">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">300x300 pixel (square)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="5">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">350x350 pixel (square)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="6">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">500x500 pixel (square)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="7">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">800x800 pixel (square)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="8">
+              <div class="div-contain">
+                <div class="divider">
+                </div>
+              </div>
+              <dt>
+                <span class="text">RESIZED (keep aspect ratio)</span>
+              </dt>
+              <a tabindex="0" class="opt " style="">
+                <span class="text">100x100 pixel (resized)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="9">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">150x150 pixel (resized)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="10">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">200x200 pixel (resized)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="11">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">250x250 pixel (resized)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="12">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">300x300 pixel (resized)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="13" class="selected">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">350x350 pixel (resized)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="14">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">500x500 pixel (resized)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="15">
+              <a tabindex="0" class="opt " style="">
+                <span class="text">800x800 pixel (resized)</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row-fluid margin-top-10">
+    <div class="span4">
+      <label class="control-label span12 label-text-left">Comments</label>
+    </div>
+    <div class="span8">
+      <select class="selectpicker span12" data-style="btn-inverse" id="comments-option" name="comments-option" style="display: none;">
+        <option selected value="1">Enable Comments</option>
+        <option value="0">Disable Comments</option>
+      </select>
+      <div class="btn-group bootstrap-select span12">
+        <button type="button" class="btn dropdown-toggle selectpicker btn-inverse" data-toggle="dropdown" data-id="comments-option">
+          <span class="filter-option pull-left">Enable Comments</span> 
+          <span class="caret">
+          </span>
+        </button>
+        <div class="dropdown-menu open">
+          <ul class="dropdown-menu inner selectpicker" role="menu">
+            <li rel="0" class="selected">
+              <a tabindex="0" class="" style="">
+                <span class="text">Enable Comments</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="1">
+              <a tabindex="0" class="" style="">
+                <span class="text">Disable Comments</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row-fluid margin-top-10">
+    <div class="span4">
+      <label class="control-label span12 label-text-left">Gallery Option</label>
+    </div>
+    <div class="span8">
+      <select class="selectpicker span12" data-style="btn-inverse" id="gallery-option" name="gallery-option" style="display: none;">
+        <option value="1">Create a New Gallery</option>
+        <option selected value="2">Add to Existing Gallery</option>
+        <option value="3">Do Not Create a Gallery</option>
+      </select>
+      <div class="btn-group bootstrap-select span12">
+        <button type="button" class="btn dropdown-toggle selectpicker btn-inverse" data-toggle="dropdown" data-id="gallery-option">
+          <span class="filter-option pull-left">Create a New Gallery</span> 
+          <span class="caret">
+          </span>
+        </button>
+        <div class="dropdown-menu open" style="max-height: 610px; overflow: hidden; min-height: 0px;">
+          <ul class="dropdown-menu inner selectpicker" role="menu" style="max-height: 598px; overflow-y: auto;">
+            <li rel="0" class="selected">
+              <a tabindex="0" class="" style="">
+                <span class="text">Create a New Gallery</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="1" class="">
+              <a tabindex="0" class="" style="">
+                <span class="text">Add to Existing Gallery</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+            <li rel="2">
+              <a tabindex="0" class="" style="">
+                <span class="text">Do Not Create a Gallery</span>
+                <i class="glyphicon glyphicon-ok icon-ok check-mark"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row-fluid margin-top-10 existing-gallery-picker hidden">
+    <div class="span12">
+      <div class="btn-group bootstrap-custom-select span12">
+        <button type="button" class="btn dropdown-toggle btn-inverse" data-toggle="dropdown" data-id="existing-gallery-option" id="existing-gallery-option-btn">
+          <span class="filter-option pull-left" id="bootstrap-custom-select-title">Select a Gallery</span> 
+          <span class="caret">
+          </span>
+        </button>
+        <div class="dropdown-menu open">
+          <div class="bootstrap-select-searchbox">
+            <input type="text" class="input-block-level form-control" id="select-search-box" placeholder="Search...">
+          </div>
+          <ul class="dropdown-menu inner selectpicker" role="menu" id="select-search-list">
+            <li rel="1" data-title="Busytown.Mysteries" data-value="k0x3GILrEm#MhSYCaTs9nX0TPni">
+              <a tabindex="0" class="" style="">
+                <span class="egp-item">
+                  <img src="https://imgbox.com/images/no-image.png" alt="">
+                  <span class="select-title">Busytown.Mysteries (6 images)</span>
+                </span>
+              </a>
+            </li>
+            <li rel="1" data-title="Dune.2021.1080p.HMAX.WEB-DL.DDP5.1.Atmos.H.264-FLUX" data-value="ig4gVOdOR8#TKYyUNslRF5SyN7t">
+              <a tabindex="0" class="" style="">
+                <span class="egp-item">
+                  <img src="https://imgbox.com/images/no-image.png" alt="">
+                  <span class="select-title">Dune.2021.1080p.HMAX.WEB-DL.DDP5.1.Atmos.H.264-FLUX (6 images)</span>
+                </span>
+              </a>
+            </li>
+            <li rel="1" data-title="Hellbound" data-value="VWpnQcjmpd#6gXFp1uijE30SNUc">
+              <a tabindex="0" class="" style="">
+                <span class="egp-item">
+                  <img src="https://imgbox.com/images/no-image.png" alt="">
+                  <span class="select-title">Hellbound (6 images)</span>
+                </span>
+              </a>
+            </li>
+            <li rel="1" data-title="Rick.and.Morty.S05E01.Mort.Dinner.Rick.Andre.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb" data-value="wxl7qdoOOe#EOozMVqEbJBOVdY4">
+              <a tabindex="0" class="" style="">
+                <span class="egp-item">
+                  <img src="https://imgbox.com/images/no-image.png" alt="">
+                  <span class="select-title">Rick.and.Morty.S05E01.Mort.Dinner.Rick.Andre.1080p.AMZN.WEB-DL.DDP5.1.H.264-NTb (6 images)</span>
+                </span>
+              </a>
+            </li>
+            <li rel="1" data-title="Sex.Education.S03E01.1080p.NF.WEB-DL.DDP5.1.x264-JETIX" data-value="qOHUDRnwOW#POLSnyJmNiH4hfJC">
+              <a tabindex="0" class="" style="">
+                <span class="egp-item">
+                  <img src="https://imgbox.com/images/no-image.png" alt="">
+                  <span class="select-title">Sex.Education.S03E01.1080p.NF.WEB-DL.DDP5.1.x264-JETIX (6 images)</span>
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="existing-gallery-option" name="existing-gallery-option" value="0">
+  </div>
+  <script type="text/javascript">
+  $('#select-search-box').click(function (e) {
+                e.stopPropagation();
+            });
+  
+            $('#select-search-box').keyup(function () {
+                v = $("#select-search-box").val();
+                var regexp = new RegExp(v, 'gi');
+  
+  
+                $('#select-search-list li').each(function (index) {
+                    console.log($(this).data("title"));
+                    console.log(v);
+                    if ($(this).data("title").match(regexp)) {
+                        console.log("match");
+                        $(this).show();
+                    } else {
+                        console.log("no match");
+                        $(this).hide();
+                    }
+                });
+            });
+  
+            $('#select-search-list li').click(function () {
+                $('#existing-gallery-option-btn').addClass("btn-inverse");
+                $('#existing-gallery-option-btn').removeClass("btn-danger");
+                $('#bootstrap-custom-select-title').text($(this).data("title"));
+                $('#existing-gallery-option').val($(this).data("value"));
+            });
+  </script>
+  <div class="row-fluid margin-top-10 new-gallery-title-input-container">
+    <input type="text" id="gallery-title" name="gallery-title" placeholder="Enter a Gallery Name" maxlength="100" class="input-block-level">
+  </div>
+  <div class="row-fluid margin-top-20 fileupload-buttonbar text-center">
+    <button type="submit" class="btn btn-warning btn-large" id="fake-submit-button">
+      <i class="icon-cloud-upload"></i>
+      <span>Start upload</span>
+    </button>
+    <button type="submit" class="hidden start" id="real-submit-button">
+    </button>
+    <button type="reset" class="btn btn-inverse cancel uploading">
+      <i class="glyphicon glyphicon-ban-circle"></i>
+      <span>Cancel upload</span>
+    </button>
+    <button type="button" class="hidden delete">
+    </button>
+  </div>
+</div>
