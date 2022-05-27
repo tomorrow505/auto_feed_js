@@ -8,7 +8,6 @@ PT站一键转载脚本
 
 安装地址：https://greasyfork.org/zh-CN/scripts/424132-auto-feed
 
-项目tg讨论：https://t.me/+rGUOUYZ3Ey43OWY9
 
 ### 关于更新
 ----
