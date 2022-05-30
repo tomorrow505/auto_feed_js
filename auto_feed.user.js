@@ -830,7 +830,7 @@ const default_search_list = [
     `<a href="http://cinemageddon.net/browse.php?search={imdbid}&proj=0&descr=1" target="_blank">CG</a>`,
     `<a href="https://filelist.io/browse.php?search={imdbid}" target="_blank">FileList</a>`,
     `<a href="https://beyond-hd.me/torrents?imdb={imdbid}" target="_blank">BHD</a>`,
-    `<a href="https://blutopia.xyz/torrents?imdb={imdbid}#page/1" target="_blank">BLU</a>`,
+    `<a href="https://blutopia.xyz/torrents?imdbid={imdbno}&perPage=25&imdbId={imdbno}" target="_blank">BLU</a>`,
     `<a href="https://secret-cinema.pw/torrents.php?action=advanced&searchsubmit=1&filter_cat=1&cataloguenumber={imdbid}" target="_blank">SC</a>`,
     `<a href="https://pt.hdpost.top/torrents?imdbId={imdbid}#page/1" target="_blank">HDPost</a>`,
     `<a href="https://hd-torrents.org/torrents.php?&search={imdbid}&active=0" target="_blank">HDT</a>`,
@@ -5021,104 +5021,6 @@ if (site_url.match(/https:\/\/openlook.me\/.*/)) {
     }
 }
 
-if (site_url.match(/^https:\/\/(music|book).douban.com\/subject\/\d+/)) {
-    var source_type = '音乐';
-    if (site_url.match(/book/)) {
-        source_type = '书籍';
-    }
-    function walk_Dom(n) {
-        do {
-            if (n.nodeName == 'SPAN' && n.className == 'pl') {
-                n.innerHTML = '◎' + n.innerHTML.trim();
-            } else if (n.nodeName == 'BR') {
-                n.innerHTML = '\r\n';
-            }
-            if (n.hasChildNodes()) {
-                walk_Dom(n.firstChild);
-            } else {
-                if (n.nodeType !=1){
-                    raw_info = raw_info + n.textContent.trim();
-                }
-            }
-            n = n.nextSibling;
-        } while (n);
-        return raw_info;
-    }
-    var raw_info = '';
-    var poster = `[img]${$('div#mainpic').find('a').prop('href')}[/img]\n`;
-    var info = walk_Dom($('#info')[0].cloneNode(true));
-    info = info.replace(/◎/g, '\n◎');
-    info = info.replace(/:/g, '：');
-    info = poster + info;
-    try {
-        info += '\n◎豆瓣评分：' + `${$('strong.rating_num').text()}/10 from ${$('div.rating_sum').text().match(/\d+/)[0]} users`;
-    } catch(err) {
-        info += '\n◎豆瓣评分： NaN';
-    }
-    info += '\n◎豆瓣链接：' + site_url.split('?')[0] + '\n';
-
-    var tag = $('div.tags-body');
-    if (tag.length) {
-        info += '\n◎标签：' + Array.from(tag.find('a').map((index,e)=>{
-            return $(e).text();
-        })).join(' | ');
-    }
-
-    if (source_type == '音乐') {
-        var introduction = $('span[property="v:summary"]');
-        if (introduction.length) {
-            if (introduction.parent().text().match(/展开全部/i) && introduction.parent().parent().find('span.hidden').length) {
-                introduction = introduction.parent().parent().find('span.hidden');
-            }
-            introduction = introduction.clone();
-            introduction.find('br').replaceWith(`\n`);
-            info += `\n◎简介\n${introduction.text().replace(/\n\n/g, '\n')}`;
-        } else {
-            info += `\n◎简介\n　　该${source_type}暂无简介。`;
-        }
-        var track_list = $('div.track-list');
-        if (track_list.length) {
-            track_list = track_list.clone();
-            track_list.find('br').replaceWith(`\n`);
-            track_list_info = track_list.text().trim().replace(/  +/g, '').replace(/\n\n+/g, '\n');
-            info += `\n\n◎曲目\n${track_list_info}`;
-        }
-    } else {
-        var introduction = $('#link-report').find('div.intro:first');
-        if (introduction.length) {
-            if (introduction.text().match(/展开全部/i)) {
-                introduction = $('#link-report').find('span[class*="all hidden"]').find('div.intro');
-            }
-            introduction = introduction.clone();
-            introduction.find('p').map((index,e)=>{
-                $(e).text($(e).text() + '\n\n');
-            });
-            info += `\n◎内容简介\n${'　　' + introduction.text().trim()}`;
-        } else {
-            info += `\n◎内容简介\n　　该${source_type}暂无简介。`;
-        }
-        var author_intro = $('span:contains(作者简介)').parent().next();
-        if (author_intro.length) {
-            if (author_intro.text().match('展开全部')){
-                author_intro = author_intro.find('span[class*="all hidden"]').find('div.intro');
-            } else {
-                author_intro = author_intro.find('div.intro')
-            }
-            author_intro = author_intro.clone();
-            author_intro.find('p').map((index,e)=>{
-                $(e).text($(e).text() + '\n\n');
-            });
-            info += `\n\n◎作者简介\n${'　　' + author_intro.text().trim()}`;
-        }
-    }
-
-    $('#info').append(`描述: <a id="copy">复制</a>`);
-    $('#copy').click(e=>{
-        GM_setClipboard(info);
-        $('#copy').text('完成')
-    });
-}
-
 //脚本设置简单页面，使用猫/柠檬等站点的个人设置页面来做的，涵盖转图床的部分操作
 if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostimg|#ptgen|#mediainfo)/)) {
     var style = `
@@ -5372,46 +5274,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         alert('保存成功！！！')
     });
 
-    //部署转图床的操作
-    $table.append(`<tr style="display:none;"><td width="1%" class="rowhead nowrap" valign="top" align="right">单图转存</td><td width="99%" class="rowfollow" valign="top" align="left" id="rehostimg"></td></tr>`);
-
-    $('#rehostimg').append(`<b>选择单图转存站点(默认freeimage,catbox只有源图无缩略图)：</b>`)
-    for (key in used_rehost_img_info){
-        $('#rehostimg').append(`<input type="radio" name="rehost_site" value="${key}">${key}`);
-    }
-    $(`input:radio[value="freeimage"]`).prop('checked', true);
-    $('#rehostimg').append(`<br><br>`);
-
-    $('#rehostimg').append(`<label><b>输入想要转存的图片链接:</b></label><input type="text" name="img_url" style="width: 480px; margin-left:5px">`);
-    $('#rehostimg').append(`<input type="button" id="go_rehost" value="开始转存" style="margin-left:15px"><br><br>`);
-    if (site_url.match(/springsunday/)) {
-        $('#go_rehost').css({'color': 'white', 'background' :'url(https://springsunday.net/styles/Maya/images/btn_submit_bg.gif) repeat left top', 'border': '1px black'});
-    }
-    $('#rehostimg').append(`<textarea name="show_result" style="width:700px" rows="6"></textarea><br>`);
-    $('#go_rehost').click(function(){
-        var rehost_site = $('input[name="rehost_site"]:checked').val();
-        var img_url = $('input[name="img_url"]').val();
-        if (used_rehost_img_info[rehost_site]['api-key'] || rehost_site == 'catbox') {
-            if (!img_url.match(/https?:\/\/.*?(png|jpg|webp)/)) {
-                alert('请输入图片链接！！');
-                return;
-            }
-        } else {
-            alert('没有APIKEY无法完成转存工作！！');
-            return;
-        }
-        $('#go_rehost').prop('value', '正在转存');
-        rehost_single_img(rehost_site, img_url)
-        .then(function(result){
-            $('textarea[name="show_result"]').val(result);
-            $('#go_rehost').prop('value', '转存成功');
-        })
-        .catch(function(err){
-            $('#go_rehost').prop('value', '转存失败');
-            alert(err);
-        })
-    });
-
     //自制ptgen
     $table.append(`<tr style="display:none;"><td width="1%" class="rowhead nowrap" valign="top" align="right">PTGen</td><td width="99%" class="rowfollow" valign="top" align="left" id="ptgen"></td></tr>`);
     $('#ptgen').append(`<label><b>输入豆瓣/IMDB链接查询:</b></label><input type="text" name="url" style="width: 475px; margin-left:5px">`);
@@ -5597,42 +5459,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     return;
 }
 
-//添加豆瓣到ptgen跳转
-if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jump){
-    $(document).ready(function () {
-        var douban_button = document.createElement("input");
-        douban_button.type = "button";
-        douban_button.value = "跳转查询";
-        douban_button.style.width = '80px';
-        douban_button.style.height = '30px';
-        douban_button.style.border = 'none';
-        douban_button.id = 'douban_button';
-        $('h1').append(douban_button);
-        $('#douban_button').click(function(){
-            url = 'https://api.iyuu.cn/ptgen/?imdb=' + site_url.match(/subject\/(\d+)\//)[1];
-            window.open(url, target = '_blank');
-        });
-
-        try {
-            if($('#info').html().match(/tt\d+/i)){
-                var imdbid = $('#info').html().match(/tt\d+/i)[0];
-                var imdbno = imdbid.substring(2);
-                var search_name = $('h1').text().trim().match(/[a-z ]{2,200}/i)[0];
-                search_name = search_name.replace(/season/i, '');
-                if (!search_name.trim()) {
-                    try{
-                        search_name = $('#info span.pl:contains("又名")')[0]
-                        .nextSibling.textContent.trim()
-                        .split(" / ")[0];
-                    } catch(err) {}
-                }
-                var $container = $('h1');
-                add_search_urls($container, imdbid, imdbno, search_name, 2);
-            }
-        } catch(err) {console.log(err)}
-    });
-    return;
-}
 //柠檬发布页根据name自动填写
 if (site_url.match(/^https:\/\/lemonhd.org\/upload_.{2,20}.php$/i)) {
     var td_rowhead = document.getElementsByClassName('rowhead');
@@ -6337,7 +6163,7 @@ function get_douban_info(raw_info) {
             var data = formatInfo(await getInfo(doc, raw_info));
             raw_info.descr = data + '\n\n' + raw_info.descr;
 
-            if (!location.href.match(/usercp.php\?action=persona|pter.*upload.php|piggo.me.*upload.php/)){
+            if (!location.href.match(/usercp.php\?action=persona|pter.*upload.php|piggo.me.*upload.php|^https:\/\/movie.douban.com/)){
                 if (raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
                     raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
                 }
@@ -6382,12 +6208,83 @@ function get_douban_info(raw_info) {
                 if (!$('input[name=douban]').val()) {
                     $('input[name=douban]').val(match_link('douban', data));
                 }
+            } else if (site_url.match(/^https:\/\/movie.douban.com/)) {
+                GM_setClipboard(data);
+                $('#copy').text('完成');
             } else {
                 $('textarea[name="douban_info"]').val(raw_info.descr);
                 $('#go_ptgen').prop('value', '获取成功');
             };
         }
         infoGenClickEvent();
+    });
+}
+
+function add_picture_transfer() {
+    GM_addStyle(
+        `.delete_div {
+        position: fixed;
+        bottom: 30%;
+        right: 0%;
+        width: 100%;
+        color:white;
+    }`);
+    $(`body`).append(`
+        <div class="delete_div" style="align:center; color:white; display:none; border-radius: 5px">
+            <div id="rehost" style="width: 46%; margin-left:27%; margin:auto;"></div>
+        </div>`);
+    $('#rehost').append(`<td style="width:100%; border: none; background-color:rgba(72,101,131,0.7); padding: 6px" valign="top" align="left" id="rehostimg"></td>`);
+
+    $('#rehostimg').append(`<b>选择转存站点(catbox只有源图无缩略图)：</b>`)
+    for (key in used_rehost_img_info){
+        $('#rehostimg').append(`<input style="vertical-align:middle" type="radio" name="rehost_site" value="${key}">${key}`);
+    }
+    $('#rehostimg').append(`<input style="vertical-align:middle;margin-left:10px;color:red;" type="button" name="close_panel" value="X">`);
+    $('input[name="close_panel"]').click(()=>{
+        $('input[name="img_url"]').val('');
+        $('textarea[name="show_result"]').val('');
+        $('div.delete_div').hide();
+    });
+
+    $(`input:radio[value="freeimage"]`).prop('checked', true);
+    $('#rehostimg').append(`<br><br>`);
+
+    $('#rehostimg').append(`<label><b>输入想要转存的图片链接:</b></label><input type="text" name="img_url" style="width: 350px; margin-left:5px">`);
+    $('#rehostimg').append(`<input type="button" id="go_rehost" value="开始转存" style="margin-left:5px"><br><br>`);
+    if (site_url.match(/springsunday/)) {
+        $('#go_rehost').css({'color': 'white', 'background' :'url(https://springsunday.net/styles/Maya/images/btn_submit_bg.gif) repeat left top', 'border': '1px black'});
+    }
+    $('#rehostimg').append(`<textarea name="show_result" style="width:560px" rows="6"></textarea><br>`);
+    $('#go_rehost').click(function(){
+        var rehost_site = $('input[name="rehost_site"]:checked').val();
+        var img_url = $('input[name="img_url"]').val();
+        if (used_rehost_img_info[rehost_site]['api-key'] || rehost_site == 'catbox') {
+            if (!img_url.match(/https?:\/\/.*?(png|jpg|webp)/)) {
+                alert('请输入图片链接！！');
+                return;
+            }
+        } else {
+            alert('没有APIKEY无法完成转存工作！！');
+            return;
+        }
+        $('#go_rehost').prop('value', '正在转存');
+        rehost_single_img(rehost_site, img_url)
+        .then(function(result){
+            $('textarea[name="show_result"]').val(result);
+            $('#go_rehost').prop('value', '转存成功');
+        })
+        .catch(function(err){
+            $('#go_rehost').prop('value', '转存失败');
+            alert(err);
+        })
+    });
+    $('a:contains("单图转存"),a:contains("海报转存")').click((e)=>{
+        e.preventDefault();
+        if ($('div.delete_div').is(":hidden")) {
+            $('div.delete_div').show();
+        } else {
+            $('div.delete_div').hide();
+        }
     });
 }
 
@@ -6469,6 +6366,149 @@ if (site_url.match(/^https:\/\/piggo.me\/upload.php/)) {
 if (site_url.match(/jpopsuki.eu.*torrents.php\?id=/)) {
     $('tr.group_torrent').find("a:contains(RP)").map((index,e)=>{
         $(e).after(` | <a href="https://jpopsuki.eu/torrents.php?id=${site_url.match(/id=(\d+)/)[1]}&torrentid=${$(e).attr('href').match(/id=(\d+)/)[1]}">PL</a>`);
+    });
+}
+
+//添加豆瓣到ptgen跳转
+if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jump){
+    $(document).ready(function () {
+        $('#info').append(`描述: <a id="copy">复制</a>`);
+        $('#copy').click(e=>{
+            var tmp_raw_info = {'url': '', 'dburl': match_link('douban', site_url), 'descr': ''};
+            get_douban_info(tmp_raw_info);
+        });
+
+        $('#mainpic').append(`<a href="#">海报转存</a>`);
+        add_picture_transfer();
+        var poster = $('#mainpic img')[0].src.replace(
+            /^.+(p\d+).+$/,
+            (_, p1) => `https://img9.doubanio.com/view/photo/l_ratio_poster/public/${p1}.jpg`
+        );
+        $('input[name=img_url]').val(poster);
+
+        try {
+            if($('#info').html().match(/tt\d+/i)){
+                var imdbid = $('#info').html().match(/tt\d+/i)[0];
+                var imdbno = imdbid.substring(2);
+                var search_name = $('h1').text().trim().match(/[a-z ]{2,200}/i)[0];
+                search_name = search_name.replace(/season/i, '');
+                if (!search_name.trim()) {
+                    try{
+                        search_name = $('#info span.pl:contains("又名")')[0]
+                        .nextSibling.textContent.trim()
+                        .split(" / ")[0];
+                    } catch(err) {}
+                }
+                var $container = $('h1');
+                add_search_urls($container, imdbid, imdbno, search_name, 2);
+            }
+        } catch(err) {console.log(err)}
+    });
+    return;
+}
+
+if (site_url.match(/^https:\/\/(music|book).douban.com\/subject\/\d+/)) {
+    var source_type = '音乐';
+    if (site_url.match(/book/)) {
+        source_type = '书籍';
+    }
+    $('#mainpic').append(`<a href="#">海报转存</a>`);
+    add_picture_transfer();
+    var poster = $('#mainpic img')[0].src.replace(
+        /^.+(p\d+).+$/,
+        (_, p1) => `https://img9.doubanio.com/view/photo/l_ratio_poster/public/${p1}.jpg`
+    );
+    $('input[name=img_url]').val(poster);
+    function walk_Dom(n) {
+        do {
+            if (n.nodeName == 'SPAN' && n.className == 'pl') {
+                n.innerHTML = '◎' + n.innerHTML.trim();
+            } else if (n.nodeName == 'BR') {
+                n.innerHTML = '\r\n';
+            }
+            if (n.hasChildNodes()) {
+                walk_Dom(n.firstChild);
+            } else {
+                if (n.nodeType !=1){
+                    raw_info = raw_info + n.textContent.trim();
+                }
+            }
+            n = n.nextSibling;
+        } while (n);
+        return raw_info;
+    }
+    var raw_info = '';
+    var poster = `[img]${$('div#mainpic').find('a').prop('href')}[/img]\n`;
+    var info = walk_Dom($('#info')[0].cloneNode(true));
+    info = info.replace(/◎/g, '\n◎');
+    info = info.replace(/:/g, '：');
+    info = poster + info;
+    try {
+        info += '\n◎豆瓣评分：' + `${$('strong.rating_num').text()}/10 from ${$('div.rating_sum').text().match(/\d+/)[0]} users`;
+    } catch(err) {
+        info += '\n◎豆瓣评分： NaN';
+    }
+    info += '\n◎豆瓣链接：' + site_url.split('?')[0] + '\n';
+
+    var tag = $('div.tags-body');
+    if (tag.length) {
+        info += '\n◎标签：' + Array.from(tag.find('a').map((index,e)=>{
+            return $(e).text();
+        })).join(' | ');
+    }
+
+    if (source_type == '音乐') {
+        var introduction = $('span[property="v:summary"]');
+        if (introduction.length) {
+            if (introduction.parent().text().match(/展开全部/i) && introduction.parent().parent().find('span.hidden').length) {
+                introduction = introduction.parent().parent().find('span.hidden');
+            }
+            introduction = introduction.clone();
+            introduction.find('br').replaceWith(`\n`);
+            info += `\n◎简介\n${introduction.text().replace(/\n\n/g, '\n')}`;
+        } else {
+            info += `\n◎简介\n　　该${source_type}暂无简介。`;
+        }
+        var track_list = $('div.track-list');
+        if (track_list.length) {
+            track_list = track_list.clone();
+            track_list.find('br').replaceWith(`\n`);
+            track_list_info = track_list.text().trim().replace(/  +/g, '').replace(/\n\n+/g, '\n');
+            info += `\n\n◎曲目\n${track_list_info}`;
+        }
+    } else {
+        var introduction = $('#link-report').find('div.intro:first');
+        if (introduction.length) {
+            if (introduction.text().match(/展开全部/i)) {
+                introduction = $('#link-report').find('span[class*="all hidden"]').find('div.intro');
+            }
+            introduction = introduction.clone();
+            introduction.find('p').map((index,e)=>{
+                $(e).text($(e).text() + '\n\n');
+            });
+            info += `\n◎内容简介\n${'　　' + introduction.text().trim()}`;
+        } else {
+            info += `\n◎内容简介\n　　该${source_type}暂无简介。`;
+        }
+        var author_intro = $('span:contains(作者简介)').parent().next();
+        if (author_intro.length) {
+            if (author_intro.text().match('展开全部')){
+                author_intro = author_intro.find('span[class*="all hidden"]').find('div.intro');
+            } else {
+                author_intro = author_intro.find('div.intro')
+            }
+            author_intro = author_intro.clone();
+            author_intro.find('p').map((index,e)=>{
+                $(e).text($(e).text() + '\n\n');
+            });
+            info += `\n\n◎作者简介\n${'　　' + author_intro.text().trim()}`;
+        }
+    }
+
+    $('#info').append(`描述: <a id="copy">复制</a>`);
+    $('#copy').click(e=>{
+        GM_setClipboard(info);
+        $('#copy').text('完成')
     });
 }
 
@@ -7342,7 +7382,7 @@ setTimeout(function(){
             }
             raw_info.name = document.getElementsByTagName('h2')[0].textContent.replace(/–/g, '-');
             raw_info.music_author = $('h2>a[href*="artist"]').text();
-            raw_info.music_name = $('h2').text().split(raw_info.music_author)[1].replace(/^.?-.?|\[.*?\]/g, '').trim();
+            raw_info.music_name = $('h2').text().replace(/–/g, '-').split(raw_info.music_author)[1].replace(/^.?-.?|\[.*?\]/g, '').trim();
             raw_info.name = raw_info.name.replace(/\[|\]/g, '*');
             var cover = $('#cover_div_0').find('img').attr('onclick').match(/http.*(jpg|png|jpeg|webp)/)[0];
             var mediainfo = $('div.torrent_description').find('div.body');
@@ -9575,7 +9615,7 @@ setTimeout(function(){
         forward_r.innerHTML = forward_r.innerHTML + ' | ';
         var rehost_link = document.createElement('a');
         rehost_link.innerHTML = '单图转存';
-        rehost_link.href = setting_host_list[setting_host]+'#rehostimg';
+        rehost_link.href = "#";
         rehost_link.target = '_blank';
         forward_r.appendChild(rehost_link);
 
@@ -10547,65 +10587,7 @@ setTimeout(function(){
                 });
             }, false);
         }
-
-        GM_addStyle(
-            `.delete_div {
-            position: fixed;
-            bottom: 30%;
-            right: 0%;
-            width: 100%;
-            color:white;
-        }`);
-        $(`body`).append(`
-            <div class="delete_div" style="align:center; color:white; display:none; border-radius: 5px">
-                <div id="rehost" style="width: 46%; margin-left:27%; margin:auto;"></div>
-            </div>`);
-        $('#rehost').append(`<td style="width:100%; border: none; background-color:rgba(72,101,131,0.7); padding: 6px" valign="top" align="left" id="rehostimg"></td>`);
-
-        $('#rehostimg').append(`<b>选择转存站点(catbox只有源图无缩略图)：</b>`)
-        for (key in used_rehost_img_info){
-            $('#rehostimg').append(`<input style="vertical-align:middle" type="radio" name="rehost_site" value="${key}">${key}`);
-        }
-        $(`input:radio[value="freeimage"]`).prop('checked', true);
-        $('#rehostimg').append(`<br><br>`);
-
-        $('#rehostimg').append(`<label><b>输入想要转存的图片链接:</b></label><input type="text" name="img_url" style="width: 350px; margin-left:5px">`);
-        $('#rehostimg').append(`<input type="button" id="go_rehost" value="开始转存" style="margin-left:5px"><br><br>`);
-        if (site_url.match(/springsunday/)) {
-            $('#go_rehost').css({'color': 'white', 'background' :'url(https://springsunday.net/styles/Maya/images/btn_submit_bg.gif) repeat left top', 'border': '1px black'});
-        }
-        $('#rehostimg').append(`<textarea name="show_result" style="width:560px" rows="6"></textarea><br>`);
-        $('#go_rehost').click(function(){
-            var rehost_site = $('input[name="rehost_site"]:checked').val();
-            var img_url = $('input[name="img_url"]').val();
-            if (used_rehost_img_info[rehost_site]['api-key'] || rehost_site == 'catbox') {
-                if (!img_url.match(/https?:\/\/.*?(png|jpg|webp)/)) {
-                    alert('请输入图片链接！！');
-                    return;
-                }
-            } else {
-                alert('没有APIKEY无法完成转存工作！！');
-                return;
-            }
-            $('#go_rehost').prop('value', '正在转存');
-            rehost_single_img(rehost_site, img_url)
-            .then(function(result){
-                $('textarea[name="show_result"]').val(result);
-                $('#go_rehost').prop('value', '转存成功');
-            })
-            .catch(function(err){
-                $('#go_rehost').prop('value', '转存失败');
-                alert(err);
-            })
-        });
-        $('a:contains("单图转存")').click((e)=>{
-            e.preventDefault();
-            if ($('div.delete_div').is(":hidden")) {
-                $('div.delete_div').show();
-            } else {
-                $('div.delete_div').hide();
-            }
-        })
+        add_picture_transfer();
     }
 
     /*****************************************************************************************************************
