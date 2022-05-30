@@ -6378,7 +6378,7 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
             get_douban_info(tmp_raw_info);
         });
 
-        $('#mainpic').append(`<a href="#">海报转存</a>`);
+        $('#mainpic').append(`<br><a href="#">海报转存</a>`);
         add_picture_transfer();
         var poster = $('#mainpic img')[0].src.replace(
             /^.+(p\d+).+$/,
@@ -6412,7 +6412,7 @@ if (site_url.match(/^https:\/\/(music|book).douban.com\/subject\/\d+/)) {
     if (site_url.match(/book/)) {
         source_type = '书籍';
     }
-    $('#mainpic').append(`<a href="#">海报转存</a>`);
+    $('#mainpic').append(`<br><a href="#">海报转存</a>`);
     add_picture_transfer();
     var poster = $('#mainpic img')[0].src.replace(
         /^.+(p\d+).+$/,
