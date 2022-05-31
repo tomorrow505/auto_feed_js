@@ -53,11 +53,8 @@
 // @match        https://*php?torrentid=*&id=*
 // @match        https://hdbits.org/details.php?id=*
 // @match        https://hdf.world/torrents.php*
-// @match        http*://www.morethan.tv/torrents.php?id*
 // @match        http*://beyond-hd.me/torrents/*
-// @match        https://movie.douban.com/subject/*
-// @match        https://music.douban.com/subject/*
-// @match        https://book.douban.com/subject/*
+// @match        https://*.douban.com/subject/*
 // @match        https://filelist.io/browse.php*
 // @match        http*://www.torrentleech.org/torrent/*
 // @match        http*://*/torrents/*
@@ -231,8 +228,7 @@
     20220522：支持bib转发至部分内站，修复部分bug。
     20220523：支持HDB图片选择之后不下载直接跳转ptpimg和imgbox上传。
     20220524：更新海豹组名显示，适配bit-hdtv，jptv转出(设置界面语言为简体中文)，命名还有点问题。取消hon3yhd支持，原因：关站。
-    20220525：将简化MI面板托管到设置页面，并根据功能只显示相对应内容。支持豆瓣音乐、豆瓣读书一键复制简介。
-    
+    20220525：将简化MI面板托管到设置页面，并根据功能只显示相对应内容。支持豆瓣电影、豆瓣音乐、豆瓣读书一键复制简介。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -6378,7 +6374,7 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
             get_douban_info(tmp_raw_info);
         });
 
-        $('#mainpic').append(`<a href="#">海报转存</a>`);
+        $('#mainpic').append(`<br><a href="#">海报转存</a>`);
         add_picture_transfer();
         var poster = $('#mainpic img')[0].src.replace(
             /^.+(p\d+).+$/,
@@ -6412,7 +6408,7 @@ if (site_url.match(/^https:\/\/(music|book).douban.com\/subject\/\d+/)) {
     if (site_url.match(/book/)) {
         source_type = '书籍';
     }
-    $('#mainpic').append(`<a href="#">海报转存</a>`);
+    $('#mainpic').append(`<br><a href="#">海报转存</a>`);
     add_picture_transfer();
     var poster = $('#mainpic img')[0].src.replace(
         /^.+(p\d+).+$/,
@@ -7331,7 +7327,6 @@ setTimeout(function(){
             raw_info.type = '音乐';
             tbody = document.getElementById('torrent_details');
             raw_info.edition_info = $(`#torrent${torrent_id}`).prev().text().replace('− ', '').trim();
-            console.log(raw_info.tracklist);
             raw_info.torrent_url = `https://redacted.ch/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
         }
 
@@ -7340,8 +7335,10 @@ setTimeout(function(){
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
             raw_info.name = document.getElementsByTagName('h2')[0].textContent;
-            raw_info.music_author = $('h2>a[href*="artist"]').text();
+            raw_info.music_author = $('h2>a[href*="artist"]:last').text();
             raw_info.music_name = $('h2').text().split(raw_info.music_author)[1].replace(/^.?-.?|\[.*?\]/g, '').trim();
+            raw_info.music_author = Array.from($('h2>a[href*="artist"]')).map((item)=>{return $(item).text()}).join(' & ');
+            console.log(raw_info.music_author)
             raw_info.name = raw_info.name.replace(/\[|\]/g, '*');
             var cover = $('p.thumbnail-container').find('img').attr('onclick').match(/http.*(jpg|png|jpeg|webp)/)[0];
             console.log(cover);
@@ -7381,8 +7378,9 @@ setTimeout(function(){
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
             raw_info.name = document.getElementsByTagName('h2')[0].textContent.replace(/–/g, '-');
-            raw_info.music_author = $('h2>a[href*="artist"]').text();
+            raw_info.music_author = $('h2>a[href*="artist"]:last').text();
             raw_info.music_name = $('h2').text().replace(/–/g, '-').split(raw_info.music_author)[1].replace(/^.?-.?|\[.*?\]/g, '').trim();
+            raw_info.music_author = Array.from($('h2>a[href*="artist"]')).map((item)=>{return $(item).text()}).join(' & ');
             raw_info.name = raw_info.name.replace(/\[|\]/g, '*');
             var cover = $('#cover_div_0').find('img').attr('onclick').match(/http.*(jpg|png|jpeg|webp)/)[0];
             var mediainfo = $('div.torrent_description').find('div.body');
@@ -7426,11 +7424,8 @@ setTimeout(function(){
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
             raw_info.name = document.getElementsByTagName('h2')[0].textContent;
-            console.log(raw_info.name)
             raw_info.music_name = $('h2>span[dir="ltr"]').text();
-            console.log(raw_info.music_name)
             raw_info.music_author = raw_info.name.split(raw_info.music_name)[0].replace(/-.?$/, '').trim();
-            console.log(raw_info.music_author)
             raw_info.name = raw_info.name.replace(/\[|\]/g, '*');
             var cover = $('#cover_div_0').find('img').attr('onclick').match(/http.*(jpg|png|jpeg|webp)/)[0];
             var mediainfo = $('div.torrent_description').find('div:eq(1)');
@@ -7474,10 +7469,9 @@ setTimeout(function(){
         if (origin_site == 'jpop') {
             raw_info.edition_info = document.getElementsByTagName('h2')[0].textContent;
             raw_info.name = document.getElementsByTagName('h2')[0].textContent.replace(/\[|\]/g, '');
-            raw_info.music_author = $('h2>a[href*="artist"]').text();
+            raw_info.music_author = $('h2>a[href*="artist"]:last').text();
             raw_info.music_name = $('h2').text().split(raw_info.music_author)[1].replace(/^.?-.?|\[.*?\]/g, '').trim();
-            console.log(raw_info.music_author)
-            console.log(raw_info.music_name)
+            raw_info.music_author = Array.from($('h2>a[href*="artist"]')).map((item)=>{return $(item).text()}).join(' & ');
             raw_info.name = raw_info.name.replace(/album|Single/i, '').trim();
             if (site_url.match(/torrentid=(\d+)/)) {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
