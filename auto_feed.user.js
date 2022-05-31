@@ -76,13 +76,11 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.5.9
+// @version      1.9.6.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @grant        GM_listValues
-// @grant        GM_deleteValue
 // @grant        GM_download
 // @grant        GM_getResourceText
 // @license      GPL-3.0 License
@@ -6221,13 +6219,13 @@ function add_picture_transfer() {
         `.delete_div {
         position: fixed;
         bottom: 30%;
-        right: 0%;
-        width: 100%;
+        right: 27%;
+        width: 46%;
         color:white;
     }`);
     $(`body`).append(`
         <div class="delete_div" style="align:center; color:white; display:none; border-radius: 5px">
-            <div id="rehost" style="width: 46%; margin-left:27%; margin:auto;"></div>
+            <div id="rehost" style="width: 100%; margin:auto;"></div>
         </div>`);
     $('#rehost').append(`<td style="width:100%; border: none; background-color:rgba(72,101,131,0.7); padding: 6px" valign="top" align="left" id="rehostimg"></td>`);
 
