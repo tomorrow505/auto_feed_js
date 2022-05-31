@@ -2725,7 +2725,7 @@ function set_jump_href(raw_info, mode) {
             for (key in used_site_info) {
                 if (used_site_info[key].enable) {
                     if (key == 'TTG') {
-                        forward_url = used_site_info[key].url + 'browse.php?search_field={name}&c=M'.format({'name': search_name});
+                        forward_url = used_site_info[key].url + 'browse.php?search_field=imdb{name}&c=M'.format({'name': raw_info.url.match(/tt(\d+)/)[1]});
                     } else if (key == 'HDRoute') {
                         forward_url = used_site_info[key].url + 'browse.php?s={name}&dp=0&add=0&action=s&or=1&imdb={url}'.format({'name': search_name, 'url': url});
                     } else if (key == 'LemonHD'){
