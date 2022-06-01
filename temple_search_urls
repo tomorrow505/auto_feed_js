@@ -14,7 +14,7 @@
 <a href="https://uhdbits.org/torrents.php?searchstr={imdbid}" target="_blank">UHD</a>
 <a href="https://shadowthein.net/browse.php?search={imdbid}" target="_blank">iTs</a>
 <a href="https://lemonhd.org/torrents.php?search={imdbid}&search_area=imdb&suggest=4" target="_blank">Lemon</a>
-<a href="https://totheglory.im/browse.php?search_field={search_name}&c=M" target="_blank">TTG</a>
+<a href="https://totheglory.im/browse.php?search_field=imdb{imdbno}&c=M" target="_blank">TTG</a>
 <a href="https://chdbits.co/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">CHD</a>
 <a href="https://springsunday.net/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">CMCT</a>
 <a href="https://hdsky.me/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">HDSky</a>
