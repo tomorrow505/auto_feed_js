@@ -64,9 +64,10 @@
 // @exclude      http*bitpt.cn*
 // @exclude      https://bt.byr.cn/upload.php*
 // @match        https://lemonhd.org/upload_music.php*
-// @include      http*://*redacted.ch/upload.php*
-// @include      http*://*redacted.ch/requests.php*
-// @include      http*://*redacted.ch/torrents.php*
+// @match        http*://*redacted.ch/upload.php*
+// @match        http*://*redacted.ch/requests.php*
+// @match        http*://*redacted.ch/torrents.php*
+// @match        https://c.pc.qq.com/middlem.html?pfurl=*
 // @require      https://code.jquery.com/jquery-1.12.4.js
 // @require      http://code.jquery.com/ui/1.9.2/jquery-ui.js
 // @resource     css http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css
@@ -384,6 +385,11 @@ if (location.href.match(/^https:\/\/greatposterwall.com\/torrents.php.*/)) {
             torrent.append(` / <span style="font-weight:bold;color:#20B2AA">${torrent_name}</span>`);
         })
     }
+}
+if (location.href.match(/^https:\/\/c.pc.qq.com\/middlem.html\?pfurl=.*/)) {
+    var url = decodeURIComponent(location.href).match(/pfurl=(.*?)&pf/)[1];
+    window.location.href = url;
+    return;
 }
 
 if (location.href.match(/^https:\/\/filelist.io\/browse.php/)) {
