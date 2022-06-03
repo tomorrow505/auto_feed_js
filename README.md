@@ -32,7 +32,7 @@ TG群链接：https://t.me/+rGUOUYZ3Ey43OWY9
 
 |                   Alipay                    |                     WeChat                     |
 | :-----------------------------------------: | :--------------------------------------------: |
-| ![](https://tomorrow505.xyz/img/ali_pay.png) | ![](https://tomorrow505.xyz/img/wechat_pay.png) |
+| <img src="https://tomorrow505.xyz/img/ali_pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://tomorrow505.xyz/img/wechat_pay.png" width = "160" height = "160" alt="微信" align=center /> |
 
  
 
