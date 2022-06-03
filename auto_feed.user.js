@@ -18041,10 +18041,10 @@ setTimeout(function(){
             function get_subtitles_from_descr(descr) {
                 console.log(raw_info.small_descr)
                 var subtitles = [];
-                if (raw_info.small_descr.match(/简.*字幕|简.*中/)) {
+                if (raw_info.small_descr.match(/简.*字幕|简.*中|简繁/)) {
                     subtitles.push('chinese_simplified');
                 }
-                if (raw_info.small_descr.match(/繁.*中|繁.*字幕/)) {
+                if (raw_info.small_descr.match(/繁.*中|繁.*字幕|简繁/)) {
                     subtitles.push('chinese_traditional');
                 }
                 if (descr.match(/DISC INFO:/)) {
@@ -18075,18 +18075,45 @@ setTimeout(function(){
                         return subtitle;
                     });
                 }else {
-                    descr.match(/Text.*?\nID[\s\S]*?Forced/g).map(function(item){
-                        try{
-                            var e = item.match(/Language.*?:(.*)/)[1].trim().toLowerCase();
-                            if (e == 'chinese' && item.match(/Simplified/)) {
-                                subtitles.push('chinese_simplified');
-                            } else if (e == 'chinese' && item.match(/Traditional/)) {
-                                subtitles.push('chinese_traditional');
-                            } else {
-                                subtitles.push(e);
-                            }
-                        } catch(err) {}
-                    });
+                    try{
+                        descr.match(/Text.*?\nID[\s\S]*?Forced/g).map(function(item){
+                            try{
+                                var e = item.match(/Language.*?:(.*)/)[1].trim().toLowerCase();
+                                if (e == 'chinese' && item.match(/Simplified/)) {
+                                    subtitles.push('chinese_simplified');
+                                } else if (e == 'chinese' && item.match(/Traditional/)) {
+                                    subtitles.push('chinese_traditional');
+                                } else {
+                                    subtitles.push(e);
+                                }
+                            } catch(err) {}
+                        });
+                    } catch(err) {
+                        if (descr.match(/Subtitle.*?:(.*)/i)) {
+                            descr.match(/Subtitle.*?:(.*)/ig).map(item=>{
+                                console.log(item)
+                                if (item.match(/eng/i)) {
+                                    subtitles.push('english');
+                                } else if (item.match(/chs/i)) {
+                                    subtitles.push('chinese_simplified');
+                                } else if (item.match(/cht/i)) {
+                                    subtitles.push('chinese_traditional');
+                                } else if (item.match(/port/i)) {
+                                    subtitles.push('portuguese');
+                                } else if (item.match(/span/i)) {
+                                    subtitles.push('spanish');
+                                } else if (item.match(/janp/i)) {
+                                    subtitles.push('japanese');
+                                } else if (item.match(/kor/i)) {
+                                    subtitles.push('korean');
+                                } else if (item.match(/ita/i)) {
+                                    subtitles.push('italian');
+                                } else if (item.match(/fre/i)) {
+                                    subtitles.push('french');
+                                }
+                            })
+                        }
+                    }
                 }
                 return subtitles;
             }
@@ -18243,7 +18270,7 @@ setTimeout(function(){
             $('#container').val('Other');
             if ((raw_info.descr+raw_info.full_mediainfo).match(/mp4|\.mp4/i)) {
                 $('#container').val('MP4');
-            } else if ((raw_info.descr+raw_info.full_mediainfo).match(/Matroska|\.mkv/i)) {
+            } else if ((raw_info.descr+raw_info.full_mediainfo).match(/Matroska|\.mkv/i) || ['Remux', 'Encode'].indexOf(raw_info.medium_sel) >-1) {
                 $('#container').val('MKV');
             } else if ((raw_info.descr+raw_info.full_mediainfo).match(/\.mpg/i)) {
                 $('#container').val('MPG');
