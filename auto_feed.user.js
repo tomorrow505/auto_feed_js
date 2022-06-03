@@ -307,7 +307,7 @@ if (location.href.match(/^https:\/\/greatposterwall.com\/torrents.php.*/)) {
 
     function get_group_name(name, torrent_info) {
         name = name.replace(/\[.*?\]|web-dl|dts-hd|Blu-ray|MPEG-2|MPEG-4/ig, '');
-        name = name.split(/\.mkv|\.mp4|\.iso/)[0];
+        name = name.split(/\.mkv|\.mp4|\.iso|\.avi/)[0];
         try{
             tmp_name = name.match(/-(.*)/)[1].split(/-/).pop();
             if (tmp_name.match(/x264|x265|h264|h265/i)){
@@ -8946,7 +8946,7 @@ setTimeout(function(){
                     }
                 });
             }
-            raw_info.torrent_url = $('a[href*="download/torrent"]').attr('href');
+            raw_info.torrent_url = $(`a[href*="download/torrent"]:last`).attr('href');
         }
 
         if (origin_site == 'HDT'){
@@ -9527,7 +9527,7 @@ setTimeout(function(){
         forward_r.id = 'forward_r';
         var style = document.createElement("style");
         style.type = "text/css";
-        var text = document.createTextNode(".round_icon{ width: 13px;height: 13px;border-radius: 75%;} #douban_button {outline:none;}");
+        var text = document.createTextNode(".round_icon{ width: 14px;height: 14px;border-radius: 75%;} #douban_button {outline:none;}");
         style.appendChild(text);
         var head = document.getElementsByTagName("head")[0];
         head.appendChild(style);
@@ -16025,13 +16025,13 @@ setTimeout(function(){
                 case 'WAV': audiocodec_box.val(7);
             }
             //分辨率
-            var standard_box = document.getElementsByName('standard_sel')[0];
+            var standard_box = $('select[name=standard_sel]');
             var standard_dict = {
-                '4K': 5, '1080p': 1, '1080i': 2, '720p': 3, 'SD': 4, '': 4
+                '4K': 5, '1080p': 1, '1080i': 2, '720p': 3
             };
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
-                standard_box.options[index].selected = true;
+                standard_box.val(index);
             }
             $('select[name="team_sel"]>option').map(function(index,e){
                 if (raw_info.name.match(e.innerText)) {
@@ -18039,11 +18039,17 @@ setTimeout(function(){
             }
 
             function get_subtitles_from_descr(descr) {
+                console.log(raw_info.small_descr)
                 var subtitles = [];
+                if (raw_info.small_descr.match(/简.*字幕|简.*中/)) {
+                    subtitles.push('chinese_simplified');
+                }
+                if (raw_info.small_descr.match(/繁.*中|繁.*字幕/)) {
+                    subtitles.push('chinese_traditional');
+                }
                 if (descr.match(/DISC INFO:/)) {
                     if (descr.match(/SUBTITLES:[\s\S]{0,20}Codec/i)) {
                         var subtitle_info = descr.match(/SUBTITLES:[\s\S]{0,300}-----------([\s\S]*)/i)[1].trim();
-                        console.log(subtitle_info)
                         subtitles = subtitle_info.split('\n').map(e=>{
                             var info = e.split(/   /).filter(function(e){return e.trim();});
                             console.log(info)
@@ -18053,6 +18059,15 @@ setTimeout(function(){
                                 return '';
                             }
                         });
+                        if (subtitle_info.match(/简.*中/)) {
+                            subtitles.push('chinese_simplified');
+                        }
+                        if (subtitle_info.match(/繁.*中/)) {
+                            subtitles.push('chinese_traditional');
+                        } else if (subtitles.indexOf("Chinese")>-1) {
+                            subtitles.push('chinese_simplified');
+                        }
+                        console.log(subtitles)
                     }
                 } else if (descr.match(/Subtitle: (.*?) \/ .*?/)) {
                     subtitles = descr.match(/Subtitle: (.*?) \/ .*/g).map(e=>{
@@ -18097,12 +18112,12 @@ setTimeout(function(){
                 case 'UHD': case 'Blu-ray':  case 'Encode': case 'Remux':
                     $('#source').val('Blu-ray');
                     $('#processing-container').removeClass('hidden');
-                    if (labels.diy) {
-                        $('#processing').val('DIY');
-                    } else if (raw_info.medium_sel == 'Encode') {
+                    if (raw_info.medium_sel == 'Encode') {
                         $('#processing').val('Encode');
                     } else if (raw_info.medium_sel == 'Remux') {
                         $('#processing').val('Remux');
+                    } else if (labels.diy) {
+                        $('#processing').val('DIY');
                     } else if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
                         $('#processing').val('Untouched');
                         var size = 0;
@@ -18137,7 +18152,8 @@ setTimeout(function(){
 
             if (raw_info.edition_info.match(/VOB IFO|ISO|BD25|BD50|BD66|BD100/)) {
                 $('#processing').val('Untouched');
-                $('select[name="processing_other"]').val(raw_info.edition_info.match(/VOB IFO|ISO|BD25|BD50|BD66|BD100/)[0]);
+                $('select[name="processing_other"]').val(raw_info.edition_info.match(/DVD9|DVD5|BD25|BD50|BD66|BD100/)[0]);
+                $('#processing-container').find('.Form-errorMessage').hide();
             }
             $('#processing')[0].dispatchEvent(evt);
 
@@ -18225,15 +18241,15 @@ setTimeout(function(){
             }, 1000);
 
             $('#container').val('Other');
-            if (raw_info.descr.match(/mp4|\.mp4/i)) {
+            if ((raw_info.descr+raw_info.full_mediainfo).match(/mp4|\.mp4/i)) {
                 $('#container').val('MP4');
-            } else if (raw_info.descr.match(/Matroska|\.mkv/i)) {
+            } else if ((raw_info.descr+raw_info.full_mediainfo).match(/Matroska|\.mkv/i)) {
                 $('#container').val('MKV');
-            } else if (raw_info.descr.match(/\.mpg/i)) {
+            } else if ((raw_info.descr+raw_info.full_mediainfo).match(/\.mpg/i)) {
                 $('#container').val('MPG');
-            } else if (raw_info.descr.match(/MPLS/i)) {
+            } else if ((raw_info.descr+raw_info.full_mediainfo).match(/MPLS/i)) {
                 $('#container').val('m2ts');
-            } else if (raw_info.descr.match(/Audio Video Interleave|\.AVI/i)) {
+            } else if ((raw_info.descr+raw_info.full_mediainfo).match(/Audio Video Interleave|\.AVI/i)) {
                 $('#container').val('AVI');
             }
             if (raw_info.edition_info.match(/VOB IFO/)) {
@@ -18263,7 +18279,7 @@ setTimeout(function(){
             } else {
                 $('#type_of_subtitles').append(`<input type="button" value="辅助" id="help" class="button_preview_1 bbcode-preview-button">`);
                 $('#help').click(()=>{
-                    var subtitles = get_subtitles_from_descr($('textarea[name="mediainfo[]"]').val())
+                    var subtitles = get_subtitles_from_descr(raw_info.full_mediainfo ? raw_info.full_mediainfo: $('textarea[name="mediainfo[]"]').val())
                     if (subtitles.length) {
                         $('#mixed_subtitles').attr('checked', true);
                         $('#other_subtitles').removeClass('hidden');
@@ -18276,6 +18292,9 @@ setTimeout(function(){
                 })
             }
             if (raw_info.version_info) {
+                if (raw_info.version_info.match(/scene/i)) {
+                    $('#scene').attr('checked', true);
+                }
                 var tag_dict = {
                     'Masters of Cinema': 'masters_of_cinema',
                     'The Criterion Collection': 'the_criterion_collection',
@@ -18295,6 +18314,7 @@ setTimeout(function(){
                     '3D Half SBS': '3d_half_sbs',
                     '4K Restoration': '4k_restoration',
                     '4K Remaster': '4k_remaster',
+                    'Remaster': 'remaster',
                     '10-bit': '10_bit',
                     'DTS:X': 'dts_x',
                     'Dolby Atmos': 'dolby_atmos',
@@ -18316,6 +18336,82 @@ setTimeout(function(){
                         $('input[id=movie_edition_information]').attr('checked', true);
                         $('#movie_edition_information_container').css({'display': 'block'});
                     }
+                }
+            } else {
+                var flag = false;
+                if (raw_info.name.match(/Unrated/i) || raw_info.small_descr.match(/未分级版/)) {
+                    $(`a[onclick*="unrated"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/\d+.Uncut/i) || raw_info.small_descr.match(/未删节版/)) {
+                    $(`a[onclick*="uncut"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/Criterion Collection/i) || raw_info.small_descr.match(/CC标准收藏/)) {
+                    $(`a[onclick*="the_criterion_collection"`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/Director's cut/i) || raw_info.small_descr.match(/导演剪辑版/)) {
+                    $(`a[onclick*="director_s_cut"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/Extended/i) || raw_info.small_descr.match(/加长版/)) {
+                    $(`a[onclick*="extended_edition"]`).click();
+                    flag = true;
+                }
+                if (labels.db || raw_info.small_descr.match(/杜比|dolby version/i)) {
+                    $(`a[onclick*="dolby_vision"]`).click();
+                    flag = true;
+                }
+                if (labels.hdr10 || raw_info.small_descr.match(/hdr10/i)) {
+                    $(`a[onclick*="hdr10'"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/atmos/i) || raw_info.small_descr.match(/atmos/i)) {
+                    $(`a[onclick*="dolby_atmos"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/4K remaster/i) || raw_info.small_descr.match(/4K修复版/)) {
+                    $(`a[onclick*="4k_remaster"]`).click();
+                    flag = true;
+                } else if (raw_info.name.match(/remaster/i)) {
+                    $(`a[onclick*="'remaster"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/atmos/i) || raw_info.small_descr.match(/atmos/i)) {
+                    $(`a[onclick*="dolby_atmos"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/10-bit/i)) {
+                    $(`a[onclick*="10_bit"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/[\. ]3D[\. ]/) || raw_info.small_descr.match(/3D/)) {
+                    $(`a[onclick*="2d_3d_edition"]`).click();
+                    if (raw_info.small_descr.match(/左右半宽/)) {
+                        $(`a[onclick*="3d_half_sbs"]`).click();
+                    } else if (raw_info.small_descr.match(/左右全宽/)) {
+                        $(`a[onclick*="3d_full_sbs"]`).click();
+                    } else if (raw_info.small_descr.match(/上下半高/)) {
+                        $(`a[onclick*="3d_half_ou"]`).click();
+                    }
+                    flag = true;
+                }
+                if (raw_info.name.match(/2-Disc/) || raw_info.small_descr.match(/双碟版/)) {
+                    $(`a[onclick*="2_disc_set"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/DTS.X/i)) {
+                    $(`a[onclick*="dts_x"]`).click();
+                    flag = true;
+                }
+                if (raw_info.name.match(/commentary/i) || raw_info.small_descr.match(/评论音轨/)) {
+                    $(`a[onclick*="with_commentary"]`).click();
+                    flag = true;
+                }
+                if (flag) {
+                    $('input[id=movie_edition_information]').attr('checked', true);
+                    $('#movie_edition_information_container').css({'display': 'block'});
                 }
             }
         }
