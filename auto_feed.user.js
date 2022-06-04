@@ -2306,7 +2306,9 @@ function get_mediainfo_picture_from_descr(descr){
         '[img]https://kp.m-team.cc/logo.png[/img]',
         '[img]http://tpimg.ccache.org/images/2015/03/08/c736743e65f95c4b68a8acd3f3e2d599.png[/img]',
         '[img]https://ourbits.club/pic/Ourbits_info.png[/img]',
-        '[img]https://ourbits.club/pic/Ourbits_MoreScreens.png[/img]'
+        '[img]https://ourbits.club/pic/Ourbits_MoreScreens.png[/img]',
+        '[img]https://images2.imgbox.com/ce/e7/KCmGFMOB_o.png[/img]',
+        '[img]https://img.m-team.cc/images/2016/12/05/d3be0d6f0cf8738edfa3b8074744c8e8.png[/img]'
     ];
     cmctimgs = descr.split(/\[\/quote\]/).pop();
     cmctimgs = cmctimgs.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
@@ -6659,7 +6661,7 @@ setTimeout(function(){
                     var descr_table = descr.getElementsByTagName('table')[0];
                     if (descr_table.textContent.match(/general/i)){
                         descr_table.parentNode.removeChild(descr_table);
-                        raw_info.full_mediainfo = $('div.codemain:first').text();
+                        raw_info.full_mediainfo = $('div.codemain:contains("General"):first').text();
                     }
                 }
             }catch(err){
@@ -6735,12 +6737,12 @@ setTimeout(function(){
                 if (raw_info.descr.match(/https:\/\/img.hdchina.org\/images/) || raw_info.descr.match(/https?:\/\/tu.totheglory.im\/files/) || raw_info.descr.match(/https:\/\/imgbox.leaguehd.com\/images/)) {
                     douban_button_needed = true;
                     if (origin_site == 'HDChina') {
-                        raw_info.descr = raw_info.descr.replace(/\[url=.*?\]\[img\]https:\/\/img.hdchina.org\/images.*?\[\/url\]/g, '');
+                        // raw_info.descr = raw_info.descr.replace(/\[url=.*?\]\[img\]https:\/\/img.hdchina.org\/images.*?\[\/url\]/g, '');
                         var img = Array.from(document.getElementById("kdescr").getElementsByTagName('img'));
                     } else if (origin_site == 'TTG'){
                         var img = Array.from(document.getElementById("kt_d").getElementsByTagName('img'));
                     } else {
-                        raw_info.descr = raw_info.descr.replace(/\[url=.*?\]\[img\]https:\/\/imgbox.leaguehd.com\/images.*?\[\/url\]/g, '');
+                        // raw_info.descr = raw_info.descr.replace(/\[url=.*?\]\[img\]https:\/\/imgbox.leaguehd.com\/images.*?\[\/url\]/g, '');
                         var img = Array.from(document.getElementById("kdescr").getElementsByTagName('img'));
                     }
                     raw_info.url = match_link('imdb', raw_info.descr);
@@ -18197,6 +18199,8 @@ setTimeout(function(){
                                     pic_info += '[img]' + item.replace(/th.png/, 'png') + '[/img]\n';
                                 } else if (item.match(/tu.totheglory.im/)) {
                                     pic_info += '[img]' + item.replace(/_thumb.png/, '.png') + '[/img]\n';
+                                } else if (item.match(/img.hdchina.org/)) {
+                                    pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
                                 } else {
                                     pic_info += '[img]' + item + '[/img]\n';
                                 }
@@ -18234,7 +18238,7 @@ setTimeout(function(){
                                             }
                                         }
                                     } else {
-                                        raw_info.images.map(item=>{
+                                        raw_info.images = raw_info.images.map(item=>{
                                             return `[img]${item}[/img]`;
                                         });
                                         origin_str = origin_str.replace(raw_info.images[0], new_urls[0]);
@@ -18251,22 +18255,47 @@ setTimeout(function(){
                         });
                         $('td').has('#preview_1').append(`<div style="color:yellow">辅助设置对比图：
                             将第<input type="text" style="width: 50px; text-align:center; margin-left: 5px" id="start" />--<input type="text" style="width: 50px; text-align:center; margin-right: 5px" id="end" />张图设置为
-                            <input type="text" placeholder="Source, Encode" id="comparison"/>
-                            <input type="button" value="设置" id="go_setting"/></div>`);
+                            <input type="text" placeholder="Source, Encode" id="comparison" style="width:200px" />
+                            <input type="button" value="设置对比图" id="go_setting"/>
+                            <input type="button" value="抽取展示图" id="show_img" /></div>`);
                         $('#go_setting').click(()=>{
+                            try{
+                                var origin_str = $('#release_desc').val();
+                                raw_info.images = origin_str.match(/http[^\[\]]*?(jpg|png)/g);
+                                var start = parseInt($('#start').val() ? $('#start').val(): 1);
+                                var end = parseInt($('#end').val() ? $('#end').val(): raw_info.images.length);
+                                var comparison_str = $('#comparison').val() ? $('#comparison').val(): "Source, Encode";
+                                var insert_point = origin_str.search(raw_info.images[start-1]) - 5;
+                                var new_str = origin_str.substring(0,insert_point) + `[comparison=${comparison_str}]\n` + origin_str.substring(insert_point);
+                                insert_point = new_str.search(raw_info.images[end-1]) + raw_info.images[end-1].length + 6;
+                                new_str = new_str.substring(0,insert_point) + `\n[/comparison]\n` + new_str.substring(insert_point)
+                                $('#release_desc').val(new_str)
+                            } catch (err) {}
+                        });
+                        $('#show_img').click((e)=>{
                             try{
                                 var origin_str = $('#release_desc').val();
                                 raw_info.images = origin_str.match(/http[^\[\]]*?(jpg|png)/g);
                                 var start = parseInt($('#start').val() ? $('#start').val(): 0);
                                 var end = parseInt($('#end').val() ? $('#end').val(): raw_info.images.length);
                                 var comparison_str = $('#comparison').val() ? $('#comparison').val(): "Source, Encode";
-                                var insert_point = origin_str.search(raw_info.images[start-1]) - 5;
-                                var new_str = origin_str.substring(0,insert_point) + `[comparison=${comparison_str}]\n` + origin_str.substring(insert_point)
-                                insert_point = new_str.search(raw_info.images[end-1]) + raw_info.images[end-1].length + 6;
-                                new_str = new_str.substring(0,insert_point) + `\n[/comparison]\n` + new_str.substring(insert_point)
-                                $('#release_desc').val(new_str)
+                                var encode_index = 0;
+                                comparison_str.split(',').map((item,index)=>{
+                                    if (item.trim().match(/Encode/i)) {
+                                        encode_index = index;
+                                    }
+                                });
+                                var step = comparison_str.split(',').length;
+                                var stop = raw_info.images.length > start + encode_index + 2 * step + 1 ? start + encode_index + 2 * step + 1: raw_info.images.length;
+                                raw_info.images = raw_info.images.map(item=>{
+                                    return `[img]${item}[/img]`;
+                                });
+                                for (i = start; i < stop; i += step) {
+                                    origin_str += '\n' + raw_info.images[i + encode_index - 1];
+                                }
+                                $('#release_desc').val(origin_str)
                             } catch (err) {}
-                        });
+                        })
                     }
                     $('#release_desc').val($('#release_desc').val() ? $('#release_desc').val() + '\n\n' + pic_info: pic_info);
                 } catch (err) {
