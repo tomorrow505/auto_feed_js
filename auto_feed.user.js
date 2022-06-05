@@ -1587,7 +1587,7 @@ function walk_ptp(n) {
 }
 
 function deal_img_350(pic_info) {
-    var imgs = pic_info.match(/\[img\].*?ptpimg.*?\[\/img\]/g);
+    var imgs = pic_info.match(/\[img\].*?(jpg|png).*?\[\/img\]/g);
     if (imgs) {
         imgs.map((item)=>{
             var img_url = item.match(/http.*?(png|jpg)/)[0];
@@ -2505,7 +2505,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
                     new_urls = new_urls.toString().split(',');
                     var urls_append = '';
                     if (new_urls.length > 1) {
-                        for (var i=0; i<new_urls.length; i+=2) {
+                        for (var i=0; i<new_urls.length-2; i+=2) {
                             urls_append += `${new_urls[i]} ${new_urls[i+1]}\n`
                         }
                     } else {
@@ -3123,7 +3123,7 @@ function reBuildHref(raw_info, forward_r) {
     jump_str = dictToString(raw_info);
     tag_aa = forward_r.getElementsByClassName('forward_a');
     for (i = 0; i < tag_aa.length; i++) {
-        if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP'].indexOf(tag_aa[i].textContent) < 0){
+        if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
             tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
         }
     }
@@ -5066,7 +5066,7 @@ if (site_url.match(/https:\/\/openlook.me\/.*/)) {
 }
 
 //脚本设置简单页面，使用猫/柠檬等站点的个人设置页面来做的，涵盖转图床的部分操作
-if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostimg|#ptgen|#mediainfo)/)) {
+if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostimg|#ptgen|#mediainfo|#dealimg)/)) {
     var style = `
     #sortable { list-style-type: none; margin: 0; padding: 0; width: 750px; display: inline-block}
     #sortable div { margin: 3px 3px 3px 0; padding: 1px; float: left; width: 100px; height: 20px; font-size: 1em; text-align: left; }
@@ -5216,7 +5216,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
 
 
     //**************************************************** 3.2 *************************************************************************
-
     $('#setting').append(`<input type="checkbox" name="douban_jump" value="yes">是否显示豆瓣页面跳转选项，默认开启。`);
     if (if_douban_jump) {
         $(`input[name="douban_jump"]`).prop('checked', true);
@@ -5354,6 +5353,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         });
     });
 
+    //mediainfo转换
     $table.append(`<tr style="display:none;"><td width="1%" class="rowhead nowrap" valign="top" align="right">简化MI</td><td width="99%" class="rowfollow" valign="top" align="left" id="mediainfo"></td></tr>`);
     $('#mediainfo').append(`<textarea id="media_info" style="width:700px" rows="20"></textarea><br>`);
     $('#mediainfo').append(`<input type="button" id="simplify" value="简化信息" style="margin-bottom:5px"><br>`);
@@ -5486,6 +5486,194 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         }
         console.log($('#clarify_media_info').val());
     });
+
+    $table.append(`<tr style="display:none;"><td width="1%" class="rowhead nowrap" valign="top" align="right">图片处理</td><td width="99%" class="rowfollow" valign="top" align="left" id="dealimg"></td></tr>`);
+    $('#dealimg').append(`<input type="button" id="preview" value="图片预览" style="margin-bottom:5px;">`);
+    $('#dealimg').append(`<input type="button" id="getsource" value="获取大图" style="margin-bottom:5px;margin-left:5px">`);
+    $('#dealimg').append(`<input type="button" id="send_ptpimg" value="转存ptpimg" style="margin-bottom:5px;margin-left:5px">`);
+    $('#dealimg').append(`<input type="button" id="send_pixhost" value="转存pixhost" style="margin-bottom:5px;margin-left:5px">`);
+    $('#dealimg').append(`<input type="button" id="get_imgbb" value="获取imgbb源图" style="margin-bottom:5px;margin-left:5px">`);
+    $('#dealimg').append(`<input type="button" id="350px" value="350px缩略" style="margin-bottom:5px;margin-left:5px">`);
+    $('#dealimg').append(`<input type="button" id="change" value="字符串替换" style="margin-bottom:5px;margin-left:5px">`);
+    $('#dealimg').append(`<input type="text" style="width: 50px; text-align:center; margin-left: 5px" id="img_source" />--<input type="text" style="width: 50px; text-align:center; margin-right: 5px" id="img_dest" /><br>`);
+    $('#dealimg').append(`<input type="button" id="enter2space" value="换行->空格" style="margin-bottom:5px;margin-right:5px">`);
+    $('#dealimg').append(`<input type="button" id="get_encode" value="图片提取" style="margin-bottom:5px;margin-right:5px">`);
+    $('#dealimg').append(`从第<input type="text" style="width: 30px; text-align:center; margin-left: 5px; margin-right:5px" id="start" />张开始每隔<input type="text" style="width: 30px; text-align:center; margin-left: 5px; margin-right:5px" id="step" />张获取其中第<input type="text" style="width: 30px; text-align:center; margin-left: 5px;margin-right:5px" id="number" />张。<br>`);
+    $('#dealimg').append(`<font color="red">获取大图目前支持imgbox，pixhost，pter，ttg，瓷器，img4k，其余的可以尝试字符串替换。</font><a href="https://github.com/tomorrow505/auto_feed_js/wiki/%E5%9B%BE%E7%89%87%E5%A4%84%E7%90%86" target="_blank">查看教程</a><br>`);
+    $('#dealimg').append(`<textarea id="picture" style="width:700px" rows="15"></textarea>`);
+    $('#dealimg').append(`<div id="imgs_to_show" style="display: none;"></div><br>`);
+    $('#dealimg').append(`<div>结果展示<br><textarea id="result" style="width:700px;" rows="15"></textarea></div>`);
+
+    var descr = GM_getValue('descr') === undefined ? '': GM_getValue('descr');
+    var imgs_to_deal = descr.match(/(\[url=.*?\])?\[img\].*?(png|jpg)\[\/img\](\[\/url\])?/g);
+    $('#picture').val(imgs_to_deal.join('\n'));
+
+    $('#preview').click((e)=>{
+        if (!$('#imgs_to_show').is(":hidden")){
+            $('#imgs_to_show').hide();
+            return;
+        }
+        var origin_str = $('#picture').val();
+        var imgs_to_show = origin_str.match(/\[img\]https?:.*?(jpg|png)\[\/img\]/g).map(item=>{ return item.replace(/\[.*?\]/g, '') });
+        if (imgs_to_show.length) {
+            $('#imgs_to_show').html('');
+            imgs_to_show.map((item)=>{
+                $('#imgs_to_show').append(`<img src=${item} style="max-width: 700px"/><br>`);
+            });
+            $('#imgs_to_show').show();
+        }
+    });
+
+    $('#getsource').click((e)=>{
+        var origin_str = $('#picture').val();
+        pic_info = '';
+        origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)/g).forEach((item)=>{
+            item = item.replace(/\[.*\]/g, '');
+            if (item.match(/imgbox/)) {
+                pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
+            } else if (item.match(/pixhost/)) {
+                pic_info += '[img]' + item.replace('//t', '//img').replace('thumbs', 'images') + '[/img]\n';
+            } else if (item.match(/pterclub.com/)) {
+                pic_info += '[img]' + item.replace(/th.png/, 'png') + '[/img]\n';
+            } else if (item.match(/tu.totheglory.im/)) {
+                pic_info += '[img]' + item.replace(/_thumb.png/, '.png') + '[/img]\n';
+            } else if (item.match(/img.hdchina.org/)) {
+                pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
+            } else if (item.match(/img4k.net/)) {
+                pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
+            } else {
+                pic_info += '[img]' + item + '[/img]\n';
+            }
+        });
+        if (pic_info) {
+            $('#result').val(pic_info);
+        }
+    });
+
+    $('#enter2space').click((e)=>{
+        var origin_str = $('#picture').val();
+        origin_str = origin_str.replace(/\n/g, ' ');
+        console.log(origin_str)
+        $('#picture').val(origin_str);
+    })
+
+    $('#send_ptpimg').click((e)=>{
+        var origin_str = $('#picture').val();
+        images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
+        if (images.length) {
+            ptp_send_images(images, used_ptp_img_key)
+            .then(function(new_urls){
+                new_urls = new_urls.toString().split(',').join('\n');
+                $('#result').val(new_urls);
+            }).catch(function(err){
+                alert(err);
+            });
+        } else {
+            alert('请输入图片地址！！');
+        }
+    });
+
+    $('#send_pixhost').click((e)=>{
+        if ($('#picture').val().match(/http[^\[\]]*?(jpg|png)/g).length > 0) {
+            var origin_str = $('#picture').val();
+            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
+            console.log(images)
+            pix_send_images(images)
+            .then(function(new_urls) {
+                new_urls = new_urls.toString().split(',');
+                var urls_append = '';
+                if (new_urls.length > 1) {
+                    for (var i=0; i<new_urls.length-2; i+=2) {
+                        urls_append += `${new_urls[i]} ${new_urls[i+1]}\n`
+                    }
+                } else {
+                    urls_append = new_urls[0] + '\n';
+                }
+                $('#result').val(urls_append);
+                alert('转存成功！');
+            })
+            .catch(function(message){
+                alert('转存失败');
+            });
+        } else {
+            alert('缺少截图');
+        }
+    });
+
+    $('#send_pixhost').click((e)=>{
+    });
+
+    $('#change').click((e)=>{
+        var origin_str = $('#picture').val();
+        if (!$('#img_source').val()) {
+            alert("请填写源字符串！")
+            return;
+        }
+        var source_str = $('#img_source').val();
+        var dest_str = $('#img_dest').val();
+        images = origin_str.match(/http[^\[\]]*?(jpg|png)/g);
+        images.map(item=>{
+            var new_img = item.replace(source_str, dest_str);
+            origin_str = origin_str.replace(item, new_img);
+        });
+        $('#picture').val(origin_str);
+    });
+
+    $('#get_imgbb').click((e)=>{
+        function getibbdoc(url) {
+            var p = new Promise((resolve, reject)=>{
+                getDoc(url,null,function(doc){
+                    console.log(doc)
+                    var source_img_url = $('#embed-code-2', doc).val();
+                    resolve(source_img_url);
+                });
+            })
+            return p;
+        }
+        var origin_str = $('#picture').val();
+        var imgbb_urls = origin_str.match(/https?:\/\/i.ibb.co[^\[\]]*?(jpg|png)/g);
+        if (!imgbb_urls.length) {
+            alert("没有监测到imgbb链接");
+        } else {
+            var imgbb_tasks = [];
+            imgbb_urls.map(item=>{
+                var imgbb_show_url = 'https://ibb.co/' + item.match(/https:\/\/i.ibb.co\/(.*?)\//)[1];
+                var imgbb_p = getibbdoc(imgbb_show_url);
+                imgbb_tasks.push(imgbb_p);
+            })
+            Promise.all(imgbb_tasks).then((data)=>{
+                for (i=0; i<data.length; i++) {
+                    origin_str = origin_str.replace(imgbb_urls[i], data[i]);
+                }
+                origin_str = origin_str.match(/\[img\]https?:.*?(jpg|png)\[\/img\]/g).join('\n');
+                $('#result').val(origin_str);
+            })
+            
+        }
+    });
+
+    $('#get_encode').click((e)=>{
+        var origin_str = $('#picture').val();
+        console.log(origin_str)
+        var dest_str = '';
+        var images = origin_str.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
+        var start = parseInt($('#start').val() ? $('#start').val(): 1);
+        var encode_index = parseInt($('#number').val());
+        var step = parseInt($('#step').val());
+        for (i = start; i < images.length-step; i += step) {
+            console.log(i + encode_index - 2)
+            dest_str += images[i + encode_index - 2] + '\n';
+        }
+        $('#result').val(dest_str);
+    });
+
+    $('#350px').click((e)=>{
+        var origin_str = $('#picture').val();
+        images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)\[\/img\]/g).join('\n');
+        if (images.length) {
+            $('#result').val(deal_img_350(images));
+        }
+    })
 
     var id_scroll = site_url.split('#')[1];
     if (id_scroll.match(/\?/)) {
@@ -6236,7 +6424,7 @@ function get_douban_info(raw_info) {
                 GM_setClipboard(data);
                 tag_aa = forward_r.getElementsByClassName('forward_a');
                 for (i = 0; i < tag_aa.length; i++) {
-                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP'].indexOf(tag_aa[i].textContent) < 0){
+                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
                         tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
                     }
                 }
@@ -8867,7 +9055,7 @@ setTimeout(function(){
 
             var compare_string = '';
             var img_urls = '';
-            raw_info.descr = '[quote]' + $('#media-info').text() + '[/quote]\n\n';
+            raw_info.descr = '[quote]' + $(`#torrent_${torrent_id}`).find('#media-info').text() + '[/quote]\n\n';
 
             setTimeout(function(){
                 var torrent_tr = document.getElementById('torrent_' + torrent_id);
@@ -9628,6 +9816,14 @@ setTimeout(function(){
         ptgen.style.color = 'red';
         forward_r.appendChild(ptgen);
 
+        forward_r.innerHTML = forward_r.innerHTML + ' | ';
+        var get_img = document.createElement('a');
+        get_img.innerHTML = '提取图片';
+        get_img.id = 'get_img';
+        get_img.href = setting_host_list[setting_host] + '#dealimg';
+        get_img.target = '_blank';
+        forward_r.appendChild(get_img);
+
         //添加常用链接跳转
         if (used_common_sites.length > 0){
             forward_r.innerHTML = forward_r.innerHTML + ' | ';
@@ -10062,11 +10258,11 @@ setTimeout(function(){
                     'avz': 'avistaz.to', 'PHD': 'privatehd.to', 'CNZ': 'cinemaz.to'
                 }
                 if (raw_info.url){
-                    var url = `https://${domain[this.id]}/movies?search=&imdb=` + raw_info.url.match(/tt\d+/)[0];
-                    var upload_url = `https://${domain[this.id]}/upload/movie`;
+                    var url = `https://${domain[site]}/movies?search=&imdb=` + raw_info.url.match(/tt\d+/)[0];
+                    var upload_url = `https://${domain[site]}/upload/movie`;
                     if (raw_info.type != '电影' && raw_info.type != '纪录') {
-                        url = `https://${domain[this.id]}/tv-shows?search=&imdb=` + raw_info.url.match(/tt\d+/)[0];
-                        upload_url = `https://${domain[this.id]}/upload/tv`;
+                        url = `https://${domain[site]}/tv-shows?search=&imdb=` + raw_info.url.match(/tt\d+/)[0];
+                        upload_url = `https://${domain[site]}/upload/tv`;
                     }
                     GM_xmlhttpRequest({
                         method: 'GET',
@@ -10084,9 +10280,9 @@ setTimeout(function(){
                         }
                     });
                 } else {
-                    var upload_url = `https://${domain[this.id]}/upload/movie`;
+                    var upload_url = `https://${domain[site]}/upload/movie`;
                     if (raw_info.type != '电影') {
-                        upload_url = `https://${domain[this.id]}/upload/tv`;
+                        upload_url = `https://${domain[site]}/upload/tv`;
                     }
                     jump_str = dictToString(raw_info);
                     site_href = upload_url + seperator + encodeURI(jump_str);
@@ -10544,7 +10740,7 @@ setTimeout(function(){
 
                                 tag_aa = forward_r.getElementsByClassName('forward_a');
                                 for (i = 0; i < tag_aa.length; i++) {
-                                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP'].indexOf(tag_aa[i].textContent) < 0){
+                                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
                                         tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
                                     }
                                 }
@@ -10623,6 +10819,10 @@ setTimeout(function(){
             }, false);
         }
         add_picture_transfer();
+
+        $('#get_img').click((e)=>{
+            GM_setValue("descr", raw_info.descr);
+        });
     }
 
     /*****************************************************************************************************************
@@ -18201,6 +18401,8 @@ setTimeout(function(){
                                     pic_info += '[img]' + item.replace(/_thumb.png/, '.png') + '[/img]\n';
                                 } else if (item.match(/img.hdchina.org/)) {
                                     pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
+                                } else if (item.match(/img4k.net/)) {
+                                    pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
                                 } else {
                                     pic_info += '[img]' + item + '[/img]\n';
                                 }
@@ -18221,7 +18423,7 @@ setTimeout(function(){
                                     if (new_urls.length > 1) {
                                         if (raw_info.origin_site == 'TTG' && raw_info.name.match(/wiki$/i)) {
                                             urls_append += '[comparison=Source, Encode]\n';
-                                            for (var i=0; i<new_urls.length; i+=2) {
+                                            for (var i=0; i<new_urls.length-2; i+=2) {
                                                 urls_append += `${new_urls[i]} ${new_urls[i+1]}\n`
                                             }
                                             urls_append += '[/comparison]';
@@ -18276,7 +18478,7 @@ setTimeout(function(){
                             try{
                                 var origin_str = $('#release_desc').val();
                                 raw_info.images = origin_str.match(/http[^\[\]]*?(jpg|png)/g);
-                                var start = parseInt($('#start').val() ? $('#start').val(): 0);
+                                var start = parseInt($('#start').val() ? $('#start').val(): 1);
                                 var end = parseInt($('#end').val() ? $('#end').val(): raw_info.images.length);
                                 var comparison_str = $('#comparison').val() ? $('#comparison').val(): "Source, Encode";
                                 var encode_index = 0;
@@ -18293,9 +18495,62 @@ setTimeout(function(){
                                 for (i = start; i < stop; i += step) {
                                     origin_str += '\n' + raw_info.images[i + encode_index - 1];
                                 }
-                                $('#release_desc').val(origin_str)
+                                $('#release_desc').val(origin_str);
                             } catch (err) {}
-                        })
+                        });
+                        $('td').has('#preview_1').append(`<div style="color:yellow">辅助缩略转大图：
+                            将源<input type="text" style="width: 50px; text-align:center; margin-left: 5px" id="img_source" />--<input type="text" style="width: 50px; text-align:center; margin-right: 5px" id="img_dest" />字符串替换
+                            <input type="button" value="替换字符串" id="go_changing"/>
+                            <input type="button" value="获取ibb源图" id="go_ibb"/>
+                            </div>`);
+                        $('#go_changing').click((e)=>{
+                            var origin_str = $('#release_desc').val();
+                            if (!$('#img_source').val()) {
+                                alert("请填写源字符串！")
+                                return;
+                            }
+                            var source_str = $('#img_source').val();
+                            var dest_str = $('#img_dest').val();
+                            raw_info.images = origin_str.match(/http[^\[\]]*?(jpg|png)/g);
+                            raw_info.images.map(item=>{
+                                var new_img = item.replace(source_str, dest_str);
+                                origin_str = origin_str.replace(item, new_img);
+                            });
+                            $('#release_desc').val(origin_str);
+                        });
+                        $('#go_ibb').click((e)=>{
+                            function getibbdoc(url) {
+                                console.log(url)
+                                var p = new Promise((resolve, reject)=>{
+                                    getDoc(url,null,function(doc){
+                                        console.log(doc)
+                                        var source_img_url = $('#embed-code-2', doc).val();
+                                        resolve(source_img_url);
+                                    });
+                                })
+                                return p;
+                            }
+                            var origin_str = $('#release_desc').val();
+                            var imgbb_urls = origin_str.match(/https?:\/\/i.ibb.co[^\[\]]*?(jpg|png)/g);
+                            if (!imgbb_urls.length) {
+                                alert("没有监测到imgbb链接");
+                            } else {
+                                var imgbb_tasks = [];
+                                imgbb_urls.map(item=>{
+                                    var imgbb_show_url = 'https://ibb.co/' + item.match(/https:\/\/i.ibb.co\/(.*?)\//)[1];
+                                    var imgbb_p = getibbdoc(imgbb_show_url);
+                                    imgbb_tasks.push(imgbb_p);
+                                })
+                                Promise.all(imgbb_tasks).then((data)=>{
+                                    for (i=0; i<data.length; i++) {
+                                        origin_str = origin_str.replace(imgbb_urls[i], data[i]);
+                                    }
+                                    $('#release_desc').val(origin_str);
+                                    alert("获取成功");
+                                })
+                                
+                            }
+                        });
                     }
                     $('#release_desc').val($('#release_desc').val() ? $('#release_desc').val() + '\n\n' + pic_info: pic_info);
                 } catch (err) {
