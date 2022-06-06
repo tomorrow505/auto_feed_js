@@ -231,6 +231,8 @@
     20220525：将简化MI面板托管到设置页面，并根据功能只显示相对应内容。支持豆瓣电影、豆瓣音乐、豆瓣读书一键复制简介。
 
     20220604：修复海豹部分bug，修复piggo部分bug。优化禁转判断后跳转逻辑。
+    20220605：新增图片提取功能：https://github.com/tomorrow505/auto_feed_js/wiki/图片处理
+    20220606：适配BTN另一个网址：https://backup.landof.tv/
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -831,6 +833,9 @@ if (site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd)\//)) {
 
 if (site_url.match(/^https?:\/\/backup.landof.tv\/.*/)) {
     used_site_info.BTN.url = 'https://backup.landof.tv/';
+    GM_setValue('used_site_info', JSON.stringify(used_site_info));
+} else if (site_url.match(/^https?:\/\/broadcasthe.net\/.*/)) {
+    used_site_info.BTN.url = 'https://broadcasthe.net/';
     GM_setValue('used_site_info', JSON.stringify(used_site_info));
 }
 
@@ -5505,10 +5510,10 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     $('#dealimg').append(`<input type="button" id="enter2space" value="换行->空格" style="margin-bottom:5px;margin-right:5px">`);
     $('#dealimg').append(`<input type="button" id="get_encode" value="图片提取" style="margin-bottom:5px;margin-right:5px">`);
     $('#dealimg').append(`从第<input type="text" style="width: 30px; text-align:center; margin-left: 5px; margin-right:5px" id="start" />张开始每隔<input type="text" style="width: 30px; text-align:center; margin-left: 5px; margin-right:5px" id="step" />张获取其中第<input type="text" style="width: 30px; text-align:center; margin-left: 5px;margin-right:5px" id="number" />张。<br>`);
-    $('#dealimg').append(`<font color="red">获取大图目前支持imgbox，pixhost，pter，ttg，瓷器，img4k，其余的可以尝试字符串替换。</font><a href="https://github.com/tomorrow505/auto_feed_js/wiki/%E5%9B%BE%E7%89%87%E5%A4%84%E7%90%86" target="_blank">查看教程</a><br>`);
+    $('#dealimg').append(`<font color="red">获取大图目前支持imgbox，pixhost，pter，ttg，瓷器，img4k，其余的可以尝试字符串替换。</font><a href="https://github.com/tomorrow505/auto_feed_js/wiki/%E5%9B%BE%E7%89%87%E5%A4%84%E7%90%86" target="_blank" style="color:blue">→→点我查看教程←←</a><br>`);
     $('#dealimg').append(`<textarea id="picture" style="width:700px" rows="15"></textarea>`);
     $('#dealimg').append(`<div id="imgs_to_show" style="display: none;"></div><br>`);
-    $('#dealimg').append(`<div>结果展示<br><textarea id="result" style="width:700px;" rows="15"></textarea></div>`);
+    $('#dealimg').append(`<div>结果展示 <a href="#" id="up_text" style="color:red; font-size:4px">↑将结果移入输入框</a><br><textarea id="result" style="width:700px;" rows="15"></textarea></div>`);
 
     var descr = GM_getValue('descr') === undefined ? '': GM_getValue('descr');
     var imgs_to_deal = descr.match(/(\[url=.*?\])?\[img\].*?(png|jpg)\[\/img\](\[\/url\])?/g);
@@ -5679,7 +5684,13 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         if (images.length) {
             $('#result').val(deal_img_350(images));
         }
-    })
+    });
+
+    $('#up_text').click((e)=>{
+        e.preventDefault();
+        $('#picture').val($('#result').val() ? $('#result').val(): $('#picture').val());
+        $('#result').val('');
+    });
 
     var id_scroll = site_url.split('#')[1];
     if (id_scroll.match(/\?/)) {
@@ -9786,7 +9797,7 @@ setTimeout(function(){
                 else{
                     img_url = used_site_info[key].url + 'favicon.ico';
                 }
-                para.innerHTML = '<img src='+ img_url+ ' class="round_icon">' + ' ' + key;
+                para.innerHTML = '<div style="display:inline-block"><img src='+ img_url+ ' class="round_icon">' + ' ' + key + '</div>';
             }
         }
         if (origin_site == 'PTer') {
@@ -9800,7 +9811,7 @@ setTimeout(function(){
             raw_info.dburl = match_link('douban', raw_info.descr);
         }
 
-        forward_r.innerHTML = forward_r.innerHTML + ' | ';
+        forward_r.innerHTML = forward_r.innerHTML + ' <br><br><font color="green">其他功能 →</font> ';
         var ptgen = document.createElement('a');
         ptgen.innerHTML = 'PTgen';
         ptgen.id = 'ptgen';
@@ -9814,13 +9825,22 @@ setTimeout(function(){
         forward_r.appendChild(ptgen);
 
         forward_r.innerHTML = forward_r.innerHTML + ' | ';
-        var ptgen = document.createElement('a');
-        ptgen.innerHTML = 'BUG反馈';
-        ptgen.id = 'bugfeedback';
-        ptgen.href = 'https://greasyfork.org/zh-CN/scripts/424132-auto-feed/feedback';
-        ptgen.target = '_blank';
-        ptgen.style.color = 'red';
-        forward_r.appendChild(ptgen);
+        var wiki = document.createElement('a');
+        wiki.innerHTML = '使用教程';
+        wiki.id = 'wiki';
+        wiki.href = 'https://github.com/tomorrow505/auto_feed_js/wiki';
+        wiki.target = '_blank';
+        wiki.style.color = 'yellow';
+        forward_r.appendChild(wiki);
+
+        forward_r.innerHTML = forward_r.innerHTML + ' | ';
+        var feedback = document.createElement('a');
+        feedback.innerHTML = 'BUG反馈';
+        feedback.id = 'bugfeedback';
+        feedback.href = 'https://greasyfork.org/zh-CN/scripts/424132-auto-feed/feedback';
+        feedback.target = '_blank';
+        feedback.style.color = 'red';
+        forward_r.appendChild(feedback);
 
         forward_r.innerHTML = forward_r.innerHTML + ' | ';
         var get_img = document.createElement('a');
@@ -18708,7 +18728,7 @@ setTimeout(function(){
                     $(`a[onclick*="uncut"]`).click();
                     flag = true;
                 }
-                if (raw_info.name.match(/Criterion Collection/i) || raw_info.small_descr.match(/CC标准收藏/)) {
+                if (raw_info.name.match(/Criterion Collection/i) || raw_info.small_descr.match(/CC标准收藏|Criterion Collection/i)) {
                     $(`a[onclick*="the_criterion_collection"`).click();
                     flag = true;
                 }
@@ -18728,7 +18748,7 @@ setTimeout(function(){
                     $(`a[onclick*="hdr10'"]`).click();
                     flag = true;
                 }
-                if (raw_info.name.match(/4K remaster/i) || raw_info.small_descr.match(/4K修复版/)) {
+                if (raw_info.name.match(/4K remaster/i) || raw_info.small_descr.match(/4K.?修复/i)) {
                     $(`a[onclick*="4k_remaster"]`).click();
                     flag = true;
                 } else if (raw_info.name.match(/remaster/i)) {
