@@ -9811,7 +9811,7 @@ setTimeout(function(){
             raw_info.dburl = match_link('douban', raw_info.descr);
         }
 
-        forward_r.innerHTML = forward_r.innerHTML + ' <br><br><font color="green">其他功能 →</font> ';
+        forward_r.innerHTML = forward_r.innerHTML + ' <br><br><font color="green">Tools →</font> ';
         var ptgen = document.createElement('a');
         ptgen.innerHTML = 'PTgen';
         ptgen.id = 'ptgen';
@@ -9826,7 +9826,7 @@ setTimeout(function(){
 
         forward_r.innerHTML = forward_r.innerHTML + ' | ';
         var wiki = document.createElement('a');
-        wiki.innerHTML = '使用教程';
+        wiki.innerHTML = '教程';
         wiki.id = 'wiki';
         wiki.href = 'https://github.com/tomorrow505/auto_feed_js/wiki';
         wiki.target = '_blank';
