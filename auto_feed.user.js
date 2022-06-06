@@ -36,6 +36,7 @@
 // @match        https://hd-torrents.org/torrents.php*
 // @match        https://greatposterwall.com/torrents.php*
 // @match        https://broadcasthe.net/*.php*
+// @match        https://backup.landof.tv/*.php*
 // @match        https://beyond-hd.me/upload*
 // @match        https://*/usercp.php?action=personal*
 // @match        https://uhdbits.org/torrents.php*
@@ -77,7 +78,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.6.1
+// @version      1.9.6.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -295,7 +296,7 @@ GM_addStyle(
 *                                          part 0 简单页面逻辑                                                       *
 ********************************************************************************************************************/
 //修复妞站friend页面两个表列宽不等的问题
-if (location.href == 'https://broadcasthe.net/friends.php') {
+if (location.href == 'https://broadcasthe.net/friends.php' || location.href == 'https://backup.landof.tv/friends.php') {
     $('.main_column').find('td:contains("Last seen")').css({'width':'150px'});
     return;
 }
@@ -828,6 +829,11 @@ if (site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd)\//)) {
     GM_setValue('used_site_info', JSON.stringify(used_site_info));
 }
 
+if (site_url.match(/^https?:\/\/backup.landof.tv\/.*/)) {
+    used_site_info.BTN.url = 'https://backup.landof.tv/';
+    GM_setValue('used_site_info', JSON.stringify(used_site_info));
+}
+
 //支持快速搜索的默认站点列表，可自行添加，举例：imdbid表示tt123456, imdbno表示123456，search_name表示the big bang thoery
 const default_search_list = [
     `<a href="https://passthepopcorn.me/torrents.php?searchstr={imdbid}" target="_blank">PTP</a>`,
@@ -977,7 +983,7 @@ const o_site_info = {
     'FileList': 'https://filelist.io/',
     'HDF': 'https://hdf.world/',
     'HDB': 'https://hdbits.org/',
-    'BTN': 'https://broadcasthe.net/',
+    'BTN': used_site_info.BTN.url,
     'RED': 'https://redacted.ch/',
     'OpenCD': 'https://open.cd/',
     'U2': 'https://u2.dmhy.org/',
@@ -1612,7 +1618,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/karagarga.in\/upload\.php.*/)) {
         return 4;
     }
-    if (site_url.match(/^https:\/\/broadcasthe.net\/upload.php.*/)) {
+    if (site_url.match(/^https:\/\/(broadcasthe.net|backup.landof.tv)\/upload.php.*/)) {
         return 5;
     }
     if (site_url.match(/^https?:\/\/.*\/(upload|offer).*?(php)?#seperator#/i)) {
@@ -1687,7 +1693,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^http(s*):\/\/greatposterwall.com.*torrentid.*/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/broadcasthe.net.*torrentid.*/i)) {
+    if (site_url.match(/^http(s*):\/\/(broadcasthe.net|backup.landof.tv).*torrentid.*/i)) {
         return 1;
     }
     if (site_url.match(/^https:\/\/hdbits\.org\/details\.php\?id=.*/i)) {
@@ -3129,7 +3135,7 @@ function reBuildHref(raw_info, forward_r) {
     }
 }
 
-if (site_url.match(/broadcasthe.net\/.*.php.*/)) {
+if (site_url.match(/(broadcasthe.net|backup.landof.tv)\/.*.php.*/)) {
     $('#searchbars').find('li').each(function(){
         $(this).find('form').find('input').prop('size', 16);
     });
@@ -3196,7 +3202,7 @@ if (site_url.match(/broadcasthe.net\/.*.php.*/)) {
     });
 }
 
-if (site_url.match(/^https?:\/\/broadcasthe.net\/series.php\?id=\d+/)) {
+if (site_url.match(/^https?:\/\/(broadcasthe.net|backup.landof.tv)\/series.php\?id=\d+/)) {
     var name = $('title').text().split(':')[0].trim();
     var imdb_url = $('img[src*="tvicon/imdb.png"]:eq(0)').parent().attr('href');
     if (imdb_url == '') {
@@ -7101,7 +7107,7 @@ setTimeout(function(){
             }
             setTimeout(()=>{
                 var series_num = $('.thin').find('a').attr('href');
-                getDoc('https://broadcasthe.net/' + series_num, null, function(doc){
+                getDoc(used_site_info.BTN.url + series_num, null, function(doc){
                     var link_as = doc.getElementsByClassName('box')[1].getElementsByTagName('a');
                     for (i=0;i<link_as.length;i++){
                         if (link_as[i].href.match(/imdb.com/)){
@@ -7139,7 +7145,7 @@ setTimeout(function(){
                 }
             }
             raw_info.descr += img_urls;
-            raw_info.torrent_url = `https://broadcasthe.net/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+            raw_info.torrent_url = used_site_info.BTN.url + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
         }
 
         if (origin_site == 'NBL') {
@@ -10401,7 +10407,7 @@ setTimeout(function(){
                     return;
                 }
                 GM_setValue('btn_info', JSON.stringify(raw_info));
-                var href = 'https://broadcasthe.net/upload.php';
+                var href = `${used_site_info.BTN.url}upload.php`;
                 window.open(href, target="_blank");
             }
         }
