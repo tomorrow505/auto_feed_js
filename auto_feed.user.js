@@ -5597,7 +5597,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     $('#enter2space').click((e)=>{
         var origin_str = $('#picture').val();
         origin_str = origin_str.replace(/\n/g, ' ');
-        console.log(origin_str)
         $('#picture').val(origin_str);
     })
 
@@ -10880,6 +10879,20 @@ setTimeout(function(){
         add_picture_transfer();
 
         $('#get_img').click((e)=>{
+            if (original_site == 'TTG') {
+                descr = document.getElementById('kt_d');
+                descr_box = descr.cloneNode(true);
+                raw_info.descr = walkDOM(descr_box);
+            } else if (origin_site == 'TJUPT' || origin_site == 'PTsbao') {
+                descr = document.getElementById("kdescr");
+                descr = descr.cloneNode(true);
+                raw_info.descr = '';
+                raw_info.descr = walkDOM(descr);
+            } else if (origin_site == 'HaresClub') {
+                descr = $('#kdescr').next()[0];
+                descr = descr.cloneNode(true);
+                raw_info.descr = walkDOM(descr).replace(/^简介./, '');
+            }
             GM_setValue("descr", raw_info.descr);
         });
     }
