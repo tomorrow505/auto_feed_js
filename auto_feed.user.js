@@ -5205,9 +5205,38 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
 
     //**************************************************** 4 ***************************************************************************
     $('#setting').append(`<b>快速搜索站点设置(每个一行,可自行添加)
-        <a href="https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/temple_search_urls" target=_blank>
+        <a href="https://gitee.com/tomorrow505/auto-feed-helper/raw/master/temple_search_urls" target=_blank>
         <font color="red">范例</font></a></b></br>`);
-    $('#setting').append(`<textarea name="set_jump_href" style="width:700px" rows="13"></textarea><br><br>`);
+    
+    getDoc('https://gitee.com/tomorrow505/auto-feed-helper/raw/master/temple_search_urls', null, function(doc){
+        $(`<font>从范例页面获取：</font><input id="url_input" type="text" list="options_jump_href" style="border-radius:2px;">
+            <datalist name="options_jump_href" id="options_jump_href" style="width:100px; margin-bottom:3px; margin-right:5px"><option value="---">---</option></datalist><a type="button" id="append_url" href="#" style="color:blue">↓ 新增</a><br>`).insertBefore($('textarea[name="set_jump_href"]'));
+        $(`<div style="display:none; margin-bottom:5px"><span id="show_selected"></span><br></div>`).insertBefore($('textarea[name="set_jump_href"]'));
+        var urls_to_append = $('body', doc).find('a');
+        var urls_appended = $('textarea[name="set_jump_href"]').val();
+        console.log(urls_appended)
+        urls_to_append.map((index,e)=>{
+            var url_to_append = $(`a:contains(${$(e).text()})`, doc).attr('href').replace(/\/|\?/g, '.');
+            console.log(url_to_append)
+            var reg = new RegExp(url_to_append, 'i');
+            if ( !urls_appended.match(reg)) {
+                $('datalist[name="options_jump_href"]').append(`<option value=${$(e).text()}>${$(e).text()}</option>`);
+            }
+        });
+        $('#append_url').click((e)=>{
+            e.preventDefault();
+            var origin_str = $('textarea[name="set_jump_href"]').val();
+            $('textarea[name="set_jump_href"]').val(origin_str + '\n' + $('#show_selected').text());
+        });
+        $('input[id="url_input"]').change((e)=>{
+            var selected_url = $(e.target).val();
+            var jump_url = $(`a:contains(${selected_url})`, doc).prop("outerHTML").replace(/&amp;/g, '&');
+            if (jump_url) {
+                $('#show_selected').text(jump_url).parent().show();
+            }
+        });
+    })
+    $('#setting').append(`<textarea name="set_jump_href" style="width:700px" rows="15"></textarea><br><br>`);
     $('textarea[name="set_jump_href"]').val(used_search_list.join('\n'));
 
     //**************************************************** 5 ***************************************************************************
@@ -5517,7 +5546,11 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
 
     var descr = GM_getValue('descr') === undefined ? '': GM_getValue('descr');
     var imgs_to_deal = descr.match(/(\[url=.*?\])?\[img\].*?(png|jpg)\[\/img\](\[\/url\])?/g);
-    $('#picture').val(imgs_to_deal.join('\n'));
+    try {
+        if (imgs_to_deal) {
+            $('#picture').val(imgs_to_deal.join('\n'));
+        }
+    } catch (err) {}
 
     $('#preview').click((e)=>{
         if (!$('#imgs_to_show').is(":hidden")){
