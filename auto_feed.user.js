@@ -10879,7 +10879,7 @@ setTimeout(function(){
         add_picture_transfer();
 
         $('#get_img').click((e)=>{
-            if (original_site == 'TTG') {
+            if (origin_site == 'TTG') {
                 descr = document.getElementById('kt_d');
                 descr_box = descr.cloneNode(true);
                 raw_info.descr = walkDOM(descr_box);
