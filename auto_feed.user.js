@@ -1603,8 +1603,10 @@ function deal_img_350(pic_info) {
     if (imgs) {
         imgs.map((item)=>{
             var img_url = item.match(/http.*?(png|jpg)/)[0];
-            var new_imgs = `[url=${img_url}]${item.replace('[img]', '[img=350x350]')}[/url]`;
-            pic_info = pic_info.replace(item, new_imgs);
+            if (!img_url.match(/thumbs2.imgbox.com/)) {
+                var new_imgs = `[url=${img_url}]${item.replace('[img]', '[img=350x350]')}[/url]`;
+                pic_info = pic_info.replace(item, new_imgs);
+            }
         })
     }
     return pic_info;
@@ -16315,6 +16317,15 @@ setTimeout(function(){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
+            function disableother(select,target){
+                if(document.getElementById(select).value==0) {
+                    document.getElementById(target).disabled=false;
+                } else {
+                    document.getElementById(target).disabled=true;
+                    document.getElementById(select).disabled=false;
+                }
+            }
+            disableother('browsecat','specialcat');
             //来源
             var source_box = document.getElementsByName('source_sel')[0];
             source_box.options[6].selected=true;
