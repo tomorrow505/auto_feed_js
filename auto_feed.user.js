@@ -78,7 +78,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.6.2
+// @version      1.9.6.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -2514,8 +2514,11 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
                     new_urls = new_urls.toString().split(',');
                     var urls_append = '';
                     if (new_urls.length > 1) {
-                        for (var i=0; i<new_urls.length-2; i+=2) {
+                        for (var i=0; i<=new_urls.length-2; i+=2) {
                             urls_append += `${new_urls[i]} ${new_urls[i+1]}\n`
+                        }
+                        if (new_urls.length % 2 == 1) {
+                            urls_append += new_urls[new_urls.length-1] + '\n';
                         }
                     } else {
                         urls_append = new_urls;
@@ -5573,7 +5576,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                 pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
             } else if (item.match(/pixhost/)) {
                 pic_info += '[img]' + item.replace('//t', '//img').replace('thumbs', 'images') + '[/img]\n';
-            } else if (item.match(/pterclub.com/)) {
+            } else if (item.match(/pterclub.com|beyondhd.co\/images/)) {
                 pic_info += '[img]' + item.replace(/th.png/, 'png') + '[/img]\n';
             } else if (item.match(/tu.totheglory.im/)) {
                 pic_info += '[img]' + item.replace(/_thumb.png/, '.png') + '[/img]\n';
@@ -5616,14 +5619,16 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         if ($('#picture').val().match(/http[^\[\]]*?(jpg|png)/g).length > 0) {
             var origin_str = $('#picture').val();
             images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
-            console.log(images)
             pix_send_images(images)
             .then(function(new_urls) {
                 new_urls = new_urls.toString().split(',');
                 var urls_append = '';
                 if (new_urls.length > 1) {
-                    for (var i=0; i<new_urls.length-2; i+=2) {
+                    for (var i=0; i<=new_urls.length-2; i+=2) {
                         urls_append += `${new_urls[i]} ${new_urls[i+1]}\n`
+                    }
+                    if (new_urls.length % 2 == 1) {
+                        urls_append += new_urls[new_urls.length-1] + '\n';
                     }
                 } else {
                     urls_append = new_urls[0] + '\n';
@@ -18565,7 +18570,7 @@ setTimeout(function(){
                                     pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
                                 } else if (item.match(/pixhost/)) {
                                     pic_info += '[img]' + item.replace('//t', '//img').replace('thumbs', 'images') + '[/img]\n';
-                                } else if (item.match(/pterclub.com/)) {
+                                } else if (item.match(/pterclub.com|beyondhd.co\/images/)) {
                                     pic_info += '[img]' + item.replace(/th.png/, 'png') + '[/img]\n';
                                 } else if (item.match(/tu.totheglory.im/)) {
                                     pic_info += '[img]' + item.replace(/_thumb.png/, '.png') + '[/img]\n';
@@ -18593,7 +18598,7 @@ setTimeout(function(){
                                     if (new_urls.length > 1) {
                                         if (raw_info.origin_site == 'TTG' && raw_info.name.match(/wiki$/i)) {
                                             urls_append += '[comparison=Source, Encode]\n';
-                                            for (var i=0; i<new_urls.length-2; i+=2) {
+                                            for (var i=0; i<=new_urls.length-2; i+=2) {
                                                 urls_append += `${new_urls[i]} ${new_urls[i+1]}\n`
                                             }
                                             urls_append += '[/comparison]';
