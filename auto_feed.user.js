@@ -824,10 +824,12 @@ if (if_new_site_added) {
 }
 
 // 修正北洋和皇后有www和不带www两个域名。
-if (site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd)\//)) {
-    var site_domain = site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd)\//)[0];
+if (site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd|pthome.net)\//)) {
+    var site_domain = site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd|pthome.net)\//)[0];
     if (site_domain.match(/tjupt/)) {
         used_site_info.TJUPT.url = site_domain;
+    } else if (site_domain.match(/pthome/)) {
+        used_site_info.PThome.url = site_domain;
     } else {
         used_site_info.OpenCD.url = site_domain;
     }
