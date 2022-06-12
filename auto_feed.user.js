@@ -78,7 +78,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.6.3
+// @version      1.9.6.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -234,6 +234,7 @@
     20220605：新增图片提取功能：https://github.com/tomorrow505/auto_feed_js/wiki/图片处理
     20220606：适配BTN另一个网址：https://backup.landof.tv/
     20220608：取消适配Telly，原因：永久关站。适配ptchina。
+    20220612：ptgen若无豆瓣词条，可以获取imdb信息。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -5384,12 +5385,72 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                 get_douban_info(raw_info);
             }
         }, function(err) {
-            console.log(err);
-            $('#go_ptgen').prop('value', '获取失败');
-            if (match_link('imdb', url)) {
-                window.open(`https://search.douban.com/movie/subject_search?search_text=${url.match(/tt\d+/)[0]}&cat=1002`, target="_blank");
+            if (confirm("该资源貌似没有豆瓣词条，是否获取imdb信息？")){
+                async function formatDescr() {
+                    var descr = kg_intro_base_content.split('Screenshots here')[0].trim();
+                    var aka_url = 'https://www.imdb.com/title/{imdbid}/releaseinfo?ref_=tt_dt_dt'.format({'imdbid': raw_info.url.match(/tt\d+/)[0]});
+                    const aka = await getAKAtitle(aka_url);
+
+                    var doc = await getimdbpage(raw_info.url);
+                    var country = Array.from($('li.ipc-metadata-list__item:contains("Countr")', doc).find('a')).map(function(e){
+                        return $(e).text();
+                    });
+                    var country_selected = false;
+                    country = country.map(function(e){
+                        if (e == 'United States') e = 'USA';
+                        if (e == 'United Kingdom') e = 'UK';
+                        return e;
+                    }).join(', ');
+                    var index = descr.search('Date Published');
+                    descr = descr.substring(0,index) + `Country: ${country}\n` + descr.substring(index);
+                    var poster_url = 'https://www.imdb.com/' + $('a[href*=tt_ov_i]', doc).first().attr('href');
+                    if ($('a[href*=tt_ov_i]', doc).length == 0) {
+                        poster_url = 'https://www.imdb.com/' + $('div[class*=ipc-poster] > div > a', doc).last().attr('href');
+                    }
+
+                    var poster = await getPoster(poster_url);
+                    descr = descr.format({'poster': poster});
+                    descr = descr.format({'title': $('h1:eq(0)', doc).text().trim()});
+                    descr = descr.format({'genres': Array.from($('div[data-testid*=genres]', doc).find('a')).map(function(e){
+                        return $(e).text();
+                    }).join(', ').replace(/, Read all/g, '')});
+
+                    descr = descr.format({'date': $('li.ipc-metadata-list__item:contains("Release date")', doc).find('div').find('li').text()});
+                    descr = descr.format({'score': $('div[data-testid*=aggregate-rating__score]:eq(0)', doc).text()});
+                    descr = descr.format({'imdb_url': raw_info.url});
+                    var director = Array.from($('li.ipc-metadata-list__item:contains("Director"):eq(0)', doc).find('a')).map(function(e){
+                        return $(e).text();
+                    }).join(', ');
+                    descr = descr.format({'director': director});
+
+                    var creators = await getFullCredits(raw_info.url);
+                    descr = descr.format({'creator': creators});
+
+                    var actors = Array.from($('div.title-cast__grid', doc).find('a[data-testid="title-cast-item__actor"]:lt(8)')).map(function(e){
+                        return $(e).text();
+                    }).join(', ');
+                    descr = descr.format({'cast': actors});
+
+                    var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
+                    if (imdb_descr.match(/Read all/)){
+                        var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
+                        imdb_descr = await getFullDescr(full_descr_url);
+                    } else if (imdb_descr.match(/Add a Plot/)) {
+                        imdb_descr =  `No data from IMDB: ${raw_info.url}`;
+                    }
+                    descr = descr.format({'en_descr': imdb_descr});
+                    $('#go_ptgen').prop('value', '获取成功');
+                    $('textarea[name=douban_info]').val(descr);
+                }
+
+                formatDescr();
             } else {
-                window.open(url, target='_blank');
+                $('#go_ptgen').prop('value', '获取失败');
+                if (match_link('imdb', url)) {
+                    window.open(`https://search.douban.com/movie/subject_search?search_text=${url.match(/tt\d+/)[0]}&cat=1002`, target="_blank");
+                } else {
+                    window.open(url, target='_blank');
+                }
             }
         });
     });
@@ -5741,6 +5802,16 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     $(`#${id_scroll}`).parent().show();
     document.querySelector(`#${id_scroll}`).scrollIntoView();
     return;
+}
+
+if (site_url.match(/^https:\/\/lemonhd.org\/upload_.*/i)) {
+    const type_dict = { '剧集综艺': 'tv', '音乐': 'music', '动漫': 'animate', 'MV': 'mv', '纪录片': 'doc', '艺术': 'other' };
+    $('#compose').find('td:first').append(`<div id="change_type">切换至其他发布页：`);
+    for (var i in type_dict) {
+        var origin_type = site_url.match(/^https:\/\/lemonhd.org\/upload_(.*?)\.php/)[1];
+        var type_url = encodeURI(site_url.replace(origin_type, type_dict[i]));
+        $("#change_type").append(` <a id="${type_dict[i]}" href="${type_url}">${i}</a>`);
+    }
 }
 
 //柠檬发布页根据name自动填写
@@ -16341,7 +16412,6 @@ setTimeout(function(){
                     }
             }
             //媒介
-            console.log(raw_info.medium_sel)
             var medium_box = $('select[name=medium_sel]');
             switch(raw_info.medium_sel){
                 case 'UHD': medium_box.val(10); break;
