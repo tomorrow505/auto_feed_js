@@ -78,7 +78,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.6.4
+// @version      1.9.6.5
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -233,7 +233,7 @@
     20220604：修复海豹部分bug，修复piggo部分bug。优化禁转判断后跳转逻辑。
     20220605：新增图片提取功能：https://github.com/tomorrow505/auto_feed_js/wiki/图片处理
     20220606：适配BTN另一个网址：https://backup.landof.tv/
-    20220608：取消适配Telly，原因：永久关站。适配ptchina。
+    20220608：适配ptchina。
     20220612：ptgen若无豆瓣词条，可以获取imdb信息。
 */
 
@@ -398,7 +398,6 @@ if (location.href.match(/^https:\/\/c.pc.qq.com\/middlem.html\?pfurl=.*/)) {
     window.location.href = url;
     return;
 }
-
 if (location.href.match(/^https:\/\/filelist.io\/browse.php/)) {
     $('input[name="search"]').attr('placeholder', 'Search by key-word or IMDB...');
     $('input[type="submit"]').attr('value', 'Go!');
@@ -609,7 +608,7 @@ if (site_url.match(/^https:\/\/hdf\.world\/torrents\.php/i) && !site_url.match(/
     return;
 }
 //处理blutopia和hdpost跳转检索，因为其使用ajax异步检索
-if (site_url.match(/(blutopia.xyz|pt.hdpost.top|asiancinema.me|hd-olimpo.club)\/torrents\?imdb(id)?=.*/)){
+if (site_url.match(/(blutopia.xyz|pt.hdpost.top|asiancinema.me|hd-olimpo.club|telly.wtf)\/torrents\?imdb(id)?=.*/)){
     if (site_url.match(/blutopia.xyz/i)) {
         $('div.form-group:contains(IMDb)').find('input').val(site_url.split('=')[1].split('&')[0]);
         $('button.btn-primary:contains(Advanced)').click();
@@ -654,9 +653,12 @@ if (site_url.match(/^https:\/\/api.iyuu.cn\/ptgen\/\?imdb=/)){
     return;
 }
 
-if (site_url.match(/^https:\/\/(blutopia.xyz|pt.hdpost.top|asiancinema.me|hd-olimpo.club)\/torrents\/download_check/)) {
+if (site_url.match(/^https:\/\/(blutopia.xyz|pt.hdpost.top|asiancinema.me|hd-olimpo.club|telly.wtf)\/torrents\/download_check/)) {
     window.open($('a[href*="torrents/download"]').has('i').attr('href'), '_blank');
     return;
+}
+if (site_url.match(/^https:\/\/totheglory.im\/details.php\?id=\d+&uploaded=1/)) {
+    window.open($('a.index:contains(".torrent")').attr("href"), '_blank');
 }
 
 /*******************************************************************************************************************
@@ -823,7 +825,7 @@ if (if_new_site_added) {
     GM_setValue('site_order', JSON.stringify(site_order.join(',')));
 }
 
-// 修正北洋和皇后有www和不带www两个域名。
+// 修正北洋、铂金和皇后有www和不带www两个域名。
 if (site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd|pthome.net)\//)) {
     var site_domain = site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd|pthome.net)\//)[0];
     if (site_domain.match(/tjupt/)) {
@@ -1010,6 +1012,7 @@ const o_site_info = {
     'CNZ': 'https://cinemaz.to/',
     'GPW': 'https://greatposterwall.com/',
     'HD-Only': 'https://hd-only.org/',
+    'Telly': 'https://telly.wtf/',
     'NBL': 'https://nebulance.io/',
     'ANT': 'https://anthelion.me/',
     'IPT': 'https://iptorrents.com/',
@@ -1668,6 +1671,9 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/nzbs.in\/.*/)){
         return 1;
     }
+    if (site_url.match(/^https:\/\/telly.wtf\/torrents\/\d+/i)) {
+        return 1;
+    }
     if (site_url.match(/^https:\/\/nebulance.io\/torrents.php\?id=\d+/i)) {
         return 1;
     }
@@ -1764,8 +1770,8 @@ function judge_if_the_site_in_domestic() {
 //处理标题业务封装进函数
 function deal_with_title(title){
     title = title.replace(/\./g, ' ').replace(/torrent$/g, '').replace(/mkv$|mp4$/i, '').trim();
-    if (title.match(/[^\d](2 0|5 1|7 1|1 0|6 1)/)) {
-        title = title.replace(/[^\d](2 0|5 1|7 1|1 0|6 1)/, function(data){
+    if (title.match(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)/)) {
+        title = title.replace(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)/, function(data){
             return data.slice(0,2) + '.'+ data.slice(3,data.length);
         });
     }
@@ -2652,7 +2658,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         }
 
     } else {
-        if (site == 'BHD' || site == 'BLU' || site == 'HDPost' || site == 'ACM' || site == 'HDOli' || site == 'jptv'){
+        if (site == 'BHD' || site == 'BLU' || site == 'HDPost' || site == 'ACM' || site == 'HDOli' || site == 'Telly' || site == 'jptv'){
             $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"border": "1px solid #0D8ED9", "color": "#FFFFFF", "backgroundColor": "#292929"});
         } else if (site == 'TorrentLeech') {
             $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"border": "1px solid green", "color": "#FFFFFF", "backgroundColor": "#292929"});
@@ -7324,6 +7330,16 @@ setTimeout(function(){
             if (!raw_info.url) {
                 raw_info.url = match_link('imdb', $('#media').html());
             }
+            if (all_sites_show_douban) {
+                getData(raw_info.url, function(data){
+                    if (data.data){
+                        $('td:contains(豆瓣信息)').last().parent().before(`<tr><td colSpan="2" id="douban_info"></td></tr>`);
+                        add_douban_info_table($('#douban_info'), 150, data);
+                        $('#douban_info').find('th').css({"color": "white"});
+                        $('#douban_info').find('h3').hide();
+                    }
+                });
+            }
             raw_info.name = $('h1').text();
         } 
 
@@ -7551,7 +7567,7 @@ setTimeout(function(){
             }
         }
 
-        if (origin_site == 'BLU') {
+        if (origin_site == 'BLU' || origin_site == 'Telly') {
             $('h4:first').click();
             var iii = document.getElementsByTagName('h4')[0].parentNode.parentNode;
             var div_box = iii.getElementsByClassName('table-responsive')[1];
@@ -8345,7 +8361,7 @@ setTimeout(function(){
                 }
             }
 
-            if (['BHD','BLU', 'HDPost', 'ACM', 'HDOli', 'jptv'].indexOf(origin_site) > -1){
+            if (['BHD','BLU', 'HDPost', 'ACM', 'HDOli', 'Telly', 'jptv'].indexOf(origin_site) > -1){
 
                 if (['Name', 'Nombre', '名称'].indexOf(tds[i].textContent.trim())>-1) {
                     raw_info.name = tds[i+1].textContent.replace(/ *\n.*/gm, '').trim();
@@ -9450,7 +9466,7 @@ setTimeout(function(){
             raw_info.torrent_url = $('a[href*="me/download"]').attr('href');
         }
 
-        if (['BLU', 'HDPost', 'ACM', 'HDOli', 'jptv'].indexOf(origin_site) > -1) {
+        if (['BLU', 'HDPost', 'ACM', 'HDOli', 'Telly', 'jptv'].indexOf(origin_site) > -1) {
             var mediainfo_lack = false;
             try {
                 var mediainfo_box = document.getElementsByClassName('slidingDiv')[0];
@@ -9460,7 +9476,7 @@ setTimeout(function(){
                 mediainfo_lack = true;
             }
 
-            if (mediainfo_lack && (origin_site == 'BLU' || origin_site == 'HDPost')) {
+            if (mediainfo_lack && (origin_site == 'BLU' || origin_site == 'Telly' || origin_site == 'HDPost')) {
                 mediainfo = $('pre[class="decoda-code"]').text();
                 mediainfo_lack = false;
             }
@@ -9789,7 +9805,7 @@ setTimeout(function(){
 
             if ((!judge_if_the_site_in_domestic() && no_need_douban_button_sites.indexOf(origin_site) < 0) || douban_button_needed) {
                 var direct;
-                if (['PHD', 'avz', 'CNZ', 'BLU', 'TorrentLeech', 'BHD', 'HDPost', 'ACM', 'HDOli'].indexOf(origin_site) > -1) {
+                if (['PHD', 'avz', 'CNZ', 'BLU', 'TorrentLeech', 'BHD', 'HDPost', 'ACM', 'HDOli', 'Telly'].indexOf(origin_site) > -1) {
                     direct = "left";
                 } else {
                     direct = "right";
@@ -17411,6 +17427,7 @@ setTimeout(function(){
                 }
                 $('textarea[name="mediainfo"]').css({'height': '600px'});
                 var pic_info = deal_img_350(infos.pic_info);
+                pic_info = pic_info.replace(/350x350/g, '350');
                 $('#upload-form-description').val(pic_info);
             } catch(Err) {
                 if (raw_info.full_mediainfo){
