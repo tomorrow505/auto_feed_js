@@ -2120,7 +2120,7 @@ function get_source_sel_from_descr(descr){
         reg_region = RegExp(us_ue, 'i');
         if (region.match(/香港/)){
             region = '香港';
-        } else if (region.match(/台湾/)){
+        } else if (region.match(/台湾|臺灣/)){
             region = '台湾';
         } else if (region.match(/日本/)){
             region = '日本';
@@ -2387,7 +2387,22 @@ function fill_raw_info(raw_info){
     //没有来源或者指向不明
     if (raw_info.source_sel == '' || raw_info.source_sel.match(/(港台|日韩)/)){
         var region = get_source_sel_from_descr(raw_info.descr);
-        if (region != ''){
+        if (raw_info.source_sel.match(/(港台|日韩)/)) {
+            if (raw_info.source_sel == '港台') {
+                if (region == '台湾') {
+                    raw_info.source_sel = '台湾';
+                }else {
+                    raw_info.source_sel = '香港';
+                }
+            } else if (raw_info.source_sel == '日韩') {
+                if (region == '日本') {
+                    raw_info.source_sel = '日本';
+                }  else {
+                    raw_info.source_sel = '韩国';
+                }
+            }
+        }
+        if (region != '' && raw_info.source_sel == ''){
             raw_info.source_sel = region;
         }
     }
