@@ -235,6 +235,7 @@
     20220606：适配BTN另一个网址：https://backup.landof.tv/
     20220608：适配ptchina。
     20220612：ptgen若无豆瓣词条，可以获取imdb信息。
+    20220629：适配hdvideo，修复部分bug。适配HDyu。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -759,6 +760,7 @@ const default_site_info = {
     'HDTime': {'url': 'https://hdtime.org/', 'enable': 1},
     'HDU': {'url': 'https://pt.hdupt.com/', 'enable': 1},
     'HDVideo': {'url': 'https://hdvideo.one/', 'enable': 1},
+    'HDYu': {'url': 'https://www.hdyu.top/', 'enable': 1},
     'HDZone': {'url': 'https://hdzone.me/', 'enable': 1},
     'HD-Only': {'url': 'https://hd-only.org/', 'enable': 1},
     'HITPT': {'url': 'https://www.hitpt.com/', 'enable': 1},
@@ -922,7 +924,8 @@ const reg_team_name = {
     'PigGo': /PigoHD|PigoWeb/i,
     'GainBound': /-DGB|GBWEB/i,
     'CarPt': /CarPT/i,
-    'HDVideo': /(-QHstudIo|-HDVWEB|-HDVMV)/i
+    'HDVideo': /(-QHstudIo|-HDVWEB|-HDVMV)/i,
+    'HDfans': /HDFans/i
 };
 const thanks_str = "[quote][b][color=Blue]转自{site}，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
@@ -7357,6 +7360,16 @@ setTimeout(function(){
             douban_box = tbody.insertRow(0);
             raw_info.name = $('h1:last').text().trim();
             raw_info.url = match_link('imdb', $('#torrent-page').html());
+            if (all_sites_show_douban && raw_info.url) {
+                getData(raw_info.url, function(data){
+                    if (data.data){
+                        $('td:contains(豆瓣信息)').last().parent().before(`<tr><td colSpan="2" id="douban_info"></td></tr>`);
+                        add_douban_info_table($('#douban_info'), 150, data);
+                        $('#douban_info').find('th').css({"color": "blue"});
+                        $('#douban_info').find('h3').hide();
+                    }
+                });
+            }
         }
 
         if (origin_site == 'IN') {
@@ -17909,6 +17922,57 @@ setTimeout(function(){
                 standard_box.options[index].selected = true;
             }
             $('select[name="team_sel"]').val(4);
+        }
+
+        else if (forward_site == 'HDYu') {
+            var browsecat = $('select[name=type]');
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 406, '纪录': 404,
+                             '体育': 407, '软件': 409, '学习': 409, '': 0, '游戏': 409};
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            var medium_box = $('select[name=medium_sel]');
+            switch(raw_info.medium_sel){
+                case 'UHD': medium_box.val(1); break;
+                case 'Blu-ray': medium_box.val(1); break;
+                case 'DVD': 
+                    medium_box.val(2);
+                    if (raw_info.name.match(/dvdr/i)) {
+                        medium_box.val(6);
+                    }
+                    break;
+                case 'Remux': medium_box.val(3); break;
+                case 'HDTV': medium_box.val(5); break;
+                case 'Encode': medium_box.val(7); break;
+                case 'WEB-DL': medium_box.val(0);
+            }
+            if (raw_info.name.match(/MiniBD/i)){
+                medium_box.val(4);
+            }
+            //视频编码
+            var codec_box = document.getElementsByName('codec_sel')[0];
+            codec_box.options[6].selected = true;
+            switch (raw_info.codec_sel){
+                case 'H265': case 'X265': codec_box.options[1].selected = true; break;
+                case 'H264': case 'X264': codec_box.options[2].selected = true; break;
+                case 'VC-1': codec_box.options[3].selected = true; break;
+                case 'XVID': codec_box.options[4].selected = true; break;
+                case 'MPEG-2': case 'MPEG-4': codec_box.options[5].selected = true;
+            }
+            //分辨率
+            var standard_box = document.getElementsByName('standard_sel')[0];
+            var standard_dict = {'4K': 1, '1080p': 3, '1080i': 4, '720p': 5, 'SD': 6};
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.options[index].selected = true;
+            }
+            $('select[name="team_sel"]').val(5);
+            $('select[name="team_sel"]>option').map(function(index,e){
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
         }
 
         else if (forward_site == 'HITPT'){
