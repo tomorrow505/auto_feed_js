@@ -17,7 +17,7 @@ TG群链接：https://t.me/+rGUOUYZ3Ey43OWY9
 + 支持自定义站点显示顺序
 + 支持大量外站中文显示
 + 英化支持部分小语种外站，主要wiki和rules.
-+ 部分内站发布省略种子上传下载步骤……
++ 发布省略种子下载上传步骤，[自动清洗种子](https://github.com/tomorrow505/auto_feed_js/wiki/%E6%B8%85%E6%B4%97%E7%A7%8D%E5%AD%90-%E8%87%AA%E5%8A%A8%E4%B8%8B%E8%BD%BD%E5%8F%91%E5%B8%83%E7%9A%84%E7%A7%8D%E5%AD%90)……
 + 支持豆瓣音乐和豆瓣读书简介一键获取
 + qq非官方链接自动跳转
 
