@@ -81,7 +81,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.6.8
+// @version      1.9.6.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -128,6 +128,7 @@
     20220629：适配hdvideo，修复部分bug。适配HDyu。
     20220705：适配torrentdb转出，清洗种子部分内容并且适配外站转种直接发布。
     20220706：适配多站发布完之后自动下载种子……(该部分还需要测试)
+    20220707：修复种子加载之后无效文件名的bug，修复BLU改版引起的bug.
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -3106,12 +3107,15 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
                     announce = forward_announce;
                 }
                 var name = '';
-                if (r.match(/8:announce\d+:.*please.passthepopcorn.me/)) {
+                if (r.match(/8:announce\d+:.*(please.passthepopcorn.me|blutopia.xyz|beyond-hd.me|asiancinema.me|telly.wtf|jptv.club|hd-olimpo.club|secret-cinema.pw)/)) {
                     if (r.match(/4:name\d+:/)) {
                         var length = parseInt(r.match(/4:name(\d+):/)[1]);
                         var index = parseInt(r.search('4:name'));
                         var substring = r.substring(index, index + length + 7 + length.toString().length).split(':').pop();
                         name = substring;
+                    }
+                    if ($('input[name="name"]').length && !$('input[name="name"]').val()) {
+                        $('input[name="name"]').val(deal_with_title(name));
                     }
                 }
                 if (r.match(/8:announce\d+:.*(greatposterwall.com|karagarga.in)/)) {
@@ -3126,6 +3130,9 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
                     var substring = r.substring(index, index + length + 11 + length.toString().length);
                     var new_announce = `8:announce${announce.length}:${announce}`;
                     r = r.replace(substring, new_announce);
+                } else {
+                    alert('种子文件加载失败！！！');
+                    return;
                 }
                 if (r.match(/6:source\d+:/)) {
                     var length = parseInt(r.match(/6:source(\d+):/)[1]);
@@ -17519,7 +17526,6 @@ setTimeout(function(){
                     search_url = 'http://api.tmdb.org/3/search/multi?api_key={key}&language=zh-CN&query={name}&page=1&include_adult=true';
                 }
                 search_url = search_url.format({'key': used_tmdb_key, 'name': search_name});
-                console.log(search_url)
 
                 function compare(date){
                     return function(obj1, obj2) {
@@ -17576,6 +17582,9 @@ setTimeout(function(){
             }
 
             try{ $('#autoimdb').val(raw_info.url.match(/tt(\d+)/i)[1]); } catch(err) {}
+            if (forward_site == 'BLU') {
+                $('#automal').val(0);
+            }
             try{
                 var infos = get_mediainfo_picture_from_descr(raw_info.descr);
                 var container = $('textarea[name="mediainfo"]');
@@ -17591,6 +17600,7 @@ setTimeout(function(){
                 var pic_info = deal_img_350(infos.pic_info);
                 pic_info = pic_info.replace(/350x350/g, '350');
                 $('#upload-form-description').val(pic_info);
+                $('#bbcode-description').val(pic_info);
             } catch(Err) {
                 if (raw_info.full_mediainfo){
                     $('textarea[name="mediainfo"]').val(raw_info.full_mediainfo);
@@ -19853,8 +19863,8 @@ setTimeout(function(){
         }
 
         else if (forward_site == 'TVV') {
-            if ($('a[href^="torrents.php"]:contains("here")').length) {
-                getDoc('http://tv-vault.me/' + $('a[href^="torrents.php"]:contains("here")').attr('href'), null, function(doc){
+            if ($('a[href*="torrents.php"]:contains("here")').length) {
+                getDoc('http://tv-vault.me/' + $('a[href*="torrents.php"]:contains("here")').attr('href'), null, function(doc){
                     $(`tr[class="group_torrent"]`, doc).has('a:contains(ED)').map((index,e)=>{
                         if ($(e).find('td:eq(3)').text() == '0') {
                             var download_url = 'http://tv-vault.me/' + $(e).find('a[href*="download&id="]:contains(DL)').attr('href');
