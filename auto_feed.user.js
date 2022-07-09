@@ -3091,47 +3091,49 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
             overrideMimeType: "text/plain; charset=x-user-defined",
             onload: (xhr) => {
                 var r = xhr.responseText;
-                if (r.match(/value="firsttime"/)) {
-                    alert("加载种子失败，请先在源站进行一次种子下载操作！！！");
-                    return;
-                }
                 var name = '';
-                if (r.match(/8:announce\d+:.*(please.passthepopcorn.me|blutopia.xyz|beyond-hd.me|asiancinema.me|telly.wtf|jptv.club|hd-olimpo.club|secret-cinema.pw)/)) {
-                    if (r.match(/4:name\d+:/)) {
-                        var length = parseInt(r.match(/4:name(\d+):/)[1]);
-                        var index = parseInt(r.search('4:name'));
-                        name = r.substring(index, index + length + 7 + length.toString().length).split(':').pop();
+                if (forward_site !== null) {
+                    if (r.match(/value="firsttime"/)) {
+                        alert("加载种子失败，请先在源站进行一次种子下载操作！！！");
+                        return;
                     }
-                    if ($('input[name="name"]').length && !$('input[name="name"]').val()) {
-                        $('input[name="name"]').val(deal_with_title(name));
+                    if (r.match(/8:announce\d+:.*(please.passthepopcorn.me|blutopia.xyz|beyond-hd.me|asiancinema.me|telly.wtf|jptv.club|hd-olimpo.club|secret-cinema.pw)/)) {
+                        if (r.match(/4:name\d+:/)) {
+                            var length = parseInt(r.match(/4:name(\d+):/)[1]);
+                            var index = parseInt(r.search('4:name'));
+                            name = r.substring(index, index + length + 7 + length.toString().length).split(':').pop();
+                        }
+                        if ($('input[name="name"]').length && !$('input[name="name"]').val()) {
+                            $('input[name="name"]').val(deal_with_title(name));
+                        }
                     }
+                    var new_torrent = 'd';
+                    var announce = 'https://hudbt.hust.edu.cn/announce.php';
+                    if (forward_announce !== null) {
+                        announce = forward_announce;
+                    }
+                    if (r.match(/8:announce\d+:/)) {
+                        var new_announce = `8:announce${announce.length}:${announce}`;
+                        new_torrent += new_announce;
+                    } else {
+                        alert('种子文件加载失败！！！');
+                        return;
+                    }
+                    if (r.match(/13:creation date/)) {
+                        var date_str = r.match(/13:creation datei(\d+)e/)[0];
+                        var date = r.match(/13:creation datei(\d+)e/)[1];
+                        var new_date = parseInt(date) + 600 + parseInt(Math.random()*(600),10);
+                        var new_date_str = `13:creation datei${new_date.toString()}e`
+                        new_torrent += new_date_str;
+                    }
+                    new_torrent += '8:encoding5:UTF-8';
+                    var info = r.match(/4:info[\s\S]*?privatei1e/)[0];
+                    new_torrent += info;
+                    var new_source = `6:source${forward_site.length}:${forward_site.toUpperCase()}`;
+                    new_torrent += new_source;
+                    new_torrent += 'ee';
+                    r = new_torrent;
                 }
-                var new_torrent = 'd';
-                var announce = 'https://hudbt.hust.edu.cn/announce.php';
-                if (forward_announce !== null) {
-                    announce = forward_announce;
-                }
-                if (r.match(/8:announce\d+:/)) {
-                    var new_announce = `8:announce${announce.length}:${announce}`;
-                    new_torrent += new_announce;
-                } else if (forward_site !== null){
-                    alert('种子文件加载失败！！！');
-                    return;
-                }
-                if (r.match(/13:creation date/)) {
-                    var date_str = r.match(/13:creation datei(\d+)e/)[0];
-                    var date = r.match(/13:creation datei(\d+)e/)[1];
-                    var new_date = parseInt(date) + 600 + parseInt(Math.random()*(600),10);
-                    var new_date_str = `13:creation datei${new_date.toString()}e`
-                    new_torrent += new_date_str;
-                }
-                new_torrent += '8:encoding5:UTF-8';
-                var info = r.match(/4:info[\s\S]*?privatei1e/)[0];
-                new_torrent += info;
-                var new_source = `6:source${forward_site.length}:${forward_site.toUpperCase()}`;
-                new_torrent += new_source;
-                new_torrent += 'ee';
-                r = new_torrent;
                 var data = new Uint8Array(r.length)
                 var i = 0
                 while (i < r.length) {
