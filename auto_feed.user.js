@@ -1315,12 +1315,14 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
             }
         })
     } else {
-        used_search_list = used_search_list.map((e)=> {
-            if (e.match(/imdbid|imdbno/)) {
-                e = e.replace(/<a/, '<a class="disabled"');
-            }
-            return e;
-        });
+        if (imdbid == '') {
+            used_search_list = used_search_list.map((e)=> {
+                if (e.match(/imdbid|imdbno/)) {
+                    e = e.replace(/<a/, '<a class="disabled"');
+                }
+                return e;
+            });
+        }
     }
     var site_search_lists = used_search_list.join(' | ');
     site_search_lists = site_search_lists.format({'imdbid': imdbid, 'imdbno': imdbno, 'search_name': search_name});
@@ -2727,6 +2729,8 @@ function match_link(site, data) {
         link = data.match(/https:\/\/anidb\.net\/a\d+/i)[0] + '/';
     } else if(site == 'tmdb' && data.match(/http(s*):\/\/www.themoviedb.org\//i)){
         link = data.match(/http(s*):\/\/www.themoviedb.org\/(tv|movie)\/\d+/i)[0] + '/';
+    }  else if(site == 'tvdb' && data.match(/http(s*):\/\/www.thetvdb.com\//i)){
+        link = 'https://www.thetvdb.com/?tab=series&id=' + data.match(/https?:\/\/www.thetvdb.com\/.*?id=(\d+)/i)[1];
     }
     return link;
 }
@@ -7731,6 +7735,9 @@ setTimeout(function(){
             tbody = div_box.getElementsByTagName('table')[0];
             var imdb_box = document.getElementsByClassName('movie-details')[0];
             raw_info.url = match_link('imdb', imdb_box.parentNode.innerHTML);
+            raw_info.tmdb_url = match_link('tmdb', imdb_box.parentNode.innerHTML);
+            raw_info.tvdb_url = match_link('tvdb', imdb_box.parentNode.innerHTML);
+            console.log(raw_info.tvdb_url, raw_info.tmdb_url)
         }
 
         if (origin_site == 'UHD') {
@@ -8164,6 +8171,7 @@ setTimeout(function(){
 
             var mydiv = document.getElementsByClassName('cblock-innercontent')[0];
             raw_info.url = match_link('imdb', mydiv.innerHTML);
+            raw_info.tmdb_url = match_link('tmdb', mydiv.innerHTML);
             var filelist_tmdb = match_link('tmdb', mydiv.innerHTML);
 
             if(filelist_tmdb){
@@ -9470,6 +9478,9 @@ setTimeout(function(){
                 }
                 if (movie_as[i].href.match(/www.imdb.com/i)) {
                     raw_info.url = 'http://www.imdb.com/title/' + movie_as[i].innerHTML;
+                }
+                if (movie_as[i].href.match(/www.themoviedb.org/)) {
+                    raw_info.tmdb_url = movie_as[i].href.split('?').pop();
                 }
             }
             if (raw_info.url && all_sites_show_douban) {
@@ -21024,6 +21035,7 @@ setTimeout(function(){
         }
     } else if (judge_if_the_site_as_source() == 5) { //btn
         if (btn_code !== null){
+            $('#dnu_header').parent().hide();
             eval(btn_code);
         }
     } else if (judge_if_the_site_as_source() == 6) { //avz系列
