@@ -129,6 +129,7 @@
     20220705：适配torrentdb转出，清洗种子部分内容并且适配外站转种直接发布。
     20220706：适配多站发布完之后自动下载种子……(该部分还需要测试)
     20220707：修复种子加载之后无效文件名的bug，修复BLU改版引起的bug. 优化洗种逻辑，适配WT-Sakura,冬樱。
+    20220708：适配支持TVV转出。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -566,7 +567,7 @@ if (site_url.match(/^https:\/\/broadcasthe.net\/torrents.php\?id=\d+$/)) {
         });
     }
 }
-if (site_url.match(/^https:\/\/kp.m-team.cc\/details.php\?id=\d+&uploaded=1/)) {
+if (site_url.match(/^https:\/\/(kp.m-team.cc|ccfbits.org)\/details.php\?id=\d+&uploaded=1/)) {
     window.open($('a[href*="download.php?id="]').attr("href"), '_blank');
     return;
 }
@@ -1012,7 +1013,8 @@ const o_site_info = {
     'bib': 'https://bibliotik.me/',
     'bit-hdtv': 'https://www.bit-hdtv.com/',
     'jptv': 'https://jptv.club/',
-    'torrentdb': 'https://torrentdb.net/'
+    'torrentdb': 'https://torrentdb.net/',
+    'TVV': 'http://tv-vault.me/'
 };
 
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
@@ -1296,7 +1298,6 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
         div_style = ''; font_color = 'green'; text = ''; brs = '';
     }
     if (raw_info.url) {
-        //https://cinemaz.to/torrents?in=1&search=running+man+mmr&type=0&tags=&uploader=
         used_search_list = used_search_list.map((e)=> {
             if (e.match(/avistaz|privatehd|cinemaz/)) {
                 var domain = e.match(/avistaz|privatehd|cinemaz/)[0];
@@ -1313,10 +1314,22 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
                 return e;
             }
         })
+    } else {
+        used_search_list = used_search_list.map((e)=> {
+            if (e.match(/imdbid|imdbno/)) {
+                e = e.replace(/<a/, '<a class="disabled"');
+            }
+            return e;
+        });
     }
     var site_search_lists = used_search_list.join(' | ');
     site_search_lists = site_search_lists.format({'imdbid': imdbid, 'imdbno': imdbno, 'search_name': search_name});
     container.append(`${brs}<div ${div_style}><font size="2px" color=${font_color}>${text}${site_search_lists}</font></div>`);
+    container.find('.disabled').attr("disabled",true).click(e=>{
+        e.preventDefault();
+        alert('当前影视没有IMDB信息！！');
+        return;
+    });
 }
 
 //函数用来豆瓣信息搜索时候进行处理, 后期准备作废
@@ -1671,7 +1684,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^http(s*):\/\/totheglory.im\/t\/.*/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/passthepopcorn.me.*torrentid.*/i)) {
+    if (site_url.match(/^http(s*):\/\/(passthepopcorn.me|tv-vault.me|broadcasthe.net|backup.landof.tv|greatposterwall.com).*torrentid.*/i)) {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/iptorrents.com\/torrent.php\?id=*/i)) {
@@ -1692,31 +1705,16 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^http(s*):\/\/hd-only.org.*torrentid.*/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/greatposterwall.com.*torrentid.*/i)) {
-        return 1;
-    }
-    if (site_url.match(/^http(s*):\/\/(broadcasthe.net|backup.landof.tv).*torrentid.*/i)) {
-        return 1;
-    }
     if (site_url.match(/^https:\/\/hdbits\.org\/details\.php\?id=.*/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/privatehd.to\/torrent/i)) {
-        return 1;
-    }
-    if (site_url.match(/^http(s*):\/\/cinemaz.to\/torrent/i)) {
-        return 1;
-    }
-    if (site_url.match(/^http(s*):\/\/avistaz.to\/torrent/i)) {
+    if (site_url.match(/^http(s*):\/\/(privatehd|cinemaz|avistaz).to\/torrent/i)) {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/www.morethan.tv\/torrents.php\?id/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/beyond-hd.me\/torrents/i)) {
-        return 1;
-    }
-    if (site_url.match(/^http(s*):\/\/blutopia.xyz\//i)) {
+    if (site_url.match(/^http(s*):\/\/(beyond-hd.me|blutopia.xyz)\/torrents/i)) {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/uhdbits.org\/torrents.php\?id=\d+&torrentid=\d+/i)) {
@@ -3083,7 +3081,7 @@ function rehost_single_img(site, img_url) {
 }
 
 function getBlob(url, forward_announce, forward_site, filetype, callback) {
-     GM_xmlhttpRequest({
+    GM_xmlhttpRequest({
         method: "GET",
             url: url,
             overrideMimeType: "text/plain; charset=x-user-defined",
@@ -5676,7 +5674,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     $('#dealimg').append(`<div>结果展示 <a href="#" id="up_text" style="color:red; font-size:4px">↑将结果移入输入框</a><br><textarea id="result" style="width:700px;" rows="15"></textarea></div>`);
 
     var descr = GM_getValue('descr') === undefined ? '': GM_getValue('descr');
-    var imgs_to_deal = descr.match(/(\[url=.*?\])?\[img\].*?(png|jpg)\[\/img\](\[\/url\])?/g);
+    var imgs_to_deal = descr.match(/(\[url=.*?\])?\[img\].*?(png|jpg|webp)\[\/img\](\[\/url\])?/g);
     try {
         if (imgs_to_deal) {
             $('#picture').val(imgs_to_deal.join('\n'));
@@ -5689,7 +5687,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
             return;
         }
         var origin_str = $('#picture').val();
-        var imgs_to_show = origin_str.match(/\[img\]https?:.*?(jpg|png)\[\/img\]/g).map(item=>{ return item.replace(/\[.*?\]/g, '') });
+        var imgs_to_show = origin_str.match(/\[img\]https?:.*?(jpg|png|webp)\[\/img\]/g).map(item=>{ return item.replace(/\[.*?\]/g, '') });
         if (imgs_to_show.length) {
             $('#imgs_to_show').html('');
             imgs_to_show.map((item)=>{
@@ -5702,7 +5700,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     $('#getsource').click((e)=>{
         var origin_str = $('#picture').val();
         pic_info = '';
-        origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)/g).forEach((item)=>{
+        origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).forEach((item)=>{
             item = item.replace(/\[.*\]/g, '');
             if (item.match(/imgbox/)) {
                 pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
@@ -5733,7 +5731,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
 
     $('#send_ptpimg').click((e)=>{
         var origin_str = $('#picture').val();
-        images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
+        images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
         if (images.length) {
             ptp_send_images(images, used_ptp_img_key)
             .then(function(new_urls){
@@ -5749,7 +5747,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
 
     $('#send_imgbox').click((e)=>{
         var origin_str = $('#picture').val();
-        images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
+        images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
         if (images.length) {
             var name = 'set your gallary name';
             try {
@@ -5766,9 +5764,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     });
 
     $('#send_pixhost').click((e)=>{
-        if ($('#picture').val().match(/http[^\[\]]*?(jpg|png)/g).length > 0) {
+        if ($('#picture').val().match(/http[^\[\]]*?(jpg|png|webp)/g).length > 0) {
             var origin_str = $('#picture').val();
-            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
+            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
             pix_send_images(images)
             .then(function(new_urls) {
                 new_urls = new_urls.toString().split(',');
@@ -5792,9 +5790,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         } else {
             alert('缺少截图');
         }
-    });
-
-    $('#send_pixhost').click((e)=>{
     });
 
     $('#change').click((e)=>{
@@ -7357,6 +7352,50 @@ setTimeout(function(){
             raw_info.torrent_url = used_site_info.BTN.url + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
         }
 
+        if (origin_site == 'TVV') {
+            tbody = document.getElementsByClassName('torrent_table')[0];
+            raw_info.type = '剧集';
+            if (site_url.match(/torrentid=(\d+)/)) {
+                torrent_id = site_url.match(/torrentid=(\d+)/)[1];
+            }
+            raw_info.url = match_link('imdb', $('body').html());
+            var torrent_tr = $(`#torrent_${torrent_id}`);
+            raw_info.descr = '[quote]\n' + torrent_tr.find('blockquote:eq(1)').text().trim() + '\n[/quote]\n\n';
+            torrent_tr.find('img').map((index,e)=>{
+                if ($(e).parent().prop("tagName") == 'A') {
+                    raw_info.descr += '[url='+ $(e).parent().attr('href') +'][img]' + $(e).attr('src') + '[/img][/url]';
+                } else {
+                    raw_info.descr += '[img]' + $(e).attr('src') + '[/img]';
+                }
+            });
+            raw_info.torrent_url = used_site_info.TVV.url + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+            if (raw_info.descr.match(/Complete name.*?:.*/)) {
+                raw_info.name = raw_info.descr.match(/Complete name.*?:(.*)/)[1].split('/').pop().trim();
+            } else {
+                GM_xmlhttpRequest({
+                    method: "GET",
+                    url: raw_info.torrent_url,
+                    overrideMimeType: "text/plain; charset=x-user-defined",
+                    onload: (xhr) => {
+                        var r = xhr.responseText;
+                        if (r.match(/4:name\d+:/)) {
+                            var length = parseInt(r.match(/4:name(\d+):/)[1]);
+                            var index = parseInt(r.search('4:name'));
+                            raw_info.name = r.substring(index, index + length + 7 + length.toString().length).split(':').pop();
+                            raw_info.torrent_name = raw_info.name + '.torrent';
+                            jump_str = dictToString(raw_info);
+                            tag_aa = forward_r.getElementsByClassName('forward_a');
+                            for (i = 0; i < tag_aa.length; i++) {
+                                if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
+                                    tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
         if (origin_site == 'NBL') {
             $('#mediainfobox').parent().prepend(`
                 <div style="padding-left:55px; padding-right:55px">
@@ -8448,13 +8487,13 @@ setTimeout(function(){
                 }
             }
 
-            if (['PTP', 'MTV', 'UHD', 'HDF', 'RED' , 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'dicmusic', 'OPS'].indexOf(origin_site) > -1) {
+            if (['PTP', 'MTV', 'UHD', 'HDF', 'RED' , 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'dicmusic', 'OPS', 'TVV'].indexOf(origin_site) > -1) {
                 if (origin_site == 'PTP' || origin_site == 'UHD' || origin_site == 'GPW' || origin_site == 'SC' || origin_site == 'ANT') {
                     raw_info.type = '电影';
-                } else if (origin_site == 'BTN' || origin_site == 'MTV'){
+                } else if (origin_site == 'BTN' || origin_site == 'MTV' || origin_site == 'TVV'){
                     raw_info.type = '剧集';
                 }
-                if (tds[i].innerHTML.match(`torrent_(torrent_|detail_)?${torrent_id}`) || (['BTN','jpop'].indexOf(origin_site) >-1 && tds[i].parentNode.innerHTML.match('id=' + torrent_id))) {
+                if (tds[i].innerHTML.match(`torrent_(torrent_|detail_)?${torrent_id}`) || (['BTN','jpop', 'TVV'].indexOf(origin_site) >-1 && tds[i].parentNode.innerHTML.match('id=' + torrent_id))) {
                     table = tds[i].parentNode.parentNode;
                     if (origin_site == 'HDF' || origin_site == 'UHD') {
                         if(tds[i].parentNode.textContent.match(/s\d{1,3}/i)) {
@@ -9426,9 +9465,11 @@ setTimeout(function(){
             var movie_detail = document.getElementsByClassName('movie-details')[0];
             var movie_as = movie_detail.getElementsByTagName('a');
             for (i = 0; i < movie_as.length; i++) {
+                if (movie_as[i].href.match(/www.thetvdb.com/)) {
+                    raw_info.tvdb_url = 'https://www.thetvdb.com/?' + movie_as[i].href.split('?').pop();
+                }
                 if (movie_as[i].href.match(/www.imdb.com/i)) {
                     raw_info.url = 'http://www.imdb.com/title/' + movie_as[i].innerHTML;
-                    break;
                 }
             }
             if (raw_info.url && all_sites_show_douban) {
@@ -9916,7 +9957,7 @@ setTimeout(function(){
     *                                       part 4 源网页转发跳转及功能部署                                             *
     ******************************************************************************************************************/
         var forward_l, forward_r;
-        if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'dicmusic', 'OPS'].indexOf(origin_site) > -1) {
+        if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'dicmusic', 'OPS', 'TVV'].indexOf(origin_site) > -1) {
             forward_r = insert_row.insertCell(0);
             forward_r.colSpan="5";
             forward_r.style.paddingLeft = '12px'; forward_r.style.paddingTop = '10px';
@@ -10221,7 +10262,12 @@ setTimeout(function(){
             var imdbno = imdbid.substring(2);
             var container = $('#forward_r');
             add_search_urls(container, imdbid, imdbno, search_name, 0);
-        } catch(err) {}
+        } catch(err) {
+            var imdbid = '';
+            var imdbno = '';
+            var container = $('#forward_r');
+            add_search_urls(container, imdbid, imdbno, search_name, 0);
+        }
 
         if (origin_site == 'CMCT' && cmct_mode == 2) {
             setTimeout(function(){
@@ -20226,8 +20272,12 @@ setTimeout(function(){
                         console.log(data);
                         if (data.movie_results.length) {
                             $('input[name=url]').val(`https://www.themoviedb.org/movie/${data.movie_results[0].id}`);
-                        } else if (data.tv_episode_results.length || data.tv_results.length || data.tv_season_results.length) {
-                            $('input[name=url]').val(`https://www.themoviedb.org/tv/${data.movie_results[0].id}`);
+                        } else if (data.tv_episode_results.length) {
+                            $('input[name=url]').val(`https://www.themoviedb.org/tv/${data.tv_episode_results[0].id}`);
+                        } else if (data.tv_results.length) {
+                            $('input[name=url]').val(`https://www.themoviedb.org/tv/${data.tv_results[0].id}`);
+                        } else if (data.tv_season_results.length) {
+                            $('input[name=url]').val(`https://www.themoviedb.org/tv/${data.tv_season_results[0].id}`);
                         } else {
                             alert("暂无结果，请直接跳转搜索！！")
                         }
