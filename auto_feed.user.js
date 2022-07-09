@@ -1325,8 +1325,11 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
         }
     }
     var site_search_lists = used_search_list.join(' | ');
+    if ($('.search_urls').length) {
+        brs = '';
+    }
     site_search_lists = site_search_lists.format({'imdbid': imdbid, 'imdbno': imdbno, 'search_name': search_name});
-    container.append(`${brs}<div ${div_style}><font size="2px" color=${font_color}>${text}${site_search_lists}</font></div>`);
+    container.append(`${brs}<div ${div_style} class="search_urls"><font size="2px" color=${font_color}>${text}${site_search_lists}</font></div>`);
     container.find('.disabled').attr("disabled",true).click(e=>{
         e.preventDefault();
         alert('当前影视没有IMDB信息！！');
@@ -3203,6 +3206,9 @@ function reBuildHref(raw_info, forward_r) {
     var imdbid = raw_info.url.match(/tt\d+/i)[0];
     var imdbno = imdbid.substring(2);
     var container = $('#forward_r');
+    if ($('.search_urls').length) {
+        $('.search_urls').hide();
+    }
     add_search_urls(container, imdbid, imdbno, search_name, 0);
     jump_str = dictToString(raw_info);
     tag_aa = forward_r.getElementsByClassName('forward_a');
