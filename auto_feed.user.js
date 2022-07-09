@@ -3114,7 +3114,7 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
                 if (r.match(/8:announce\d+:/)) {
                     var new_announce = `8:announce${announce.length}:${announce}`;
                     new_torrent += new_announce;
-                } else {
+                } else if (forward_site !== null){
                     alert('种子文件加载失败！！！');
                     return;
                 }
