@@ -20,6 +20,7 @@ TG群链接：https://t.me/+rGUOUYZ3Ey43OWY9
 + 发布省略种子下载上传步骤，[自动清洗种子](https://github.com/tomorrow505/auto_feed_js/wiki/%E6%B8%85%E6%B4%97%E7%A7%8D%E5%AD%90-%E8%87%AA%E5%8A%A8%E4%B8%8B%E8%BD%BD%E5%8F%91%E5%B8%83%E7%9A%84%E7%A7%8D%E5%AD%90)……
 + 支持豆瓣音乐和豆瓣读书简介一键获取
 + qq非官方链接自动跳转
++ 支持一键签到适配站点
 
 ## 关于更新
 
