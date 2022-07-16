@@ -82,7 +82,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.7.1
+// @version      1.9.7.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -133,6 +133,7 @@
     20220708：适配支持TVV转出。
     20220710：优化皮转入，修复GPW部分bug，简单支持一键签到(测试中)。
     20220714：完善一键签到，支持A-soul转入。
+    20220716：继续完善一键签到。修复部分bug。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -193,20 +194,6 @@ GM_addStyle(
         color:gray
     }`
 );
-
-// 辅助签到的魔力
-if (site_url.match(/^https:\/\/totheglory.im\/*/)) {
-    if ($('#signed').text() == "签到") {
-        var data = $('head').html().match(/signed_timestamp: "\d+", signed_token: ".*?"/)[0];
-        setTimeout(function(){
-            var timestamp = data.match(/signed_timestamp: "(\d+)"/)[1];
-            var token = data.match(/signed_token: "(.*?)"/)[1];
-            postData('https://totheglory.im/signed.php', encodeURI(`signed_timestamp=${timestamp}&signed_token=${token}`), function(rep){
-                console.log(rep);
-            })
-        }, 1000);
-    }
-}
 
 /*******************************************************************************************************************
 *                                          part 0 简单页面逻辑                                                       *
@@ -277,8 +264,8 @@ if (location.href.match(/^https:\/\/greatposterwall.com\/torrents.php.*/)) {
     }
 
     if (location.href.match(/id=\d+/)) {
-        var number = $('tr.TableTorrent-rowDetail').length / 2;
-        $(`tr.TableTorrent-rowDetail:lt(${number})`).each((index, e)=>{
+        var number = parseInt($('tr.TableTorrent-rowDetail').length / 2);
+        $(`tr.TableTorrent-rowDetail:lt(${number+1})`).each((index, e)=>{
             var tid = $(e).attr('id').match(/\d+/)[0];
             var torrent_name = $(e).find('a:contains(详情)').parent().text().split('详情 | ')[1];
             var torrent_info = $(e).prev().find('td').text();
@@ -289,11 +276,11 @@ if (location.href.match(/^https:\/\/greatposterwall.com\/torrents.php.*/)) {
                     var torrent_td = $(e).find('table[class="TableTorrentFileList Table"]').find('tr:first').find('td:first');
                     torrent_name = torrent_td.text().replace(/\//g, '');
                     torrent_name = get_group_name(torrent_name, torrent_info);
-                    $(`#torrent${tid}`).find('td > a:last').append(` / <span style="font-weight:bold;color:#20B2AA">${torrent_name}</span>`);
+                    $(`#torrent${tid}`).find('span.TorrentTitle ').append(`/<span style="font-weight:bold;color:#20B2AA">${torrent_name}</span>`);
                     show_files(tid, 'detail');
                 });
             } else {
-                $(e).prev().find('td > a:last').append(` / <span style="font-weight:bold;color:#20B2AA">${torrent_name}</span>`);
+                $(e).prev().find('span.TorrentTitle ').append(`/<span style="font-weight:bold;color:#20B2AA">${torrent_name}</span>`);
             }
         });
     } else {
@@ -1327,7 +1314,7 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
         div_style = ''; font_color = 'green'; text = ''; brs = '';
     }
     if (raw_info.url) {
-        used_search_list = used_search_list.map((e)=> {
+        tmp_search_list = used_search_list.map((e)=> {
             if (e.match(/avistaz|privatehd|cinemaz/)) {
                 var domain = e.match(/avistaz|privatehd|cinemaz/)[0];
                 if (raw_info.type == "剧集" || raw_info.name.match(/S\d+|E\d+/i)) {
@@ -1345,16 +1332,19 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
         })
     } else {
         if (imdbid == '') {
-            used_search_list = used_search_list.map((e)=> {
+            tmp_search_list = used_search_list.map((e)=> {
                 if (e.match(/imdbid|imdbno/)) {
                     e = e.replace(/<a/, '<a class="disabled"');
                 }
                 return e;
             });
+        } else {
+            tmp_search_list = used_search_list;
         }
     }
-    var site_search_lists = used_search_list.join(' | ');
+    var site_search_lists = tmp_search_list.join(' | ');
     if ($('.search_urls').length) {
+        $('.search_urls').hide();
         brs = '';
     }
     site_search_lists = site_search_lists.format({'imdbid': imdbid, 'imdbno': imdbno, 'search_name': search_name});
@@ -5218,11 +5208,13 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     $('#signin').append(`<b>签到站点设置</b>`);
     $('#signin').append(`&nbsp;&nbsp;&nbsp;<a href="#" id="s_all" style="color:red">全选</a>&nbsp;&nbsp;&nbsp;<a href="#" id="u_all" style="color:red">全不选</a>
                         &nbsp;&nbsp;&nbsp;<a href="#" id="s_fail" style="color:red">保留失败站点</a>
-                        &nbsp;&nbsp;&nbsp;<a href="#" id="u_fail" style="color:red">去掉失败站点</a>`);
+                        &nbsp;&nbsp;&nbsp;<a href="#" id="u_fail" style="color:red">去掉失败站点</a>
+                        &nbsp;&nbsp;&nbsp;<a href="#" id="hide_unselected" style="color:red">隐藏未选择(默认)</a>
+                        &nbsp;&nbsp;&nbsp;<a href="#" id="show_all" style="color:red">全部显示</a>`);
     $('#signin').append(`<b>&nbsp;&nbsp;&nbsp;</b><a href="#", target="_blank" id="begin_sign"><font color="red"><b>→开始签到←</b></font></a>`);
     $('#signin').append(`<br><div id="ksortable"></div>`);
 
-    var unsupported_sites = ['HDCity', 'NPUPT', 'HITPT', 'digitalcore', 'HD-Only', 'IN'];
+    var unsupported_sites = ['NPUPT', 'digitalcore', 'HD-Only'];
 
     for (index=0; index < site_order.length; index++) {
         var key = site_order[index];
@@ -5253,16 +5245,16 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     }
     $('#signin').append(`<br><br><font color="red">暂不支持的站点列表：</font><div id="unsupported_sites" style="display:inline-block; margin-left:3px"></div>`);
     unsupported_sites.forEach((e)=>{
-        $('#unsupported_sites').append(` | <div style="display:inline-block; margin-left:5px"><a href="${o_site_info[e]? o_site_info[e]: used_site_info[e].url}" target="_blank"><b>${e}</b></a></div>`);
+        $('#unsupported_sites').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${o_site_info[e]? o_site_info[e]: used_site_info[e].url}" target="_blank"><b>${e}</b></a></div>`);
     });
-    $('#signin').append(`<br><font color="red">手动获取魔力的站点：</font> | <div style="display:inline-block; margin-left:5px"><a href="${used_site_info['TTG'].url}" target="_blank"><b>TTG(访问即可)</b></a></div>`);
-    $('#signin').append(` | <div style="display:inline-block; margin-left:5px"><a href="${used_site_info['HDSky'].url}" target="_blank"><b>HDSky(打开手动签到)</b></a></div>`);
-    $('#signin').append(` | <div style="display:inline-block; margin-left:5px"><a href="${used_site_info['CHDBits'].url + 'bakatest.php'}" target="_blank"><b>CHDBits(打开手动签到)</b></a></div>`);
-    $('#signin').append(` | <div style="display:inline-block; margin-left:5px"><a href="${o_site_info['U2'].url + 'showup.php'}" target="_blank"><b>U2(打开手动签到)</b></a></div>`);
+    $('#signin').append(`<br><font color="red">手动获取魔力的站点：</font>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['CHDBits'].url + 'bakatest.php'}" target="_blank"><b>CHDBits(打开手动签到)</b></a></div>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['TJUPT'].url + 'attendance.php'}" target="_blank"><b>TJUPT(打开手动签到)</b></a></div>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${o_site_info['U2'].url + 'showup.php'}" target="_blank"><b>U2(打开手动签到)</b></a></div>`);
 
     $('#signin').append(`<br><br><br>`);
     $('#signin').append(`<input type="button" id="ksave_setting" value="保存脚本设置！&nbsp;(只需点击一次)">`);
-    $('#signin').append(`&nbsp;&nbsp;<font color="green">说明：红色表示获取到魔力，黄色表示登录成功，蓝色表示登录失败，黑色表示暂不支持或无响应。</font>`);
+    $('#signin').append(`&nbsp;&nbsp;<font color="green">说明：红色表示获取到魔力，橙色表示登录成功，蓝色表示登录失败，黑色表示暂不支持或无响应。</font>`);
     if (site_url.match(/springsunday/)) {
         $('#ksave_setting').css({'color': 'white', 'background' :'url(https://springsunday.net/styles/Maya/images/btn_submit_bg.gif) repeat left top', 'border': '1px black'});
     }
@@ -5304,11 +5296,29 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         e.preventDefault();
         $('#signin').find('.s_all').map((index,e)=>{
             if ($(e).prop('checked')) {
-                if ($(e).parent().find('a').css('color') == 'rgb(17, 17, 17)' || $(e).parent().find('a').css('color') !== 'rgb(0, 0, 255)') {
+                if ($(e).parent().find('a').css('color') === 'rgb(17, 17, 17)' || $(e).parent().find('a').css('color') === 'rgb(0, 0, 255)') {
                     $(e).prop('checked', false);
                 }
             }
         });
+    });
+    $('#hide_unselected').click(e=>{
+        e.preventDefault();
+        $('#signin').find('.s_all').map((index,e)=>{
+            if (!$(e).prop('checked')) {
+                $(e).parent().hide();
+            }
+        });
+    });
+    $('#show_all').click(e=>{
+        e.preventDefault();
+        $('#signin').find('.s_all').parent().show();
+    });
+
+    $('#signin').find('.s_all').map((index,e)=>{
+        if (!$(e).prop('checked')) {
+            $(e).parent().hide();
+        }
     });
 
     $('#begin_sign').click((e)=>{
@@ -5331,7 +5341,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
             }
         });
 
-        // 好大啊，测试成功
         if (used_signin_sites.indexOf('HDArea') > -1) {
             postData('https://www.hdarea.co/sign_in.php', encodeURI('action=sign_in'), function(data){
                 if (data.match(/该页面必须在登录后才能访问/)) {
@@ -5343,8 +5352,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                 }
             });
         }
-
-        // 大白兔
         if (used_signin_sites.indexOf('HaresClub') > -1) {
             var data_url = 'https://club.hares.top/attendance.php?action=sign';
             GM_xmlhttpRequest({
@@ -5363,8 +5370,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                 }
             });
         }
-
-        // 瓷器 测试成功
         if (used_signin_sites.indexOf('HDChina') > -1) {
             getDoc('https://hdchina.org/', null, function(doc){
                 var data = encodeURI('csrf=' + $('head', doc).find('meta[name="x-csrf"]').attr("content"));
@@ -5379,7 +5384,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                 });
             });
         }
-        // 猫站 测试成功
         if (used_signin_sites.indexOf('PTer') > -1) {
             getJson('https://pterclub.com/attendance-ajax.php', null, function(data){
                 if (typeof data == 'object') {
@@ -5391,7 +5395,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                 }
             });
         }
-
         if (used_signin_sites.indexOf('HDU') > -1) {
             GM_xmlhttpRequest({
                 method : "POST",
@@ -5437,7 +5440,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                 });
             }, 2000);
         }
-
         if (used_signin_sites.indexOf('HD4FANS') > -1) {
             GM_xmlhttpRequest({
                 method : "POST",
@@ -5483,6 +5485,120 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                 });
             }, 2000);
         }
+        if (used_signin_sites.indexOf('TTG') > -1) {
+            GM_xmlhttpRequest({
+                method : "GET",
+                url: `https://totheglory.im/`,
+                headers: {
+                    "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    "Accept-Language": 'zh-CN,zh;q=0.9,tr;q=0.8,en-US;q=0.7,en;q=0.6',
+                    "sec-ch-ua": '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+                    "sec-ch-ua-mobile": '?0',
+                    "sec-ch-ua-platform": '"Windows"',
+                    "sec-fetch-dest": "document",
+                    "sec-fetch-mode": "navigate",
+                    "sec-fetch-site": "none",
+                    "sec-fetch-user": "?1",
+                    "upgrade-insecure-requests": "1",
+                    "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+                },
+                onload : function (response) {
+                    var resp = response.responseText;
+                    if (resp.match(/次失败登录会导致你的 IP 被禁止。/)) {
+                        $(`input[kname=TTG]`).parent().find('a').css({"color": "blue"});
+                        console.log(`开始登录TTG：`, '失败！！！');
+                    } else {
+                        var data = resp.match(/signed_timestamp: "\d+", signed_token: ".*?"/)[0];
+                        setTimeout(function(){
+                            var timestamp = data.match(/signed_timestamp: "(\d+)"/)[1];
+                            var token = data.match(/signed_token: "(.*?)"/)[1];
+                            postData('https://totheglory.im/signed.php', encodeURI(`signed_timestamp=${timestamp}&signed_token=${token}`), function(rep){
+                                if (rep === undefined) {
+                                    $(`input[kname=TTG]`).parent().find('a').css({"color": "DarkOrange"});
+                                    console.log(`开始登录TTG：`, '成功！！！');
+                                } else {
+                                    $(`input[kname=TTG]`).parent().find('a').css({"color": "red"});
+                                    console.log(`开始签到TTG：`, rep);
+                                }
+                            })
+                        }, 1000);
+                    }
+                }
+            });
+        }
+        if (used_signin_sites.indexOf('HDSky') > -1) {
+            GM_xmlhttpRequest({
+                method : "POST",
+                url: `https://hdsky.me/showup.php`,
+                data: encodeURI("action=showup"),
+                headers: {
+                    "Accept": "*/*",
+                    "accept-encoding": 'gzip, deflate, br',
+                    "accept-language": 'zh-CN,zh;q=0.9,tr;q=0.8,en-US;q=0.7,en;q=0.6',
+                    "content-length": '13',
+                    "content-type": 'application/x-www-form-urlencoded; charset=UTF-8',
+                    "Host": 'hdsky.me',
+                    "origin": 'https://hdsky.me',
+                    "referer": 'https://hdsky.me/torrents.php',
+                    "sec-ch-ua": '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+                    "sec-ch-ua-mobile": '?0',
+                    "sec-ch-ua-platform": '"Windows"',
+                    "sec-fetch-dest": 'empty',
+                    "sec-fetch-mode": 'cors',
+                    "sec-fetch-site": 'same-origin',
+                    "user-agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+                    "x-requested-with": 'XMLHttpRequest'
+                },
+                onload : function (response) {
+                    var data = response.responseText;
+                    console.log(data)
+                }
+            });
+            setTimeout(function(){
+                getDoc('https://hdsky.me/', null, function(doc) {
+                    if ($('span:contains(已签到)', doc).length) {
+                        $(`input[kname=HDSky]`).parent().find('a').css({"color": "red"});
+                        console.log(`开始签到HDSky：`, '成功！！！');
+                    } else if ($('#nav_block',doc).length) {
+                        $(`input[kname=HDSky]`).parent().find('a').css({"color": "yellow"});
+                        console.log(`开始登录HDSky：`, '成功！！！');
+                    } else {
+                        $(`input[kname=HDSky]`).parent().find('a').css({"color": "blue"});
+                        console.log(`开始登录HDSky：`, '失败！！！');
+                    }
+                });
+            }, 2000);
+        }
+        if (used_signin_sites.indexOf('BTSchool') > -1) {
+            var signin_url = used_site_info['BTSchool'].url + 'index.php?action=addbonus';
+            getDoc(signin_url, null, function(doc){
+                if ($('#nav_block', doc).length) {
+                    if ($('font:contains("今天签到您获得"):last', doc).length) {
+                        console.log(`开始签到BTSchool：`, $('font:contains("今天签到您获得"):last', doc).text().trim());
+                    } else {
+                        console.log(`开始签到BTSchool：`, '重复签到！！');
+                    }
+                    $(`input[kname=BTSchool]`).parent().find('a').css({"color": "red"});
+                } else {
+                    console.log(`开始签到BTSchool：`, '失败！！！');
+                    $(`input[kname=BTSchool]`).parent().find('a').css({"color": "blue"});
+                }
+            })
+        }
+        if (used_signin_sites.indexOf('HDCity') >-1) {
+            var signin_url = used_site_info['HDCity'].url + 'sign';
+            getDoc(signin_url, null, function(doc){
+                if ($('#bottomnav',doc).length) {
+                    if ($('p:contains("本次签到获得魅力")', doc).length || $('p:contains("Bonus earned today")', doc).length) {
+                        console.log(`开始签到HDCity：`, $('p:contains("本次签到获得魅力")', doc).length ? $('p:contains("本次签到获得魅力")', doc).text(): $('p:contains("Bonus earned today")', doc).text());
+                        $(`input[kname=HDCity]`).parent().find('a').css({"color": "red"});
+                    }
+                } else {
+                    console.log(`开始签到HDCity：`, '失败！！！');
+                    $(`input[kname=HDCity]`).parent().find('a').css({"color": "blue"});
+                }
+            });
+        }
 
         function log_in(sites, judge_str) {
             sites.forEach((e)=>{
@@ -5492,10 +5608,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                         url = 'https://1ptba.com/index.php';
                     }
                     getDoc(url, null, function(doc) {
-                        if (sites.indexOf('HD-Only')>-1) {
-                            console.log(sites)
-                            console.log(doc);
-                        }
                         if ($(judge_str, doc).length) {
                             $(`input[kname=${e}]`).parent().find('a').css({"color": "DarkOrange"});
                             console.log(`开始登陆${e}：`, '成功登陆！！');
@@ -5509,7 +5621,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         }
 
         var np_sites = ['MTeam', 'CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', 'TJUPT', '1PTBA', '52PT',
-                        'NanYang', 'BTSchool', 'DiscFan', 'Dragon', 'BYR', 'U2', 'HDSky', 'YDY', 'JoyHD', 'Oshen', 'PTMSG', 'PTNIC'];
+                        'NanYang', 'DiscFan', 'Dragon', 'BYR', 'U2', 'YDY', 'JoyHD', 'Oshen', 'PTMSG', 'PTNIC', 'HITPT'];
         log_in(np_sites, '#mainmenu');
 
         log_in(['PuTao'], '#userbar');
@@ -5525,9 +5637,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
         log_in(['KG'], 'a[class="customtab1"]');
         log_in(['HDT'], 'img[class="torrents"]');
         log_in(['xthor'], '#navbar');
-        log_in(['TTG'], '#book_tools');
         log_in(['FileList'], '#navigation');
         log_in(['bib'], '#header_nav');
+        log_in(['IN'], '#nav');
 
         log_in(['HDPost', 'BLU', 'Telly', 'HDOli'], 'nav[class="top-nav"]');
         log_in(['ACM'], 'ul[class="left-navbar"]');
@@ -19139,7 +19251,7 @@ setTimeout(function(){
                 }
             }
             var standard_dict = {
-                'SD': '480p', '720p': '720p', '1080i': '1080i', '1080p': '1080p', '4K': '2160p', '': 'Other'
+                'SD': '480p', '720p': '720p', '1080i': '1080i', '1080p': '1080p', '4K': '2160p', '': 'Other', '480p': '480p'
             };
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 $('#resolution').val(standard_dict[raw_info.standard_sel])
