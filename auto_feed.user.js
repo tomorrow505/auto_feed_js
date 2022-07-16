@@ -707,8 +707,8 @@ var ptp_name_location = GM_getValue('ptp_name_location') === undefined ? 1 : GM_
 
 //支持转发的站点列表，可以自行取消注释
 const default_site_info = {
-    '1PTBA': {'url': 'https://1ptba.com/', 'enable': 1},
-    '3Wmg': {'url': 'https://www.3wmg.com/', 'enable': 1},
+    '3Wmg': { 'url': 'https://www.3wmg.com/', 'enable': 1 },
+    '1PTBA': { 'url': 'https://1ptba.com/', 'enable': 1 },
     '52PT': {'url': 'https://52pt.site/', 'enable': 1},
     'ACM': {'url': 'https://asiancinema.me/', 'enable': 1},
     'ANT': {'url': 'https://anthelion.me/', 'enable': 1},
