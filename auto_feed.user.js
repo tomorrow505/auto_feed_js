@@ -1343,9 +1343,11 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
         }
     }
     var site_search_lists = tmp_search_list.join(' | ');
-    if ($('.search_urls').length) {
+    if ($('.search_urls').length == 1) {
         $('.search_urls').hide();
         brs = '';
+    } else if ($('.search_urls').length > 2) {
+        $('.search_urls').show();
     }
     site_search_lists = site_search_lists.format({'imdbid': imdbid, 'imdbno': imdbno, 'search_name': search_name});
     container.append(`${brs}<div ${div_style} class="search_urls"><font size="2px" color=${font_color}>${text}${site_search_lists}</font></div>`);
@@ -5249,8 +5251,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
     });
     $('#signin').append(`<br><font color="red">手动获取魔力的站点：</font>`);
     $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['CHDBits'].url + 'bakatest.php'}" target="_blank"><b>CHDBits(打开手动签到)</b></a></div>`);
-    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['TJUPT'].url + 'attendance.php'}" target="_blank"><b>TJUPT(打开手动签到)</b></a></div>`);
-    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${o_site_info['U2'].url + 'showup.php'}" target="_blank"><b>U2(打开手动签到)</b></a></div>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${o_site_info['U2'] + 'showup.php'}" target="_blank"><b>U2(打开手动签到)</b></a></div>`);
 
     $('#signin').append(`<br><br><br>`);
     $('#signin').append(`<input type="button" id="ksave_setting" value="保存脚本设置！&nbsp;(只需点击一次)">`);
@@ -5599,6 +5600,80 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
                 }
             });
         }
+        if (used_signin_sites.indexOf('TJUPT') > -1) {
+            getDoc('https://www.tjupt.org/attendance.php', null, function(doc){
+                if ($('#mainmenu', doc).length) {
+                    if ($('a:contains(今日已签到)', doc).length) {
+                        return;
+                    }
+                    var answers = [];
+                    var values = [];
+                    $('input[name="answer"]', doc).map((index, e)=>{
+                        values.push($(e).val().replace(/ /, '+').replace(/:/g, '%3A').replace(/&/, '%26'));
+                        answers.push($(e)[0].nextSibling.textContent);
+                    });
+                    var imgid = $('table.captcha', doc).find('img').attr('src').match(/p(\d+).jpg/)[1];
+                    answers.forEach((item, index)=>{
+                        getJson(`https://movie.douban.com/j/subject_suggest?q=${item}`, null, function(data){
+                            if (data.length) {
+                                data.forEach((movie)=>{
+                                    if (movie.img.match(imgid)) {
+                                        GM_xmlhttpRequest({
+                                            method : "POST",
+                                            url: `https://www.tjupt.org/attendance.php`,
+                                            data: `answer=${values[index]}&submit=%E6%8F%90%E4%BA%A4`,
+                                            headers: {
+                                                "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                                                "Accept-Encoding": 'gzip, deflate, br',
+                                                "Accept-Language": 'zh-CN,zh;q=0.9,tr;q=0.8,en-US;q=0.7,en;q=0.6',
+                                                "Cache-Control": 'no-cache',
+                                                "Content-Length": '61',
+                                                "Content-Type": 'application/x-www-form-urlencoded',
+                                                "Host": 'www.tjupt.org',
+                                                "Origin": 'https://www.tjupt.org',
+                                                "Pragma": 'no-cache',
+                                                "Referer": 'https://www.tjupt.org/attendance.php',
+                                                "sec-ch-ua": '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+                                                "sec-ch-ua-mobile": '?0',
+                                                "sec-ch-ua-platform": '"Windows"',
+                                                "Sec-Fetch-Dest": 'document',
+                                                "Sec-Fetch-Mode": 'navigate',
+                                                "Sec-Fetch-Site": 'same-origin',
+                                                "Sec-Fetch-User": '?1',
+                                                "Upgrade-Insecure-Requests": '1',
+                                                "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36'
+                                            },
+                                            onload : function (response) {
+                                                var data = response.responseText;
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    });
+
+                } else {
+                    $(`input[kname=TJUPT]`).parent().find('a').css({"color": "blue"});
+                    console.log(`开始登陆TJUPT：`, '登陆失败！！！！！！！');
+                }
+            });
+            setTimeout(function(){
+                getDoc('https://www.tjupt.org/attendance.php', null, function(doc) {
+                    if ($('a:contains(今日已签到)', doc).length) {
+                        $(`input[kname=TJUPT]`).parent().find('a').css({"color": "red"});
+                        console.log(`开始签到TJUPT：`, '成功！！！');
+                    } else if ($('#mainmenu',doc).length) {
+                        $(`input[kname=TJUPT]`).parent().find('a').css({"color": "DarkOrange"});
+                        console.log(`开始登录TJUPT：`, '成功！！！');
+                    } else {
+                        $(`input[kname=TJUPT]`).parent().find('a').css({"color": "blue"});
+                        console.log(`开始登录TJUPT：`, '失败！！！');
+                    }
+                });
+            }, 3000);
+        }
+
 
         function log_in(sites, judge_str) {
             sites.forEach((e)=>{
@@ -5620,7 +5695,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#rehostim
             });
         }
 
-        var np_sites = ['MTeam', 'CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', 'TJUPT', '1PTBA', '52PT',
+        var np_sites = ['MTeam', 'CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', '1PTBA', '52PT',
                         'NanYang', 'DiscFan', 'Dragon', 'BYR', 'U2', 'YDY', 'JoyHD', 'Oshen', 'PTMSG', 'PTNIC', 'HITPT'];
         log_in(np_sites, '#mainmenu');
 
@@ -11693,6 +11768,12 @@ setTimeout(function(){
             } else {
                 search_mode = 0;
                 set_jump_href(raw_info, 0);
+            }
+        }, false);
+        $('#bugfeedback')[0].addEventListener('click', function(e){
+            if (!confirm('有问题可以加qq群: 867736374或者TG群(见GitHub)交流，请先查看项目wiki，确定有bug再反馈。确定反馈吗？')) {
+                e.preventDefault();
+                return;
             }
         }, false);
     }
