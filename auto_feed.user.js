@@ -19280,6 +19280,8 @@ setTimeout(function(){
                 $('#source').val('HD-DVD');
             }
 
+            console.log(raw_info.codec_sel)
+
             switch (raw_info.codec_sel){
                 case 'H265':
                     $('#codec').val('H.265'); break;
@@ -19320,7 +19322,7 @@ setTimeout(function(){
             }
 
             var size = 0;
-            if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+            if ((raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') && raw_info.descr.match(/mpls/i)) {
                 size = get_size_from_descr(raw_info.descr);
                 if (0 <= size && size < 25) {
                     $('#codec').val('BD25');
@@ -19349,6 +19351,9 @@ setTimeout(function(){
                     }
                 } else if (height == '2 160') {
                     raw_info.standard_sel = '4K';
+                }
+                if (raw_info.name.match(/576p/i)) {
+                    raw_info.standard_sel = '576p';
                 }
             }
             var standard_dict = {
