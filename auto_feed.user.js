@@ -82,7 +82,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.7.3
+// @version      1.9.7.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1896,8 +1896,8 @@ String.prototype.codec_sel = function() { //编码
         result = 'XVID';
     } else if (result.match(/(VP9)/i)) {
         result = 'VP9';
-    } else if (result.match(/DVIX/i)) {
-        result = 'DVIX';
+    } else if (result.match(/DIVX/i)) {
+        result = 'DIVX';
     } else {
         result = '';
     }
@@ -2075,7 +2075,7 @@ function blurayVersion(name){
 
     var small_descr;
     const ver = ['AUS','CAN','CEE','CZE','ESP','EUR','FRA','GBR','GER','HKG','ITA','JPN','KOR','NOR','NLD','RUS','TWN','USA'];
-    const ver_chinese=['澳版','加拿大','CEE','捷克','西班牙版','欧版','法版','英版','德版','港版','意大利版','日版','韩版','挪威版','荷兰版','俄版','台版','美版'];
+    const ver_chinese=['澳版','加拿大','CEE','捷克','西班牙版','欧版','法版','英版','德版','港版','意大利版','日版','韩版','北欧版','荷兰版','俄版','台版','美版'];
     for (i=0; i<ver.length; i++) {
         var reg = new RegExp('(\\.| )'+ ver[i] + '(\\.| )', 'i');
             if (name.match(reg)) {
@@ -2443,13 +2443,69 @@ function fill_raw_info(raw_info){
         }
     }
 
+    if (raw_info.standard_sel == '1080p') {
+        if (raw_info.name.standard_sel() == '1080i') {
+            raw_info.standard_sel = '1080i';
+        } else if (raw_info.descr.match(/1080i|Scan.*?type.*?(Interleaved|Interlaced)/)) {
+            raw_info.standard_sel = '1080i';
+        }
+    }
+
     //没有分辨率
     if (raw_info.standard_sel == ''){
         raw_info.standard_sel = raw_info.name.standard_sel();
     }
 
+    if (raw_info.standard_sel == '') {
+        var height = raw_info.descr.match(/Height.*?:(.*?)pixels/i)[1].trim();
+        if (height == '480' || height == '576') {
+            raw_info.standard_sel = 'SD';
+        } else if (height == '720') {
+            raw_info.standard_sel = '720p';
+        } else if (height == '1 080') {
+            raw_info.standard_sel = '1080p';
+            if (raw_info.descr.match(/Scan.*?type.*?(Interleaved|Interlaced)/i)) {
+                raw_info.standard_sel = '1080i';
+            }
+        } else if (height == '2 160') {
+            raw_info.standard_sel = '4K';
+        }
+    }
+
     if (raw_info.name.match(/Remux/i)){
         raw_info.medium_sel = 'Remux';
+    }
+
+    if (raw_info.name.match(/webrip/i)) {
+        raw_info.medium_sel = 'WEB-DL';
+    }
+    if (raw_info.edition_info.medium_sel()) {
+        if (raw_info.edition_info.medium_sel() != 'Blu-ray' || raw_info.descr.match(/mpls/i)) {
+            raw_info.medium_sel = raw_info.edition_info.medium_sel();
+        } else if (raw_info.edition_info.medium_sel() == 'Blu-ray' && raw_info.edition_info.match(/mkv/i)) {
+            raw_info.medium_sel = 'Encode';
+        }
+    }
+
+    if (raw_info.edition_info.codec_sel()) {
+        raw_info.codec_sel = raw_info.edition_info.codec_sel();
+    }
+    if (!raw_info.codec_sel) {
+        if (raw_info.descr.match(/Writing library.*(x264|x265)/)) {
+            raw_info.codec_sel = raw_info.descr.match(/Writing library.*(x264|x265)/)[1].toUpperCase();
+        } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?HEVC/i)){
+            raw_info.codec_sel = 'H265';
+        } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?AVC/i)){
+            raw_info.codec_sel = 'H264';
+        } else if (raw_info.descr.match(/XviD/i)){
+            raw_info.codec_sel = 'XVID';
+        } else if (raw_info.descr.match(/DivX/i)){
+            raw_info.codec_sel = 'DIVX';
+        } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?MPEG Video[\s\S]{1,10}Format Version.*?Version 4/i)) {
+            raw_info.codec_sel = 'MPEG-4';
+        } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?MPEG Video[\s\S]{1,10}Format Version.*?Version 2/i)) {
+            raw_info.codec_sel = 'MPEG-2';
+        }
     }
 
     return raw_info;
@@ -5709,7 +5765,8 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         log_in(['ANT'], '#nav_home');
         log_in(['NBL'], '#mainnav');
-        log_in(['BTN', 'Tik', 'SC', 'MTV', 'UHD', 'HDSpace', 'TVV', 'HDF', 'RED', 'jpop', 'lztr', 'dicmusic', 'OPS', 'bit-hdtv', 'openlook'], '#menu');
+        log_in(['BTN', 'SC', 'MTV', 'UHD', 'HDSpace', 'TVV', 'HDF', 'RED', 'jpop', 'lztr', 'dicmusic', 'OPS', 'bit-hdtv', 'openlook'], '#menu');
+        log_in(['Tik'], 'a[href*="www.cinematik.net/index.php"]')
         log_in(['HDB'], '#menusides');
         log_in(['BHD'], 'div[class="beta-table"]');
         log_in(['PTP'], 'div[class="main-menu"]');
@@ -12670,7 +12727,7 @@ setTimeout(function(){
         }
 
         if ($('textarea[name="technical_info"]').length) {
-            if (raw_info.descr.match(/MPLS|disc info/i) && forward_site != 'PigGo') {
+            if (raw_info.descr.match(/MPLS|disc info/i) && forward_site != 'PigGo' && forward_site != 'FreeFarm') {
                 $('textarea[name="descr"]').val(raw_info.descr);
             } else {
                 try{
@@ -19280,45 +19337,24 @@ setTimeout(function(){
                 $('#source').val('HD-DVD');
             }
 
-            console.log(raw_info.codec_sel)
-
             switch (raw_info.codec_sel){
-                case 'H265':
-                    $('#codec').val('H.265'); break;
-                case 'H264':
-                    $('#codec').val('H.264'); break;
-                case 'X264':
-                    $('#codec').val('x264'); break;
-                case 'X265':
-                    $('#codec').val('x265'); break;
-                case 'VC-1':
-                    $('#codec').val('x264'); break;
-                case 'Xvid':
-                    $('#codec').val('XviD'); break;
+                case 'H265': $('#codec').val('H.265'); break;
+                case 'H264': $('#codec').val('H.264'); break;
+                case 'X264': $('#codec').val('x264'); break;
+                case 'X265': $('#codec').val('x265'); break;
+                case 'VC-1': $('#codec').val('x264'); break;
+                case 'XVID': $('#codec').val('XviD'); break;
+                case 'DIVX': $('#codec').val('DivX'); break;
+                case 'MPEG-2': case 'MPEG-4':
+                    $('#codec').val('Other');
+                    $('#codec')[0].dispatchEvent(evt);
+                    $('#other_codec').val(raw_info.codec_sel);
+                    break;
             }
             if (raw_info.name.match(/dvd5/i)) {
                 $('#codec').val('DVD5');
             } else if (raw_info.name.match(/dvd9/i)) {
                 $('#codec').val('DVD9');
-            }
-            if (raw_info.descr.match(/Writing library.*(x264|x265)/)) {
-                $('#codec').val(raw_info.descr.match(/Writing library.*(x264|x265)/)[1]);
-            } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?HEVC/i)){
-                $('#codec').val('H.265');
-            } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?AVC/i)){
-                $('#codec').val('H.264');
-            } else if (raw_info.descr.match(/XviD/i)){
-                $('#codec').val('XviD');
-            } else if (raw_info.descr.match(/DivX/i)){
-                $('#codec').val('DivX');
-            } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?MPEG Video[\s\S]{1,10}Format Version.*?Version 4/i)) {
-                $('#codec').val('Other');
-                $('#codec')[0].dispatchEvent(evt);
-                $('#other_codec').val('MPEG-4')
-            } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?MPEG Video[\s\S]{1,10}Format Version.*?Version 2/i)) {
-                $('#codec').val('Other');
-                $('#codec')[0].dispatchEvent(evt);
-                $('#other_codec').val('MPEG-2')
             }
 
             var size = 0;
@@ -19336,21 +19372,12 @@ setTimeout(function(){
                 $('#container').val('m2ts');
             }
 
-            if (raw_info.standard_sel == '' || raw_info.standard_sel == 'SD') {
+            if (raw_info.standard_sel == 'SD') {
                 var height = raw_info.descr.match(/Height.*?:(.*?)pixels/i)[1].trim();
                 if (height == '480') {
                     raw_info.standard_sel = '480p';
-                } else if (height == '720') {
-                    raw_info.standard_sel = '720p';
                 } else if (height == '576') {
                     raw_info.standard_sel = '576p';
-                } else if (height == '1 080') {
-                    raw_info.standard_sel = '1080p';
-                    if (raw_info.descr.match(/Scan.*?type.*Interlaced/i)) {
-                        raw_info.standard_sel = '1080i';
-                    }
-                } else if (height == '2 160') {
-                    raw_info.standard_sel = '4K';
                 }
                 if (raw_info.name.match(/576p/i)) {
                     raw_info.standard_sel = '576p';
@@ -19851,12 +19878,6 @@ setTimeout(function(){
             // 默认长片
             $('#releasetype').val('1');
 
-            if (raw_info.name.match(/webrip/i)) {
-                raw_info.medium_sel = 'WEB-DL';
-            }
-            if (raw_info.edition_info.medium_sel()) {
-                raw_info.medium_sel = raw_info.edition_info.medium_sel();
-            }
             switch(raw_info.medium_sel){
                 case 'UHD': case 'Blu-ray':  case 'Encode': case 'Remux':
                     $('#source').val('Blu-ray');
@@ -19910,21 +19931,12 @@ setTimeout(function(){
             }
             $('#processing')[0].dispatchEvent(evt);
 
-            if (raw_info.standard_sel == '' || raw_info.standard_sel == 'SD') {
+            if (raw_info.standard_sel == 'SD') {
                 var height = raw_info.descr.match(/Height.*?:(.*?)pixels/i)[1].trim();
                 if (height == '480') {
                     raw_info.standard_sel = '480p';
-                } else if (height == '720') {
-                    raw_info.standard_sel = '720p';
                 } else if (height == '576') {
                     raw_info.standard_sel = '576p';
-                } else if (height == '1 080') {
-                    raw_info.standard_sel = '1080p';
-                    if (raw_info.descr.match(/Scan.*?type.*Interlaced/i)) {
-                        raw_info.standard_sel = '1080i';
-                    }
-                } else if (height == '2 160') {
-                    raw_info.standard_sel = '4K';
                 }
             }
 
@@ -19960,28 +19972,7 @@ setTimeout(function(){
             $('#resolution')[0].dispatchEvent(evt);
 
             $('#codec').val('Other');
-            if (raw_info.edition_info.codec_sel()) {
-                raw_info.codec_sel = raw_info.edition_info.codec_sel();
-            }
-            if (!raw_info.codec_sel) {
-                if (raw_info.descr.match(/Writing library.*(x264|x265)/)) {
-                    raw_info.codec_sel = raw_info.descr.match(/Writing library.*(x264|x265)/)[1].toUpperCase();
-                } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?HEVC/i)){
-                    raw_info.codec_sel = 'H265';
-                } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?AVC/i)){
-                    raw_info.codec_sel = 'H264';
-                } else if (raw_info.descr.match(/XviD/i)){
-                    raw_info.codec_sel = 'XVID';
-                } else if (raw_info.descr.match(/DivX/i)){
-                    raw_info.codec_sel = 'DVIX';
-                } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?MPEG Video[\s\S]{1,10}Format Version.*?Version 4/i)) {
-                    $('#codec').val('Other');
-                    $('#other_codec').val('MPEG-4')
-                } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?MPEG Video[\s\S]{1,10}Format Version.*?Version 2/i)) {
-                    $('#codec').val('Other');
-                    $('#other_codec').val('MPEG-2')
-                }
-            }
+
             switch (raw_info.codec_sel){
                 case 'H265': $('#codec').val('H.265'); break;
                 case 'H264': $('#codec').val('H.264'); break;
@@ -19989,7 +19980,11 @@ setTimeout(function(){
                 case 'X265': $('#codec').val('x265'); break;
                 case 'VC-1': $('#codec').val('VC-1'); break;
                 case 'XVID': $('#codec').val('XviD'); break;
-                case 'DVIX': $('#codec').val('DVIX'); break;
+                case 'DIVX': $('#codec').val('DivX'); break;
+                case 'MPEG-2': case 'MPEG-4':
+                    $('#codec').val('Other');
+                    $('input[name="codec_other"]').val(raw_info.codec_sel);
+                    break;
             }
             $('#codec')[0].dispatchEvent(evt);
 
