@@ -78,11 +78,12 @@
 // @resource     css http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css
 // @require      https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js
 // @require      https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js
+// @require      https://gist.github.com/po5/740d100c992f1315e81dbeca9a4b425a/raw/mediainfo.lib.js
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.7.4
+// @version      1.9.7.5
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -134,6 +135,7 @@
     20220710：优化皮转入，修复GPW部分bug，简单支持一键签到(测试中)。
     20220714：完善一键签到，支持A-soul转入。
     20220716：继续完善一键签到。修复部分bug。
+    20220726：支持MP4/MKV视频文件获取mediainfo+截图。功能待测试
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -422,6 +424,40 @@ if (site_url.match(/^https?:\/\/imgbox.com/)) {
                 $('#gallery-title').val(gallary_name);
                 $('#add_images').val("拉取成功！");
             });
+        });
+    }
+    var imgs_64 = GM_getValue('64imgs') !== undefined ? JSON.parse(GM_getValue('64imgs')): [];
+    if (imgs_64.length) {
+        function b64toBlob(b64Data, contentType, sliceSize) {
+            contentType = contentType || '';
+            sliceSize = sliceSize || 512;
+            var byteCharacters = atob(b64Data);
+            var byteArrays = [];
+            for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                var slice = byteCharacters.slice(offset, offset + sliceSize);
+                var byteNumbers = new Array(slice.length);
+                for (var i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+                var byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+            var blob = new Blob(byteArrays, {type: contentType});
+            return blob;
+        }
+        $('div.visible-desktop:first').find('span:first').append(`<br><br><input type="button" value="拉取BASE64图片" id="add_64images"/>`);
+        $('#add_64images').click(()=>{
+            var gallary_name = imgs_64.pop();
+            let container = new DataTransfer();
+            imgs_64.forEach((item, index)=>{
+                console.log(item)
+                var blob = b64toBlob(item.replace('data:image/png;base64,', ''), 'image/png');
+                const file = new window.File([blob], `thumbnail-${index}.png`, { type: blob.type });
+                container.items.add(file);
+            });
+            $('input[name="files[]"]')[0].files = container.files;
+            $('input[name="files[]"]')[0].dispatchEvent(evt);
+            $('#gallery-title').val(gallary_name);
         });
     }
     return;
@@ -6170,6 +6206,182 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
     $('#mediainfo').append(`<textarea id="media_info" style="width:700px" rows="20"></textarea><br>`);
     $('#mediainfo').append(`<input type="button" id="simplify" value="简化信息" style="margin-bottom:5px"><br>`);
     $('#mediainfo').append(`<textarea id="clarify_media_info" style="width:700px" rows="20"></textarea><br>`);
+
+    $('#mediainfo').append(`<div id="video-demo-container">
+        <button id="upload-button" style="width:320px; margin-left:160px">Select MP4/MKV Video</button> 
+        <input type="file" id="file-to-upload" accept="video/mp4,video/x-matroska" />
+        <video id="main-video" controls>
+            <source type="video/mp4">
+        </video>
+        <div id="video-canvas">
+        </div>
+        <textarea id="mediainfo_output" style="width:640px; margin-bottom:5px" rows="30"></textarea>
+        <div id="thumbnail-container">
+            <span>截图展示<a id="upload_img" href="#"><font color="blue">-->上传<--</font></a></span><br>
+        </div>
+    </div>`);
+
+    var new_style = `
+        #video-demo-container {
+            width: 800px;
+            margin: 40px auto;
+        }
+
+        #main-video {
+            display: none;
+            max-width: 400px;
+        }
+
+        #thumbnail-container {
+            display: none;
+        }
+
+        #video-canvas {
+            display: none;
+        }
+
+        #upload-button {
+            width: 150px;
+            display: block;
+            margin: 20px auto;
+        }
+
+        #file-to-upload {
+            display: none;
+        }
+    `;
+    GM_addStyle(new_style);
+
+    for (var i = 0; i < 6; i++) {
+        $('#video-canvas').append(`<canvas class="canvas"></canvas>`);
+        $('#thumbnail-container').append(`<a href=""><img style="max-width:320px; display:inline-block;margin-right:6px;" src="" /></a>`)
+    }
+
+    var _CANVAS = document.querySelectorAll(".canvas");
+    var _CTXS = [];
+    for (var i = 0; i < 6; i++) {
+        var _CTX = _CANVAS[i].getContext("2d");
+        _CTXS.push(_CTX);
+    }
+    _VIDEO = document.querySelector("#main-video");
+
+    document.querySelector("#upload-button").addEventListener('click', function() {
+        document.querySelector("#file-to-upload").click();
+    });
+
+    document.querySelector("#file-to-upload").addEventListener('change', function() {
+        // Validate whether MP4/MKV
+        file = document.querySelector("#file-to-upload").files[0];
+        if(['video/mp4', 'video/x-matroska'].indexOf(file.type) == -1) {
+            alert('Error : Only MP4/MKV format allowed');
+            return;
+        }
+        var video_name = file.name;
+        $('#upload_img').click((e)=>{
+            var imgs = [];
+            e.preventDefault();
+            $(`#thumbnail-container`).find(`img`).map((index,el)=>{
+                imgs.push($(el).attr('src'));
+            });
+            imgs.push(video_name);
+            GM_setValue("64imgs", JSON.stringify(imgs));
+            window.open('https://imgbox.com', '_blank');
+        });
+        // Object Url as the video source
+        document.querySelector("#main-video source").setAttribute('src', URL.createObjectURL(document.querySelector("#file-to-upload").files[0]));
+        
+        // Load the video and show it
+        _VIDEO.load();
+        // _VIDEO.style.display = 'inline';
+        
+        // Load metadata of the video to get video duration and dimensions
+        _VIDEO.addEventListener('loadedmetadata', function() {
+            var video_duration = _VIDEO.duration,
+            duration_options_html = '';
+
+            var step = Math.floor(video_duration/7);
+            var times = [];
+            for (var i = 0; i < 6; i++) {
+                times.push((i+1)*step);
+            }
+
+            Array.from(_CANVAS).forEach((item)=>{
+                item.width = _VIDEO.videoWidth;
+                item.height = _VIDEO.videoHeight;
+            });
+
+            times.forEach((t,index)=>{
+                setTimeout(function(){
+                    _VIDEO.currentTime = t;
+                }, index*3000);
+
+            });
+            $(`#thumbnail-container`).css('display', 'block');
+        });
+
+        var img_index = 0;
+        _VIDEO.addEventListener('seeked', () => {
+                // define a canvas to have the same dimension as the video
+                // const canvas = document.createElement("canvas");
+                // canvas.width = videoPlayer.videoWidth;
+                // canvas.height = videoPlayer.videoHeight;
+                // // draw the video frame to canvas
+                // const ctx = canvas.getContext("2d");
+                // ctx.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
+                // // return the canvas image as a blob
+                // ctx.canvas.toBlob(
+                //     blob => {
+                //         resolve(blob);
+                //     },
+                //     "image/jpeg",
+                //     0.75 /* quality */
+                // );
+                _CTXS[img_index].drawImage(_VIDEO, 0, 0, _VIDEO.videoWidth, _VIDEO.videoHeight);                        
+                $(`#thumbnail-container`).find(`img:eq(${img_index})`).attr('src', _CANVAS[img_index].toDataURL());
+                $(`#thumbnail-container>a:eq(${img_index})`).attr('href', _CANVAS[img_index].toDataURL());
+                $(`#thumbnail-container>a:eq(${img_index})`).attr('download', `${video_name}-thumbnail-${img_index}.png`);
+                img_index += 1;
+        });
+    });
+
+    try {
+        const fileinput = document.getElementById('file-to-upload');
+        const output = document.getElementById('mediainfo_output');
+
+        const onChangeFile = (mediainfo) => {
+          const file = fileinput.files[0];
+          if (file) {
+            output.value = 'Working…'
+            const getSize = () => file.size
+            const readChunk = (chunkSize, offset) =>
+              new Promise((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = (event) => {
+                  if (event.target.error) {
+                    reject(event.target.error)
+                  }
+                  resolve(new Uint8Array(event.target.result))
+                }
+                reader.readAsArrayBuffer(file.slice(offset, offset + chunkSize))
+              })
+
+            mediainfo
+                .analyzeData(getSize, readChunk)
+                .then((result) => {
+                output.value = result;
+                })
+                .catch((error) => {
+                  output.value = `An error occured:\n${error.stack}`
+                })
+          }
+        }
+
+        MediaInfo({ format: 'text' }, (mediainfo) => {
+            fileinput.addEventListener('change', () => onChangeFile(mediainfo))
+        });
+    } catch(err) {
+        $('#mediainfo_output').css('display', 'none');
+    }
 
     //长mediainfo转换简洁版mediainfo
     const N = "\n";
