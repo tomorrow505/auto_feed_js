@@ -78,7 +78,7 @@
 // @resource     css http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css
 // @require      https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js
 // @require      https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js
-// @require      https://objectstorage.ap-tokyo-1.oraclecloud.com/n/nrmpw4xvtvgl/b/bucket-20200224-2012/o/CDN%2Fmediainfo.js
+// @require      https://unpkg.com/auto-feed-media@1.0.1/index.js
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1052800
 // @icon         https://kp.m-team.cc//favicon.ico
@@ -401,7 +401,7 @@ if (site_url.match(/^https?:\/\/ptpimg.me/)) {
     return;
 }
 
-if (site_url.match(/^https?:\/\/imgbox.com/)) {
+if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.com).?$/)) {
     var images = GM_getValue('HDB_images') !== undefined ? GM_getValue('HDB_images').split(', '): '';
     if (images && $('input[name="files[]"]').length) {
         $('div.visible-desktop:first').find('span:first').append(`<br><br><input type="button" value="拉取图片" id="add_images"/>`);
@@ -445,7 +445,11 @@ if (site_url.match(/^https?:\/\/imgbox.com/)) {
             var blob = new Blob(byteArrays, {type: contentType});
             return blob;
         }
-        $('div.visible-desktop:first').find('span:first').append(`<br><br><input type="button" value="拉取BASE64图片" id="add_64images"/>`);
+        if (site_url.match(/imgbox/)) {
+            $('div.visible-desktop:first').find('span:first').append(`<br><br><input type="button" value="拉取BASE64图片" id="add_64images"/>`);
+        } else {
+            $('div.main-content').after(`<br><br><input type="button" value="拉取BASE64图片" id="add_64images"/>`);
+        }
         $('#add_64images').click(()=>{
             var gallary_name = imgs_64.pop();
             let container = new DataTransfer();
@@ -455,9 +459,19 @@ if (site_url.match(/^https?:\/\/imgbox.com/)) {
                 const file = new window.File([blob], `thumbnail-${index}.png`, { type: blob.type });
                 container.items.add(file);
             });
-            $('input[name="files[]"]')[0].files = container.files;
-            $('input[name="files[]"]')[0].dispatchEvent(evt);
-            $('#gallery-title').val(gallary_name);
+            if (site_url.match(/imgbox/)) {
+                $('input[name="files[]"]')[0].files = container.files;
+                $('input[name="files[]"]')[0].dispatchEvent(evt);
+                $('#gallery-title').val(gallary_name);
+            } else {
+                $('input[class="dz-hidden-input"]')[0].files = container.files;
+                $('input[class="dz-hidden-input"')[0].dispatchEvent(evt);
+                $('input[value="sfw"]').attr('checked', true);
+                $('#gallery').attr('checked', true);
+                $('#gallery')[0].dispatchEvent(evt);
+                $('#thumbnail-size').val(4);
+                $('#gallery-title').val(gallary_name);
+            }
         });
     }
     return;
@@ -6217,7 +6231,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         </div>
         <textarea id="mediainfo_output" style="width:640px; margin-bottom:5px" rows="30"></textarea>
         <div id="thumbnail-container">
-            <span>截图展示<a id="upload_img" href="#"><font color="blue">-->上传<--</font></a></span><br>
+            <span>截图展示：<a class="upload_img" href="https://imgbox.com" style="color:blue">-->上传imgbox<--</a> | 
+            <a class="upload_img" href="https://www.imagebam.com/" style="color:blue">-->上传imagebam<--</a> 
+            </span><br>
         </div>
     </div>`);
 
@@ -6277,7 +6293,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             return;
         }
         var video_name = file.name;
-        $('#upload_img').click((e)=>{
+        $('.upload_img').click((e)=>{
             var imgs = [];
             e.preventDefault();
             $(`#thumbnail-container`).find(`img`).map((index,el)=>{
@@ -6285,7 +6301,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             });
             imgs.push(video_name);
             GM_setValue("64imgs", JSON.stringify(imgs));
-            window.open('https://imgbox.com', '_blank');
+            window.open(e.target.href, '_blank');
         });
         // Object Url as the video source
         document.querySelector("#main-video source").setAttribute('src', URL.createObjectURL(document.querySelector("#file-to-upload").files[0]));
@@ -6368,7 +6384,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             mediainfo
                 .analyzeData(getSize, readChunk)
                 .then((result) => {
-                output.value = result;
+                    result = result.replace(/Movie name.*\n/, '');
+                    result = result.replace(/(Unique ID.*\n)/, `$1Complete name                            : ${file.name}\n`);
+                    output.value = result;
                 })
                 .catch((error) => {
                   output.value = `An error occured:\n${error.stack}`
