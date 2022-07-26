@@ -26,6 +26,7 @@
 // @match        http*://ptpimg.me*
 // @match        https://torrentdb.net/torrent/*
 // @match        https://imgbox.com*
+// @match        https://www.imagebam.com/*
 // @match        https://totheglory.im/*
 // @match        https://hd-space.org/index.php?page=upload
 // @match        https://hdcity.city/upload*
