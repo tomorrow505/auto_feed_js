@@ -6337,27 +6337,25 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         var img_index = 0;
         _VIDEO.addEventListener('seeked', () => {
-                // define a canvas to have the same dimension as the video
-                // const canvas = document.createElement("canvas");
-                // canvas.width = videoPlayer.videoWidth;
-                // canvas.height = videoPlayer.videoHeight;
-                // // draw the video frame to canvas
-                // const ctx = canvas.getContext("2d");
-                // ctx.drawImage(videoPlayer, 0, 0, canvas.width, canvas.height);
-                // // return the canvas image as a blob
-                // ctx.canvas.toBlob(
-                //     blob => {
-                //         resolve(blob);
-                //     },
-                //     "image/jpeg",
-                //     0.75 /* quality */
-                // );
                 _CTXS[img_index].drawImage(_VIDEO, 0, 0, _VIDEO.videoWidth, _VIDEO.videoHeight);                        
                 $(`#thumbnail-container`).find(`img:eq(${img_index})`).attr('src', _CANVAS[img_index].toDataURL());
                 $(`#thumbnail-container>a:eq(${img_index})`).attr('href', _CANVAS[img_index].toDataURL());
                 $(`#thumbnail-container>a:eq(${img_index})`).attr('download', `${video_name}-thumbnail-${img_index}.png`);
                 img_index += 1;
         });
+    });
+
+    document.querySelector("#upload-button").addEventListener("dragenter",function(e){  //拖进
+        e.preventDefault();      
+    })  
+    document.querySelector("#upload-button").addEventListener("dragover",function(e){  //拖来拖去 
+        e.preventDefault();      
+    })
+    document.querySelector("#upload-button").addEventListener('drop', function(event) {
+        event.preventDefault(); 
+        var fileList = Array.from(event.dataTransfer.files);  //  es6 格式
+        document.querySelector("#file-to-upload").files = event.dataTransfer.files;
+        document.querySelector("#file-to-upload").dispatchEvent(evt);
     });
 
     try {
