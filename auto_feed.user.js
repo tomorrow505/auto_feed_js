@@ -7948,6 +7948,9 @@ setTimeout(function(){
             } else if (origin_site == 'HaresClub') {
                 raw_info.torrent_name = $('td:contains(".torrent")').text();
                 raw_info.torrent_url = used_site_info[origin_site].url + $('a[href*="download.php"]').attr('href');
+            } else if (origin_site == 'U2') {
+                raw_info.torrent_name = $('td:contains(".torrent")').text();
+                raw_info.torrent_url = o_site_info[origin_site] + $('a[href*="download.php"]').attr('href');
             } else if (origin_site == 'other') {
                 raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
                 try {
