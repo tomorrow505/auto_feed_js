@@ -146,6 +146,7 @@
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
 var site_url = decodeURI(location.href);
 const TIMEOUT = 6000;
+const N = "\n";
 var evt = document.createEvent("HTMLEvents");
 evt.initEvent("change", false, true);
 
@@ -6317,132 +6318,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#mediainfo_output').css('display', 'none');
     }
 
-    //长mediainfo转换简洁版mediainfo
-    const N = "\n";
-    function get_general_info(general_info){
-        var general_text = "General\n";
-        try{
-            var filename = general_info.match(/Complete name.*?:(.*)/i)[1].split('/').pop().trim();
-            general_text += `Release Name.......: ${filename}${N}`;
-        } catch(err) {}
-        try{
-            var format = general_info.match(/format.*:(.*)/i)[1].trim();
-            general_text += `Container..........: ${format}${N}`;
-        } catch(err) {}
-        try{
-            var duration = general_info.match(/duration.*:(.*)/i)[1].trim();
-            general_text += `Duration...........: ${duration}${N}`;
-        } catch(err) {}
-        try {
-            var file_size = general_info.match(/file.{0,5}size.*:(.*)/i)[1].trim();
-            general_text += `Size...............: ${file_size}${N}`;
-        } catch(err) {}
-
-        general_text += `Source(s)..........: ${N}`;
-
-        return general_text;
-    }
-    function get_video_info(video_info){
-        var video_text = `Video${N}`;
-        try{
-            var codec = video_info.match(/format.*:(.*)/i)[1].trim();
-            video_text += `Codec..............: ${codec}${N}`;
-        } catch(err) {}
-        try {
-            var type = video_info.match(/scan.{0,5}type.*:(.*)/i)[1].trim();
-            video_text += `Type...............: ${type}${N}`;
-        } catch(err) {}
-        try{
-            var width = video_info.match(/width.*:(.*)/i)[1].trim();
-            var height = video_info.match(/height.*:(.*)/i)[1].trim();
-            var resolution = width.replace(/ /g, '').match(/\d+/)[0] + 'x' + height.replace(/ /g, '').match(/\d+/)[0];
-            video_text += `Resolution.........: ${resolution}${N}`;
-        } catch(err) {}
-        try{
-            var aspect_ratio = video_info.match(/display.{0,5}aspect.{0,5}ratio.*?:(.*)/i)[1].trim();
-            video_text += `Aspect ratio.......: ${aspect_ratio}${N}`;
-        } catch(err) {}
-        try{
-            var bit_rate = video_info.match(/bit.{0,5}rate(?!.*mode).*:(.*)/i)[1].trim();
-            video_text += `Bit rate...........: ${bit_rate}${N}`;
-        } catch(err) {}
-        try{
-            var frame_rate = video_info.match(/frame.{0,5}rate.*:(.*fps)/i)[1].trim();
-            video_text += `Frame rate.........: ${frame_rate}${N}`;
-        } catch(err) {}
-
-        video_text += `${N}`;
-
-        return video_text;
-    }
-    function get_audio_info(audio_info){
-        var audio_text = `Audio${N}`;
-        try{
-            var format = audio_info.match(/format.*:(.*)/i)[1].trim();
-            audio_text += `Format.............: ${format}${N}`;
-        } catch(err) {}
-        try{
-            var channels = audio_info.match(/channel\(s\).*:(.*)/i)[1].trim();
-            audio_text += `Channels...........: ${channels}${N}`;
-        } catch(err) {}
-        try{
-            var bit_rate = audio_info.match(/bit.{0,5}rate(?!.*mode).*:(.*)/i)[1].trim();
-            audio_text += `Bit rate...........: ${bit_rate}${N}`;
-        } catch(err) {alert(err)}
-        try{
-            var language = audio_info.match(/language.*:(.*)/i)[1].trim();
-            audio_text += `Language...........: ${language}`;
-        } catch(err) {}
-        var title = '';
-        try { title = audio_info.match(/title.*:(.*)/i)[1].trim(); } catch(err){ title = '';}
-        audio_text += ` ${title}${N}${N}`;
-
-        return audio_text;
-    }
-    function get_text_info(text_info){
-        var format = text_info.match(/format.*:(.*)/i)[1].trim();
-        var language = text_info.match(/language.*:(.*)/i)[1].trim();
-        try{ var title = text_info.match(/title.*:(.*)/i)[1].trim(); } catch(err){ title = '';}
-        var subtitle_text = `Subtitles..........: ${language} ${format} ${title}${N}`;
-        return subtitle_text;
-    }
-
     $('#simplify').click(function(){
-        var mediainfo_text = $('#media_info').val();
-        if (mediainfo_text.match(/Disc INFO/i)) {
-            $('#clarify_media_info').val(full_bdinfo2summary(mediainfo_text));
-            return;
-        }
-
-        var general_info = mediainfo_text.match(/(general[\s\S]*?)?video/i)[0].trim();
-        general_info = get_general_info(general_info);
-        if (mediainfo_text.match(/encode.{0,10}date.*?:(.*)/i)){
-            var release_date = mediainfo_text.match(/encode.{0,10}date.*?:(.*)/i)[1].trim();
-            general_info += `Release date.......: ${release_date}`;
-        }
-        general_info += `${N}${N}`;
-        $('#clarify_media_info').val(general_info);
-        try{ var video_info = mediainfo_text.match(/(video[\s\S]*?)audio/i)[0].trim(); } catch (err) { video_info = mediainfo_text.match(/(video[\s\S]*?)Forced/i)[0].trim();}
-        video_info = get_video_info(video_info);
-        $('#clarify_media_info').val($('#clarify_media_info').val() + video_info);
-        try { var audio_info = mediainfo_text.match(/(audio[\s\S]*)(text)?/i)[0].trim(); } catch (err) { audio_info = mediainfo_text.match(/(audio[\s\S]*)(Forced)?/i)[0].trim(); }
-        var audio_infos = audio_info.split(/audio.*?\nid.*/i).filter(audio => audio.length > 30);
-        for (i=0; i < audio_infos.length; i++){
-            audio_info = get_audio_info(audio_infos[i]);
-            $('#clarify_media_info').val($('#clarify_media_info').val() + audio_info);
-        }
-        try{
-            var text_info = mediainfo_text.match(/(text[\s\S]*)$/i)[0].trim();
-            var text_infos = text_info.split(/text.*?\nid.*/i).filter(text => text.length > 30);
-            for (i=0; i < text_infos.length; i++){
-                subtitle_info = get_text_info(text_infos[i]);
-                $('#clarify_media_info').val($('#clarify_media_info').val() + subtitle_info);
-            }
-        } catch(err){
-            var subtitle_text = `Subtitles..........: no`;
-            $('#clarify_media_info').val($('#clarify_media_info').val() + subtitle_text);
-        }
-        console.log($('#clarify_media_info').val());
+        var mediainfo_text = simplifyMI($('#media_info').val());
+        $('#clarify_media_info').val(mediainfo_text);
     });
 
     $table.append(`<tr style="display:none;"><td width="1%" class="rowhead nowrap" valign="top" align="right">图片处理</td><td width="99%" class="rowfollow" valign="top" align="left" id="dealimg"></td></tr>`);
@@ -6782,6 +6660,134 @@ if (site_url.match(/^https:\/\/lemonhd.org\/upload_.{2,20}.php$/i)) {
         }
     }
     return;
+}
+
+//长mediainfo转换简洁版mediainfo
+function simplifyMI(mediainfo_text){
+    // var mediainfo_text = full_mediainfo;
+    var simplifiedMI = '';
+    if (mediainfo_text.match(/Disc INFO/i)) {
+        simplifiedMI = full_bdinfo2summary(mediainfo_text);
+        return simplifiedMI;
+    }
+
+    var general_info = mediainfo_text.match(/(general[\s\S]*?)?video/i)[0].trim();
+    general_info = get_general_info(general_info);
+    if (mediainfo_text.match(/encode.{0,10}date.*?:(.*)/i)){
+        var release_date = mediainfo_text.match(/encode.{0,10}date.*?:(.*)/i)[1].trim();
+        general_info += `Release date.......: ${release_date}`;
+    }
+    general_info += `${N}${N}`;
+    simplifiedMI += general_info;
+    try{ var video_info = mediainfo_text.match(/(video[\s\S]*?)audio/i)[0].trim(); } catch (err) { video_info = mediainfo_text.match(/(video[\s\S]*?)Forced/i)[0].trim();}
+    video_info = get_video_info(video_info);
+    simplifiedMI += video_info;
+    try { var audio_info = mediainfo_text.match(/(audio[\s\S]*)(text)?/i)[0].trim(); } catch (err) { audio_info = mediainfo_text.match(/(audio[\s\S]*)(Forced)?/i)[0].trim(); }
+    var audio_infos = audio_info.split(/audio.*?\nid.*/i).filter(audio => audio.length > 30);
+    for (i=0; i < audio_infos.length; i++){
+        audio_info = get_audio_info(audio_infos[i]);
+        simplifiedMI += audio_info;
+    }
+    try{
+        var text_info = mediainfo_text.match(/(text[\s\S]*)$/i)[0].trim();
+        var text_infos = text_info.split(/text.*?\nid.*/i).filter(text => text.length > 30);
+        for (i=0; i < text_infos.length; i++){
+            subtitle_info = get_text_info(text_infos[i]);
+            simplifiedMI += subtitle_info;
+        }
+    } catch(err){
+        var subtitle_text = `Subtitles..........: no`;
+        simplifiedMI += subtitle_text;
+    }
+    console.log(simplifiedMI);
+    return simplifiedMI;
+}
+function get_general_info(general_info){
+    var general_text = "General\n";
+    try{
+        var filename = general_info.match(/Complete name.*?:(.*)/i)[1].split('/').pop().trim();
+        general_text += `Release Name.......: ${filename}${N}`;
+    } catch(err) {}
+    try{
+        var format = general_info.match(/format.*:(.*)/i)[1].trim();
+        general_text += `Container..........: ${format}${N}`;
+    } catch(err) {}
+    try{
+        var duration = general_info.match(/duration.*:(.*)/i)[1].trim();
+        general_text += `Duration...........: ${duration}${N}`;
+    } catch(err) {}
+    try {
+        var file_size = general_info.match(/file.{0,5}size.*:(.*)/i)[1].trim();
+        general_text += `Size...............: ${file_size}${N}`;
+    } catch(err) {}
+
+    general_text += `Source(s)..........: ${N}`;
+
+    return general_text;
+}
+function get_video_info(video_info){
+    var video_text = `Video${N}`;
+    try{
+        var codec = video_info.match(/format.*:(.*)/i)[1].trim();
+        video_text += `Codec..............: ${codec}${N}`;
+    } catch(err) {}
+    try {
+        var type = video_info.match(/scan.{0,5}type.*:(.*)/i)[1].trim();
+        video_text += `Type...............: ${type}${N}`;
+    } catch(err) {}
+    try{
+        var width = video_info.match(/width.*:(.*)/i)[1].trim();
+        var height = video_info.match(/height.*:(.*)/i)[1].trim();
+        var resolution = width.replace(/ /g, '').match(/\d+/)[0] + 'x' + height.replace(/ /g, '').match(/\d+/)[0];
+        video_text += `Resolution.........: ${resolution}${N}`;
+    } catch(err) {}
+    try{
+        var aspect_ratio = video_info.match(/display.{0,5}aspect.{0,5}ratio.*?:(.*)/i)[1].trim();
+        video_text += `Aspect ratio.......: ${aspect_ratio}${N}`;
+    } catch(err) {}
+    try{
+        var bit_rate = video_info.match(/bit.{0,5}rate(?!.*mode).*:(.*)/i)[1].trim();
+        video_text += `Bit rate...........: ${bit_rate}${N}`;
+    } catch(err) {}
+    try{
+        var frame_rate = video_info.match(/frame.{0,5}rate.*:(.*fps)/i)[1].trim();
+        video_text += `Frame rate.........: ${frame_rate}${N}`;
+    } catch(err) {}
+
+    video_text += `${N}`;
+
+    return video_text;
+}
+function get_audio_info(audio_info){
+    var audio_text = `Audio${N}`;
+    try{
+        var format = audio_info.match(/format.*:(.*)/i)[1].trim();
+        audio_text += `Format.............: ${format}${N}`;
+    } catch(err) {}
+    try{
+        var channels = audio_info.match(/channel\(s\).*:(.*)/i)[1].trim();
+        audio_text += `Channels...........: ${channels}${N}`;
+    } catch(err) {}
+    try{
+        var bit_rate = audio_info.match(/bit.{0,5}rate(?!.*mode).*:(.*)/i)[1].trim();
+        audio_text += `Bit rate...........: ${bit_rate}${N}`;
+    } catch(err) {alert(err)}
+    try{
+        var language = audio_info.match(/language.*:(.*)/i)[1].trim();
+        audio_text += `Language...........: ${language}`;
+    } catch(err) {}
+    var title = '';
+    try { title = audio_info.match(/title.*:(.*)/i)[1].trim(); } catch(err){ title = '';}
+    audio_text += ` ${title}${N}${N}`;
+
+    return audio_text;
+}
+function get_text_info(text_info){
+    var format = text_info.match(/format.*:(.*)/i)[1].trim();
+    var language = text_info.match(/language.*:(.*)/i)[1].trim();
+    try{ var title = text_info.match(/title.*:(.*)/i)[1].trim(); } catch(err){ title = '';}
+    var subtitle_text = `Subtitles..........: ${language} ${format} ${title}${N}`;
+    return subtitle_text;
 }
 
 function full_bdinfo2summary(descr) {
@@ -13028,7 +13034,7 @@ setTimeout(function(){
             if (forward_site == 'HDT') {
                 descr_box[0].style.height = '600px';
                 var mediainfo_hdt = get_mediainfo_picture_from_descr(raw_info.descr);
-                descr_box[0].value = '[quote]' + mediainfo_hdt.mediainfo + '[/quote]\n' + mediainfo_hdt.pic_info.replace(/\n/g,'');
+                descr_box[0].value = '[quote]' + simplifyMI(mediainfo_hdt.mediainfo) + '[/quote]\n' + mediainfo_hdt.pic_info.replace(/\n/g,'');
             } else if (forward_site != 'HaiDan'){
                 if (forward_site != 'OpenCD' && !LemonHD_music) {
                     descr_box[0].style.height = '800px';
