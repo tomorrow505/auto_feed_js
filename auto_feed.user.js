@@ -10547,7 +10547,7 @@ setTimeout(function(){
             }
 
             if (mediainfo_lack && (origin_site == 'BLU' || origin_site == 'Telly' || origin_site == 'HDPost')) {
-                mediainfo = $('pre[class="decoda-code"]').text();
+                mediainfo = $('pre[class="decoda-code"]').eq(0).text();
                 mediainfo_lack = false;
             }
             var picture_boxes = document.getElementsByClassName('panel panel-chat shoutbox');
@@ -13648,6 +13648,9 @@ setTimeout(function(){
                 descr_box[1].value = raw_info.mediainfo_cmct.trim();
             } else {
                 descr_box[1].value = cmctinfos.trim();
+            }
+            if(descr_box[1].value.indexOf('ReportBy') > 0){
+                descr_box[1].value = descr_box[1].value.substring(0, descr_box[1].value.indexOf('ReportBy')); //删除reporty by, cmct媒体信息不支持ReportBy
             }
             descr_box[2].value = raw_info.descr;
             var clear = document.createElement('input');
