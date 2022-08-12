@@ -1754,7 +1754,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/hdcity.city\/upload/)){
         return 2;
     }
-    if (site_url.match(/^https:\/\/(pt.hdpost.top|asiancinema.me|hd-olimpo.club|jptv.club)\/torrents\/\d+/)){
+    if (site_url.match(/^https:\/\/(pt.hdpost.top|asiancinema.me|hd-olimpo.club|jptv.club|blutopia.xyz)\/torrents\/\d+$/)){
         return 1;
     }
     if (site_url.match(/^https:\/\/www.torrentseeds.org\/torrents\/\d+/)){
@@ -1814,7 +1814,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^http(s*):\/\/www.morethan.tv\/torrents.php\?id/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/(beyond-hd.me|blutopia.xyz)\/torrents/i)) {
+    if (site_url.match(/^http(s*):\/\/beyond-hd.me\/torrents/i)) {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/uhdbits.org\/torrents.php\?id=\d+&torrentid=\d+/i)) {
