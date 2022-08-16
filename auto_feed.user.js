@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.7.9
+// @version      1.9.8.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -141,6 +141,7 @@
     20220802：支持转入ITZMX、NapQAQ、HDPt(明教)，修复1PTBA、3Wmg部分bug。(by shmt86)
     20220807：一键签到取消天空和北洋，增加支持妞的转入。具体见教程：https://github.com/tomorrow505/auto_feed_js/wiki/%E8%BD%AC%E8%BD%BD%E5%88%B0BTN
     20220808：适配海豚从gz音乐站转入。
+    20220816：适配azusa by shmt86; 适配OPS从GZ音乐站转入。修复部分bug。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -824,6 +825,7 @@ const default_site_info = {
     'NBL': {'url': 'https://nebulance.io/', 'enable': 1},
     'NPUPT': {'url': 'https://npupt.com/', 'enable': 1},
     'OpenCD': {'url': 'https://open.cd/', 'enable': 1},
+    'OPS': {'url': 'https://orpheus.network/', 'enable': 1},
     'Oshen': {'url': 'http://www.oshen.win/', 'enable': 1},
     'OurBits': {'url': 'https://ourbits.club/', 'enable': 1},
     'PHD': {'url': 'https://privatehd.to/', 'enable': 1},
@@ -3345,7 +3347,7 @@ function addTorrent(url, name, forward_site, forward_announce) {
         container.items.add(files);
         if (['HDPost', 'BHD', 'BLU', 'ACM', 'HDSpace', 'xthor', 'jptv'].indexOf(forward_site) > -1) {
             $('#torrent')[0].files = container.files;
-        } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'DICMusic'].indexOf(forward_site) > -1) {
+        } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'DICMusic', 'OPS'].indexOf(forward_site) > -1) {
             $('input[name=file_input]')[0].files = container.files;
             setTimeout(function(){$('#file')[0].dispatchEvent(evt);}, 1000);
         } else if (forward_site == 'CHDBits') {
@@ -12089,7 +12091,6 @@ setTimeout(function(){
         }
 
         if (origin_site == 'DICMusic') {
-            alert(1)
             var html = $('#forward_r').html();
             html = html.replace(`<font color="green">Tools →</font>`, '<blockquote><font color="green">Tools →</font>');
             html = html.replace(`签到</a><br>`, '签到</a></blockquote>');
@@ -12515,8 +12516,11 @@ setTimeout(function(){
             raw_info.descr += '\n\n' + '[quote]' + raw_info.tracklist + '[/quote]'
         }
 
-        if (forward_site == 'DICMusic') {
+        if (forward_site == 'DICMusic' || forward_site == 'OPS') {
             var announce = $('a:contains(已隐藏你的个人)').attr('href');
+            if (forward_site == 'OPS') {
+                announce = $('input[value*="announce"]').val();
+            }
             addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, announce);
             console.log(raw_info);
             function add_extra_info() {
@@ -12607,7 +12611,11 @@ setTimeout(function(){
                 }
                 categories.val(index).triggerHandler('change');
                 WaitForCategory(function() {
-                    ParseForm(group, torrent);
+                    if (forward_site == 'DICMusic') {
+                        ParseForm(group, torrent);
+                    } else {
+                        fillForm(group, torrent);
+                    }
                     add_extra_info();
                 });
 
