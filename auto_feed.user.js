@@ -12113,7 +12113,7 @@ setTimeout(function(){
             transfer_mode = 1;
         }
 
-        if ($('td:contains(你没有发布种子的权限)').length) {
+        if ($('td:contains(你没有发布种子的权限)').length || $('td:contains(请提交候选)').length) {
             if (forward_site == "CMCT") {
                 upload_site = upload_site.replace('upload.php', 'upload.php?offer=1');
             } else {
