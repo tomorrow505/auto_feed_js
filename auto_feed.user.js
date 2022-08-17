@@ -850,7 +850,7 @@ const default_site_info = {
     'TVV': {'url': 'http://tv-vault.me/', 'enable': 1},
     'UHD': {'url': 'https://uhdbits.org/', 'enable': 1},
     'UltraHD': {'url': 'https://ultrahd.net/', 'enable': 1},
-    'WT-Sakura': {'url': 'https://wintersakura.org/', 'enable': 1},
+    'WT-Sakura': {'url': 'https://resources.wintersakura.org/', 'enable': 1},
     'xthor': {'url': 'https://xthor.tk/', 'enable': 1},
     'YDY': {'url': 'https://pt.hdbd.us/', 'enable': 1},
     'ITZMX': {'url': 'https://pt.itzmx.com/', 'enable': 1},
@@ -874,6 +874,8 @@ if (used_site_info === undefined) {
         if (!used_site_info.hasOwnProperty(key)) {
             used_site_info[key] = default_site_info[key];
             if_new_site_added = true;
+        } else if (default_site_info[key].url != used_site_info[key].url) {
+            used_site_info[key].url = default_site_info[key].url
         }
         if (site_order.indexOf(key) < 0) {
             site_order.push(key);
