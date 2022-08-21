@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.8.1
+// @version      1.9.8.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -143,7 +143,8 @@
     20220807：一键签到取消天空和北洋，增加支持妞的转入。具体见教程：https://github.com/tomorrow505/auto_feed_js/wiki/%E8%BD%AC%E8%BD%BD%E5%88%B0BTN
     20220808：适配海豚从gz音乐站转入。
     20220816：适配azusa by shmt86; 适配OPS/RED从GZ音乐站转入。修复部分bug。
-    20220820：适配sugoimusic转出，修复部分bug.
+    20220820：适配sugoimusic转出，修复部分bug。
+    20220821：取消适配HDSKY，不要问为什么。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
