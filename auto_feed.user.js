@@ -12677,9 +12677,20 @@ setTimeout(function(){
                     if (forward_site == 'DICMusic') {
                         ParseForm(group, torrent);
                     } else {
-                        fillForm(group, torrent);
+                        fillMusicForm(group, torrent);
                     }
                     add_extra_info();
+                    setTimeout(function(){
+                        if (group.wikiBody.match(/\<(br|span).*?\>/)) {
+                            var tmp_descr = raw_info.descr;
+                            raw_info.descr = '';
+                            var wikiBody = $(`<div>${group.wikiBody}</div>`);
+                            wikiBody = walkDOM(wikiBody[0]);
+                            $('#album_desc').val(wikiBody);
+                            raw_info.descr = tmp_descr;
+                        }
+                        $('#release_desc').val(torrent.description.replace(/&emsp;/g, ' '));
+                    }, 2000);
                 });
 
             } else {
