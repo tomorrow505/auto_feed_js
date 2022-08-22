@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.8.2
+// @version      1.9.8.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -891,8 +891,16 @@ if (used_site_info === undefined) {
                     return item != key;
                 });
             }
+            if_new_site_added = true;
         }
     }
+    site_order = site_order.filter(function(item){
+        if (!default_site_info.hasOwnProperty(item)) {
+            return false;
+        } else {
+            return true;
+        }
+    });
 }
 if (if_new_site_added) {
     GM_setValue('used_site_info', JSON.stringify(used_site_info));
@@ -12149,9 +12157,9 @@ setTimeout(function(){
 
         if (origin_site == 'DICMusic') {
             var html = $('#forward_r').html();
-            html = html.replace(`<font color="green">Tools →</font>`, '<blockquote><font color="green">Tools →</font>');
+            html = html.replace(`<font color="green">Tools →</font>`, '<blockquote style="margin-right:200px"><font color="green">Tools →</font>');
             html = html.replace(`签到</a><br>`, '签到</a></blockquote>');
-            html = html.replace(`查重 `, '查重 <br><div></div>')
+            html = html.replace(`查重 `, '查重 <div></div>')
             $('#forward_r').html(html);
         }
     }
