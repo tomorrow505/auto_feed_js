@@ -20490,16 +20490,14 @@ setTimeout(function(){
                 } else {
                     descr = descr.format({'mediainfo': infos.mediainfo})
                 }
-                if (infos.pic_info.match(/ptpimg|imgbox/)) {
+                if (infos.pic_info.match(/ptpimg/)) {
                     var pic_info = '';
-                    infos.pic_info.match(/http[^\[\]]*?(jpg|png)/g).forEach((item)=>{
-                        if (item.match(/ptpimg/)) {
-                            pic_info += '[img]' + item + '[/img]\n';
-                        } else if (item.match(/imgbox/)) {
-                            pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
-                        }
+                    infos.pic_info.match(/\[img\]http[^\[\]]*?(jpg|png)\[\/img\]/g).forEach((item)=>{
+                        pic_info += item + '\n';
                     })
                     descr = descr.format({'poster': pic_info});
+                } else if (infos.pic_info.match(/ibb\.co|imgbox/)){
+                    descr = descr.format({'poster': infos.pic_info});
                 } else {
                     $('#noimg').show();
                     $('#t1').val(infos.pic_info);
