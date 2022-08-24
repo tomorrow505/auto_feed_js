@@ -20897,7 +20897,7 @@ setTimeout(function(){
                                 pix_send_images(raw_info.images)
                                 .then(function(new_urls) {
                                     new_urls = new_urls.toString().split(',').map((item)=>{
-                                        return item.match(/\[img\]http[^\[\]]*?(jpg|png)\[\/img\]/)[0].replace('t73', 'img73').replace('thumbs', 'images');
+                                        return item.match(/\[img\]http[^\[\]]*?(jpg|png)\[\/img\]/)[0].replace('//t', '//img').replace('thumbs', 'images');
                                     });
                                     var urls_append = '';
                                     if (new_urls.length > 1) {
