@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.8.4
+// @version      1.9.8.5
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -142,6 +142,7 @@
     20220808：适配海豚从gz音乐站转入。
     20220816：适配azusa by shmt86; 适配OPS/RED从GZ音乐站转入。修复部分bug。
     20220820：适配sugoimusic转出，修复部分bug。
+    20220826：修复HDai部分bug。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -3376,6 +3377,9 @@ function addTorrent(url, name, forward_site, forward_announce) {
             setTimeout(function(){$('#file')[0].dispatchEvent(evt);}, 1000);
         } else if (forward_site == 'CHDBits') {
             $('input[name=torrentfile]')[0].files = container.files;
+        } else if (forward_site == 'HDai') {
+            $('input[id=torrent2]')[0].files = container.files;
+            $('#choose-text').html(document.getElementById('torrent2').files[0].name);
         } else if (forward_site == 'avz' || forward_site == 'PHD' || forward_site == 'CNZ') {
             $('input[name=torrent_file]')[0].files = container.files;
         } else if (forward_site == 'HDT') {
@@ -12985,28 +12989,7 @@ setTimeout(function(){
                         sourceWebsiteDomains = ['notwhat.cd', 'orpheus.network'];
                         relDesc.value = relDescJSON;
                         document.querySelector('input.button_preview_1').click();
-
                         break;
-
-                    case 1:
-                        break;
-
-                    case 2:
-                        break;
-
-                    case 3:
-                        break;
-
-                    case 4:
-                        break;
-
-                    case 5:
-                        break;
-
-                    case 6:
-                        break;
-
-                    default:
                 }
             }
             if (raw_info.json !== undefined) {
@@ -13471,9 +13454,6 @@ setTimeout(function(){
         }
 
         if ($('textarea[name="technical_info"]').length) {
-            // if (raw_info.descr.match(/MPLS|disc info/i) && forward_site != 'PigGo' && forward_site != 'FreeFarm') {
-            //     $('textarea[name="descr"]').val(raw_info.descr);
-            // } else {
             try{
                 var infos = get_mediainfo_picture_from_descr(raw_info.descr);
                 var container = $('textarea[name="technical_info"]');
@@ -13496,7 +13476,6 @@ setTimeout(function(){
                 }
                 $('textarea[name="technical_info"]').css({'height': '600px'});
             }
-            // }
         }
 
         if (LemonHD_music) {
@@ -14152,17 +14131,7 @@ setTimeout(function(){
                 descr_box[0].value = cmctinfos.trim();
             }
 
-
-            $('textarea[name=screenshot]').parent().parent().after(`
-                <div class="layui-form-item layui-form-text">
-                    <label class="layui-form-label">源简介-辅助填写</label>
-                    <div class="layui-input-block">
-                        <textarea name="originDescr" placeholder="源站点的简介过来的，辅助填写。" class="layui-textarea" style="height: 600px;"></textarea>
-                    </div>
-                </div>
-            `);
-            $('textarea[name=originDescr]').val(raw_info.descr);
-
+            $('textarea[name=descr]').val(raw_info.descr);
             $('select[name="team_sel"]>option').map(function(index,e){
                 if (raw_info.name.match(e.innerText)) {
                     $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
