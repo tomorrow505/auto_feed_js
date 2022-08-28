@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.8.5
+// @version      1.9.8.6
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1721,7 +1721,7 @@ function deal_img_350(pic_info) {
     if (imgs) {
         imgs.map((item)=>{
             var img_url = item.match(/http.*?(png|jpg)/)[0];
-            if (!img_url.match(/thumbs2.imgbox.com/)) {
+            if (img_url.match(/ptpimg/)) {
                 var new_imgs = `[url=${img_url}]${item.replace('[img]', '[img=350x350]')}[/url]`;
                 pic_info = pic_info.replace(item, new_imgs);
             }
@@ -10909,7 +10909,6 @@ setTimeout(function(){
         //获取跳转的字符串
         var jump_str = dictToString(raw_info);
 
-
         //添加ptgen跳转
         if (raw_info.url == ''){
             raw_info.url = match_link('imdb', raw_info.descr);
@@ -13834,6 +13833,27 @@ setTimeout(function(){
                 var index = team_dict[raw_info.source_sel];
                 team_box.val(index);
             }
+
+            $('tr:contains(简介):last').after(`<tr><td style="text-align:right"><b>转换</b></td>
+                <td><a id="img2" style="margin-left:5px" href="#">IMG2</a>
+                <a id="img3" style="margin-left:5px" href="#">IMG3</a>
+                <a id="img4" style="margin-left:5px" href="#">IMG4</a>
+                <font style="margin-left:5px" color="red">选中要转换的bbcode图片部分点击即可。</font></td></tr>`);
+            $('#img2,#img3').click(function(e){
+                e.preventDefault();
+                var text = $('#descr').val();
+                var textarea = document.getElementById('descr');
+                if (textarea && textarea.selectionStart != undefined && textarea.selectionEnd != undefined){
+                    var chosen_value = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+                    if (this.id == 'img2') {
+                        $('#descr').val(text.replace(chosen_value, chosen_value.replace(/\[img\]/g, '[img2]')));
+                    } else if (this.id == 'img3') {
+                        $('#descr').val(text.replace(chosen_value, chosen_value.replace(/\[img\]/g, '[img3]')));
+                    } else if (this.id == 'img4') {
+                        $('#descr').val(text.replace(chosen_value, chosen_value.replace(/\[img\]/g, '[img4]')));
+                    }
+                }
+            })
         }
 
         else if (forward_site == 'MTeam'){
@@ -17333,6 +17353,22 @@ setTimeout(function(){
                 $('#mediainfo').css({'height': '600px'});
                 var pic_info = deal_img_350(infos.pic_info);
                 $('#upload-form-description').val(pic_info);
+                $('#upload-form-description').parent().after(`<div style="margin-bottom:5px"><a id="img350" style="margin-left:5px" href="#">IMG350</a>
+                    <font style="margin-left:5px" color="red">选中要转换的bbcode图片部分点击即可。</font></div>
+                `);
+                $('#img350').click(function(e){
+                    e.preventDefault();
+                    var text = $('#upload-form-description').val();
+                    var textarea = document.getElementById('upload-form-description');
+                    if (textarea && textarea.selectionStart != undefined && textarea.selectionEnd != undefined){
+                        var chosen_value = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+                        if (chosen_value) {
+                            $('#upload-form-description').val(text.replace(chosen_value, chosen_value.replace(/\[img\]/g, '[img=350]')));
+                        } else {
+                            $('#upload-form-description').val(text.replace(/\[img\]/g, '[img=350x350]'));
+                        }
+                    } 
+                });
             } catch(Err) {
                 if (raw_info.full_mediainfo){
                     $('#mediainfo').val(raw_info.full_mediainfo);
@@ -17425,7 +17461,6 @@ setTimeout(function(){
                 });
 
                 $('#search').click();
-
             }, 2000);
         }
 
@@ -19294,6 +19329,22 @@ setTimeout(function(){
                 var pic_info;
                 if (forward_site == 'BLU'){
                     pic_info = deal_img_350_ptpimg(infos.pic_info);
+                    $('#upload-form-mediainfo').parent().before(`<div style="margin-bottom:5px"><a id="img350" style="margin-left:5px" href="#">IMG350</a>
+                        <font style="margin-left:5px" color="red">选中要转换的bbcode图片部分点击即可。</font></div>
+                    `);
+                    $('#img350').click(function(e){
+                        e.preventDefault();
+                        var text = $('#bbcode-description').val();
+                        var textarea = document.getElementById('bbcode-description');
+                        if (textarea && textarea.selectionStart != undefined && textarea.selectionEnd != undefined){
+                            var chosen_value = textarea.value.substring(textarea.selectionStart, textarea.selectionEnd);
+                            if (chosen_value) {
+                                $('#bbcode-description').val(text.replace(chosen_value, chosen_value.replace(/\[img\]/g, '[img=350]')));
+                            } else {
+                                $('#bbcode-description').val(text.replace(/\[img\]/g, '[img=350]'));
+                            }
+                        } 
+                    })
                 }
                 else{
                     pic_info = infos.pic_info;
