@@ -2022,7 +2022,7 @@ String.prototype.audiocodec_sel = function() { //音频编码
         result = 'DTS-X';
     } else if (result.match(/(LPCM)/i)) {
         result = 'LPCM';
-    } else if (result.match(/(DD|AC3|AC-3|Dolby Digital)/i)) {
+    } else if (result.match(/(DD[+p]?[\d ]|AC3|AC-3|Dolby Digital)/i)) {
         result = 'AC3';
     } else if (result.match(/(Atmos)/i)) {
         result = 'Atmos';
@@ -6413,6 +6413,8 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                 pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
             } else if (item.match(/img4k.net/)) {
                 pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
+            } else if (item.match(/hostik.cinematik.net/)) {
+                pic_info += '[img]' + item.replace(/\/thu\//, '/big/') + '[/img]\n';
             } else {
                 pic_info += '[img]' + item + '[/img]\n';
             }
@@ -10883,7 +10885,7 @@ setTimeout(function(){
             raw_info.type = site_url.get_type();
         }
 
-        if (raw_info.name.audiocodec_sel()) {
+        if (raw_info.name.audiocodec_sel() && !raw_info.audiocodec_sel) {
             raw_info.audiocodec_sel = raw_info.name.audiocodec_sel();
         }
 
