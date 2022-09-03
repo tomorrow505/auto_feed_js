@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.8.7
+// @version      1.9.8.8
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -6353,7 +6353,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
     }
 
     $('#simplify').click(function(){
-        var mediainfo_text = simplifyMI($('#media_info').val());
+        var mediainfo_text = simplifyMI($('#media_info').val(), null);
         $('#clarify_media_info').val(mediainfo_text);
     });
 
@@ -6697,12 +6697,21 @@ if (site_url.match(/^https:\/\/lemonhd.org\/upload_.{2,20}.php$/i)) {
 }
 
 //长mediainfo转换简洁版mediainfo
-function simplifyMI(mediainfo_text){
-    // var mediainfo_text = full_mediainfo;
+function simplifyMI(mediainfo_text, site){
     var simplifiedMI = '';
+    if (mediainfo_text.match(/QUICK SUMMARY/i)) {
+        return mediainfo_text;
+    }
     if (mediainfo_text.match(/Disc INFO/i)) {
+        if (site == 'HDT') {
+            return mediainfo_text;
+        }
         simplifiedMI = full_bdinfo2summary(mediainfo_text);
         return simplifiedMI;
+    }
+
+    if (!mediainfo_text.match(/Video[\S\s]{0,5}ID/)) {
+        return mediainfo_text;
     }
 
     var general_info = mediainfo_text.match(/(general[\s\S]*?)?video/i)[0].trim();
@@ -13428,7 +13437,7 @@ setTimeout(function(){
             if (forward_site == 'HDT') {
                 descr_box[0].style.height = '600px';
                 var mediainfo_hdt = get_mediainfo_picture_from_descr(raw_info.descr);
-                descr_box[0].value = '[quote]' + simplifyMI(mediainfo_hdt.mediainfo) + '[/quote]\n' + mediainfo_hdt.pic_info.replace(/\n/g,'');
+                descr_box[0].value = '[quote]' + simplifyMI(mediainfo_hdt.mediainfo, 'HDT') + '[/quote]\n' + mediainfo_hdt.pic_info.replace(/\n/g,'');
             } else if (forward_site != 'HaiDan'){
                 if (forward_site != 'OpenCD' && !LemonHD_music) {
                     descr_box[0].style.height = '800px';
@@ -15127,7 +15136,7 @@ setTimeout(function(){
                         break;
                     case 'Blu-ray':
                         if (raw_info.name.match(/(diy|@)/i)) {
-                            medium_box.options[4].selected = true;
+                            medium_box.options[1].selected = true;
                         }
                 }
 
@@ -19625,7 +19634,7 @@ setTimeout(function(){
             $('#filename').val(raw_info.name);
             try{$('input[name="imdb"]').val(raw_info.url.match(/tt(\d+)/i)[1]);}catch(err){}
             var infos = get_mediainfo_picture_from_descr(raw_info.descr);
-            $('textarea[name="info"]').val('[quote]' + infos.mediainfo + '[/quote]\n\n' + infos.pic_info);
+            $('textarea[name="info"]').val('[quote]' + simplifyMI(infos.mediainfo, 'HDT') + '[/quote]\n\n' + infos.pic_info);
 
             try{
                 var imdbid = raw_info.url.match(/tt\d+/i)[0];
