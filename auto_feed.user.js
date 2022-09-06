@@ -23526,16 +23526,17 @@ setTimeout(function(){
                 if (!name.match(label)) {
                     name = name.replace(/(DDPA|AAC|DDP|FLAC|DTS|LPCM|TrueHD)/, `$1${label_str}`);
                 }
+
                 if (type == 'WEB-DL' || type == 'Encode') {
-                    if (name.match(/(H.265|H.264|x264|x265)(.*?)(DDPA|AAC|DDP|FLAC|DTS|LPCM|TrueHD)(2\.0|1\.0|5\.1|7\.1)/i)) {
-                        name = name.replace(/(H.265|H.264|x264|x265)(.*?)(DDPA|AAC|DDP|FLAC|DTS|LPCM|TrueHD)(2\.0|1\.0|5\.1|7\.1)/, '$3 $4 $1 $2');
+                    if (name.match(/(H.265|H.264|x264|x265)(.*?)(DDPA|AAC|DDP|FLAC|DTS|LPCM|TrueHD) ?(2\.0|1\.0|5\.1|7\.1)/i)) {
+                        name = name.replace(/(H.265|H.264|x264|x265)(.*?)(DDPA|AAC|DDP|FLAC|DTS|LPCM|TrueHD) ?(2\.0|1\.0|5\.1|7\.1)/, '$3 $4 $1 $2');
                     }
                 }
                 return name;
             }
             try{
                 var channels = (raw_info.descr).match(/Channel.*?(\d)/)[1];
-                name = re_build_name(channels, name, raw_info.type);
+                name = re_build_name(channels, name, raw_info.medium_sel);
             } catch(err) {
                 if (raw_info.descr.match(/(AUDIO.*CODEC.*?|音频编码.*?)(2\.0|1\.0|5\.1|7\.1)/i)) {
                     channels = raw_info.descr.match(/(AUDIO.*CODEC.*?|音频编码.*?)(2\.0|1\.0|5\.1|7\.1)/i)[2];
@@ -23547,15 +23548,14 @@ setTimeout(function(){
                     }
                 } else if (raw_info.descr.match(/\d channels/i)) {
                     channels = raw_info.descr.match(/(\d) channels/i)[1];
-                    name = re_build_name(channels, name, raw_info.type);
+                    name = re_build_name(channels, name, raw_info.medium_sel);
                 }
             }
             if (name.match(/(WEB-DL|Bluray|HDTV).(1080p|4K|2160p|720p|480p)/i)) {
                 name = name.replace(/(WEB-DL|Bluray|HDTV).(1080p|4K|2160p|720p|480p)/i, '$2 $1');
             }
-            name = name.replace(/DDP/i, 'DD+').replace(/DTS(\d)/i, 'DTS $1');
-
-            if (raw_info.type == '剧集') {
+            name = name.replace(/DDP/i, 'DD+').replace(/AAC/, 'DD').replace(/DTS(\d)/i, 'DTS $1').replace(/(DD|DD\+|FLAC|LPCM|TrueHD|MA|HR) (2\.0|1\.0|5\.1|7\.1)/, '$1$2');
+            if (raw_info.type == '剧集' || raw_info.type == '综艺' || raw_info.type == '纪录') {
                 year = name.match(/(19|20)\d{2}[^pP]/g);
                 try{
                     if (year[0] !== undefined) {
@@ -23564,7 +23564,7 @@ setTimeout(function(){
                     }
                 } catch(err) {}
             }
-
+            name = name.replace(/ -/g, '-').replace(/- /g, '-');
             $('input[name=name]').val(name);
             if (raw_info.tvdb_url !== undefined) {
                 $('#tvdb').val(raw_info.tvdb_url.match(/\d+/)[0]);
