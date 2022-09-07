@@ -8162,12 +8162,14 @@ setTimeout(function(){
                     for (i=0;i<link_as.length;i++){
                         if (link_as[i].href.match(/imdb.com/)){
                             raw_info.url = link_as[i].href;
-                            try{
-                                reBuildHref(raw_info, forward_r);
-                            } catch(err){}
-                            break;
+                        }
+                        if (link_as[i].href.match(/thetvdb.com/)) {
+                            raw_info.tvdb_url = link_as[i].href;
                         }
                     }
+                    try{
+                        reBuildHref(raw_info, forward_r);
+                    } catch(err){}
                 });
             }, 2000);
 
@@ -23526,7 +23528,6 @@ setTimeout(function(){
                 if (!name.match(label)) {
                     name = name.replace(/(DDPA|AAC|DDP|FLAC|DTS|LPCM|TrueHD)/, `$1${label_str}`);
                 }
-
                 if (type == 'WEB-DL' || type == 'Encode') {
                     if (name.match(/(H.265|H.264|x264|x265)(.*?)(DDPA|AAC|DDP|FLAC|DTS|LPCM|TrueHD) ?(2\.0|1\.0|5\.1|7\.1)/i)) {
                         name = name.replace(/(H.265|H.264|x264|x265)(.*?)(DDPA|AAC|DDP|FLAC|DTS|LPCM|TrueHD) ?(2\.0|1\.0|5\.1|7\.1)/, '$3 $4 $1 $2');
