@@ -1442,6 +1442,9 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
         alert('当前影视没有IMDB信息！！');
         return;
     });
+    $('.hdb-task').click((e)=>{
+        GM_setValue('task_info', JSON.stringify(raw_info));
+    });
 }
 
 //函数用来豆瓣信息搜索时候进行处理, 后期准备作废
@@ -23555,20 +23558,32 @@ setTimeout(function(){
             if (name.match(/(WEB-DL|Bluray|HDTV).(1080p|4K|2160p|720p|480p)/i)) {
                 name = name.replace(/(WEB-DL|Bluray|HDTV).(1080p|4K|2160p|720p|480p)/i, '$2 $1');
             }
-            name = name.replace(/DDP/i, 'DD+').replace(/AAC/, 'DD').replace(/DTS(\d)/i, 'DTS $1').replace(/(DD|DD\+|FLAC|LPCM|TrueHD|MA|HR) (2\.0|1\.0|5\.1|7\.1)/, '$1$2');
+            name = name.replace(/DDPA?/i, 'DD+').replace(/AAC/, 'DD').replace(/DTS(\d)/i, 'DTS $1').replace(/(DD|DD\+|FLAC|LPCM|TrueHD|MA|HR) (2\.0|1\.0|5\.1|7\.1)/, '$1$2');
             if (raw_info.type == '剧集' || raw_info.type == '综艺' || raw_info.type == '纪录') {
                 year = name.match(/(19|20)\d{2}[^pP]/g);
                 try{
                     if (year[0] !== undefined) {
-                    name = name.replace(year, ' ');
-                    name = name.replace(/ +/g, ' ');
+                        name = name.replace(year, ' ');
+                        name = name.replace(/ +/g, ' ');
                     }
                 } catch(err) {}
             }
             name = name.replace(/ -/g, '-').replace(/- /g, '-');
             $('input[name=name]').val(name);
             if (raw_info.tvdb_url !== undefined) {
-                $('#tvdb').val(raw_info.tvdb_url.match(/\d+/)[0]);
+                if (raw_info.tvdb_url.match(/\d+/)) {
+                    $('#tvdb').val(raw_info.tvdb_url.match(/\d+/)[0]);
+                }
+                getDoc(raw_info.tvdb_url, null, function(doc){
+                    if (!$('#tvdb').val()) {
+                        var tvdb_id = $('li:contains(TheTVDB.com Series ID):last', doc).find('span').text();
+                        $('#tvdb').val(tvdb_id);
+                    }
+                    var genres = $('li:contains(Genres):last', doc).find('span').text();
+                    if (genres.includes('Documentary')) {
+                        $('#type_category').val("3");
+                    }
+                });
             }
             var announce = 'http://tracker.hdbits.org/announce.php';
             addTorrent(raw_info.torrent_url, raw_info.torrent_name, 'hdb-task', announce);
@@ -23668,7 +23683,7 @@ setTimeout(function(){
                 $(`input[type=checkbox][value=8]`).attr('checked', true);
             }
 
-            if (raw_info.name.match(/atmos/i) || raw_info.small_descr.match(/atmos/i)) {
+            if (raw_info.name.match(/atmos/i) || raw_info.small_descr.match(/atmos/i) || raw_info.descr.match(/Dolby Atmos/)) {
                 $(`input[type=checkbox][value=5]`).attr('checked', true);
             }
 
@@ -23682,7 +23697,6 @@ setTimeout(function(){
                 $(`input[type=checkbox][value=34]`).attr('checked', true);
             }
             if (raw_info.name.match(/dsnp/i)) {
-                alert(1)
                 $(`input[type=checkbox][value=33]`).attr('checked', true);
             }
             if (raw_info.name.match(/aptv/i)) {
