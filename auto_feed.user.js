@@ -814,6 +814,7 @@ const default_site_info = {
     'HDVideo': {'url': 'https://hdvideo.one/', 'enable': 1},
     'HDZone': {'url': 'https://hdzone.me/', 'enable': 1},
     'HD-Only': {'url': 'https://hd-only.org/', 'enable': 1},
+    'HHClub': {'url': 'https://hhanclub.top/', 'enable': 1},
     'HITPT': {'url': 'https://www.hitpt.com/', 'enable': 1},
     'HUDBT': {'url': 'https://hudbt.hust.edu.cn/', 'enable': 1},
     'iTS': {'url': 'https://shadowthein.net/', 'enable': 1},
@@ -13658,6 +13659,15 @@ setTimeout(function(){
                     if (labels.zz){ check_label(document.getElementsByName('tags[]'), '32'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '64'); }
                     break;
+                case 'HHClub':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[]'), '5'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[]'), '6'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7'); }
+                    if (raw_info.medium_sel == 'WEB-DL') {
+                        check_label(document.getElementsByName('tags[]'), '4');
+                    }
+                    break;
                 case 'HaresClub':
                     if (labels.gy){
                         $('input[value="32"]').next().addClass('layui-form-checked');
@@ -18391,6 +18401,106 @@ setTimeout(function(){
             $('input[name="pt_gen"]').val(raw_info.dburl? raw_info.dburl: raw_info.url);
         }
 
+        else if (forward_site == 'HHClub') {
+            var browsecat = $('#browsecat')
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+                             '体育': 407, '软件': 409, '学习': 409, '': 409, '游戏': 409, 'MV': 406};
+            //如果当前类型在上述字典中
+            browsecat.val(409)
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            var source_box = document.getElementsByName('source_sel')[0];
+            source_box.options[6].selected=true;
+            switch(raw_info.medium_sel){
+                case 'UHD': case 'Blu-ray': case 'Remux': case 'Encode':
+                    source_box.options[1].selected = true; break;
+                case 'HDTV': source_box.options[4].selected=true; break;
+                case 'DVD':
+                    source_box.options[3].selected=true;
+                    if (raw_info.name.match(/hd ?dvd/i)) {
+                        source_box.options[2].selected=true;
+                    }
+            }
+            //媒介
+            var medium_box = $('select[name=medium_sel]');
+            switch(raw_info.medium_sel){
+                case 'UHD': medium_box.val(1); break;
+                case 'Blu-ray': medium_box.val(1); break;
+                case 'DVD':
+                    medium_box.val(2);
+                    if (raw_info.name.match(/DVDr/i)) {
+                        medium_box.val(6);
+                    }
+                    break;
+                case 'Remux': medium_box.val(3); break;
+                case 'HDTV': medium_box.val(5); break;
+                case 'Encode': medium_box.val(7); break;
+                case 'WEB-DL': medium_box.val(10);
+            }
+            if (raw_info.name.match(/MiniBD/i)) {
+                medium_box.val(4);
+            }
+            //视频编码
+            var codec_box = document.getElementsByName('codec_sel')[0];
+            codec_box.options[5].selected = true;
+            switch (raw_info.codec_sel){
+                case 'H265': case 'X265': codec_box.options[6].selected = true; break;
+                case 'H264': case 'X264': codec_box.options[1].selected = true; break;
+                case 'VC-1': codec_box.options[2].selected = true; break;
+                case 'MPEG-2': case 'MPEG-4': codec_box.options[4].selected = true; break;
+                case 'XVID': codec_box.options[3].selected = true;
+            }
+            //音频编码
+            var audiocodec_box = $('select[name=audiocodec_sel]');
+            switch (raw_info.audiocodec_sel){
+                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': audiocodec_box.val(3); break;
+                case 'TrueHD': audiocodec_box.val(10); break;
+                case 'Atmos': audiocodec_box.val(10); break;
+                case 'DTS': audiocodec_box.val(3); break;
+                case 'AC3': audiocodec_box.val(8); break;
+                case 'AAC': audiocodec_box.val(6); break;
+                case 'Flac': audiocodec_box.val(1); break;
+                case 'APE': audiocodec_box.val(2); break;
+                case 'LPCM': audiocodec_box.val(11); break;
+                case 'WAV': audiocodec_box.val(7);
+            }
+            //分辨率
+            var standard_box = $('select[name=standard_sel]');
+            var standard_dict = {
+                '4K': 1, '1080p': 2, '1080i': 2, '720p': 3, 'SD': 4
+            };
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.val(index);
+            }
+            $('select[name="team_sel"]').val(5);
+            $('select[name="team_sel"]>option').map(function(index,e){
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
+            $('input[name="pt_gen"]').val(raw_info.dburl? raw_info.dburl: raw_info.url);
+            if (raw_info.type == '剧集') {
+                if (raw_info.source_sel == '大陆') {
+                    $('select[name=processing_sel]').val(8);
+                } else if (raw_info.source_sel == '欧美') {
+                    $('select[name=processing_sel]').val(3);
+                } else if (raw_info.source_sel == '日本') {
+                    $('select[name=processing_sel]').val(4);
+                } else if (raw_info.source_sel == '韩国') {
+                    $('select[name=processing_sel]').val(5);
+                } else if (raw_info.source_sel == '香港') {
+                    $('select[name=processing_sel]').val(6);
+                } else if (raw_info.source_sel == '台湾') {
+                    $('select[name=processing_sel]').val(7);
+                }
+            } else {
+                $('select[name=processing_sel]').val(9);
+            }
+        }
+
         else if (forward_site == 'CarPt') {
             //类型
             var browsecat = $('#browsecat')
@@ -18463,7 +18573,6 @@ setTimeout(function(){
         else if (forward_site == 'JoyHD') {
 
             $('input[name="imdburl"]').val(raw_info.url);
-
             //类型
             var browsecat = document.getElementsByName('type')[0];
             var type_dict = {'电影': 1, '剧集': 2, '动漫': 4, '综艺': 3, '音乐': 5, '纪录': 7,
