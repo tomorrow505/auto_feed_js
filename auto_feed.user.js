@@ -13617,7 +13617,13 @@ setTimeout(function(){
                     break;
                 case 'HDVideo': case 'WT-Sakura': case 'FreeFarm':
                     if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
-                    if (labels.yy){ check_label(document.getElementsByName('tags[]'), '5'); }
+                    if (labels.yy){
+                        if (forward_site == 'HDVideo') {
+                            check_label(document.getElementsByName('tags[]'), '10');
+                        } else if (forward_site == 'WT-Sakura') {
+                            check_label(document.getElementsByName('tags[]'), '12');
+                        }
+                    }
                     if (labels.zz){ check_label(document.getElementsByName('tags[]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[]'), '4'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7'); }
@@ -14074,9 +14080,9 @@ setTimeout(function(){
             cmctdescr = cmctdescr.replace(/\[img\]htt.*[\s\S]*?img\]/i, '');
 
             if (raw_info.imgs_cmct){
-                descr_box[0].value = raw_info.imgs_cmct.trim();
+                descr_box[0].value = raw_info.imgs_cmct.replace(/\[.?img\]/g, '').trim();
             } else {
-                descr_box[0].value = cmctimgs.replace(/\n\n+/g, '\n').trim();
+                descr_box[0].value = cmctimgs.replace(/\n\n+/g, '\n').replace(/\[.?img\]/g, '').trim();
             }
             if (raw_info.mediainfo_cmct){
                 descr_box[1].value = raw_info.mediainfo_cmct.trim();
@@ -19871,13 +19877,26 @@ setTimeout(function(){
                 case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA':
                     audiocodec_box.val(3); break;
                 case 'TrueHD': case 'Atmos':
-                    audiocodec_box.val(7); break;
+                    audiocodec_box.val(11); break;
                 case 'LPCM':
-                    audiocodec_box.val(7); break;
+                    audiocodec_box.val(8); break;
                 case 'DTS':
                     audiocodec_box.val(3); break;
                 case 'AC3':
-                    audiocodec_box.val(7); break;
+                    if (raw_info.name.match(/5\.1 /)) {
+                        audiocodec_box.val(10);
+                    } else if (raw_info.name.match(/2\.0 /)) {
+                        audiocodec_box.val(9);
+                    }
+                    if (raw_info.descr.match(/Channel[\s\S]*?(6|2).*?channels/i)) {
+                        var number = raw_info.descr.match(/Channel[\s\S]*?(2|6).*?channels/i)[1];
+                        if (number == '2') {
+                            audiocodec_box.val(9);
+                        } else if (number == '6') {
+                            audiocodec_box.val(10);
+                        }
+                    }
+                    break;
                 case 'AAC':
                     audiocodec_box.val(6); break;
                 case 'Flac':
