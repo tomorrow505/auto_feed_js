@@ -23800,55 +23800,76 @@ setTimeout(function(){
 
             raw_info.name = raw_info.name + (raw_info.edition_info === undefined ? '': raw_info.edition_info);
 
-            var event = document.createEvent("HTMLEvents");
-            event.initEvent("click", false, true);
-            $('a:contains(Masters of Cinema)')[0].dispatchEvent(event);
-            $('a:contains(Masters of Cinema)').css({"color": "yellow"});
+            $('#get_ptp').click((e)=>{
+                e.preventDefault();
+                var imdburl = $('#imdb').val();
+                var search_url = 'https://passthepopcorn.me/ajax.php?' + encodeURI(`action=torrent_info&imdb=${imdburl}&fast=1`)
+                getJson(search_url, null, function(data){
+                    if (data.length) {
+                        data = data[0];
+                        $('#title').val(data.title);
+                        $('#year').val(data.year);
+                        if (data.groupid) {
+                            $('#title').attr('disabled', true);
+                            $('#year').attr('disabled', true);
+                            $('#image').attr('disabled', true);
+                            $('#tags').attr('disabled', true);
+                            $('#album_desc').attr('disabled', true);
+                            $('#genre_tags').attr('disabled', true);
+                        } else {
+                            $('#image').val(data.art);
+                            $('#tags').val(data.tags);
+                            $('#album_desc').val(data.plot);
+                        }
+                    }
+                })
+            })
+
+            function addedition(str) {
+                var event = document.createEvent("HTMLEvents");
+                event.initEvent("click", false, true);
+                $(`a:contains(${str})`)[0].dispatchEvent(event);
+                $(`a:contains(${str})`).css({"color": "yellow"});
+            }
+
             if (raw_info.name.match(/Criterion Collection/i) || raw_info.small_descr.match(/CC标准收藏|Criterion Collection/i)) {
-                $(`input[type=checkbox][value=18]`).attr('checked', true);
+                addedition('The Criterion Collection');
             }
             if (raw_info.name.match(/Masters of Cinema/i) || raw_info.small_descr.match(/Masters of Cinema/i)) {
-                $(`input[type=checkbox][value=19]`).attr('checked', true);
+                addedition('Masters of Cinema')
             }
             if (raw_info.name.match(/Warner Archive Collection/i) || raw_info.small_descr.match(/WAC|Warner Archive Collection/i)) {
-                $(`input[type=checkbox][value=68]`).attr('checked', true);
+                addedition('Warner Archive Collection')
             }
-
             if (labels.db || raw_info.small_descr.match(/杜比|dolby version/i)) {
-                $(`input[type=checkbox][value=6]`).attr('checked', true);
+                addedition('Dolby Vision')
             }
-
             if (labels.hdr10 || raw_info.small_descr.match(/hdr10/i)) {
-                $(`input[type=checkbox][value=9]`).attr('checked', true);
+                addedition('HDR10')
             }
             if (raw_info.name.match(/4K remaster/i) || raw_info.small_descr.match(/4K.?修复/i)) {
-                $(`input[type=checkbox][value=8]`).attr('checked', true);
+                addedition('4K Remaster')
             }
-
             if (raw_info.name.match(/atmos/i) || raw_info.small_descr.match(/atmos/i) || raw_info.descr.match(/Dolby Atmos/)) {
-                $(`input[type=checkbox][value=5]`).attr('checked', true);
+                addedition('Dolby Atmos')
             }
-
             if (raw_info.name.match(/amzn/i)) {
-                $(`input[type=checkbox][value=28]`).attr('checked', true);
+                addedition('Amazon')
             }
             if (raw_info.name.match(/netflix/i)) {
-                $(`input[type=checkbox][value=29]`).attr('checked', true);
+                addedition('Netflix')
             }
             if (raw_info.name.match(/hulu/i)) {
-                $(`input[type=checkbox][value=34]`).attr('checked', true);
+                addedition('Hulu')
             }
             if (raw_info.name.match(/dsnp/i)) {
-                $(`input[type=checkbox][value=33]`).attr('checked', true);
+                addedition('Disney+')
             }
             if (raw_info.name.match(/aptv/i)) {
-                $(`input[type=checkbox][value=27]`).attr('checked', true);
+                addedition('Apple TV+')
             }
             if (raw_info.name.match(/itunes/i)) {
-                $(`input[type=checkbox][value=38]`).attr('checked', true);
-            }
-            if (raw_info.name.match(/imax/i)) {
-                $(`input[type=checkbox][value=14]`).attr('checked', true);
+                addedition('iTunes')
             }
 
             $('button[type=submit]').click(()=>{
