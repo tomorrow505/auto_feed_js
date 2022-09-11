@@ -23635,7 +23635,6 @@ setTimeout(function(){
             raw_info.descr = raw_info.descr.replace(/ /g, ' ');
             raw_info.full_mediainfo = raw_info.full_mediainfo.replace(/ /g, ' ');
             console.log(raw_info);
-
             $('input[name=imdb]').val(raw_info.url);
 
             name = raw_info.name;
@@ -23716,6 +23715,17 @@ setTimeout(function(){
             var announce = 'http://tracker.hdbits.org/announce.php';
             addTorrent(raw_info.torrent_url, raw_info.torrent_name, 'hdb-task', announce);
 
+            switch(raw_info.medium_sel){
+                case 'UHD': case 'Blu-ray':  case 'Encode': case 'Remux': $('#source').val('Blu-ray'); break;
+                case 'HDTV': $('#source').val('HDTV'); break;
+                case 'WEB-DL': $('#source').val('WEB'); break;
+                case 'DVD': $('#source').val('DVD'); break;
+                case 'TV': $('#source').val('TV'); break;
+            }
+            if (raw_info.name.match(/hd-dvd/i)) {
+                $('#source').val('HD-DVD');
+            }
+
             switch (raw_info.type){
                 case '电影': $('#type_category').val("1"); break;
                 case '剧集': $('#type_category').val("2"); break;
@@ -23764,10 +23774,10 @@ setTimeout(function(){
 
             var infos = get_mediainfo_picture_from_descr(raw_info.descr);
             if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'DVD') {
-                $('textarea[name="bdinfo"]').val(infos.mediainfo);
+                $('textarea[name="release_desc"]').val(infos.mediainfo);
             } else {
                 infos.mediainfo = infos.mediainfo.replace(/ \n/g, '\n');
-                $('textarea[name="techinfo"]').val(infos.mediainfo);
+                $('textarea[name="release_desc"]').val(infos.mediainfo);
             }
 
             var label_str = raw_info.small_descr + raw_info.name + raw_info.descr;
@@ -23790,6 +23800,10 @@ setTimeout(function(){
 
             raw_info.name = raw_info.name + (raw_info.edition_info === undefined ? '': raw_info.edition_info);
 
+            var event = document.createEvent("HTMLEvents");
+            event.initEvent("click", false, true);
+            $('a:contains(Masters of Cinema)')[0].dispatchEvent(event);
+            $('a:contains(Masters of Cinema)').css({"color": "yellow"});
             if (raw_info.name.match(/Criterion Collection/i) || raw_info.small_descr.match(/CC标准收藏|Criterion Collection/i)) {
                 $(`input[type=checkbox][value=18]`).attr('checked', true);
             }
