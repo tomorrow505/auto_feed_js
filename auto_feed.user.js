@@ -3316,6 +3316,10 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
                         alert("加载种子失败，请先在源站进行一次种子下载操作！！！");
                         return;
                     }
+                    if (r.match(/Request frequency limit/)) {
+                        alert("频率太快，600秒后再来！");
+                        return;
+                    }
                     if (r.match(/8:announce\d+:.*(please.passthepopcorn.me|blutopia.xyz|beyond-hd.me|asiancinema.me|telly.wtf|jptv.club|hd-olimpo.club|secret-cinema.pw)/)) {
                         if (r.match(/4:name\d+:/)) {
                             var length = parseInt(r.match(/4:name(\d+):/)[1]);
@@ -8302,6 +8306,7 @@ setTimeout(function(){
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
             raw_info.url = match_link('imdb', $('.des').has('blockquote').text());
+            raw_info.type = $('div.tags').text().get_type();
             if (!raw_info.url) {
                 raw_info.url = match_link('imdb', $('#media').html());
             }
@@ -23695,8 +23700,7 @@ setTimeout(function(){
                     }
                 } catch(err) {}
             }
-            name = name.replace(/ -/g, '-').replace(/- /g, '-');
-            $('input[name=name]').val(name);
+            $('#name').val(name.replace(/ +-|- +/g, '-'));
             if (raw_info.tvdb_url !== undefined) {
                 if (raw_info.tvdb_url.match(/\d+/)) {
                     $('#tvdb').val(raw_info.tvdb_url.match(/\d+/)[0]);
@@ -23757,11 +23761,12 @@ setTimeout(function(){
             if (raw_info.type == '剧集') {
                 if (raw_info.name.match(/S(\d+)(E\d+)?/)) {
                     season_episode = raw_info.name.match(/S(\d+)(E\d+)?/);
+                    console.log(season_episode)
                     if (season_episode[1] !== undefined) {
                         $('#season').val(parseInt(season_episode[1]));
                     }
                     if (season_episode[2] !== undefined) {
-                        $('#episode').val(parseInt(season_episode[2]));
+                        $('#episode').val(parseInt(season_episode[2].replace(/e/i, '')));
                     }
                 }
             }
@@ -23810,12 +23815,7 @@ setTimeout(function(){
                         $('#title').val(data.title);
                         $('#year').val(data.year);
                         if (data.groupid) {
-                            $('#title').attr('disabled', true);
-                            $('#year').attr('disabled', true);
-                            $('#image').attr('disabled', true);
-                            $('#tags').attr('disabled', true);
-                            $('#album_desc').attr('disabled', true);
-                            $('#genre_tags').attr('disabled', true);
+                            $('#groupid').val(data.groupid);
                         } else {
                             $('#image').val(data.art);
                             $('#tags').val(data.tags);
@@ -23871,8 +23871,45 @@ setTimeout(function(){
             if (raw_info.name.match(/itunes/i)) {
                 addedition('iTunes')
             }
+            if (raw_info.name.match(/Unrated/i) || raw_info.small_descr.match(/未分级版/)) {
+                addedition('Unrated')
+            }
+            if (raw_info.name.match(/\d+.Uncut/i) || raw_info.small_descr.match(/未删节版/)) {
+                addedition('Uncut')
+            }
+            if (raw_info.name.match(/Director's cut/i) || raw_info.small_descr.match(/导演剪辑版/)) {
+                addedition("Director's Cut")
+            }
+            if (raw_info.name.match(/Extended/i) || raw_info.small_descr.match(/加长版/)) {
+                addedition('Extended')
+            }
+            if (raw_info.name.match(/10.?bit/i)) {
+                addedition('10-bit')
+            }
+            if (raw_info.name.match(/2-Disc/) || raw_info.small_descr.match(/双碟版/)) {
+                addedition('2-Disc Set')
+            }
+            if (raw_info.name.match(/commentary/i) || raw_info.small_descr.match(/评论音轨/)) {
+                addedition('With Commentary')
+            }
 
-            $('button[type=submit]').click(()=>{
+            $('input[type=submit]').click(()=>{
+                if (!$('#ptp').is(':checked') && !$('#hdb').is(':checked')) {
+                    alert('请至少选择一个发布站点！！');
+                    return false;
+                }
+                if ($('#type_category').val() != '1' && $('#ptp').is(':checked')) {
+                    alert('此工具仅支持Movie发布到PTP站。');
+                    return false;
+                }
+                if (!$('#title').val() && $('#ptp').is(':checked')) {
+                    alert('选择了PTP站点, 请先点击获取信息！！');
+                    return false;
+                }
+                if (!$('#tvdb').val() && $('#hdb').is(':checked') && $('#type_category').val() == '2') {
+                    alert('HDB发布影视需要TVDB信息');
+                    return false;
+                }
                 GM_deleteValue('task_info');
             })
 
