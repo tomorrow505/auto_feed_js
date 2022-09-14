@@ -8321,6 +8321,7 @@ setTimeout(function(){
                 });
             }
             raw_info.name = $('h1').text();
+            raw_info.torrent_url = 'https://iptorrents.com/' + $('a[href*="download.php"]').attr('href');
         } 
 
         if (origin_site == 'torrentseeds') {
@@ -8335,6 +8336,7 @@ setTimeout(function(){
             douban_box = tbody.insertRow(0);
             raw_info.name = $('h1:last').text().trim();
             raw_info.url = match_link('imdb', $('#torrent-page').html());
+            raw_info.type = $('.torrent-format').text().get_type();
             if (all_sites_show_douban && raw_info.url) {
                 getData(raw_info.url, function(data){
                     if (data.data){
@@ -8345,6 +8347,7 @@ setTimeout(function(){
                     }
                 });
             }
+            raw_info.torrent_url = $('.torrent-buttons').find('a[href*="download"]').attr('href');
         }
 
         if (origin_site == 'IN') {
@@ -9073,7 +9076,6 @@ setTimeout(function(){
         if (origin_site == 'TorrentLeech') {
             var name = document.getElementById('torrentnameid');
             raw_info.name = name.textContent.replace(/freeleech/ig, '').trim();
-
             tbody = document.getElementsByClassName('table borderless')[0];
 
             var imdb_box = document.getElementsByClassName('torrent-main row mt-30')[0];
@@ -9570,6 +9572,9 @@ setTimeout(function(){
                     } else {
                         raw_info.type = tds[i+1].textContent.get_type();
                         raw_info.medium_sel = tds[i+1].textContent.medium_sel();
+                        if (raw_info.name.match(/COMPLETE.*?BLURAY/)) {
+                            raw_info.medium_sel = 'Blu-ray';
+                        }
                     }
                 }
             }
@@ -23855,6 +23860,9 @@ setTimeout(function(){
             }
             if (raw_info.name.match(/amzn/i)) {
                 addedition('Amazon')
+            }
+            if (raw_info.name.match(/remux/i)) {
+                addedition('Remux')
             }
             if (raw_info.name.match(/netflix/i)) {
                 addedition('Netflix')
