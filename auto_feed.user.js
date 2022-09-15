@@ -1103,7 +1103,7 @@ const o_site_info = {
     'NBL': 'https://nebulance.io/',
     'ANT': 'https://anthelion.me/',
     'IPT': 'https://iptorrents.com/',
-    'torrentseeds': 'https://www.torrentseeds.org/',
+    'torrentseeds': 'https://torrentseeds.org/',
     'IN': 'https://nzbs.in/',
     'digitalcore': 'https://digitalcore.club/',
     'BlueBird': 'https://bluebird-hd.org/',
@@ -23826,6 +23826,8 @@ setTimeout(function(){
                             $('#tags').val(data.tags);
                             $('#album_desc').val(data.plot);
                         }
+                        $('#get_ptp').css({"color": "grey"})
+                        alert('获取信息成功！！');
                     }
                 })
             })
