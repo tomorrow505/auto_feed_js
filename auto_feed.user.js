@@ -20002,18 +20002,9 @@ setTimeout(function(){
                 case 'DTS':
                     audiocodec_box.val(3); break;
                 case 'AC3':
-                    if (raw_info.name.match(/5\.1 /)) {
+                    audiocodec_box.val(9);
+                    if (raw_info.descr.match(/Dolby Digital Plus/i) || raw_info.name.match(/DD[P\+]/)) {
                         audiocodec_box.val(10);
-                    } else if (raw_info.name.match(/2\.0 /)) {
-                        audiocodec_box.val(9);
-                    }
-                    if (raw_info.descr.match(/Channel[\s\S]*?(6|2).*?channels/i)) {
-                        var number = raw_info.descr.match(/Channel[\s\S]*?(2|6).*?channels/i)[1];
-                        if (number == '2') {
-                            audiocodec_box.val(9);
-                        } else if (number == '6') {
-                            audiocodec_box.val(10);
-                        }
                     }
                     break;
                 case 'AAC':
@@ -20028,6 +20019,13 @@ setTimeout(function(){
                     audiocodec_box.val(4); break;
                 case 'M4A':
                     audiocodec_box.val(7);
+            }
+
+            if (raw_info.descr.match(/HDR10/i)) {
+                $('input[name="tags[]"][value=11]').attr('checked', true);
+            }
+            if (raw_info.descr.match(/Dolby Vision/i)) {
+                $('input[name="tags[]"][value=12]').attr('checked', true);
             }
 
             //分辨率
