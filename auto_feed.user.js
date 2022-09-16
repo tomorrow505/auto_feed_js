@@ -17,7 +17,6 @@
 // @match        https://xthor.tk/*
 // @match        https://hdf.world/*
 // @match        https://broadcity.in/*
-// @match        http://194.233.173.103:5678/
 // @match        https://secret-cinema.pw/torrents.php?id=*
 // @match        https://filelist.io/*
 // @match        https://bluebird-hd.org/*
