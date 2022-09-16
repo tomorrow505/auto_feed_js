@@ -69,7 +69,6 @@
 // @match        https://broadcasthe.net/friends.php
 // @match        https://lemonhd.org/torrents_movie.php*
 // @exclude      http*bitpt.cn*
-// @exclude      https://bt.byr.cn/upload.php*
 // @match        https://lemonhd.org/upload_music.php*
 // @match        http*://*redacted.ch/upload.php*
 // @match        http*://*redacted.ch/requests.php*
@@ -85,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.8.9
+// @version      1.9.9.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -7810,6 +7809,10 @@ if (origin_site == "HDF" || origin_site == "PTP"){
     sleep_time = 3000;
 }
 
+if (origin_site == 'BYR') {
+    delete Array.prototype.remove;
+}
+
 setTimeout(function(){
     if (judge_if_the_site_as_source() == 1) {
         raw_info.origin_site = origin_site;
@@ -9790,6 +9793,7 @@ setTimeout(function(){
                 if (tds[i+1].innerHTML.match(/英文名:(.*)/i)){
                     raw_info.name = tds[i+1].innerHTML.match(/英文名:<\/b>(.*?)(&nbsp|<br>)/i)[1];
                 }
+                raw_info.fullname = $('h1').text();
                 if (tds[i+1].innerHTML.match(/动漫文件格式:(.*)/i)) {
                     var type = tds[i+1].innerHTML.match(/动漫类别:<\/b>(.*?)<br>/i)[1];
                     raw_info.name += type == '剧场' ? ' MOVIE': ' ' + type;
@@ -10996,7 +11000,6 @@ setTimeout(function(){
             }
 
             forward_l.innerHTML = "转发种子"; forward_l.valign = "top"; forward_l.style.fontWeight = "bold";
-
             if ((!judge_if_the_site_in_domestic() && no_need_douban_button_sites.indexOf(origin_site) < 0) || douban_button_needed) {
                 var direct;
                 if (['PHD', 'avz', 'CNZ', 'BLU', 'TorrentLeech', 'BHD', 'HDPost', 'ACM', 'HDOli', 'Telly', 'torrentdb', 'jptv'].indexOf(origin_site) > -1) {
@@ -16319,6 +16322,7 @@ setTimeout(function(){
             delete Array.prototype.remove;
             raw_info.descr = raw_info.descr.replace(/^\n+/, '').replace(/\n/g, '<br />');
             $('textarea:first').val(raw_info.descr);
+            console.log(raw_info)
             switch(raw_info.type) {
                 case '电影':
                     switch (raw_info.source_sel){
@@ -16326,21 +16330,21 @@ setTimeout(function(){
                         case '日本': case '韩国': $('select[name="second_type"]').val('14'); break;
                         case '欧美': $('select[name="second_type"]').val('13'); break;
                     }
-                    raw_info.descr.match(/(◎译　　名|◎片　　名).*?<br \/>/g).filter(e=>{
-                        if (e.split(/◎译　　名|◎片　　名/).pop().trim().match(/[\u4e00-\u9fa5]/)) {
-                            e = e.split(/(◎译　　名|◎片　　名)/).pop().trim().replace('<br />', '').replace(/ /g, '').split('/').filter((e, index)=> {return index < 2})
+                    raw_info.descr.match(/(◎译.*名|◎片.*名).*?<br \/>/g).filter(e=>{
+                        if (e.split(/◎译.*名|◎片.*名/).pop().trim().match(/[\u4e00-\u9fa5]/)) {
+                            e = e.split(/(◎译.*名|◎片.*名)/).pop().trim().replace('<br />', '').replace(/ /g, '').split('/').filter((e, index)=> {return index < 2})
                             $('input[name="movie_cname"]').val(e.join('/'));
                         }
                     });
                     $('input[name="ename0day"]').val(raw_info.name.replace(/ /g, '.'));
-                    raw_info.descr.match(/◎类　　别　.*?<br \/>/g).filter(e=>{
+                    raw_info.descr.match(/◎类.*别　.*?<br \/>/g).filter(e=>{
                         if (e) {
-                            $('input[name="movie_type"]').val(e.split(/◎类　　别/).pop().trim().replace('<br />', '').replace(/ /g, ''));
+                            $('input[name="movie_type"]').val(e.split(/◎类.*别/).pop().trim().replace('<br />', '').replace(/ /g, ''));
                         }
                     });
-                    raw_info.descr.match(/(◎产　　地|◎地　　区|◎国　　家).*?<br \/>/g).filter(e=>{
+                    raw_info.descr.match(/(◎产.*地|◎地.*区|◎国.*家).*?<br \/>/g).filter(e=>{
                         if (e) {
-                            $('input[name="movie_country"]').val(e.split(/(◎产　　地|◎地　　区|◎国　　家)/).pop().trim().replace('<br />', '').replace(/ /g, ''));
+                            $('input[name="movie_country"]').val(e.split(/(◎产.*地|◎地.*区|◎国.*家)/).pop().trim().replace('<br />', '').replace(/ /g, ''));
                         }
                     });
                     break;
@@ -16351,15 +16355,77 @@ setTimeout(function(){
                         case '日本': case '韩国': $('select[name="second_type"]').val('16'); $('input[name="tv_type"]').val('日韩'); break;
                         case '欧美': $('select[name="second_type"]').val('17'); $('input[name="tv_type"]').val('欧美'); break;
                     }
-                    raw_info.descr.match(/(◎译　　名|◎片　　名).*?<br \/>/g).filter(e=>{
-                        if (e.split(/◎译　　名|◎片　　名/).pop().trim().match(/[\u4e00-\u9fa5]/)) {
-                            e = e.split(/(◎译　　名|◎片　　名)/).pop().trim().replace('<br />', '').replace(/ /g, '').split('/').filter((e, index)=> {return index < 2})
+                    raw_info.descr.match(/(◎译.*名|◎片.*名).*?<br.\/>/g).filter(e=>{
+                        if (e.split(/◎译.*名|◎片.*名/).pop().trim().match(/[\u4e00-\u9fa5]/)) {
+                            e = e.split(/(◎译.*名|◎片.*名)/).pop().trim().replace('<br />', '').replace(/ /g, '').split('/').filter((e, index)=> {return index < 2})
                             $('input[name="cname"]').val(e.join('/'));
                         }
                     });
                     $('input[name="tv_ename"]').val(raw_info.name.replace(/ /g, '.'));
                     try { $('input[name="tv_season"]').val(raw_info.name.match(/S\d+(E\d+)?/)[0]) } catch(Err) {}
                     break;
+                case '纪录':
+                    $('select[name="second_type"]').val('10');
+                    if (raw_info.name.match(/E\d+/i)) {
+                        $('#record_whetherend').val('连载');
+                    } else if (raw_info.name.match(/S\d+/i)){
+                        $('#record_whetherend').val('合集');
+                    } else {
+                        $('#record_whetherend').val('单集');
+                    }
+                    $('#record_ename').val(raw_info.name.replace(/ /g, '.'))
+                    var r_type = ['IMAX', 'BBC', 'NHK', 'PBS', 'Ch4', 'CCTV', 'BTV', '国家地理', '历史频道', '探索频道'];
+                    $('#record_type').val('其他');
+                    r_type.forEach((item)=>{
+                        if (raw_info.fullname !== undefined && raw_info.fullname.match(item)) {
+                            $('#record_type').val(item);
+                        }
+                        if (raw_info.name.match(item) || raw_info.small_descr.match(item)) {
+                            $('#record_type').val(item);
+                        }
+                    });
+                    raw_info.descr.match(/(◎译.*名|◎片.*名).*?<br.\/>/g).filter(e=>{
+                        if (e.split(/◎译.*名|◎片.*名/).pop().trim().match(/[\u4e00-\u9fa5]/)) {
+                            e = e.split(/(◎译.*名|◎片.*名)/).pop().trim().replace('<br />', '').replace(/ /g, '').split('/').filter((e, index)=> {return index < 2})
+                            $('input[name="cname"]').val(e.join('/'));
+                        }
+                    });
+                    try{ $('#record_season').val(raw_info.name.match(/(S\d+)(E\d+)?/)[0]); } catch(err) {}
+                    var standard_dict = {'4K': '2160p', '1080p': '1080p', '1080i': '1080i', '720p': '720p', 'SD': '480p'};
+                    if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                        var index = standard_dict[raw_info.standard_sel];
+                        $('#record_filetype').val(index);
+                    }
+                    switch(raw_info.medium_sel) {
+                        case 'UHD': case 'Blu-ray': case 'Remux': case 'Encode': $('#record_source').val('BluRay'); break;
+                        case 'DVD': $('#record_source').val('DVD'); break;
+                        case 'HDTV': $('#record_source').val('TV'); break;
+                        case 'WEB-DL': $('#record_source').val('Web-DL'); break;
+                    }
+                    try{ $('#record_group').val(raw_info.name.match(/-.*/)[0].split('-').pop()); } catch(err) {}
+                    var r_area = ['自然', '科学', '生理', '技术', '历史', '传记', '文化', '艺术', '社会', '军事', '旅行', '运动', '生活', '真人秀'];
+                    var r_areas = [];
+                    raw_info.descr.match(/◎类.*别　.*?<br \/>/g).filter(e=>{
+                        if (e) {
+                            var area = e.split(/◎类.*别/).pop().trim().replace('<br />', '').replace(/ /g, '');
+                            r_area.forEach((item)=>{
+                                if (area.match(item)) {
+                                    r_areas.push(item);
+                                }
+                            });
+                        }
+                        $('#record_area').val(r_areas.join('/'));
+                    });
+            }
+
+            if (raw_info.descr.match(/Audio Video Interleave|AVI/i)) {
+                $('#tv_filetype, #record_format').val('AVI');
+            } else if (raw_info.descr.match(/mp4|\.mp4/i)) {
+                $('#tv_filetype, #record_format').val('MP4');
+            } else if (raw_info.descr.match(/Matroska|\.mkv/i)) {
+                $('#tv_filetype, #record_format').val('MKV');
+            } else if (raw_info.descr.match(/MPLS/i)) {
+                $('#tv_filetype, #record_format').val('M2TS');
             }
         }
 
