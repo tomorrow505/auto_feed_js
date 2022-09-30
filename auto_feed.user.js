@@ -83,7 +83,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.9.1
+// @version      1.9.9.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -6437,6 +6437,8 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                 pic_info += '[img]' + item.replace(/_thumb.png/, '.png') + '[/img]\n';
             } else if (item.match(/img.hdchina.org/)) {
                 pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
+            } else if (item.match(/cinematik/)) {
+                pic_info += '[img]' + item.replace(/thu/, 'big') + '[/img]\n';
             } else if (item.match(/img4k.net/)) {
                 pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
             } else {
@@ -9991,8 +9993,6 @@ setTimeout(function(){
                 if (tmp_descr.match(/Unique ID|DISC INFO:|.MPLS|General/i)){
                     descr_info = descr_box[i].textContent;
                     if (descr_info.match(/Complete.*?name.*?(VOB|IFO)/i)) {
-                        raw_info.medium_sel = 'DVD';
-                        raw_info.name = $('h2').text().replace(/\]|\[/g, '');
                         if (descr_info.match(/Complete.*?name.*?VOB/i)){
                             descr_info += '\n\n' + descr_box[i+1].textContent;
                         } else {
@@ -10001,6 +10001,12 @@ setTimeout(function(){
                     }
                     break;
                 }
+            }
+            if (raw_info.edition_info.match(/DVD\d/)) {
+                raw_info.medium_sel = 'DVD';
+                raw_info.name = $('h2').text().split(/\[.*?\]/)[0] + $('h2').text().match(/\[(\d+)\]/)[1];
+                raw_info.name += ' ' + raw_info.edition_info.match(/NTSC|PAL/)[0];
+                raw_info.name += ' ' + raw_info.edition_info.match(/DVD\d+/)[0];
             }
             try {
                 raw_info.descr = '[quote]' + descr_info + '[/quote]\n\n';
@@ -10552,9 +10558,11 @@ setTimeout(function(){
             imgs = raw_info.descr.match(/\[url=.*?\] *\[img\].*?\[\/img\] *\[\/url\]/g);
 
             //从0开始，海报不在上述匹配模式里
-            for (i = 0; i < imgs.length; i++) {
-                if (!imgs[i].match(/(kralimarko)/i)) {
-                    imginfo += imgs[i] + '\n';
+            if (imgs) {
+                for (i = 0; i < imgs.length; i++) {
+                    if (!imgs[i].match(/(kralimarko)/i)) {
+                        imginfo += imgs[i] + '\n';
+                    }
                 }
             }
             raw_info.imgs_cmct = imginfo;
@@ -10707,6 +10715,15 @@ setTimeout(function(){
                 mediainfo = mediainfo.trim();
             }
 
+            if ($('summary:contains("VOB Mediainfo")').length) {
+                var vob_info = $('details[class="label label-primary"]').find('code')[0].innerHTML;
+                vob_info = vob_info.replace(/<br>/g, '\n');
+                vob_info = vob_info.replace(/<div.*?>/, '[quote]');
+                vob_info = vob_info.replace(/<\/div>/, '[/quote]\n\n')
+            } else {
+                vob_info = ''
+            }
+
             picture_info = picture_info.getElementsByTagName('img');
             var img_urls = '';
             for (i = 0; i < picture_info.length; i++){
@@ -10719,7 +10736,7 @@ setTimeout(function(){
             picture_info = img_urls;
             raw_info.mediainfo_cmct = mediainfo;
             raw_info.imgs_cmct = img_urls;
-            raw_info.descr = '[quote]' + mediainfo + '[/quote]\n\n' + picture_info;
+            raw_info.descr = '[quote]' + mediainfo + '[/quote]\n\n' + vob_info + picture_info;
 
             if (raw_info.url && all_sites_show_douban) {
                 getData(raw_info.url, function(data){
@@ -14128,18 +14145,36 @@ setTimeout(function(){
             descr_box[2].style.height = '600px';
 
             var info = get_mediainfo_picture_from_descr(raw_info.descr);
-            var cmctinfos = info.mediainfo;//图片
-            var cmctimgs = info.pic_info;//mediainfo
+            var cmctinfos = info.mediainfo;
+            var cmctimgs = info.pic_info;
+
+            var pic_str = raw_info.imgs_cmct ? raw_info.imgs_cmct: cmctimgs;
+            pic_info = '';
+            pic_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).forEach((item)=>{
+                item = item.replace(/\[.*\]/g, '');
+                if (item.match(/imgbox/)) {
+                    pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
+                } else if (item.match(/pixhost/)) {
+                    pic_info += '[img]' + item.replace('//t', '//img').replace('thumbs', 'images') + '[/img]\n';
+                } else if (item.match(/pterclub.com|beyondhd.co\/images/)) {
+                    pic_info += '[img]' + item.replace(/th.png/, 'png') + '[/img]\n';
+                } else if (item.match(/tu.totheglory.im/)) {
+                    pic_info += '[img]' + item.replace(/_thumb.png/, '.png') + '[/img]\n';
+                } else if (item.match(/img.hdchina.org/)) {
+                    pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
+                } else if (item.match(/img4k.net/)) {
+                    pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
+                } else {
+                    pic_info += '[img]' + item + '[/img]\n';
+                }
+            });
+
+            descr_box[0].value = pic_info.replace(/\[img\]/g, '').replace(/\[\/img\]/g, '\n').replace(/\n\n+/g, '\n').trim();
 
             //获取简介
             cmctdescr = raw_info.descr.slice(0,raw_info.descr.search(/\[quote\]/));
             cmctdescr = cmctdescr.replace(/\[img\]htt.*[\s\S]*?img\]/i, '');
 
-            if (raw_info.imgs_cmct){
-                descr_box[0].value = raw_info.imgs_cmct.replace(/\[.?img\]/g, '').trim();
-            } else {
-                descr_box[0].value = cmctimgs.replace(/\n\n+/g, '\n').replace(/\[.?img\]/g, '').trim();
-            }
             if (raw_info.mediainfo_cmct){
                 descr_box[1].value = raw_info.mediainfo_cmct.trim();
             } else {
@@ -15253,6 +15288,31 @@ setTimeout(function(){
                     document.getElementsByName('series')[0].value = raw_info.name.match(/E\d+(-E\d+)?/i)[0];
                 } else {
                     document.getElementsByName('t_season')[0].value = 'S01';
+                }
+            }
+
+            if (raw_info.multi_mediainfo) {
+                raw_info.descr = raw_info.descr.replace(/\[quote\][\s\S]*?\[\/quote\]/, raw_info.multi_mediainfo.replace('[/quote]', '[/quote]\n\n'));
+                $('#descr').val(raw_info.descr);
+                if (raw_info.audiocodec_sel && raw_info.name.match(/DVD\d/)) {
+                    if (raw_info.audiocodec_sel == 'AC3') {
+                        raw_info.audiocodec_sel = 'DD'
+                    }
+                    raw_info.name += ' ' + raw_info.audiocodec_sel;
+
+                    var channels = [];
+                    raw_info.descr.match(/Channel.*: \d channels/g).forEach((item)=>{
+                        channels.push(parseInt(item.match(/(\d) channels/)[1]));
+                    })
+                    channel = Math.max(...channels);
+                    if (channel == 8) {
+                        raw_info.name += ' 7.1';
+                    } else if (channel == 6) {
+                        raw_info.name += ' 5.1';
+                    } else if (channel == 2) {
+                        raw_info.name += ' 2.0';
+                    }
+                    $('#name').val(raw_info.name);
                 }
             }
 
@@ -24342,7 +24402,7 @@ setTimeout(function(){
                     alert('HDB发布剧集需要TVDB信息');
                     return false;
                 }
-                if (!$('#tvdb_season').val() && $('#hdb').is(':checked') && $('#type_category').val() == '2') {
+                if (!$('#season').val() && $('#hdb').is(':checked') && $('#type_category').val() == '2') {
                     alert('HDB发布剧集需要TVDB季度信息');
                     return false;
                 }
