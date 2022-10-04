@@ -24312,6 +24312,17 @@ setTimeout(function(){
                         alert('获取信息成功！！');
                     }
                 })
+            });
+
+            $('#show_pic').click((e)=>{
+                if (e.target.checked) {
+                    $('#pictures').show();
+                    var pic_urls = infos.pic_info.match(/http.*?(png|jpg)/g);
+                    $('#pictures').val(pic_urls.join('\n'));
+                } else {
+                    $('#pictures').hide();
+                    $('#pictures').val('');
+                }
             })
 
             function addedition(str) {
@@ -24392,6 +24403,10 @@ setTimeout(function(){
                 }
                 if ($('#type_category').val() != '1' && $('#ptp').is(':checked')) {
                     alert('此工具仅支持Movie发布到PTP站。');
+                    return false;
+                }
+                if (raw_info.descr.match(/\.mp4/) && $('#ptp').is(':checked')) {
+                    alert('此工具不支持MP4发布到PTP站。');
                     return false;
                 }
                 if (!$('#title').val() && $('#ptp').is(':checked')) {
