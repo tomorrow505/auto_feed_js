@@ -10717,11 +10717,17 @@ setTimeout(function(){
                 mediainfo = mediainfo.trim();
             }
 
-            if ($('summary:contains("VOB Mediainfo")').length) {
-                var vob_info = $('details[class="label label-primary"]').find('code')[0].innerHTML;
-                vob_info = vob_info.replace(/<br>/g, '\n');
-                vob_info = vob_info.replace(/<div.*?>/, '[quote]');
-                vob_info = vob_info.replace(/<\/div>/, '[/quote]\n\n')
+            if ($('summary').length) {
+                try{
+                    var vob_info = $('details[class="label label-primary"]').find('code')[0].innerHTML;
+                    vob_info = vob_info.replace(/<br>/g, '\n');
+                    vob_info = vob_info.replace(/<div.*?>/, '[quote]');
+                    vob_info = vob_info.replace(/<\/div>/, '[/quote]\n\n');
+                    vob_info = vob_info.replace(/<\/?pre>/g, '');
+                    vob_info = vob_info.replace(/&nbsp;/g, ' ');
+                } catch (err) {
+                    vob_info = ''
+                }
             } else {
                 vob_info = ''
             }
@@ -24309,6 +24315,7 @@ setTimeout(function(){
                             $('#image').val(data.art);
                             $('#tags').val(data.tags);
                             $('#album_desc').val(data.plot);
+                            $('div.ptp-extra').show();
                         }
                         $('#get_ptp').css({"color": "orange"})
                         alert('获取信息成功！！');
