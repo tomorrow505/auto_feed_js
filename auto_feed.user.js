@@ -83,7 +83,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.9.2
+// @version      1.9.9.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -144,6 +144,7 @@
     20220820：适配sugoimusic转出，修复部分bug。
     20220826：修复HDai部分bug。
     20220920：支持HDT备用域名，支持CG转入，待测试。修复部分bug。
+    20221013：适配monika，修复部分bug
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -21261,7 +21262,7 @@ setTimeout(function(){
                         var mediainfos = raw_info.multi_mediainfo.match(/\[quote\][\s\S]*?\[\/quote\]/g);
                         if (mediainfos.length > 1) {
                             for (i=1; i < mediainfos.length; i++) {
-                                $('#mediainfo').find('div:first').clone().appendTo($('#mediainfo').children('td').eq(1));
+                                $('#mediainfo').find('div:eq(1)').clone().appendTo($('#mediainfo').children('td').eq(1));
                             }
                         }
                         $('textarea[name="mediainfo[]"]').each((index, e)=> {
