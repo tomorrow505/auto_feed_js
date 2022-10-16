@@ -11,6 +11,7 @@
 // @match        https://nzbs.in/*
 // @match        http*://*/detail*.php*
 // @match        http*://*/upload*php*
+// @match        https://pixhost.to*
 // @match        https://*/upload/*
 // @match        https://*.open.cd/plugin_upload.php*
 // @match        http*://*/offer*php*
@@ -83,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.9.3
+// @version      1.9.9.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -144,7 +145,7 @@
     20220820：适配sugoimusic转出，修复部分bug。
     20220826：修复HDai部分bug。
     20220920：支持HDT备用域名，支持CG转入，待测试。修复部分bug。
-    20221013：适配monika，修复部分bug
+    20221013：适配monika，修复部分bug。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -410,7 +411,7 @@ if (site_url.match(/^https?:\/\/ptpimg.me/)) {
     return;
 }
 
-if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.com).?$/)) {
+if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.co|pixhost.to).?$/)) {
     var images = GM_getValue('HDB_images') !== undefined ? GM_getValue('HDB_images').split(', '): '';
     if (images && $('input[name="files[]"]').length) {
         $('div.visible-desktop:first').find('span:first').append(`<br><br><input type="button" value="拉取图片" id="add_images"/>`);
@@ -421,8 +422,13 @@ if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.com).?$/)) {
             var pros = [];
             images.map((item)=>{
                 console.log(item)
-                var p = getImage(item);
-                pros.push(p);
+                if (item.match(/t.hdbits.org/)) {
+                    item = item.replace('t.hdbits.org', 'i.hdbits.org').replace('jpg', 'png');
+                }
+                if (item.match(/jpg|png/)) {
+                    var p = getImage(item);
+                    pros.push(p);
+                }
             });
             Promise.all(pros).then((data)=>{
                 data.forEach((i)=>{
@@ -432,6 +438,41 @@ if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.com).?$/)) {
                 $('input[name="files[]"]')[0].dispatchEvent(evt);
                 $('#gallery-title').val(gallary_name);
                 $('#add_images').val("拉取成功！");
+            });
+        });
+    } 
+    if (site_url.match(/pixhost.to/)) {
+        if (images.length && images[0]) {
+            $('div.logo').append(`<br><br><input type="button" value="拉取图片" id="add_images"/>`);
+        }
+        $('#add_images').click(()=>{
+            $('#add_images').val("拉取中……");
+            var gallary_name = images.pop();
+            let container = new DataTransfer();
+            var pros = [];
+            images.map((item)=>{
+                if (item.match(/t.hdbits.org/)) {
+                    item = item.replace('t.hdbits.org', 'i.hdbits.org').replace('jpg', 'png');
+                }
+                console.log(item)
+                if (item.match(/jpg|png/)) {
+                    var p = getImage(item);
+                    pros.push(p);
+                }
+            });
+            Promise.all(pros).then((data)=>{
+                data.forEach((i)=>{
+                    container.items.add(i);
+                });
+                $('input[type="file"]')[0].files = container.files;
+                $('input[type="file"]')[0].dispatchEvent(evt);
+                $('input.max_th_size').val('350');
+                $('input.max_th_size')[0].dispatchEvent(evt);
+                $('#gallery_box').attr('checked', true);
+                $('#gallery_box')[0].dispatchEvent(evt);
+                $('input[name="gallery_name"]').val(gallary_name);
+                $('#add_images').val("拉取成功！");
+                GM_setValue('HDB_images', '');
             });
         });
     }
@@ -1151,7 +1192,6 @@ const site_img_info = {
     'avz': 'https://img.pterclub.com/images/2022/04/24/favicon.png',
     'PHD': 'https://img.pterclub.com/images/2022/04/24/phd.png',
     'CNZ': 'https://img.pterclub.com/images/2022/04/24/cnz.png',
-    'PigGo': 'https://img.pterclub.com/images/2022/05/10/favicon.png'
 };
 
 //用来拼接发布站点的url和字符串,也可用于识别发布页和源页面
@@ -2419,6 +2459,33 @@ function get_bluray_name_from_descr(descr, name) {
     return name;
 }
 
+var skip_img = [
+    '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c77825.png[/img]',
+    '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c7782a.png[/img]',
+    '[img]https://images2.imgbox.com/04/6b/Ggp5ReQb_o.png[/img]',
+    '[img]https://www.z4a.net/images/2019/09/13/info.png[/img]',
+    '[img]https://www.z4a.net/images/2019/09/13/screens.png[/img]',
+    '[img]https://i.loli.net/2019/03/28/5c9cb8f8216d7.png[/img]',
+    '[img]https://hdsky.me/attachments/201410/20141003100205b81803ac0903724ad88de90649c5a36e.jpg[/img]',
+    '[img]https://hdsky.me/adv/hds_logo.png[/img]',
+    '[img]https://iili.io/XF9HEQ.png[/img]',
+    '[img]https://img.pterclub.com/images/2022/03/24/58ef34eb1c04aa6f87442e439d103b29.png[/img]',
+    '[img]https://img.pterclub.com/images/2021/07/14/78c58ee6b3e092d0c5a7fa02f3a1905e.png[/img]',
+    '[img]https://pterclub.com/pic/CS.png[/img]',
+    '[img]https://pterclub.com/pic/GDJT.png[/img]',
+    '[img]http://img.pterclub.com/images/CS.png[/img]',
+    '[img]https://img.pterclub.com/images/GDJT.png[/img]',
+    '[img]https://kp.m-team.cc/logo.png[/img]',
+    '[img]http://tpimg.ccache.org/images/2015/03/08/c736743e65f95c4b68a8acd3f3e2d599.png[/img]',
+    '[img]https://ourbits.club/pic/Ourbits_info.png[/img]',
+    '[img]https://ourbits.club/pic/Ourbits_MoreScreens.png[/img]',
+    '[img]https://images2.imgbox.com/ce/e7/KCmGFMOB_o.png[/img]',
+    '[img]https://img.m-team.cc/images/2016/12/05/d3be0d6f0cf8738edfa3b8074744c8e8.png[/img]',
+    '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c77825.png[/img]',
+    '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c7782a.png[/img]'
+
+];
+
 //从简介拆分出来mediainfo和截图
 function get_mediainfo_picture_from_descr(descr){
     var info = {'mediainfo': '', 'pic_info': ''};
@@ -2454,29 +2521,6 @@ function get_mediainfo_picture_from_descr(descr){
     cmctinfos = cmctinfos.replace(/\[\/?(font|size|quote).{0,80}?\]/ig, '');
     //获取图片
 
-    var skip_img = [
-        '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c77825.png[/img]',
-        '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c7782a.png[/img]',
-        '[img]https://images2.imgbox.com/04/6b/Ggp5ReQb_o.png[/img]',
-        '[img]https://www.z4a.net/images/2019/09/13/info.png[/img]',
-        '[img]https://www.z4a.net/images/2019/09/13/screens.png[/img]',
-        '[img]https://i.loli.net/2019/03/28/5c9cb8f8216d7.png[/img]',
-        '[img]https://hdsky.me/attachments/201410/20141003100205b81803ac0903724ad88de90649c5a36e.jpg[/img]',
-        '[img]https://hdsky.me/adv/hds_logo.png[/img]',
-        '[img]https://iili.io/XF9HEQ.png[/img]',
-        '[img]https://img.pterclub.com/images/2022/03/24/58ef34eb1c04aa6f87442e439d103b29.png[/img]',
-        '[img]https://img.pterclub.com/images/2021/07/14/78c58ee6b3e092d0c5a7fa02f3a1905e.png[/img]',
-        '[img]https://pterclub.com/pic/CS.png[/img]',
-        '[img]https://pterclub.com/pic/GDJT.png[/img]',
-        '[img]http://img.pterclub.com/images/CS.png[/img]',
-        '[img]https://img.pterclub.com/images/GDJT.png[/img]',
-        '[img]https://kp.m-team.cc/logo.png[/img]',
-        '[img]http://tpimg.ccache.org/images/2015/03/08/c736743e65f95c4b68a8acd3f3e2d599.png[/img]',
-        '[img]https://ourbits.club/pic/Ourbits_info.png[/img]',
-        '[img]https://ourbits.club/pic/Ourbits_MoreScreens.png[/img]',
-        '[img]https://images2.imgbox.com/ce/e7/KCmGFMOB_o.png[/img]',
-        '[img]https://img.m-team.cc/images/2016/12/05/d3be0d6f0cf8738edfa3b8074744c8e8.png[/img]'
-    ];
     cmctimgs = descr.split(/\[\/quote\]/).pop();
     cmctimgs = cmctimgs.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
     try {
@@ -2774,39 +2818,22 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
     }
 
     if (site == 'HDB') {
-        var download_button = document.createElement('input');
-        download_button.type = "button";
-        download_button.id = 'download_pngs';
-        download_button.value = '下载截图';
-        download_button.style.marginLeft = '12px';
-        download_button.onclick = function() {
+
+        var send_pixhost = document.createElement('input');
+        send_pixhost.type = "button";
+        send_pixhost.id = 'send_pixhost';
+        send_pixhost.value = 'PIXHOST';
+        send_pixhost.style.marginLeft = '12px';
+        send_pixhost.onclick = function() {
             if (raw_info.images.length > 0) {
-                download_button.value = '正在下载';
-                for (var idx = 0; idx < raw_info.images.length; ++idx) {
-                    var url = raw_info.images[idx];
-                    var name = url.split('/').pop();
-                    if (!name.match(/\.(png|jpg)$/i)){
-                        name = name + '.png';
-                    }
-                    GM_download({
-                        url: url,
-                        name: name,
-                        headers: {
-                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36"
-                        },
-                        onerror: function(error) {
-                           alert('下载出错:' + error);
-                        },
-                        onload: function() {
-                           console.log('下载成功');
-                        }
-                    });
-                }
+                raw_info.images.push(raw_info.name.replace(/ /g, '.'));
+                GM_setValue('HDB_images', raw_info.images.join(', '));
+                window.open('https://pixhost.to/', '_blank');
             } else {
-                alert('请选择要下载的图片！！');
+                alert('请选择要转存的图片！！！')
             }
         };
-        container.appendChild(download_button);
+        container.appendChild(send_pixhost);
 
         var send_ptpimg = document.createElement('input');
         send_ptpimg.type = "button";
@@ -3202,7 +3229,7 @@ function getData(imdb_url, callback) {
                 try { raw_data.runtime = $('span[property="v:runtime"]', html).text(); } catch(e) {raw_data.runtime = ''}
                 try { raw_data.cast = $('#info span.pl:contains("主演")', html)[0].nextSibling.nextSibling.textContent.trim(); } catch(e) {raw_data.cast = ''}
                 try {
-                    raw_data.summary = Array.from($('#link-report>[property="v:summary"],#link-report>span.all.hidden', html)[0].childNodes)
+                    raw_data.summary = Array.from($('#link-report>[property="v:summary"],#link-report-intra>[property="v:summary"],#link-report>span.all.hidden', html)[0].childNodes)
                         .filter(e => e.nodeType === 3)
                         .map(e => e.textContent.trim())
                         .join('\n');
@@ -3242,7 +3269,7 @@ function getDataFromDou(douban_url, callback) {
         try { raw_data.runtime = $('span[property="v:runtime"]', html).text(); } catch(e) {raw_data.runtime = ''}
         try { raw_data.cast = $('#info span.pl:contains("主演")', html)[0].nextSibling.nextSibling.textContent.trim(); } catch(e) {raw_data.cast = ''}
         try {
-            raw_data.summary = Array.from($('#link-report>[property="v:summary"],#link-report>span.all.hidden', html)[0].childNodes)
+            raw_data.summary = Array.from($('#link-report>[property="v:summary"],#link-report-intra>[property="v:summary"],#link-report>span.all.hidden', html)[0].childNodes)
                 .filter(e => e.nodeType === 3)
                 .map(e => e.textContent.trim())
                 .join('\n');
@@ -6497,26 +6524,40 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         if ($('#picture').val().match(/http[^\[\]]*?(jpg|png|webp)/g).length > 0) {
             var origin_str = $('#picture').val();
             images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
-            pix_send_images(images)
-            .then(function(new_urls) {
-                new_urls = new_urls.toString().split(',');
-                var urls_append = '';
-                if (new_urls.length > 1) {
-                    for (var i=0; i<=new_urls.length-2; i+=2) {
-                        urls_append += `${new_urls[i]} ${new_urls[i+1]}\n`
+            if (images[0].match(/t.hdbits.org/)) {
+                var name = 'set your gallary name';
+                try {
+                    if (descr.match(/Disc Title:/)) {
+                        name = descr.match(/Disc Title:(.*)/)[1].trim();
+                    } else if (descr.match(/Complete name.?:/i)) {
+                        name = descr.match(/Complete name.?:(.*)/)[1].trim();
                     }
-                    if (new_urls.length % 2 == 1) {
-                        urls_append += new_urls[new_urls.length-1] + '\n';
+                } catch(err) {}
+                images.push(name);
+                GM_setValue('HDB_images', images.join(', '));
+                window.open('https://pixhost.to/', '_blank');
+            } else {
+                pix_send_images(images)
+                .then(function(new_urls) {
+                    new_urls = new_urls.toString().split(',');
+                    var urls_append = '';
+                    if (new_urls.length > 1) {
+                        for (var i=0; i<=new_urls.length-2; i+=2) {
+                            urls_append += `${new_urls[i]} ${new_urls[i+1]}\n`
+                        }
+                        if (new_urls.length % 2 == 1) {
+                            urls_append += new_urls[new_urls.length-1] + '\n';
+                        }
+                    } else {
+                        urls_append = new_urls[0] + '\n';
                     }
-                } else {
-                    urls_append = new_urls[0] + '\n';
-                }
-                $('#result').val(urls_append);
-                alert('转存成功！');
-            })
-            .catch(function(message){
-                alert('转存失败');
-            });
+                    $('#result').val(urls_append);
+                    alert('转存成功！');
+                })
+                .catch(function(message){
+                    alert('转存失败');
+                });
+            }
         } else {
             alert('缺少截图');
         }
@@ -7173,7 +7214,7 @@ function getDoubanScore(doc) {
 
 function getDescription(doc) {
     try {
-        return Array.from($('#link-report>[property="v:summary"],#link-report>span.all.hidden', doc)[0].childNodes)
+        return Array.from($('#link-report>[property="v:summary"],#link-report-intra>[property="v:summary"],#link-report>span.all.hidden', doc)[0].childNodes)
             .filter(e => e.nodeType === 3)
             .map(e => e.textContent.trim())
             .join('\n');
@@ -7920,7 +7961,7 @@ setTimeout(function(){
                     codemain[0].innerHTML = '[quote]{mediainfo}[/quote]'.format({ 'mediainfo': codemain[0].innerHTML });
                 }
 
-                if ((origin_site == 'PTer' || origin_site == 'FRDS') && descr.getElementsByTagName('table')[0]){
+                if ((origin_site == 'PTer' || origin_site == 'FRDS' || origin_site == 'Audiences') && descr.getElementsByTagName('table')[0]){
                     var descr_table = descr.getElementsByTagName('table')[0];
                     if (descr_table.textContent.match(/general/i)){
                         descr_table.parentNode.removeChild(descr_table);
@@ -7932,6 +7973,7 @@ setTimeout(function(){
             }
 
             raw_info.descr = walkDOM(descr);
+            raw_info.descr = raw_info.descr.replace(/\[\/img\]\n\n/g, '[/img]\n');
 
             if (origin_site == 'U2') {
                 tmp_descr = raw_info.descr;
@@ -9310,9 +9352,8 @@ setTimeout(function(){
                             "checkMarkSize": "20px",
                             "fadeCheckMark": false
                         });
-                    } else {
-                        raw_info.descr += '\n\n' + img_urls;
-                    }
+                    } 
+                    raw_info.descr += '\n\n' + img_urls;
                 })
             }, 2000);
 
@@ -11391,8 +11432,6 @@ setTimeout(function(){
             if_exclusive = true;
         } else if (origin_site == 'OpenCD' && document.querySelector("#outer > center > table:nth-child(4) > tbody > tr:nth-child(6) > td:nth-child(2) > table > tbody > tr:nth-child(13)").textContent == "禁止轉載") {
             if_exclusive = true;
-        } else if (['HDDolby', 'PThome', 'HDHome', 'Audiences'].indexOf(origin_site) > -1 && $('#outer').find('.tjz').length) {
-            if_exclusive = true;
         } else if (origin_site == 'CHDBits') {
             if (raw_info.name.match(/CHD|SGNB|STBOX|ONEHD|BLUCOOK|HQC|GBT|KAN|PLP/i)){
                 if (raw_info.url) {
@@ -11488,7 +11527,7 @@ setTimeout(function(){
                 $('#top').append(`<br><b><span id="checking"><font color="red">[一般资源]</font></span></b>`);
             }
         } else if (['HDDolby', 'HDHome', 'PThome', 'Audiences'].indexOf(origin_site) > -1) {
-            if ($('span.txz').length) {
+            if ($('tr:contains("标签"):last').find('span.txz').length || $('tr:contains("标签"):last').find('span.tjz').length) {
                 if_exclusive = true;
             }
         }
@@ -13552,6 +13591,10 @@ setTimeout(function(){
         }
 
         if ($('textarea[name="technical_info"]').length) {
+            for (i=0; i<skip_img.length; i++) {
+                raw_info.descr = raw_info.descr.replace(skip_img[i], '');
+            }
+            raw_info.descr = raw_info.descr.replace(/\n\n+/, '\n\n');
             try{
                 var infos = get_mediainfo_picture_from_descr(raw_info.descr);
                 var container = $('textarea[name="technical_info"]');
@@ -23909,7 +23952,16 @@ setTimeout(function(){
             $('input[name=imdb]').val(raw_info.url);
 
             name = raw_info.name;
-            name = name.replace(/DDPA?/i, 'DD+').replace(/AC3/, 'DD').replace(/DTS(\d+)/i, 'DTS $1')
+            name = name.replace(/DDPA?/i, 'DD+').replace(/AC3/, 'DD').replace(/DTS(\d+)/i, 'DTS $1');
+
+            try {
+                var team = raw_info.name.match(/.*-(.*?)$/i)[1];
+                $('#team').val(team);
+            } catch (err) {}
+
+            if (raw_info.name.match(/MULTI COMPLETE/i)) {
+                raw_info.medium_sel = 'Blu-ray';
+            }
 
             function get_audio_codec_from_descr(descr) {
                 var audio_format = descr.match(/Audio[\s\S]{0,3}ID[\s\S]*?Format.*?:(.*)/)[1];
@@ -24068,16 +24120,18 @@ setTimeout(function(){
                 window.open(url_to_search, "_blank");
             })
 
-            var infos = get_mediainfo_picture_from_descr(raw_info.descr);
-            if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'DVD' || raw_info.descr.match(/mpls/i)) {
-                $('textarea[name="release_desc"]').val(infos.mediainfo);
-            }
-            setTimeout(function(){
-                try{
-                    var intro = raw_info.descr.match(/◎简　　介[\s]*.*/i)[0];
-                    $('textarea[name="descr"]').val(raw_info.descr.split(intro)[0] + intro);
-                } catch(err) {}
-            }, 2000)
+            try {
+                var infos = get_mediainfo_picture_from_descr(raw_info.descr);
+                if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'DVD' || raw_info.descr.match(/mpls/i)) {
+                    $('textarea[name="release_desc"]').val(infos.mediainfo);
+                }
+                setTimeout(function(){
+                    try{
+                        var intro = raw_info.descr.match(/◎简　　介[\s]*.*/i)[0];
+                        $('textarea[name="descr"]').val(raw_info.descr.split(intro)[0] + intro);
+                    } catch(err) {}
+                }, 2000)
+            } catch (err) {}
 
             // 开始填写瓷器
             $('input[name="hdc_name"]').val(raw_info.name);
