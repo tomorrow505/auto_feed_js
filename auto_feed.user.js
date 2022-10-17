@@ -12512,6 +12512,13 @@ setTimeout(function(){
                 if (group.tags) {
                     raw_info.music_type = group.tags.join(',');
                 }
+                raw_info.small_descr = torrent['format'] + ' / ' + torrent['encoding'] + ' / ' + torrent['media'];
+                if (torrent.logScore !== undefined && torrent.logScore > 0) {
+                    raw_info.small_descr += ` / Log (${torrent.logScore}%)`
+                }
+                if (torrent.hasCue !== undefined && torrent.hasCue) {
+                    raw_info.small_descr += ` / Cue`
+                }
             }
             $('#yadg_input').wait(function(){
                 $('#yadg_input').val(music_name);
