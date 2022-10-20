@@ -9960,9 +9960,26 @@ setTimeout(function(){
                     raw_info.name += ' AAC';
                 }
             }
-            if ((raw_info.small_descr + raw_info.animate_info).match(/自抓|自购|自購/)) {
-                raw_info.name += '-U2';
+
+            var author = raw_info.animate_info.match(/\[.*?\]/g).pop().replace(/\[|\]/g, '');
+            if ((raw_info.small_descr + raw_info.animate_info).match(/自抓|自购|自購|自压|自壓/)) {
+                if (author.match(/^(jp|r2j|r2_j.*|r2fr|ita|.*flac.*|.*\+.*|usa|fra|movie|tv|自压|自抓|自购|自購|.*自壓.*)$/i)) {
+                    raw_info.name += '-Anonymous@U2';
+                } else {
+                    raw_info.name += `-${author}@U2`;
+                }
             } else {
+                if (author.match(/@/)) {
+                    raw_info.name += `-${author}`;
+                } else {
+                    var authors = ['lolihouse', 'jsum','Raws', 'KoushinRip', 'ANK','VCB-Studio', 'VCB','LittlePox', 'LittleBakas','ANE','Reinforce','Moozzi2','mawen1250']
+                    authors.forEach((item)=>{
+                        if (author.match(item)) {
+                            alert(item)
+                            raw_info.name += `-${author}@U2`;
+                        }
+                    });
+                }
                 raw_info.descr = '[quote]转自U2, 对原作者表示感谢[/quote]\n\n' + raw_info.descr;
             }
 
