@@ -14,6 +14,7 @@
 // @match        https://pixhost.to*
 // @match        https://*/upload/*
 // @match        https://*.open.cd/plugin_upload.php*
+// @match        https://img.hdbits.org/
 // @match        http*://*/offer*php*
 // @match        https://xthor.tk/*
 // @match        https://hdf.world/*
@@ -84,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.9.5
+// @version      1.9.9.6
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -226,13 +227,19 @@ if (location.href.match(/^.{3,30}userdetail/i) && !site_url.match(/bluebird-hd/)
 function get_group_name(name, torrent_info) {
     name = name.replace(/\[.*?\]|web-dl|dts-hd|Blu-ray|MPEG-2|MPEG-4/ig, '');
     name = name.split(/\.mkv|\.mp4|\.iso|\.avi/)[0];
+    if (name.match(/KJNU/)) {
+        return 'KJNU';
+    }
+    if (name.match(/tomorrow505/i)) {
+        return 'tomorrow505';
+    }
     try{
         tmp_name = name.match(/-(.*)/)[1].split(/-/).pop();
         if (tmp_name.match(/x264|x265|h264|h265/i)){
             if (torrent_info.match(/Scene/)) {
                 name = name.split('-')[0];
             } else {
-                tmp_name = tmp_name.split(/x264|x265|h264|h265|AC3|DD/i);
+                tmp_name = tmp_name.split(/AC3|[\. ]DD[\. \+]|AAC|x264|x265|h264|h265/i);
                 if (tmp_name.length > 1) {
                     name = tmp_name[1].replace(/\.| /g, '');
                 } else {
@@ -243,7 +250,7 @@ function get_group_name(name, torrent_info) {
             name = tmp_name;
         }
     } catch(err) {
-        name = name.split(/x264|x265|h264|h265|AC3|DD/i);
+        name = name.split(/AC3|[\. ]DD[\. \+]|AAC|x264|x265|h264|h265/i);
         if (name.length > 1) {
             name = name[1].replace(/\.| /g, '');
         } else {
@@ -252,7 +259,7 @@ function get_group_name(name, torrent_info) {
     }
     if (!name || name.match(/\)|\d\d/)) name = 'Null';
     if (name == 'Z0N3') name = 'D-Z0N3';
-    if (name.match(/CultFilms/)) name = 'CultFilms™';
+    if (name.match(/CultFilms/)) name = 'CultFilms';
     if (name.match(/™/) && !name.match(/CultFilms/)) {
         name = 'Null';
     }
@@ -413,7 +420,7 @@ if (site_url.match(/^https?:\/\/ptpimg.me/)) {
     return;
 }
 
-if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.co|pixhost.to).?$/)) {
+if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.co|pixhost.to|img.hdbits.org).?$/)) {
     var images = GM_getValue('HDB_images') !== undefined ? GM_getValue('HDB_images').split(', '): '';
     if (images && $('input[name="files[]"]').length) {
         $('div.visible-desktop:first').find('span:first').append(`<br><br><input type="button" value="拉取图片" id="add_images"/>`);
@@ -443,9 +450,10 @@ if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.co|pixhost.to).?$/)) {
             });
         });
     } 
-    if (site_url.match(/pixhost.to/)) {
+    if (site_url.match(/pixhost.to|img.hdbits.org/)) {
         if (images.length && images[0]) {
             $('div.logo').append(`<br><br><input type="button" value="拉取图片" id="add_images"/>`);
+            $('#header').after(`<br><br><div align="center"><input type="button" value="拉取图片" id="add_images"/></div>`);
         }
         $('#add_images').click(()=>{
             $('#add_images').val("拉取中……");
@@ -468,11 +476,17 @@ if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.co|pixhost.to).?$/)) {
                 });
                 $('input[type="file"]')[0].files = container.files;
                 $('input[type="file"]')[0].dispatchEvent(evt);
-                $('input.max_th_size').val('350');
-                $('input.max_th_size')[0].dispatchEvent(evt);
-                $('#gallery_box').attr('checked', true);
-                $('#gallery_box')[0].dispatchEvent(evt);
-                $('input[name="gallery_name"]').val(gallary_name);
+                if (site_url.match(/pixhost/)){
+                    $('input.max_th_size').val('350');
+                    $('input.max_th_size')[0].dispatchEvent(evt);
+                    $('#gallery_box').attr('checked', true);
+                    $('#gallery_box')[0].dispatchEvent(evt);
+                    $('input[name="gallery_name"]').val(gallary_name);
+                } else {
+                    $('#thumbsize').val('w350');
+                    $('#galleryname').val(gallary_name);
+                }
+                
                 $('#add_images').val("拉取成功！");
                 GM_setValue('HDB_images', '');
             });
@@ -1064,7 +1078,8 @@ const reg_team_name = {
     'WT-Sakura': /SakuraWEB|SakuraSUB|WScode/i,
     'PigGo': /PiGoNF|PigoHD|PigoWeb/i,
     'HHClub': /HHWEB/i,
-    'HaresClub': /Hares?WEB|HaresTV|DIY@Hares|-hares/i
+    'HaresClub': /Hares?WEB|HaresTV|DIY@Hares|-hares/i,
+    'HDPt': /hdptweb/i
 };
 const thanks_str = "[quote][b][color=Blue]转自{site}，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
@@ -2808,6 +2823,9 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
                         urls_append = new_urls;
                     }
                     $('#textarea').val($('#textarea').val() + '\n' + urls_append);
+                    if (site == 'PTP') {
+                        raw_info.descr = raw_info.descr.replace(/\[img\].*?(ptpimg|pixhost).*?\[\/img\]/g, '');
+                    }
                     raw_info.descr = raw_info.descr + '\n' + urls_append;
                     set_jump_href(raw_info, 1);
                     download_button.value = '处理成功';
@@ -2821,6 +2839,25 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
             }
         };
         container.appendChild(download_button);
+
+        if (site != 'PTP') {
+            var hdb_transfer = document.createElement('input');
+            hdb_transfer.type = "button";
+            hdb_transfer.id = 'transfer_hdb';
+            hdb_transfer.value = '转存HDB';
+            hdb_transfer.style.marginLeft = '5px';
+            hdb_transfer.style.paddingLeft = '2px';
+            container.appendChild(hdb_transfer);
+            hdb_transfer.onclick = function() {
+                if (raw_info.images.length > 0) {
+                    raw_info.images.push(raw_info.name.replace(/ /g, '.'));
+                    GM_setValue('HDB_images', raw_info.images.join(', '));
+                    window.open('https://img.hdbits.org/', '_blank');
+                } else {
+                    alert('请选择要转存的图片！！！')
+                }
+            }
+        }
     }
 
     if (site == 'HDB') {
@@ -3235,7 +3272,7 @@ function getData(imdb_url, callback) {
                 try { raw_data.runtime = $('span[property="v:runtime"]', html).text(); } catch(e) {raw_data.runtime = ''}
                 try { raw_data.cast = $('#info span.pl:contains("主演")', html)[0].nextSibling.nextSibling.textContent.trim(); } catch(e) {raw_data.cast = ''}
                 try {
-                    raw_data.summary = Array.from($('#link-report>[property="v:summary"],#link-report-intra>[property="v:summary"],#link-report>span.all.hidden', html)[0].childNodes)
+                    raw_data.summary = Array.from($('#link-report-intra>[property="v:summary"],#link-report-intra>span.all.hidden', html)[0].childNodes)
                         .filter(e => e.nodeType === 3)
                         .map(e => e.textContent.trim())
                         .join('\n');
@@ -3275,7 +3312,7 @@ function getDataFromDou(douban_url, callback) {
         try { raw_data.runtime = $('span[property="v:runtime"]', html).text(); } catch(e) {raw_data.runtime = ''}
         try { raw_data.cast = $('#info span.pl:contains("主演")', html)[0].nextSibling.nextSibling.textContent.trim(); } catch(e) {raw_data.cast = ''}
         try {
-            raw_data.summary = Array.from($('#link-report>[property="v:summary"],#link-report-intra>[property="v:summary"],#link-report>span.all.hidden', html)[0].childNodes)
+            raw_data.summary = Array.from($('#link-report-intra>[property="v:summary"],#link-report-intra>span.all.hidden', html)[0].childNodes)
                 .filter(e => e.nodeType === 3)
                 .map(e => e.textContent.trim())
                 .join('\n');
@@ -7229,7 +7266,7 @@ function getDoubanScore(doc) {
 
 function getDescription(doc) {
     try {
-        return Array.from($('#link-report>[property="v:summary"],#link-report-intra>[property="v:summary"],#link-report>span.all.hidden', doc)[0].childNodes)
+        return Array.from($('#link-report-intra>[property="v:summary"],#link-report-intra>span.all.hidden', doc)[0].childNodes)
             .filter(e => e.nodeType === 3)
             .map(e => e.textContent.trim())
             .join('\n');
@@ -18875,7 +18912,7 @@ setTimeout(function(){
                     $('select[name=processing_sel]').val(7);
                 }
             } else {
-                $('select[name=processing_sel]').val(9);
+                $('select[name=processing_sel]').val(10);
             }
         }
 
