@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.9.6
+// @version      1.9.9.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -148,6 +148,7 @@
     20220920：支持HDT备用域名，支持CG转入，待测试。修复部分bug。
     20221013：适配monika，修复部分bug。
     20221021：适配织梦PT，修复部分bug。
+    20221103：适配红叶PT。
 */
 
 //获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
@@ -918,7 +919,8 @@ const default_site_info = {
     'HDPt': {'url': 'https://hdpt.xyz/', 'enable': 1},
     'jptv': {'url': 'https://jptv.club/', 'enable': 1},
     'Monika': {'url': 'https://monikadesign.uk/', 'enable': 1},
-    'ZMPT': {'url': 'https://zmpt.cc/', 'enable': 1}
+    'ZMPT': {'url': 'https://zmpt.cc/', 'enable': 1},
+    '红叶': {'url': 'https://leaves.red/', 'enable': 1}
 };
 
 //初始化数据site_order/used_site_info等等
@@ -13984,7 +13986,7 @@ setTimeout(function(){
                     if (labels.yy){ document.getElementsByName('is_cantonese')[0].checked=true; }
                     if (labels.diy){ document.getElementsByName('is_diyed')[0].checked=true; }
                     break;
-                case 'ZMPT':
+                case 'ZMPT': case '红叶':
                     if (labels.gy){ $('input[name="tags[]"][value="5"]').attr('checked', true); }
                     if (labels.yy){ $('input[name="tags[]"][value="5"]').attr('checked', true); }
                     if (labels.zz){ $('input[name="tags[]"][value="6"]').attr('checked', true); }
@@ -18742,7 +18744,7 @@ setTimeout(function(){
             $('input[name="pt_gen"]').val(raw_info.dburl? raw_info.dburl: raw_info.url);
         }
 
-        else if (forward_site == 'ZMPT') {
+        else if (forward_site == 'ZMPT' || forward_site == '红叶') {
             //类型
             var browsecat = $('#browsecat')
             var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
@@ -18767,7 +18769,11 @@ setTimeout(function(){
                 case 'Remux': medium_box.val(3); break;
                 case 'HDTV': medium_box.val(5); break;
                 case 'Encode': medium_box.val(7); break;
-                case 'WEB-DL': medium_box.val(10);
+                case 'WEB-DL': 
+                    medium_box.val(10);
+                    if (forward_site == '红叶') {
+                        medium_box.val(8);
+                    }
             }
             if (raw_info.name.match(/MiniBD/i)) {
                 medium_box.val(4);
@@ -18775,12 +18781,22 @@ setTimeout(function(){
             //视频编码
             var codec_box = document.getElementsByName('codec_sel')[0];
             codec_box.options[5].selected = true;
-            switch (raw_info.codec_sel){
-                case 'H265': case 'X265': codec_box.options[6].selected = true; break;
-                case 'H264': case 'X264': codec_box.options[1].selected = true; break;
-                case 'VC-1': codec_box.options[2].selected = true; break;
-                case 'MPEG-2': case 'MPEG-4': codec_box.options[4].selected = true; break;
-                case 'XVID': codec_box.options[3].selected = true;
+            if (forward_site == 'ZMPT') {
+                switch (raw_info.codec_sel){
+                    case 'H265': case 'X265': codec_box.options[6].selected = true; break;
+                    case 'H264': case 'X264': codec_box.options[1].selected = true; break;
+                    case 'VC-1': codec_box.options[2].selected = true; break;
+                    case 'MPEG-2': case 'MPEG-4': codec_box.options[4].selected = true; break;
+                    case 'XVID': codec_box.options[3].selected = true;
+                }
+            } else {
+                switch (raw_info.codec_sel){
+                    case 'H265': case 'X265': codec_box.options[10].selected = true; break;
+                    case 'H264': case 'X264': codec_box.options[1].selected = true; break;
+                    case 'VC-1': codec_box.options[2].selected = true; break;
+                    case 'MPEG-2': case 'MPEG-4': codec_box.options[4].selected = true; break;
+                    case 'XVID': codec_box.options[3].selected = true;
+                }
             }
             //音频编码
             var audiocodec_box = $('select[name=audiocodec_sel]');
@@ -18791,13 +18807,22 @@ setTimeout(function(){
                 case 'TrueHD': audiocodec_box.val(7); break;
                 case 'Atmos': audiocodec_box.val(7); break;
                 case 'DTS': audiocodec_box.val(3); break;
-                case 'AC3': audiocodec_box.val(7); break;
+                case 'AC3': audiocodec_box.val(8); break;
                 case 'AAC': audiocodec_box.val(6); break;
                 case 'Flac': audiocodec_box.val(1); break;
                 case 'APE': audiocodec_box.val(2); break;
                 case 'LPCM': audiocodec_box.val(7); break;
                 case 'WAV': audiocodec_box.val(7);
             }
+
+            if (forward_site == '红叶')
+                var team_box = $('select[name=processing_sel]');
+                var team_dict = {'欧美': 3, '大陆': 2, '香港': 1, '台湾': 1, '日本': 4, '韩国': 5, '印度': 6 };
+                if (team_dict.hasOwnProperty(raw_info.source_sel)){
+                    var index = team_dict[raw_info.source_sel];
+                    team_box.val(index);
+                }
+
             //分辨率
             var standard_box = $('select[name=standard_sel]');
             var standard_dict = {
