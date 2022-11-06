@@ -3127,7 +3127,7 @@ function set_jump_href(raw_info, mode) {
                     } else if (key == 'TVV') {
                         forward_url = used_site_info[key].url + 'torrents.php?action=advanced&searchstr=&searchtags=&tags_type=1&groupdesc=&imdbid={url}'.format({'url': url});
                     } else if (key == 'HDPost' || key == 'ACM' || key == 'BLU' || key == 'jptv' || key == 'Monika') {
-                        forward_url = used_site_info[key].url + 'torrents?imdbId={imdbid}#page/1'.format({'url': url});
+                        forward_url = used_site_info[key].url + 'torrents?imdbId={imdbid}#page/1'.format({'imdbid': url});
                     } else if (key == 'HDai') {
                         forward_url = used_site_info[key].url + 'Torrents.index?keyword={url}&keyword_area=9'.format({'url': url});
                     } else {
@@ -8050,12 +8050,11 @@ setTimeout(function(){
                 }
             }
 
-            if (origin_site == 'PigGo') {
+            if ($('.nexus-media-info-raw').length) {
                 var mediainfo = $('.nexus-media-info-raw').text();
                 if ($('.spoiler-content').length) {
                     mediainfo = $('.spoiler-content').text();
                 }
-                // console.log(mediainfo);
                 try{
                     var intro = raw_info.descr.match(/◎简　　介[\s]*.*/i)[0];
                     intro = raw_info.descr.split(intro)[0] + intro;
@@ -10397,11 +10396,12 @@ setTimeout(function(){
             var divs = document.getElementsByTagName('div');
             for (var i=0; i< divs.length; i++) {
                 if (divs[i].textContent == 'Tags') {
-                    var descr = divs[i].parentNode.parentNode.previousElementSibling;
+                    var descr = divs[i].parentNode.parentNode.nextElementSibling;
                     if (descr.innerHTML.match(/Edit torrent/)){
                         descr = descr.previousElementSibling;
                     }
                     raw_info.descr = '[quote]' + walkDOM(descr.cloneNode(true)) + '[/quote]\n\n';
+                    console.log(raw_info.descr)
                     if (raw_info.descr.match(/https:\/\/t.hdbits.org\/.*jpg/)){
                         var imgs = Array.from(descr.getElementsByTagName('img'));
                         imgs.forEach(e=>{e.setAttribute('class', 'checkable_IMG');});
@@ -11014,13 +11014,13 @@ setTimeout(function(){
         switch (origin_site) {
             case 'PTer':
                 try {
-                    if (!$('a.chs_tag-gy').is(":hidden")) {
+                    if (!$('a.chs_tag-gy:last').is(":hidden")) {
                         raw_info.labels += 1;
                     }
-                    if (!$('a.chs_tag-yy').is(":hidden")) {
+                    if (!$('a.chs_tag-yy:last').is(":hidden")) {
                         raw_info.labels += 10;
                     }
-                    if (!$('a.chs_tag-sub').is(":hidden")) {
+                    if (!$('a.chs_tag-sub:last').is(":hidden")) {
                         raw_info.labels += 100;
                     }
                 } catch (err) {}
@@ -13770,6 +13770,7 @@ setTimeout(function(){
         if (raw_info.name.match(/(x|H)(264|265)/i)) {
             labels.diy = false;
         }
+        console.log(labels)
         try {
             switch (forward_site){
                 case 'PTer':
@@ -18755,6 +18756,18 @@ setTimeout(function(){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
+            if (forward_site == 'ZMPT') {
+                function disableother(select,target)
+                {
+                    if (document.getElementById(select).value == 0)
+                        document.getElementById(target).disabled = false;
+                    else {
+                    document.getElementById(target).disabled = true;
+                    document.getElementById(select).disabled = false;
+                    }
+                }
+                disableother('browsecat','specialcat')
+            }
             //媒介
             var medium_box = $('select[name=medium_sel]');
             switch(raw_info.medium_sel){
@@ -18780,8 +18793,8 @@ setTimeout(function(){
             }
             //视频编码
             var codec_box = document.getElementsByName('codec_sel')[0];
-            codec_box.options[5].selected = true;
             if (forward_site == 'ZMPT') {
+                codec_box.options[4].selected = true;
                 switch (raw_info.codec_sel){
                     case 'H265': case 'X265': codec_box.options[6].selected = true; break;
                     case 'H264': case 'X264': codec_box.options[1].selected = true; break;
@@ -18790,6 +18803,7 @@ setTimeout(function(){
                     case 'XVID': codec_box.options[3].selected = true;
                 }
             } else {
+                codec_box.options[5].selected = true;
                 switch (raw_info.codec_sel){
                     case 'H265': case 'X265': codec_box.options[10].selected = true; break;
                     case 'H264': case 'X264': codec_box.options[1].selected = true; break;
@@ -18815,13 +18829,14 @@ setTimeout(function(){
                 case 'WAV': audiocodec_box.val(7);
             }
 
-            if (forward_site == '红叶')
+            if (forward_site == '红叶') {
                 var team_box = $('select[name=processing_sel]');
                 var team_dict = {'欧美': 3, '大陆': 2, '香港': 1, '台湾': 1, '日本': 4, '韩国': 5, '印度': 6 };
                 if (team_dict.hasOwnProperty(raw_info.source_sel)){
                     var index = team_dict[raw_info.source_sel];
                     team_box.val(index);
                 }
+            }
 
             //分辨率
             var standard_box = $('select[name=standard_sel]');
