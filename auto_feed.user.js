@@ -228,11 +228,8 @@ if (location.href.match(/^.{3,30}userdetail/i) && !site_url.match(/bluebird-hd/)
 function get_group_name(name, torrent_info) {
     name = name.replace(/\[.*?\]|web-dl|dts-hd|Blu-ray|MPEG-2|MPEG-4/ig, '');
     name = name.split(/\.mkv|\.mp4|\.iso|\.avi/)[0];
-    if (name.match(/KJNU/)) {
-        return 'KJNU';
-    }
-    if (name.match(/tomorrow505/i)) {
-        return 'tomorrow505';
+    if (name.match(/(KJNU|tomorrow505|KG)$/)) {
+        return name.match(/(KJNU|tomorrow505|KG)$/)[1];
     }
     try{
         tmp_name = name.match(/-(.*)/)[1].split(/-/).pop();
@@ -2505,7 +2502,9 @@ var skip_img = [
     '[img]https://images2.imgbox.com/ce/e7/KCmGFMOB_o.png[/img]',
     '[img]https://img.m-team.cc/images/2016/12/05/d3be0d6f0cf8738edfa3b8074744c8e8.png[/img]',
     '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c77825.png[/img]',
-    '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c7782a.png[/img]'
+    '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c7782a.png[/img]',
+    '[img]https://img.pterclub.com/images/CS.png[/img]',
+    '[img]https://img.pterclub.com/images/2022/10/19/1.gif[/img]'
 
 ];
 
@@ -13706,7 +13705,14 @@ setTimeout(function(){
                 var tmp_descr = raw_info.descr.replace(infos.mediainfo, '');
                 tmp_descr = tmp_descr.replace(/\[(b|color|size|font).*?\][\s\S]{0,30}\[\/(b|color|size|font)\]/g, '');
                 tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,20}\[\/quote\]/g, '');
+                if (raw_info.full_mediainfo) {
+                    tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{50,3000}\[\/quote\]/g, '');
+                }
                 raw_info.descr = tmp_descr;
+                //判断官种表达感谢
+                if (reg_team_name.hasOwnProperty(raw_info.origin_site) && raw_info.name.match(reg_team_name[raw_info.origin_site])){
+                    raw_info.descr = thanks_str.format({'site': raw_info.origin_site, 'descr': raw_info.descr});
+                }
                 console.log(raw_info.descr)
                 $('textarea[name="descr"]').val(raw_info.descr.trim().replace(/\n{2,15}/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\['));
             } catch(Err) {
@@ -18756,18 +18762,16 @@ setTimeout(function(){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
-            if (forward_site == 'ZMPT') {
-                function disableother(select,target)
-                {
-                    if (document.getElementById(select).value == 0)
-                        document.getElementById(target).disabled = false;
-                    else {
-                    document.getElementById(target).disabled = true;
-                    document.getElementById(select).disabled = false;
-                    }
+            function disableother(select,target)
+            {
+                if (document.getElementById(select).value == 0)
+                    document.getElementById(target).disabled = false;
+                else {
+                document.getElementById(target).disabled = true;
+                document.getElementById(select).disabled = false;
                 }
-                disableother('browsecat','specialcat')
             }
+            disableother('browsecat','specialcat')
             //媒介
             var medium_box = $('select[name=medium_sel]');
             switch(raw_info.medium_sel){
@@ -18792,24 +18796,24 @@ setTimeout(function(){
                 medium_box.val(4);
             }
             //视频编码
-            var codec_box = document.getElementsByName('codec_sel')[0];
+            var codec_box = $('select[name="codec_sel"]');
             if (forward_site == 'ZMPT') {
-                codec_box.options[4].selected = true;
+                codec_box.val(5)
                 switch (raw_info.codec_sel){
-                    case 'H265': case 'X265': codec_box.options[6].selected = true; break;
-                    case 'H264': case 'X264': codec_box.options[1].selected = true; break;
-                    case 'VC-1': codec_box.options[2].selected = true; break;
-                    case 'MPEG-2': case 'MPEG-4': codec_box.options[4].selected = true; break;
-                    case 'XVID': codec_box.options[3].selected = true;
+                    case 'H265': case 'X265': codec_box.val(6); break;
+                    case 'H264': case 'X264': codec_box.val(1); break;
+                    case 'VC-1': codec_box.val(5); break;
+                    case 'MPEG-2': case 'MPEG-4': codec_box.val(4); break;
+                    case 'XVID': codec_box.val(5);
                 }
             } else {
-                codec_box.options[5].selected = true;
+                codec_box.val(5);
                 switch (raw_info.codec_sel){
-                    case 'H265': case 'X265': codec_box.options[10].selected = true; break;
-                    case 'H264': case 'X264': codec_box.options[1].selected = true; break;
-                    case 'VC-1': codec_box.options[2].selected = true; break;
-                    case 'MPEG-2': case 'MPEG-4': codec_box.options[4].selected = true; break;
-                    case 'XVID': codec_box.options[3].selected = true;
+                    case 'H265': case 'X265': codec_box.val(10); break;
+                    case 'H264': case 'X264': codec_box.val(1); break;
+                    case 'VC-1': codec_box.val(2); break;
+                    case 'MPEG-2': case 'MPEG-4': codec_box.val(4); break;
+                    case 'XVID': codec_box.val(3);
                 }
             }
             //音频编码
