@@ -18873,6 +18873,19 @@ setTimeout(function(){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
+
+            if (raw_info.type == '动漫' && forward_site == 'ZMPT') {
+                switch (raw_info.source_sel){
+                    case '大陆': case '台湾': case '香港': case '港台':
+                        browsecat.val(417);
+                        break;
+                    case '日本': browsecat.val(418); break;
+                    case '韩国': browsecat.val(419); break;
+                    case '欧美': browsecat.val(420); break;
+                    default: browsecat.val(421);
+                }
+            }
+
             try {
                 function disableother(select,target)
                 {
@@ -20705,6 +20718,16 @@ setTimeout(function(){
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
+            }
+
+            if (raw_info.type == '动漫') {
+                if (raw_info.name.match(/E\d+/i)) {
+                    browsecat.val(413);
+                } else if (raw_info.name.match(/S\d+/i)) {
+                    browsecat.val(423);
+                } else {
+                    browsecat.val(422);
+                }
             }
 
             if (raw_info.type == '剧集') {
