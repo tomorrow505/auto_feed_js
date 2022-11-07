@@ -8695,7 +8695,9 @@ setTimeout(function(){
         if (origin_site == 'BHD'){
             tbody = document.getElementsByClassName('table-details')[0].getElementsByTagName('tbody')[0];
             var imdb_box = document.getElementsByClassName('movie-details')[0];
-            raw_info.url = match_link('imdb', imdb_box.innerHTML);
+            try {
+                raw_info.url = match_link('imdb', imdb_box.innerHTML);
+            } catch(err) {}
             var trailer_info = $('.movie-details').find('span').last().html();
             if (trailer_info.match(/https:\/\/www.youtube.com\/watch\?v=.*/)){
                 raw_info.youtube_url = trailer_info.match(/https:\/\/www.youtube.com\/watch\?v=[a-zA-Z0-9-]*/)[0];
@@ -18656,7 +18658,7 @@ setTimeout(function(){
             //分辨率
             var standard_box = document.getElementsByName('standard_sel')[0];
             var standard_dict = {
-                '1080p': 1, '1080i': 1, 'SD': 2, '': 0
+                '1080p': 1, '1080i': 1, '720p': 2, 'SD': 3, '4K': 4
             };
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
