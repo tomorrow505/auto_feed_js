@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      1.9.9.8
+// @version      1.9.9.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -225,6 +225,15 @@ if (location.href.match(/^.{3,30}userdetail/i) && !site_url.match(/bluebird-hd/)
     return;
 }
 
+function disableother(select,target){
+    if(document.getElementById(select).value==0) {
+        document.getElementById(target).disabled=false;
+    } else {
+        document.getElementById(target).disabled=true;
+        document.getElementById(select).disabled=false;
+    }
+}
+
 function get_group_name(name, torrent_info) {
     name = name.replace(/\[.*?\]|web-dl|dts-hd|Blu-ray|MPEG-2|MPEG-4/ig, '');
     name = name.split(/\.mkv|\.mp4|\.iso|\.avi/)[0];
@@ -255,7 +264,7 @@ function get_group_name(name, torrent_info) {
             name = 'Null';
         }
     }
-    if (!name || name.match(/\)|\d\d/)) name = 'Null';
+    if (!name || name.match(/\)|^\d\d/)) name = 'Null';
     if (name == 'Z0N3') name = 'D-Z0N3';
     if (name.match(/CultFilms/)) name = 'CultFilms';
     if (name.match(/™/) && !name.match(/CultFilms/)) {
@@ -263,6 +272,9 @@ function get_group_name(name, torrent_info) {
     }
     if (name.search('.nfo')) {
         name = name.replace('.nfo', '');
+    }
+    if (name.length == 1) {
+        name = 'Null';
     }
     return name;
 }
@@ -5532,10 +5544,12 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#unsupported_sites').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${o_site_info[e]? o_site_info[e]: used_site_info[e].url}" target="_blank"><b>${e}</b></a></div>`);
     });
     $('#signin').append(`<br><font color="red">手动获取魔力的站点：</font>`);
-    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['CHDBits'].url + 'bakatest.php'}" target="_blank"><b>CHDBits(打开手动签到)</b></a></div>`);
-    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${o_site_info['U2'] + 'showup.php'}" target="_blank"><b>U2(打开手动签到)</b></a></div>`);
-    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['HDSky'].url}" target="_blank"><b>HDSky(打开手动签到)</b></a></div>`);
-    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['TJUPT'].url + 'attendance.php'}" target="_blank"><b>TJUPT(打开手动签到)</b></a></div>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['CHDBits'].url + 'bakatest.php'}" target="_blank"><b>CHDBits</b></a></div>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${o_site_info['U2'] + 'showup.php'}" target="_blank"><b>U2</b></a></div>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['HDSky'].url}" target="_blank"><b>HDSky</b></a></div>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['TJUPT'].url + 'attendance.php'}" target="_blank"><b>TJUPT</b></a></div>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['52PT'].url + 'bakatest.php'}" target="_blank"><b>52PT</b></a></div>`);
+    $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['WT-Sakura'].url + 'attendance.php'}" target="_blank"><b>WT-Sakura</b></a></div>`);
 
     $('#signin').append(`<br><br><br>`);
     $('#signin').append(`<input type="button" id="ksave_setting" value="保存脚本设置！&nbsp;(只需点击一次)">`);
@@ -5609,7 +5623,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
     $('#begin_sign').click((e)=>{
         e.preventDefault();
         var attendance_sites = ['PThome', 'HDHome', 'LemonHD', 'HDDolby', 'Audiences', 'OurBits', 'GainB', 'PigGo', 'SoulVoice', 'UltraHD', 'CarPt', 'HHClub', '红叶',
-                                'ptchina', 'HDVideo', 'WT-Sakura', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'iHDBits'];
+                'ptchina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'iHDBits'];
 
         attendance_sites.forEach((e)=>{
             if (used_signin_sites.indexOf(e) > -1) {
@@ -5862,7 +5876,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             });
         }
 
-        var np_sites = ['MTeam', 'CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', '1PTBA', '52PT', 'HDSky', 'ITZMX',
+        var np_sites = ['MTeam', 'CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', '1PTBA', 'HDSky', 'ITZMX',
                         'NanYang', 'DiscFan', 'Dragon', 'BYR', 'U2', 'YDY', 'JoyHD', 'Oshen', 'PTMSG', 'PTNIC', 'HITPT', 'ITZMX', 'NapQAQ', 'TJUPT'];
         log_in(np_sites, '#mainmenu');
 
@@ -15043,15 +15057,6 @@ setTimeout(function(){
         }
 
         else if (forward_site == 'HDHome'){
-            function disableother(select,target)
-            {
-                if (document.getElementById(select).value == 0)
-                    document.getElementById(target).disabled = false;
-                else {
-                document.getElementById(target).disabled = true;
-                document.getElementById(select).disabled = false;
-                }
-            }
             //类型
             var is_pad = false;
             if (raw_info.name.match(/pad$|ipad/i)){
@@ -17194,15 +17199,6 @@ setTimeout(function(){
                 browsecat.options[index].selected = true;
             }
 
-            function disableother(select,target)
-            {
-                if (document.getElementById(select).value == 0)
-                    document.getElementById(target).disabled = false;
-                else {
-                    document.getElementById(target).disabled = true;
-                    document.getElementById(select).disabled = false;
-                }
-            }
             try {disableother('browsecat','specialcat');} catch(err){}
 
             // 媒介
@@ -18550,15 +18546,6 @@ setTimeout(function(){
             var source_box = document.getElementsByName('processing_sel')[0];
             source_box.options[12].selected = true;
 
-            function disableother(select,target)
-            {
-                if (document.getElementById(select).value == 0)
-                    document.getElementById(target).disabled = false;
-                else {
-                    document.getElementById(target).disabled = true;
-                    document.getElementById(select).disabled = false;
-                }
-            }
             disableother('browsecat','specialcat');
 
             //类别
@@ -18694,14 +18681,6 @@ setTimeout(function(){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
-            function disableother(select,target){
-                if(document.getElementById(select).value==0) {
-                    document.getElementById(target).disabled=false;
-                } else {
-                    document.getElementById(target).disabled=true;
-                    document.getElementById(select).disabled=false;
-                }
-            }
             disableother('browsecat','specialcat');
             //来源
             var source_box = document.getElementsByName('source_sel')[0];
@@ -18741,7 +18720,7 @@ setTimeout(function(){
             codec_box.val(5);
             switch (raw_info.codec_sel){
                 case 'H265': case 'X265': codec_box.val(6); break;
-                case 'H264': codec_box.val(1);
+                case 'H264': codec_box.val(1); break;
                 case 'X264': codec_box.val(7); break;
                 case 'VC-1': codec_box.val(2); break;
                 case 'MPEG-2': case 'MPEG-4': codec_box.val(4);; break;
@@ -18887,15 +18866,6 @@ setTimeout(function(){
             }
 
             try {
-                function disableother(select,target)
-                {
-                    if (document.getElementById(select).value == 0)
-                        document.getElementById(target).disabled = false;
-                    else {
-                    document.getElementById(target).disabled = true;
-                    document.getElementById(select).disabled = false;
-                    }
-                }
                 disableother('browsecat','specialcat');
             } catch (err) {}
             //媒介
@@ -18945,9 +18915,7 @@ setTimeout(function(){
             //音频编码
             var audiocodec_box = $('select[name=audiocodec_sel]');
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': audiocodec_box.val(3); break;
-                case 'DTS-HDMA:X 7.1': audiocodec_box.val(3); break;
-                case 'DTS-HDMA': audiocodec_box.val(3); break;
+                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': audiocodec_box.val(16); break;
                 case 'TrueHD': audiocodec_box.val(7); break;
                 case 'Atmos': audiocodec_box.val(7); break;
                 case 'DTS': audiocodec_box.val(3); break;
@@ -19457,15 +19425,6 @@ setTimeout(function(){
                 standard_box.options[index].selected = true;
             }
 
-            function disableother(select,target)
-            {
-                if (document.getElementById(select).value == 0)
-                    document.getElementById(target).disabled = false;
-                else {
-                    document.getElementById(target).disabled = true;
-                    document.getElementById(select).disabled = false;
-                }
-            }
             disableother('browsecat','specialcat');
 
           //处理
@@ -20720,6 +20679,8 @@ setTimeout(function(){
                 browsecat.val(index);
             }
 
+            try {disableother('browsecat','specialcat');} catch(err){}
+
             if (raw_info.type == '动漫') {
                 if (raw_info.name.match(/E\d+/i)) {
                     browsecat.val(413);
@@ -20844,6 +20805,7 @@ setTimeout(function(){
             if (raw_info.name.match(/beyondhd/i)) {
                 $('select[name="team_sel"]').val(9);
             }
+            $('input[name="pt_gen"]').val(raw_info.dburl? raw_info.dburl: raw_info.url);
         }
 
         else if (forward_site == 'HITPT'){
@@ -20912,15 +20874,6 @@ setTimeout(function(){
             if (raw_info.dburl){
                 var upload_imdb_url = document.getElementById('doubanLink');
                 upload_imdb_url.value = raw_info.dburl;
-            }
-            function disableother(select,target)
-            {
-                if (document.getElementById(select).value == 0)
-                    document.getElementById(target).disabled = false;
-                else {
-                    document.getElementById(target).disabled = true;
-                    document.getElementById(select).disabled = false;
-                }
             }
             disableother('browsecat','specialcat');
         }
