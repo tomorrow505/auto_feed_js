@@ -11200,7 +11200,9 @@ setTimeout(function(){
             raw_info.torrent_name = raw_info.name.replace(/ /g, '.').replace(/\*/g, '') + '.torrent';
             raw_info.torrent_name = raw_info.torrent_name.replace(/\.\.+/g, '.');
         }
-        raw_info.torrent_name = raw_info.torrent_name.replace('#', '');
+
+        raw_info.torrent_name = raw_info.torrent_name.replace('#', '').replace(':', '.');
+
         console.log(raw_info.torrent_name);
         console.log(raw_info.torrent_url);
         //获取跳转的字符串
@@ -18914,17 +18916,32 @@ setTimeout(function(){
             }
             //音频编码
             var audiocodec_box = $('select[name=audiocodec_sel]');
-            switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': audiocodec_box.val(16); break;
-                case 'TrueHD': audiocodec_box.val(7); break;
-                case 'Atmos': audiocodec_box.val(7); break;
-                case 'DTS': audiocodec_box.val(3); break;
-                case 'AC3': audiocodec_box.val(8); break;
-                case 'AAC': audiocodec_box.val(6); break;
-                case 'Flac': audiocodec_box.val(1); break;
-                case 'APE': audiocodec_box.val(2); break;
-                case 'LPCM': audiocodec_box.val(7); break;
-                case 'WAV': audiocodec_box.val(7);
+            if (forward_site == '红叶') {
+                switch (raw_info.audiocodec_sel){
+                    case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': audiocodec_box.val(16); break;
+                    case 'TrueHD': audiocodec_box.val(7); break;
+                    case 'Atmos': audiocodec_box.val(7); break;
+                    case 'DTS': audiocodec_box.val(3); break;
+                    case 'AC3': audiocodec_box.val(8); break;
+                    case 'AAC': audiocodec_box.val(6); break;
+                    case 'Flac': audiocodec_box.val(1); break;
+                    case 'APE': audiocodec_box.val(2); break;
+                    case 'LPCM': audiocodec_box.val(7); break;
+                    case 'WAV': audiocodec_box.val(7);
+                }
+            } else {
+                switch (raw_info.audiocodec_sel){
+                    case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': audiocodec_box.val(3); break;
+                    case 'TrueHD': audiocodec_box.val(7); break;
+                    case 'Atmos': audiocodec_box.val(7); break;
+                    case 'DTS': audiocodec_box.val(3); break;
+                    case 'AC3': audiocodec_box.val(8); break;
+                    case 'AAC': audiocodec_box.val(6); break;
+                    case 'Flac': audiocodec_box.val(1); break;
+                    case 'APE': audiocodec_box.val(2); break;
+                    case 'LPCM': audiocodec_box.val(7); break;
+                    case 'WAV': audiocodec_box.val(7);
+                }
             }
 
             if (forward_site == '红叶') {
@@ -24460,7 +24477,7 @@ setTimeout(function(){
 
             try {
                 var infos = get_mediainfo_picture_from_descr(raw_info.descr);
-                if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'DVD' || raw_info.descr.match(/mpls/i)) {
+                if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray' || raw_info.descr.match(/mpls/i)) {
                     $('textarea[name="release_desc"]').val(infos.mediainfo);
                 }
                 setTimeout(function(){
