@@ -149,9 +149,9 @@
     20221021：适配织梦PT，修复部分bug。
     20221103：适配红叶PT。
     20221117：修复部分bug，去掉mediainfo和截图功能，鸡肋而且占用体积大。修复没有猫不能进入设置页面的bug。第一次NP站点应该都可以设置。
+    20221119：适配ICC2022。
 */
 
-//获取网页地址，有很多种可能，首先是简单处理页面，及时返回，另外一种匹配上发布页面，一种匹配上源页面，分别处理两种逻辑
 var site_url = decodeURI(location.href);
 const TIMEOUT = 6000;
 const N = "\n";
@@ -931,6 +931,7 @@ const default_site_info = {
     'ZMPT': {'url': 'https://zmpt.cc/', 'enable': 1},
     '红叶': {'url': 'https://leaves.red/', 'enable': 1},
     'iHDBits': {'url': 'http://ihdbits.me/', 'enable': 1},
+    'ICC': {'url': 'https://www.icc2022.com/', 'enable': 1},
 };
 
 //初始化数据site_order/used_site_info等等
@@ -13911,7 +13912,7 @@ setTimeout(function(){
                     if (labels.yy){ document.getElementsByName('is_cantonese')[0].checked=true; }
                     if (labels.diy){ document.getElementsByName('is_diyed')[0].checked=true; }
                     break;
-                case 'ZMPT': case '红叶': case 'iHDBits':
+                case 'ZMPT': case '红叶': case 'iHDBits': case 'ICC':
                     if (labels.gy){ $('input[name="tags[]"][value="5"]').attr('checked', true); }
                     if (labels.yy){ $('input[name="tags[]"][value="5"]').attr('checked', true); }
                     if (labels.zz){ $('input[name="tags[]"][value="6"]').attr('checked', true); }
@@ -18714,6 +18715,79 @@ setTimeout(function(){
                     $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
                 }
             });
+        }
+
+        else if (forward_site == 'ICC') {
+            $('input[name="pt_gen"]').val(raw_info.dburl? raw_info.dburl: raw_info.url);
+            var browsecat = $('#browsecat')
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+                             '体育': 407, '软件': 409, '学习': 409, '': 409, '游戏': 409, 'MV': 406};
+            //如果当前类型在上述字典中
+            browsecat.val(409)
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            try {
+                disableother('browsecat','specialcat');
+            } catch (err) {}
+            $('select[name="team_sel"]').val(5);
+            $('select[name="team_sel"]>option').map(function(index,e){
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
+            //媒介
+            var medium_box = $('select[name=medium_sel]');
+            switch(raw_info.medium_sel){
+                case 'UHD': case 'Blu-ray':
+                    medium_box.val(1); break;
+                case 'DVD':
+                    if (raw_info.name.match(/dvdr/i)) {
+                        medium_box.val(6);
+                    } else {
+                        medium_box.val(2);
+                    }
+                    break;
+                case 'Remux': medium_box.val(3); break
+                case 'HDTV': medium_box.val(5); break;
+                case 'Encode': medium_box.val(7); break;
+                case 'WEB-DL': medium_box.val(10);
+            }
+            if (raw_info.name.match(/MiniBD/i)) {
+                medium_box.val(4);
+            }
+            //视频编码
+            var codec_box = $('select[name=codec_sel]');
+            codec_box.val(5);
+            switch (raw_info.codec_sel){
+                case 'H265': case 'X265': codec_box.val(6); break;
+                case 'H264': case 'X264': codec_box.val(1); break;
+                case 'VC-1': codec_box.val(2); break;
+                case 'MPEG-2': case 'MPEG-4': codec_box.val(4); break;
+                case 'XVID': codec_box.val(3);
+            }
+            //分辨率
+            var standard_box = $('select[name=standard_sel]');
+            var standard_dict = {
+                '4K': 6, '1080p': 1, '1080i': 2, '720p': 3, 'SD': 4
+            };
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.val(index);
+            }
+            try {
+                var year = raw_info.name.match(/\d{4}[^pi]/gi).pop().slice(0, 4);
+                year = parseInt(year);
+                var years = [2011, 2001, 1981, 1961, 1941, 1921, 1901, 1851, 1800];
+                var year_selected = false;
+                years.forEach((item, index)=>{
+                    if (year > item && ! year_selected) {
+                        $('select[name="processing_sel"]').val(9-index);
+                        year_selected = true;
+                    }
+                });
+            } catch(err) {}
         }
 
         else if (forward_site == 'ZMPT' || forward_site == '红叶') {
