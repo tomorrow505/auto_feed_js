@@ -1279,22 +1279,13 @@ FILM SYNOPSIS/BRIEF REVIEW:
   Film Aspect Ratio..: {aspect_ratio}{dvdformat}
   Source.............: {source}
   Film Distributor...: [url=addlink]specify[/url]
-  Ripping Program....: (specify)
-  Total  Bitrate.....: {bitrate}
+  Ripping Program....: Not my rip
+  Total Bitrate......: {bitrate}
 
-Menus......: [ ] Untouched
-             [ ] Stripped
-
-Video......: [ ] Untouched
-             [ ] Re-encoded
-
-Extras.....: [ ] Untouched
-             [ ] Stripped
-             [ ] Re-encoded
-             [ ] None
-
-Audio......: [ ] Untouched
-             [ ] Stripped tracks
+Menus......: [x] Untouched
+Video......: [x] Untouched
+Extras.....: [x] Untouched
+Audio......: [x] Untouched
 [/pre]
 
 BD only..........BDInfo Report:
@@ -6901,7 +6892,7 @@ function full_bdinfo2summary(descr) {
         }).join('\nSubtitle: ').split('[/quote]')[0].replace(/(\nSubtitle: )+$/, '');
     }
     if (descr.match(/Audio:[\s\S]{0,20}Codec/i)) {
-        var audio_info = descr.match(/Audio:[\s\S]{0,300}-----------([\s\S]*)/i)[1].split(/subtitles/i)[0].trim();
+        var audio_info = descr.match(/Audio:[\s\S]{0,300}-----------([\s\S]*)/i)[1].split(/subtitles|\[.*?quote\]/i)[0].trim();
         summary['Audio'] = audio_info.split('\n').map(e=>{
             var info = e.split(/\s{5,15}/).filter(function(ee){if (ee.trim() && ee.trim() != '[/quote]') return ee.trim();});
             return info.join(' / ').trim();
@@ -23108,7 +23099,7 @@ setTimeout(function(){
 
                     try{
                         var audio_info = raw_info.descr.match(/(audio[\s\S]*)(text)?/i)[0].trim();
-                        var audio_infos = audio_info.split(/audio.*?\nid.*/i).filter(audio => audio.match(/Language/i));
+                        var audio_infos = audio_info.split(/audio.*?\nid.*/i).filter(audio => audio.match(/format/i));
                         descr = descr.format({'audio': audio_infos.map(e=>{
                             var audio_text = '';
                             if (e.match(/language.*:(.*)/i)) {
@@ -23141,7 +23132,10 @@ setTimeout(function(){
                             }
                             return subtitle_text;
                         }).join('\n                       ')});
-                    } catch (err) {console.log(err)}
+                    } catch (err) {
+                        console.log(err);
+                        descr = descr.format({'subtitles': "None"});
+                    }
 
                 } else {
                     var medium_sel = 'BD25';
@@ -23177,9 +23171,12 @@ setTimeout(function(){
                                         return '';
                                     }
                                 }).join('\n                       ').replace(/(\n                       )+$/, '')});
+                            } else {
+                                descr = descr.format({'subtitles': "None"});
                             }
                             if (raw_info.descr.match(/Audio:[\s\S]{0,20}Codec/i)) {
-                                var audio_info = raw_info.descr.match(/Audio:[\s\S]{0,300}-----------([\s\S]*)/i)[1].split(/subtitles/i)[0].trim();
+                                var audio_info = raw_info.descr.match(/Audio:[\s\S]{0,300}-----------([\s\S]*)/i)[1].split(/subtitles|\[.*quote\]/i)[0].trim();
+                                // alert(audio_info)
                                 descr = descr.format({'audio': audio_info.split('\n').map(e=>{
                                     var info = e.split(/  /).filter(function(e){return e;});
                                     return `${info[1].trim()} ${info[0].replace('Audio', '').replace(/Master/, 'MA').trim()} ${info[3].split('/')[0].trim()}`
@@ -23190,6 +23187,8 @@ setTimeout(function(){
                                 descr = descr.format({'subtitles': raw_info.descr.match(/Subtitle:(.*)/ig).map(e=>{
                                     return e.replace(/Subtitle.*?:?/i, '').split('/')[0].trim();
                                 }).join('\n                       ')});
+                            } else {
+                                descr = descr.format({'subtitles': "None"});
                             }
                             if (raw_info.descr.match(/Audio:(.*)/i)) {
                                 descr = descr.format({'audio': raw_info.descr.match(/Audio:(.*)/ig).map(e=>{
@@ -23211,7 +23210,11 @@ setTimeout(function(){
                 if (img_urls && img_urls.length) {
                     descr = descr.format({'screenshots': img_urls.join('\n\n')});
                 }
-                if (raw_info.descr.match(/Total.*?Bitrate:(.*)/i)) {
+
+                if (raw_info.descr.match(/\/ \d+ ?kbps \//)) {
+                    descr = descr.format({'bitrate': raw_info.descr.match(/\/ (\d+ ?kbps) \//)[1]}).replace('Total Bitrate..', 'Average Bitrate');
+                }
+                else if (raw_info.descr.match(/Total.*?Bitrate:(.*)/i)) {
                     descr = descr.format({'bitrate': raw_info.descr.match(/Total.*?Bitrate:(.*)/i)[1].trim()});
                 }
 
@@ -23234,7 +23237,14 @@ setTimeout(function(){
                         var poster = await getPoster(poster_url);
                         descr = descr.format({'poster': poster});
 
-                        descr = descr.format({'aspect_ratio': $('li.ipc-metadata-list__item:contains("Aspect ratio")', doc).text().replace('Aspect ratio', '').trim()});
+                        var aspect_ratio = $('li.ipc-metadata-list__item:contains("Aspect ratio")', doc).text().replace('Aspect ratio', '').trim();
+                        if (aspect_ratio) {
+                            descr = descr.format({'aspect_ratio': aspect_ratio});
+                        } else {
+                            if (raw_info.descr.match(/\/ \d+:\d+ \//)) {
+                                descr = descr.format({'aspect_ratio': raw_info.descr.match(/\/ (\d+:\d+) \//)[1]});
+                            }
+                        }
                         descr = descr.format({'country': Array.from($('li.ipc-metadata-list__item:contains("Countr")', doc).find('a')).map(function(e){
                             return $(e).text();
                         }).join(', ')});
@@ -23259,9 +23269,11 @@ setTimeout(function(){
                         } else {
                             $('input[name="newdir"]').val(director);
                         }
-                        var imdb_descr = $('span[class*="GenresAndPlot__TextContainerBreakpointXS"]:eq(0)', doc).text().trim();
-                        if (imdb_descr.match(/See full summary/)){
-                            var full_descr_url = 'https://www.imdb.com' + $('span[class*="GenresAndPlot__TextContainerBreakpointXS"]:eq(0)', doc).find('a').attr('href');
+                        var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
+                        console.log(imdb_descr)
+                        if (imdb_descr.match(/Read all/)){
+                            var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
+                            console.log(full_descr_url)
                             imdb_descr = await getFullDescr(full_descr_url);
                         } else if (imdb_descr.match(/Add a Plot/)) {
                             imdb_descr =  `No data from IMDB: ${raw_info.url}`;
