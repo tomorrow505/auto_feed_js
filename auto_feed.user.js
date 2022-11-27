@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.0.1
+// @version      2.0.0.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -224,6 +224,12 @@ if (location.href == 'https://npupt.com/upload.php'){
 }
 if (location.href.match(/^.{3,30}userdetail/i) && !site_url.match(/bluebird-hd/) && !site_url.match(/broadcity.in/)) {
     return;
+}
+
+if (location.href.match(/https:\/\/desitorrents.tv\/torrents/)) {
+    $('#torrent-list-table').find('tr:gt(0)').map((index,e)=>{
+        $(e).find('td:eq(2)').find('a.torrent-listings-name').after(`<a href="${$(e).find('a.torrent-listings-name').attr('href')}" target="_blank"><font color=yellow>跳转</font></a>`)
+    });
 }
 
 function disableother(select,target){
@@ -1208,7 +1214,8 @@ const o_site_info = {
     'TVV': 'http://tv-vault.me/',
     'SugoiMusic': 'https://sugoimusic.me/',
     'Monika': 'https://monikadesign.uk/',
-    'DTR': 'https://desitorrents.tv/'
+    'DTR': 'https://desitorrents.tv/',
+    'HONE': 'https://hawke.uno/'
 };
 
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
@@ -1872,7 +1879,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/hdcity.city\/upload/)){
         return 2;
     }
-    if (site_url.match(/^https:\/\/(pt.hdpost.top|asiancinema.me|hd-olimpo.club|jptv.club|blutopia.xyz|desitorrents.tv|monikadesign.uk)\/torrents\/\d+$/)){
+    if (site_url.match(/^https:\/\/(pt.hdpost.top|asiancinema.me|hd-olimpo.club|jptv.club|blutopia.xyz|desitorrents.tv|monikadesign.uk|hawke.uno)\/torrents\/\d+$/)){
         return 1;
     }
     if (site_url.match(/^https:\/\/www.torrentseeds.org\/torrents\/\d+/)){
@@ -2966,8 +2973,11 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         }
 
     } else {
-        if (site == 'BHD' || site == 'BLU' || site == 'HDPost' || site == 'ACM' || site == 'HDOli' || site == 'Telly' || site == 'jptv' || site == 'torrentdb' || site == 'Monika' || site == 'DTR'){
+        if (['BHD', 'BLU', 'HDPost', 'ACM', 'HDOli', 'Telly', 'jptv', 'torrentdb', 'Monika', 'DTR', 'HONE'].indexOf(site) > -1){
             $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"border": "1px solid #0D8ED9", "color": "#FFFFFF", "backgroundColor": "#292929"});
+            if (site == 'HONE') {
+                $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"width": "80px"})
+            }
         } else if (site == 'TorrentLeech') {
             $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"border": "1px solid green", "color": "#FFFFFF", "backgroundColor": "#292929"});
         }
@@ -2990,7 +3000,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
     }
 
     //把白框换个颜色
-    if (['PTP', 'xthor', 'HDF', 'BHD', 'BLU', 'TorrentLeech', 'HDPost', 'ACM', 'HDOli', 'jptv', 'torrentdb', 'Monika', 'DTR'].indexOf(site) > -1) {
+    if (['PTP', 'xthor', 'HDF', 'BHD', 'BLU', 'TorrentLeech', 'HDPost', 'ACM', 'HDOli', 'jptv', 'torrentdb', 'Monika', 'DTR', 'HONE'].indexOf(site) > -1) {
         textarea.style.backgroundColor = '#4d5656';
         textarea.style.color = 'white';
         input_box.style.backgroundColor = '#4d5656';
@@ -5624,7 +5634,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
     $('#begin_sign').click((e)=>{
         e.preventDefault();
         var attendance_sites = ['PThome', 'HDHome', 'LemonHD', 'HDDolby', 'Audiences', 'OurBits', 'GainB', 'PigGo', 'SoulVoice', 'UltraHD', 'CarPt', 'HHClub', '红叶',
-                'ptchina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'iHDBits'];
+                'ptchina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'iHDBits', 'ICC'];
 
         attendance_sites.forEach((e)=>{
             if (used_signin_sites.indexOf(e) > -1) {
@@ -5985,7 +5995,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
     //**************************************************** 3 *************************************************************************
     $('#setting').append(`<b>选择脚本设置站点(默认猫站)：</b>`);
     if (!used_setting_host_list.hasOwnProperty(setting_host)) {
-        used_setting_host_list[setting_host] = default_site_info[setting_host].url + 'usercp.php?action=personal';
+        used_setting_host_list[setting_host] = used_setting_host_list[setting_host].url + 'usercp.php?action=personal';
     }
     for (key in used_setting_host_list){
         $('#setting').append(`<input type="radio" name="setting_site" value="${key}">${key}`);
@@ -8585,7 +8595,7 @@ setTimeout(function(){
             }
         }
 
-        if (origin_site == 'HDPost' || origin_site == 'ACM' || origin_site == 'HDOli' || origin_site == 'jptv' || origin_site == 'Monika' || origin_site == 'DTR') {
+        if (['HDPost', 'ACM', 'HDOli', 'jptv', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
             var iii = document.getElementsByTagName('h4')[0].parentNode.parentNode;
             var div_box = iii.getElementsByClassName('table-responsive')[0];
             if (origin_site == 'HDPost' || origin_site == 'DTR') {
@@ -8608,6 +8618,40 @@ setTimeout(function(){
                     });
                 }
             }
+        }
+
+        if (origin_site == 'HONE') {
+            raw_info.url = match_link('imdb', $('#meta-info').html());
+            console.log(raw_info.url);
+            raw_info.type = $('.torrent-category').text().get_type();
+            $('div[class="meta-general box container"]').prepend(`
+                <div style="padding-left:55px; padding-right:55px">
+                    <table id="mytable">
+                    </table>
+                </div>
+            `);
+            tbody = $('#mytable')[0];
+            insert_row = tbody.insertRow(0);
+            douban_box = tbody.insertRow(0);
+
+            raw_info.name = $('span[class="torrent-category badge-extra"]:first').text().replace(/\(|\)/g, '').replace(/English-/, '-');
+            var search_name = get_search_name(raw_info.name);
+            // reBuildHref(raw_info, forward_r);
+            if (all_sites_show_douban) {
+                getData(raw_info.url, function(data){
+                    console.log(data);
+                    if (data.data){
+                        $('td:contains(豆瓣信息)').last().parent().before(`<tr><td align=right style="font-weight: bold;">豆瓣</td><td id="douban_info"></td></tr>`);
+                        add_douban_info_table($('#douban_info'), 150, data);
+                        $('#douban_info').find('th').css({"color": "white"});
+                    }
+                });
+            }
+            raw_info.descr = '[quote]' + $('.torrent-mediainfo-dump').find('pre').text().trim() + '\n[/quote]\n\n';
+            console.log($('.table-responsive:eq(2)').find('a').has('img').length)
+            $('.table-responsive:eq(2)').find('a').has('img').map((index,e)=>{
+                raw_info.descr += `[url=${$(e).attr("href")}][img]${$(e).find("img").attr("src")}[/img][/url]`
+            });
         }
 
         if (origin_site == 'BLU' || origin_site == 'Telly') {
@@ -11131,7 +11175,7 @@ setTimeout(function(){
             forward_l.innerHTML = "转发种子"; forward_l.valign = "top"; forward_l.style.fontWeight = "bold";
             if ((!judge_if_the_site_in_domestic() && no_need_douban_button_sites.indexOf(origin_site) < 0) || douban_button_needed) {
                 var direct;
-                if (['PHD', 'avz', 'CNZ', 'BLU', 'TorrentLeech', 'BHD', 'HDPost', 'ACM', 'HDOli', 'Telly', 'torrentdb', 'jptv', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
+                if (['PHD', 'avz', 'CNZ', 'BLU', 'TorrentLeech', 'BHD', 'HDPost', 'ACM', 'HDOli', 'Telly', 'torrentdb', 'jptv', 'Monika', 'DTR', 'HONE'].indexOf(origin_site) > -1) {
                     direct = "left";
                 } else {
                     direct = "right";
@@ -11149,7 +11193,7 @@ setTimeout(function(){
                     }
                 }
                 box_left.innerHTML = '豆瓣信息';
-                if (origin_site == 'NBL' || origin_site == 'IPT' || origin_site == 'torrentseeds') {
+                if (origin_site == 'NBL' || origin_site == 'IPT' || origin_site == 'torrentseeds' || origin_site == 'HONE') {
                     box_left.style.width = '60px';
                 } else if (origin_site == 'IN' || origin_site == 'digitalcore' || origin_site == 'BlueBird' || origin_site == 'bwtorrents') {
                     box_left.style.width = '80px';
@@ -18804,14 +18848,20 @@ setTimeout(function(){
 
         else if (forward_site == 'ZMPT' || forward_site == '红叶') {
             //类型
-            var browsecat = $('#browsecat')
-            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
-                             '体育': 407, '软件': 409, '学习': 409, '': 409, '游戏': 409, 'MV': 406};
+            var browsecat = $('#browsecat');
+            if (forward_site == '红叶') {
+                var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+                                 '体育': 407, '软件': 409, '学习': 409, '': 409, '游戏': 409, 'MV': 406};
+            }
             //如果当前类型在上述字典中
             browsecat.val(409)
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
+            }
+
+            if (raw_info.type == '纪录' && forward_site == 'ZMPT') {
+                browsecat.val(422);
             }
 
             if (raw_info.type == '动漫' && forward_site == 'ZMPT') {
