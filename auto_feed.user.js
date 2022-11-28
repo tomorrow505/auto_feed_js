@@ -151,6 +151,7 @@
     20221103：适配红叶PT。
     20221117：修复部分bug，去掉mediainfo和截图功能，鸡肋而且占用体积大。修复没有猫不能进入设置页面的bug。第一次NP站点应该都可以设置。
     20221119：适配ICC2022。
+    20221128：适配DTR/HONE转出。
 */
 
 var site_url = decodeURI(location.href);
@@ -18847,10 +18848,8 @@ setTimeout(function(){
         else if (forward_site == 'ZMPT' || forward_site == '红叶') {
             //类型
             var browsecat = $('#browsecat');
-            if (forward_site == '红叶') {
-                var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
-                                 '体育': 407, '软件': 409, '学习': 409, '': 409, '游戏': 409, 'MV': 406};
-            }
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+                             '体育': 407, '软件': 409, '学习': 409, '': 409, '游戏': 409, 'MV': 406};
             //如果当前类型在上述字典中
             browsecat.val(409)
             if (type_dict.hasOwnProperty(raw_info.type)){
