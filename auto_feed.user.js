@@ -228,7 +228,7 @@ if (location.href.match(/^.{3,30}userdetail/i) && !site_url.match(/bluebird-hd/)
 
 if (location.href.match(/https:\/\/desitorrents.tv\/torrents/)) {
     $('#torrent-list-table').find('tr:gt(0)').map((index,e)=>{
-        $(e).find('td:eq(2)').find('a.torrent-listings-name').after(`<a href="${$(e).find('a.torrent-listings-name').attr('href')}" target="_blank"><font color=yellow>跳转</font></a>`)
+        $(e).find('td:eq(2)').find('a.torrent-listings-name').after(`<a href="${$(e).find('a.torrent-listings-name').attr('href')}" target="_blank"><font color=green>跳转</font></a>`)
     });
 }
 
@@ -5994,9 +5994,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
     //**************************************************** 3 *************************************************************************
     $('#setting').append(`<b>选择脚本设置站点(默认猫站)：</b>`);
-    if (!used_setting_host_list.hasOwnProperty(setting_host)) {
-        used_setting_host_list[setting_host] = used_setting_host_list[setting_host].url + 'usercp.php?action=personal';
-    }
     for (key in used_setting_host_list){
         $('#setting').append(`<input type="radio" name="setting_site" value="${key}">${key}`);
     }
@@ -8652,6 +8649,7 @@ setTimeout(function(){
             $('.table-responsive:eq(2)').find('a').has('img').map((index,e)=>{
                 raw_info.descr += `[url=${$(e).attr("href")}][img]${$(e).find("img").attr("src")}[/img][/url]`
             });
+            raw_info.torrent_url = $('.torrent-buttons').find('a[href*="torrents/download"]').attr('href');
         }
 
         if (origin_site == 'BLU' || origin_site == 'Telly') {
