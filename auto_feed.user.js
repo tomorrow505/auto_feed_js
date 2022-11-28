@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.0.2
+// @version      2.0.0.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -100,30 +100,7 @@
 /*
 日志：
 
-    2022年以前的日志请参看："https://github.com/tomorrow505/auto_feed_js/wiki/更新日志"
-
-    20220408：修复部分bug，部分更新。
-    20220418：支持SC转入转出，支持MTV转入转出，修复部分bug。
-    20220423：支持NBL转出，修复部分MTV的转出bug。
-    20220424：支持avz，phd，CNZ转入，修复部分bug。
-    20220425：支持ANT转入转出。重新支持IPT/torrentseeds查重检索。
-    20220428：支持IN查重检索。修复部分bug。简单支持digitalcore转出。
-
-    20220503：支持转入丐帮、TVV。
-    20220504：简单支持xthor、HDF; 修复部分bug。
-    20220505：修复部分bug，英化蓝鸟部分页面，英化HDF,XTHOR部分页面。
-    20220506：支持蓝鸟转出。英化filelist以及bdc部分页面。所有英化页面托管在GitHub上，可能需要翻墙才会正确显示。
-    20220510：修复个人搭建的autofeed版ptgen节点，用的人多容易挂。整合动漫版本，并重构部分代码。支持猪猪网PT站转入转出，支持bwtorrents转出，支持NBL中文显示。
-    20220511：支持MTV、bluebird中文显示。英化openlook-韩国T站部分页面。
-    20220512：支持openlook-韩国T站转出，部分功能还需要完善。支持新站CarPt。修复部分bug，适配柠檬皇后音乐互转。猫站上传页面集成ptgen。
-    20220513：优化RED和jpop转柠檬和皇后的代码逻辑，集成音乐转载脚本pth_yadg适配皇后和柠檬。
-    20220518：支持海豚、lztr转出到皇后柠檬。支持部分内站间不下载种子直接发布，出现跨源请求询问是否信任一律选择允许此域名。
-    20220519：支持大部分站点转发内站不需要下载种子，xthor直接生成nfo,不需要手动上传。
-    20220521：支持OPS转发，修复部分bug...支持北洋皇后双域名。
-    20220522：支持bib转发至部分内站，修复部分bug。
-    20220523：支持HDB图片选择之后不下载直接跳转ptpimg和imgbox上传。
-    20220524：更新海豹组名显示，适配bit-hdtv，jptv转出(设置界面语言为简体中文)，命名还有点问题。取消hon3yhd支持，原因：关站。
-    20220525：将简化MI面板托管到设置页面，并根据功能只显示相对应内容。支持豆瓣电影、豆瓣音乐、豆瓣读书一键复制简介。
+    2022年6月以前的日志请参看："https://github.com/tomorrow505/auto_feed_js/wiki/更新日志"
 
     20220604：修复海豹部分bug，修复piggo部分bug。优化禁转判断后跳转逻辑。
     20220605：新增图片提取功能：https://github.com/tomorrow505/auto_feed_js/wiki/图片处理
