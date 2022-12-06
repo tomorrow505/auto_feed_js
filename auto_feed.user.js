@@ -1178,6 +1178,7 @@ const o_site_info = {
     'IPT': 'https://iptorrents.com/',
     'torrentseeds': 'https://torrentseeds.org/',
     'IN': 'https://nzbs.in/',
+    'HOU': 'https://house-of-usenet.com/',
     'digitalcore': 'https://digitalcore.club/',
     'BlueBird': 'https://bluebird-hd.org/',
     'bwtorrents': 'https://bwtorrents.tv/',
@@ -1869,7 +1870,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/digitalcore.club\/torrent\/\d+/)){
         return 1;
     }
-    if (site_url.match(/^https:\/\/nzbs.in\/.*/)){
+    if (site_url.match(/^https:\/\/nzbs.in\/.*|^https:\/\/house-of-usenet.*/)){
         return 1;
     }
     if (site_url.match(/^https:\/\/torrentdb.net\/torrent\/.*/)){
@@ -8374,6 +8375,21 @@ setTimeout(function(){
             raw_info.type = "电影";
         }
 
+        if (origin_site == 'HOU') {
+            $('div.post_body').prepend(`
+                <div style="padding-right:15%; padding-bottom: 15px">
+                    <table id="mytable">
+                    </table>
+                </div>
+            `);
+            raw_info.url = match_link('imdb', $('body').html());
+            tbody = $('#mytable')[0];
+            insert_row = tbody.insertRow(0);
+            douban_box = tbody.insertRow(0);
+            raw_info.name = $('span.mycode_b').first().text().trim();
+            raw_info.type = "电影";
+        }
+
         if (origin_site == 'digitalcore') {
             $('.imdbinfotext').parent().parent().parent().parent().append(`
                 <div style="padding-left:55px; padding-right:55px; padding-bottom: 15px">
@@ -11175,7 +11191,7 @@ setTimeout(function(){
                 box_left.innerHTML = '豆瓣信息';
                 if (origin_site == 'NBL' || origin_site == 'IPT' || origin_site == 'torrentseeds' || origin_site == 'HONE') {
                     box_left.style.width = '60px';
-                } else if (origin_site == 'IN' || origin_site == 'digitalcore' || origin_site == 'BlueBird' || origin_site == 'bwtorrents') {
+                } else if (origin_site == 'IN' || origin_site == 'digitalcore' || origin_site == 'BlueBird' || origin_site == 'bwtorrents' || origin_site == 'HOU') {
                     box_left.style.width = '80px';
                 }
                 box_left.align = direct;
@@ -21466,12 +21482,13 @@ setTimeout(function(){
                             subtitles.push('chinese_simplified');
                         }
                     }
-                } else if (descr.match(/Subtitle: (.*?) \/ .*?/)) {
+                } 
+                if (!subtitles.length && descr.match(/Subtitle: (.*?) \/ .*?/)) {
                     subtitles = descr.match(/Subtitle: (.*?) \/ .*/g).map(e=>{
                         var subtitle = e.split(':')[1].split('/')[0].trim();
                         return subtitle;
                     });
-                }else {
+                } else {
                     try{
                         descr.match(/Text.*?\nID[\s\S]*?Forced/g).map(function(item){
                             try{
@@ -21488,7 +21505,6 @@ setTimeout(function(){
                     } catch(err) {
                         if (descr.match(/Subtitle.*?:(.*)/i)) {
                             descr.match(/Subtitle.*?:(.*)/ig).map(item=>{
-                                console.log(item)
                                 if (item.match(/en/i)) {
                                     subtitles.push('english');
                                 } else if (item.match(/chs|zh/i)) {
@@ -21700,7 +21716,7 @@ setTimeout(function(){
                                 }
                             });
                         } catch (err) {}
-                        $('td').has('#preview_1').append(`<a href="#" id="go_imgbox">辅助转存原始图：转至PIXHOST</a>`);
+                        $('#description-container').next().find('td:eq(1)').append(`<a href="#" id="go_imgbox">辅助转存原始图：转至PIXHOST</a>`);
                         $('#go_imgbox').click(function(e) {
                             e.preventDefault();
                             if ($('#release_desc').val().match(/http[^\[\]]*?(jpg|png)/g).length > 0) {
@@ -21747,7 +21763,7 @@ setTimeout(function(){
                                 alert('缺少截图');
                             }
                         });
-                        $('td').has('#preview_1').append(`<div style="color:yellow">辅助设置对比图：
+                        $('#description-container').next().find('td:eq(1)').append(`<div style="color:yellow">辅助设置对比图：
                             将第<input type="text" style="width: 50px; text-align:center; margin-left: 5px" id="start" />--<input type="text" style="width: 50px; text-align:center; margin-right: 5px" id="end" />张图设置为
                             <input type="text" placeholder="Source, Encode" id="comparison" style="width:200px" />
                             <input type="button" value="设置对比图" id="go_setting"/>
@@ -21790,7 +21806,7 @@ setTimeout(function(){
                                 $('#release_desc').val(origin_str);
                             } catch (err) {}
                         });
-                        $('td').has('#preview_1').append(`<div style="color:yellow">辅助缩略转大图：
+                        $('#description-container').next().find('td:eq(1)').append(`<div style="color:yellow">辅助缩略转大图：
                             将源<input type="text" style="width: 50px; text-align:center; margin-left: 5px" id="img_source" />--<input type="text" style="width: 50px; text-align:center; margin-right: 5px" id="img_dest" />字符串替换
                             <input type="button" value="替换字符串" id="go_changing"/>
                             <input type="button" value="获取ibb源图" id="go_ibb"/>
@@ -24336,6 +24352,13 @@ setTimeout(function(){
 
             if (raw_info.name.match(/MULTI COMPLETE/i)) {
                 raw_info.medium_sel = 'Blu-ray';
+            }
+
+            if (raw_info.origin_site == 'HOU') {
+                $('#path').val('/home/sabnzbd/downloads/' + raw_info.name.replace(/ /g, '.'));
+                if (raw_info.name.match(/COMPLETE/)) {
+                    $('#scene').attr('checked', true);
+                }
             }
 
             function get_audio_codec_from_descr(descr) {
