@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.0.3
+// @version      2.0.0.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1635,7 +1635,7 @@ function walkDOM(n) {
             if (!site_url.match(/hudbt/i) || n.nodeName != 'BLOCKQUOTE'){
                 n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
             }
-            if (n.nodeName == 'FIELDSET' && n.textContent.match(/(温馨提示|郑重声明|您的保种|商业盈利|相关推荐|自动发布|仅供测试宽带|本站仅负责连接|感谢发布者|转载请注意礼节)/g)) {
+            if (n.nodeName == 'FIELDSET' && n.textContent.match(/(温馨提示|郑重声明|您的保种|商业盈利|相关推荐|自动发布|仅供测试宽带|不用保种|本站仅负责连接|感谢发布者|转载请注意礼节)/g)) {
                 n.innerHTML = '';
             }
         } else if (n.nodeName == 'DIV' && n.innerHTML == '代码') {
@@ -10889,6 +10889,10 @@ setTimeout(function(){
                 }
             }
             raw_info.descr = raw_info.descr + '\n\n' + img_info;
+
+            if (raw_info.descr.match(/^(\[img\].*?\[\/img\])\s*(\[quote\][\s\S]*?\[\/quote\])/)) {
+                raw_info.descr = raw_info.descr.replace(/^(\[img\].*?\[\/img\])\s*(\[quote\][\s\S]*?\[\/quote\])/, '$2\n\n$1');
+            }
         }
 
         if (origin_site == 'PTer'){
@@ -18680,6 +18684,21 @@ setTimeout(function(){
                 browsecat.val(index);
             }
 
+            //来源
+            var source_box = $('select[name=source_sel]');
+            source_box.val(6);
+            switch(raw_info.medium_sel){
+                case 'UHD': case 'Blu-ray': case 'Remux': case 'Encode':
+                    if (raw_info.standard_sel == '4K') {
+                        source_box.val(2);
+                    } else {
+                        source_box.val(1);
+                    }
+                    break;
+                case 'HDTV': source_box.val(4); break;
+                case 'WEB-DL': source_box.val(3); break;
+            }
+
             //媒介
             var medium_box = $('select[name=medium_sel]');
             switch(raw_info.medium_sel){
@@ -18688,7 +18707,7 @@ setTimeout(function(){
                     break;
                 case 'Blu-ray':
                     $('select[name=processing_sel]').val(1);
-                    medium_box.val(1); break;
+                    medium_box.val(10); break;
                 case 'DVD': break;
                 case 'Remux': 
                     if (raw_info.name.match(/UHD|2160[Pp]/)) {
@@ -18701,7 +18720,11 @@ setTimeout(function(){
                 case 'Encode':
                     medium_box.val(7); $('select[name=processing_sel]').val(2);
                     break;
-                case 'WEB-DL': medium_box.val(9);
+                case 'WEB-DL': 
+                    medium_box.val(9);
+                    if (raw_info.name.match(/webrip/i)) {
+                        medium_box.val(11);
+                    }
             }
             if (raw_info.name.match(/MiniBD/i)) {
                 medium_box.val(4);
@@ -18714,7 +18737,6 @@ setTimeout(function(){
                 case 'H264': case 'X264': codec_box.val(1); break;
                 case 'VC-1': codec_box.val(2); break;
                 case 'MPEG-2': case 'MPEG-4': codec_box.val(4); break;
-                case 'XVID': codec_box.val(5);
             }
             //音频编码
             var audiocodec_box = $('select[name=audiocodec_sel]');
@@ -19730,7 +19752,7 @@ setTimeout(function(){
         }
 
         else if (forward_site == 'HDT') {
-            var announce = 'http://hdts-announce.ru/announce.php';
+            var announce = 'https://hdts-announce.ru/announce.php';
             addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, announce);
             var category_box = $('select[name="category"]');
             switch(raw_info.type) {
