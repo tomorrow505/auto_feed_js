@@ -10580,6 +10580,8 @@ setTimeout(function(){
                 raw_info.descr = '[quote]{descr}\n[/quote]\n\n'.format({'descr': raw_info.descr});
             }
             raw_info.descr = raw_info.descr.replace("Torrent:", "").replace("Quote:", "");
+            raw_info.descr = raw_info.descr.replace("Torrent:", "").replace("Quote:", "").replace(/\[\/?font.*?\]/g, '');
+            raw_info.descr = raw_info.descr.replace(/^\[quote\].*?\n+(DISC)/i, '[quote]$1');
             raw_info.descr = raw_info.descr.replace(/\[img\]https:\/\/hd-torrents\.org\/images\/.*\/.*.gif\[\/img\]|-\(SCREENSHOTS\)-/g, '');
             raw_info.descr = raw_info.descr.replace('[img]https://hdts.ru/avatars/kralimarko.png[/img]', '');
             raw_info.descr = raw_info.descr.replace(/\[font=consolas\].*KRaLiMaRKo wishes you lots of fun! Don't forget to keep seeding[\s\S]*$/, '');
