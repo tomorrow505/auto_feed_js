@@ -917,7 +917,7 @@ const default_site_info = {
     '红叶': {'url': 'https://leaves.red/', 'enable': 1},
     'iHDBits': {'url': 'http://ihdbits.me/', 'enable': 1},
     'ICC': {'url': 'https://www.icc2022.com/', 'enable': 1},
-    '大青虫': {'url': 'https://pt.polish.work/', 'enable': 1},
+    '大青虫': {'url': 'https://cyanbug.net/', 'enable': 1},
 };
 
 //初始化数据site_order/used_site_info等等
