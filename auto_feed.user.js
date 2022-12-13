@@ -17268,8 +17268,10 @@ setTimeout(function(){
 
             //音频编码
             var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
-            var audiocodec_dict = { 'TrueHD': 10, 'Atmos': 7, 'DTS': 3, 'DTS-HD': 3, 'DTS-HDMA': 3, 'DTS-HDMA:X 7.1': 3, 'DTS-X': 3,
-                                    'AC3': 8, 'LPCM': 7, 'Flac': 1, 'MP3': 4, 'AAC': 6, 'APE': 2, '': 7 };
+            var audiocodec_dict = {
+                'DTS-HD': 1, 'DTS-HDMA:X 7.1': 2, 'DTS-HDMA': 3, 'TrueHD': 4, 'Atmos': 5, 'DTS': 6,
+                'AC3': 7, 'AAC': 8, 'Flac': 9, 'APE': 10, 'LPCM': 11, 'WAV': 12, '': 13
+            };
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
                 audiocodec_box.options[index].selected = true;
