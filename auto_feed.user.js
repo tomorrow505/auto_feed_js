@@ -917,6 +917,7 @@ const default_site_info = {
     '红叶': {'url': 'https://leaves.red/', 'enable': 1},
     'iHDBits': {'url': 'http://ihdbits.me/', 'enable': 1},
     'ICC': {'url': 'https://www.icc2022.com/', 'enable': 1},
+    '大青虫': {'url': 'https://pt.polish.work/', 'enable': 1},
 };
 
 //初始化数据site_order/used_site_info等等
@@ -13972,6 +13973,13 @@ setTimeout(function(){
                     if (labels.zz){ $('input[name="tags[]"][value="6"]').attr('checked', true); }
                     if (labels.diy){ $('input[name="tags[]"][value="4"]').attr('checked', true); }
                     if (labels.hdr10 || labels.hdr10plus) { try { $('input[name="tags[]"][value="7"]').attr('checked', true); } catch(err) {}}
+                    break;
+                case '大青虫':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[]'), '5'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[]'), '4'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7');}
             }
         } catch (err) {
         }
@@ -17218,6 +17226,64 @@ setTimeout(function(){
                 }
             }
             $('select[name="team_sel"]').val('27');
+            $('select[name="team_sel"]>option').map(function(index,e){
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
+        }
+
+        if (forward_site == '大青虫'){
+
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, '体育': 407, 'MV': 406, '': 409};
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                var index = type_dict[raw_info.type];
+                $('select[name="type"]').val(index);
+            }
+
+            // 媒介
+            var medium_box = $('select[name=medium_sel]');
+            switch(raw_info.medium_sel){
+                case 'Blu-ray': medium_box.val(1); break;
+                case 'DVD':  medium_box.val(2); break;
+                case 'Remux': medium_box.val(3); break;
+                case 'HDTV': medium_box.val(5); break;
+                case 'WEB-DL': medium_box.val(7); break;
+                case 'Encode': medium_box.val(7); break;
+                default: medium_box.val(9);
+            }
+
+            //视频编码
+            var codec_box = document.getElementsByName('codec_sel')[0];
+            switch (raw_info.codec_sel){
+                case 'H264': codec_box.options[1].selected = true; break;
+                case 'X264': codec_box.options[1].selected = true; break;
+                case 'H265': codec_box.options[6].selected = true; break;
+                case 'X265': codec_box.options[6].selected = true; break;
+                case 'VC-1': codec_box.options[2].selected = true; break;
+                case 'MPEG-2': codec_box.options[4].selected = true; break;
+                case 'XVID': codec_box.options[3].selected = true; break;
+                default: codec_box.options[5].selected = true;
+            }
+
+            //音频编码
+            var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
+            var audiocodec_dict = { 'TrueHD': 10, 'Atmos': 7, 'DTS': 3, 'DTS-HD': 3, 'DTS-HDMA': 3, 'DTS-HDMA:X 7.1': 3, 'DTS-X': 3,
+                                    'AC3': 8, 'LPCM': 7, 'Flac': 1, 'MP3': 4, 'AAC': 6, 'APE': 2, '': 7 };
+            if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
+                var index = audiocodec_dict[raw_info.audiocodec_sel];
+                audiocodec_box.options[index].selected = true;
+            }
+
+            //分辨率
+            var standard_box = document.getElementsByName('standard_sel')[0];
+            var standard_dict = {'4K': 5, '1080p': 1, '1080i': 2, '720p': 3, '8K': 5, '144Op': 5 };
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.options[index].selected = true;
+            }
+
+            $('select[name="team_sel"]').val('5');
             $('select[name="team_sel"]>option').map(function(index,e){
                 if (raw_info.name.match(e.innerText)) {
                     $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
