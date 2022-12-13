@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.0.4
+// @version      2.0.0.5
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8386,7 +8386,8 @@ setTimeout(function(){
             tbody = $('#mytable')[0];
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
-            raw_info.name = $('span.mycode_b').first().text().trim();
+            raw_info.name = $('i[class="fa fa-comments-o fa-fw"]').next().text().split('  ')[1].trim();
+            console.log(raw_info.name)
             raw_info.type = "电影";
         }
 
@@ -8576,7 +8577,7 @@ setTimeout(function(){
 
         if (origin_site == 'BHD'){
             tbody = document.getElementsByClassName('table-details')[0].getElementsByTagName('tbody')[0];
-            var imdb_box = document.getElementsByClassName('movie-details')[0];
+            var imdb_box = document.getElementsByClassName('bhd-td bhd-w30 text-right')[0];
             try {
                 raw_info.url = match_link('imdb', imdb_box.innerHTML);
             } catch(err) {}
@@ -21044,11 +21045,11 @@ setTimeout(function(){
             var size = 0;
             if ((raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') && raw_info.descr.match(/mpls/i)) {
                 size = get_size_from_descr(raw_info.descr);
-                if (0 <= size && size < 25) {
+                if (0 <= size && size < 23.28) {
                     $('#codec').val('BD25');
-                } else if (size < 50) {
+                } else if (size < 46.57) {
                     $('#codec').val('BD50');
-                } else if (size < 66) {
+                } else if (size < 61.47) {
                     $('#codec').val('BD66');
                 } else {
                     $('#codec').val('BD100');
@@ -21576,11 +21577,11 @@ setTimeout(function(){
                         try{
                             $('select[name="processing_other"]').removeClass('hidden');
                             size = get_size_from_descr(raw_info.descr);
-                            if (0 <= size && size < 25) {
+                            if (0 <= size && size < 23.28) {
                                 $('select[name="processing_other"]').val('BD25');
-                            } else if (size < 50) {
+                            } else if (size < 46.57) {
                                 $('select[name="processing_other"]').val('BD50');
-                            } else if (size < 66) {
+                            } else if (size < 61.47) {
                                 $('select[name="processing_other"]').val('BD66');
                             } else {
                                 $('select[name="processing_other"]').val('BD100');
@@ -23044,9 +23045,9 @@ setTimeout(function(){
             }
             if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray') {
                 size = get_size_from_descr(raw_info.descr);
-                if (0 <= size && size < 25) {
+                if (0 <= size && size < 23.28) {
                     $('select[name="fmt"]').val('BD25');
-                } else if (size < 50) {
+                } else if (size < 46.57) {
                     $('select[name="fmt"]').val('BD50');
                 }
             }
@@ -23290,7 +23291,7 @@ setTimeout(function(){
                 } else {
                     var medium_sel = 'BD25';
                     var size = get_size_from_descr(raw_info.descr);
-                    if (size > 25) {
+                    if (size > 23.28) {
                         descr = descr.format({'source': 'BD50'});
                         medium_sel = 'BD50';
                     } else {
@@ -23588,7 +23589,7 @@ setTimeout(function(){
                 var summary = full_bdinfo2summary(raw_info.descr);
 
                 var size = get_size_from_descr(raw_info.descr + summary);
-                if (0 < size && size <= 50) {
+                if (0 < size && size <= 23.28) {
                     bluray_info = bluray_info.format({'size': 'BD25'});
                 } else {
                     bluray_info = bluray_info.format({'size': 'BD50'});
