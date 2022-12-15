@@ -4,7 +4,7 @@
 // @thanks       感谢宝大、86大佬、贝壳等大佬提供邀请码;感谢宝大、86大佬提供友情赞助;感谢86大佬、手大、kmeng、黑白、甘蔗等大佬赠予PTP积分.（ID：tomorrow505, 感谢支持）
 // @contributor  daoshuailx/hollips/kmeng/wyyqyl/shmt86/sauterne
 // @description  PT一键转种脚本
-// @match        https://blutopia.xyz/torrents?imdb=tt*
+// @match        https://blutopia.cc/torrents?imdb=tt*
 // @namespace    https://greasyfork.org/zh-CN/scripts/424132-auto-feed
 // @updateURL    https://greasyfork.org/zh-CN/scripts/424132-auto-feed
 // @match        http*://*/*detail*.php*
@@ -47,7 +47,7 @@
 // @match        https://beyond-hd.me/upload*
 // @match        https://*/usercp.php?action=personal*
 // @match        https://uhdbits.org/torrents.php*
-// @match        https://blutopia.xyz/upload/*
+// @match        https://blutopia.cc/upload/*
 // @match        https://pt.hdpost.top/upload/*
 // @match        https://asiancinema.me/upload/*
 // @match        http*://totheglory.im/t/*
@@ -621,8 +621,8 @@ if (site_url.match(/^https:\/\/hdf\.world\/torrents\.php/i) && !site_url.match(/
     return;
 }
 //处理blutopia和hdpost跳转检索，因为其使用ajax异步检索
-if (site_url.match(/(blutopia.xyz|pt.hdpost.top|asiancinema.me|hd-olimpo.club|telly.wtf)\/torrents\?imdb(id)?=.*/)){
-    if (site_url.match(/blutopia.xyz/i)) {
+if (site_url.match(/(blutopia.cc|pt.hdpost.top|asiancinema.me|hd-olimpo.club|telly.wtf)\/torrents\?imdb(id)?=.*/)){
+    if (site_url.match(/blutopia.cc/i)) {
         $('div.form-group:contains(IMDb)').find('input').val(site_url.split('=')[1].split('&')[0]);
         $('button.btn-primary:contains(Advanced)').click();
         $('div.form-group:contains(IMDb)').find('input').focus();
@@ -669,7 +669,7 @@ if (site_url.match(/^https:\/\/passthepopcorn.me\/torrents.php\?id=\d+&torrentid
     var tid = site_url.match(/torrentid=(\d+)/)[1];
     window.open($(`a[href*="action=download&id=${tid}"]`).attr('href'), '_blank');
 }
-if (site_url.match(/^https:\/\/(blutopia.xyz|pt.hdpost.top|asiancinema.me|hd-olimpo.club|telly.wtf)\/torrents\/download_check/)) {
+if (site_url.match(/^https:\/\/(blutopia.cc|pt.hdpost.top|asiancinema.me|hd-olimpo.club|telly.wtf)\/torrents\/download_check/)) {
     window.open($('a[href*="torrents/download"]').has('i').attr('href'), '_blank');
     return;
 }
@@ -827,7 +827,7 @@ const default_site_info = {
     'avz': {'url': 'https://avistaz.to/', 'enable': 1},
     'Audiences': {'url': 'https://audiences.me/', 'enable': 1},
     'BHD' : {'url': 'https://beyond-hd.me/', 'enable': 1},
-    'BLU': {'url': 'https://blutopia.xyz/', 'enable': 1},
+    'BLU': {'url': 'https://blutopia.cc/', 'enable': 1},
     'BTN': {'url': 'https://broadcasthe.net/', 'enable': 1},
     'BYR': {'url': 'https://byr.pt/', 'enable': 1},
     'BTSchool': {'url': 'https://pt.btschool.club/', 'enable': 1},
@@ -1002,7 +1002,7 @@ const default_search_list = [
     `<a href="http://cinemageddon.net/browse.php?search={imdbid}&proj=0&descr=1" target="_blank">CG</a>`,
     `<a href="https://filelist.io/browse.php?search={imdbid}" target="_blank">FileList</a>`,
     `<a href="https://beyond-hd.me/torrents?imdb={imdbid}" target="_blank">BHD</a>`,
-    `<a href="https://blutopia.xyz/torrents?imdbid={imdbno}&perPage=25&imdbId={imdbno}" target="_blank">BLU</a>`,
+    `<a href="https://blutopia.cc/torrents?imdbid={imdbno}&perPage=25&imdbId={imdbno}" target="_blank">BLU</a>`,
     `<a href="https://secret-cinema.pw/torrents.php?action=advanced&searchsubmit=1&filter_cat=1&cataloguenumber={imdbid}" target="_blank">SC</a>`,
     `<a href="https://pt.hdpost.top/torrents?imdbId={imdbid}#page/1" target="_blank">HDPost</a>`,
     `<a href="https://totheglory.im/browse.php?search_field=imdb{imdbno}&c=M" target="_blank">TTG</a>`,
@@ -1148,7 +1148,7 @@ const o_site_info = {
     'MTV': 'https://www.morethantv.me/',
     'BHD': 'https://beyond-hd.me/',
     'UHD': 'https://uhdbits.org/',
-    'BLU': 'https://blutopia.xyz/',
+    'BLU': 'https://blutopia.cc/',
     'HDPost': 'https://pt.hdpost.top/',
     'TorrentLeech': 'https://www.torrentleech.org/',
     'xthor': 'https://xthor.tk/',
@@ -1651,7 +1651,7 @@ function walkDOM(n) {
         } else if (n.nodeName == '#text' && site_url.match(/npupt/)) {
             n.data = n.data.replace(/^ +| +$/g, '');
         } else if (n.nodeName == 'BR') {
-            if (site_url.match(/u2.dmhy.org|ourbits.club\/details.php.*|totheglory.im.*|blutopia.xyz.*|desitorrents.tv|hudbt|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv/i)) {
+            if (site_url.match(/u2.dmhy.org|ourbits.club\/details.php.*|totheglory.im.*|blutopia.cc.*|desitorrents.tv|hudbt|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv/i)) {
                 n.innerHTML = '\r\n';
             }
         } else if (n.nodeName == 'LEGEND') {
@@ -1858,7 +1858,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/hdcity.city\/upload/)){
         return 2;
     }
-    if (site_url.match(/^https:\/\/(pt.hdpost.top|asiancinema.me|hd-olimpo.club|jptv.club|blutopia.xyz|desitorrents.tv|monikadesign.uk|hawke.uno)\/torrents\/\d+$/)){
+    if (site_url.match(/^https:\/\/(pt.hdpost.top|asiancinema.me|hd-olimpo.club|jptv.club|blutopia.cc|desitorrents.tv|monikadesign.uk|hawke.uno)\/torrents\/\d+$/)){
         return 1;
     }
     if (site_url.match(/^https:\/\/www.torrentseeds.org\/torrents\/\d+/)){
@@ -3409,7 +3409,7 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
                         alert("频率太快，600秒后再来！");
                         return;
                     }
-                    if (r.match(/8:announce\d+:.*(please.passthepopcorn.me|blutopia.xyz|beyond-hd.me|asiancinema.me|telly.wtf|jptv.club|hd-olimpo.club|secret-cinema.pw|monikadesign.uk)/)) {
+                    if (r.match(/8:announce\d+:.*(please.passthepopcorn.me|blutopia.cc|beyond-hd.me|asiancinema.me|telly.wtf|jptv.club|hd-olimpo.club|secret-cinema.pw|monikadesign.uk)/)) {
                         if (r.match(/4:name\d+:/)) {
                             var length = parseInt(r.match(/4:name(\d+):/)[1]);
                             var index = parseInt(r.search('4:name'));
@@ -10773,7 +10773,7 @@ setTimeout(function(){
                 var tmp_box = picture_info.getElementsByTagName('table')[0].cloneNode(true);
                 mediainfo = walkDOM(tmp_box);
                 mediainfo = mediainfo.slice(0, mediainfo.search(/\[url=/i));
-                mediainfo = mediainfo.replace('[img]https://blutopia.xyz/img/joypixels/24c2.png[/img]', ':m:');
+                mediainfo = mediainfo.replace('[img]https://blutopia.cc/img/joypixels/24c2.png[/img]', ':m:');
                 mediainfo = mediainfo.trim();
             }
 
@@ -19845,7 +19845,7 @@ setTimeout(function(){
         else if (forward_site == 'BLU' || forward_site == 'ACM' || forward_site == 'jptv' || forward_site == 'Monika') {
 
             if (forward_site == 'BLU') {
-                var announce = $('a[href*="https://blutopia.xyz/announce/"]').attr('href');
+                var announce = $('a[href*="https://blutopia.cc/announce/"]').attr('href');
             } else {
                 var announce = $('h2:contains(announce)').text().replace('Announce URL:', '').trim();
             }
