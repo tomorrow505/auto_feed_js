@@ -18353,15 +18353,13 @@ setTimeout(function(){
             var codec_box = document.getElementsByName('codec_sel')[0];
             codec_box.options[7].selected = true;
             switch (raw_info.codec_sel){
-                case 'H265': case 'H.265': codec_box.options[1].selected = true; break;
-                case 'H264': case 'H.264': codec_box.options[2].selected = true; break;
+                case 'H265': codec_box.options[1].selected = true; break;
+                case 'H264': codec_box.options[2].selected = true; break;
                 case 'HEVC': codec_box.options[3].selected = true; break;
                 case 'AVC': codec_box.options[4].selected = true; break;
                 case 'X265': codec_box.options[5].selected = true; break;
                 case 'X264': codec_box.options[6].selected = true;
             }
-
-            //音频编码
 
             //分辨率
             var standard_box = document.getElementsByName('standard_sel')[0];
@@ -18416,7 +18414,47 @@ setTimeout(function(){
                 case '学习': browsecat.val(409); break;
             }
             $('select[id=specialcat]').attr('disabled', true);
+            setTimeout(function(){
+                $('tr.mode_6').css('display', '');
+            }, 1000);
             $('input[name="pt_gen"]').val(raw_info.dburl? raw_info.dburl: raw_info.url);
+            //视频编码
+            var codec_box = document.getElementsByName('codec_sel[6]')[0];
+            codec_box.options[2].selected = true;
+            switch (raw_info.codec_sel){
+                case 'H265': case 'X265': codec_box.options[3].selected = true; break;
+                case 'H264': case 'X264': codec_box.options[1].selected = true; break;
+            }
+
+            //分辨率
+            var standard_box = document.getElementsByName('standard_sel[6]')[0];
+            var standard_dict = {'4K': 6, '1080p': 1, '1080i': 2, '720p': 3, 'SD': 4, '': 6 };
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.options[index].selected = true;
+            }
+            $("select[name='team_sel[6]']").val('5');
+            $('select[name="team_sel[6]"]>option').map(function(index,e){
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel[6]"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
+
+            if (raw_info.medium_sel == 'Encode' || raw_info.name.match(/x264|x265/)) {
+                $('select[name="processing_sel[6]"]').val(2);
+            } else {
+                $('select[name="processing_sel[6]"]').val(1);
+            }
+
+            if (labels.gy){ check_label(document.getElementsByName('tags[6][]'), '5'); }
+            if (labels.yy){ check_label(document.getElementsByName('tags[6][]'), '20'); }
+            if (labels.zz){ check_label(document.getElementsByName('tags[6][]'), '6'); }
+            if (labels.diy){ check_label(document.getElementsByName('tags[6][]'), '4'); }
+            if (labels.hdr10) { check_label(document.getElementsByName('tags[6][]'), '16');}
+            if (labels.db) { check_label(document.getElementsByName('tags[6][]'), '10'); }
+            if (raw_info.name.match(/atmos/i)) {
+                check_label(document.getElementsByName('tags[6][]'), '11');
+            }
         }
 
         else if (forward_site == '52PT') {
