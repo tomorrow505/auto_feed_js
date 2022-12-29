@@ -1684,7 +1684,13 @@ function walkDOM(n) {
                 raw_info.descr = raw_info.descr + '[img]' + n.src + '[/img]';
             }
         } else if (n.nodeName=='DIV' && site_url.match(/pthome|audiences/i) && n.className == 'codemain') {
-            n.innerHTML = '';
+            if (raw_info.name.match(/-ADE|-ADWeb/) && raw_info.descr.match(/General/)) {
+                n.innerHTML = '';
+            } else if (n.parentNode.className == 'show' || site_url.match(/pthome/i)) {
+                n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
+            } else {
+                n.innerHTML = '';
+            }
         } else if (n.nodeName=='TT' && site_url.match(/cinematik/i)) {
             n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
         } else if (n.nodeName=='TD' && site_url.match(/cinematik/i) && n.style.border == "1px dotted rgb(0, 0, 0)") {
@@ -19261,60 +19267,62 @@ setTimeout(function(){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
-            var source_box = document.getElementsByName('source_sel')[0];
-            source_box.options[6].selected=true;
+            var source_box = $('select[name="source_sel"]');
+            source_box.val(6);
             switch(raw_info.medium_sel){
-                case 'UHD': case 'Blu-ray': case 'Remux': case 'Encode':
-                    source_box.options[1].selected = true; break;
-                case 'HDTV': source_box.options[4].selected=true; break;
-                case 'DVD':
-                    source_box.options[3].selected=true;
-                    if (raw_info.name.match(/hd ?dvd/i)) {
-                        source_box.options[2].selected=true;
-                    }
+                case 'UHD': source_box.val(7); break;
+                case 'Blu-ray': case 'Remux': case 'Encode':
+                    source_box.val(1); break;
+                case 'HDTV': source_box.val(4); break;
+                case 'DVD': source_box.val(3); break;
+                case 'WEB-DL': source_box.val(2); break;
             }
             //媒介
             var medium_box = $('select[name=medium_sel]');
             switch(raw_info.medium_sel){
-                case 'UHD': medium_box.val(1); break;
+                case 'UHD': medium_box.val(11); break;
                 case 'Blu-ray': medium_box.val(1); break;
-                case 'DVD':
-                    medium_box.val(2);
-                    if (raw_info.name.match(/DVDr/i)) {
-                        medium_box.val(6);
+                case 'DVD': medium_box.val(6); break;
+                case 'Remux': 
+                    if (raw_info.standard_sel == '4K') {
+                        medium_box.val(2);
+                    } else {
+                        medium_box.val(3);
                     }
                     break;
-                case 'Remux': medium_box.val(3); break;
                 case 'HDTV': medium_box.val(5); break;
                 case 'Encode': medium_box.val(7); break;
                 case 'WEB-DL': medium_box.val(10);
             }
-            if (raw_info.name.match(/MiniBD/i)) {
-                medium_box.val(4);
-            }
+
             //视频编码
             var codec_box = document.getElementsByName('codec_sel')[0];
             codec_box.options[5].selected = true;
             switch (raw_info.codec_sel){
-                case 'H265': case 'X265': codec_box.options[6].selected = true; break;
-                case 'H264': case 'X264': codec_box.options[1].selected = true; break;
-                case 'VC-1': codec_box.options[2].selected = true; break;
+                case 'H265': case 'X265': codec_box.options[1].selected = true; break;
+                case 'H264': case 'X264': codec_box.options[2].selected = true; break;
+                case 'VC-1': codec_box.options[3].selected = true; break;
                 case 'MPEG-2': case 'MPEG-4': codec_box.options[4].selected = true; break;
-                case 'XVID': codec_box.options[3].selected = true;
+                case 'XVID': codec_box.options[5].selected = true;
             }
             //音频编码
             var audiocodec_box = $('select[name=audiocodec_sel]');
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': audiocodec_box.val(3); break;
+                case 'DTS-HD': audiocodec_box.val(13); break;
+                case 'DTS-HDMA:X 7.1': audiocodec_box.val(11); break;
+                case 'DTS-HDMA': audiocodec_box.val(12); break;
                 case 'TrueHD': audiocodec_box.val(10); break;
-                case 'Atmos': audiocodec_box.val(10); break;
-                case 'DTS': audiocodec_box.val(3); break;
+                case 'Atmos': audiocodec_box.val(9); break;
+                case 'DTS': audiocodec_box.val(13); break;
                 case 'AC3': audiocodec_box.val(8); break;
                 case 'AAC': audiocodec_box.val(6); break;
                 case 'Flac': audiocodec_box.val(1); break;
                 case 'APE': audiocodec_box.val(2); break;
-                case 'LPCM': audiocodec_box.val(11); break;
-                case 'WAV': audiocodec_box.val(7);
+                case 'LPCM': audiocodec_box.val(3); break;
+                case 'WAV': audiocodec_box.val(17);
+            }
+            if (raw_info.name.match(/DTS.?HD.?HR/)) {
+                audiocodec_box.val(15);
             }
             //分辨率
             var standard_box = $('select[name=standard_sel]');
