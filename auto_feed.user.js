@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.0.7
+// @version      2.0.0.8
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -919,6 +919,7 @@ const default_site_info = {
     'ICC': {'url': 'https://www.icc2022.com/', 'enable': 1},
     'CyanBug': {'url': 'https://cyanbug.net/', 'enable': 1},
     'SharkPT': {'url': 'https://sharkpt.net/', 'enable': 1},
+    '2xFree': {'url': 'https://pt.2xfree.org/', 'enable': 1},
 };
 
 //初始化数据site_order/used_site_info等等
@@ -1981,7 +1982,7 @@ function deal_with_title(title){
 
 //处理副标题逻辑业务封装进函数
 function deal_with_subtitle(subtitle){
-    subtitle = subtitle.replace(/\[checked by.*?\]/i, '').replace(/(\[|\])/g, " ").replace(/autoup/i, '').replace(/ +/, ' ').trim();
+    subtitle = subtitle.replace(/\[checked by.*?\]/i, '').replace(/autoup/i, '').replace(/ +/, ' ').trim();
     return subtitle;
 }
 
@@ -5506,7 +5507,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
     $('#signin').append(`<b>&nbsp;&nbsp;&nbsp;</b><a href="#", target="_blank" id="begin_sign"><font color="red"><b>→开始签到←</b></font></a>`);
     $('#signin').append(`<br><div id="ksortable"></div>`);
 
-    var unsupported_sites = ['NPUPT', 'digitalcore', 'HD-Only'];
+    var unsupported_sites = ['NPUPT', 'digitalcore', 'HD-Only', 'WT-Sakura'];
 
     for (index=0; index < site_order.length; index++) {
         var key = site_order[index];
@@ -5618,8 +5619,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
     $('#begin_sign').click((e)=>{
         e.preventDefault();
-        var attendance_sites = ['PThome', 'HDHome', 'LemonHD', 'HDDolby', 'Audiences', 'OurBits', 'GainB', 'PigGo', 'SoulVoice', 'UltraHD', 'CarPt', 'HHClub', '红叶',
-                'ptchina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'iHDBits', 'ICC', 'CyanBug', 'SharkPT'];
+        var attendance_sites = ['PThome', 'HDHome', 'LemonHD', 'HDDolby', 'Audiences', 'OurBits', 'GainB', 'PigGo', 'SoulVoice', 'UltraHD', 'CarPt', 
+        'HHClub', '红叶', 'ptchina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'iHDBits', 
+        'ICC', 'CyanBug', 'SharkPT', '2xFree'];
 
         attendance_sites.forEach((e)=>{
             if (used_signin_sites.indexOf(e) > -1) {
@@ -5890,11 +5892,12 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         log_in(['KG'], 'a[class="customtab1"]');
         log_in(['HDT'], 'img[class="torrents"]');
         log_in(['xthor'], '#navbar');
+        log_in(['HONE'], '#hoeapp-container');
         log_in(['FileList'], '#navigation');
         log_in(['bib'], '#header_nav');
         log_in(['IN'], '#nav');
 
-        log_in(['HDPost', 'BLU', 'Telly', 'HDOli', 'Monika'], 'nav[class="top-nav"]');
+        log_in(['HDPost', 'BLU', 'Telly', 'HDOli', 'Monika', 'DTR'], 'nav[class="top-nav"]');
         log_in(['ACM'], 'ul[class="left-navbar"]');
 
         log_in(['HDai'], 'div[class="header-nav"]');
@@ -7818,7 +7821,7 @@ setTimeout(function(){
 
         //----------------------------------标题简介获取——国内站点-------------------------------------------
         if (judge_if_the_site_in_domestic(site_url) || opencd_mode) {
-            if (origin_site == 'TTG' || origin_site == 'PuTao' || origin_site == 'OpenCD') {
+            if (origin_site == 'TTG' || origin_site == 'PuTao' || origin_site == 'OpenCD' || origin_site == 'HDArea') {
                 title = document.getElementsByTagName("h1")[0];
                 if ($(title).text().match(/上传成功/)) {
                     title = document.getElementsByTagName("h1")[1];
@@ -18396,6 +18399,24 @@ setTimeout(function(){
                 case 'CD':  medium_box.val(8); break;
                 default:  medium_box.val(6);
             }
+        }
+
+        else if (forward_site == '2xFree') {
+            var browsecat = $('#browsecat');
+            switch (raw_info.type){
+                case '电影': browsecat.val(401); break;
+                case '剧集': browsecat.val(402); break;
+                case '游戏': browsecat.val(411); break;
+                case '纪录': browsecat.val(404); break;
+                case '动漫': browsecat.val(405); break;
+                case '综艺': browsecat.val(403); break;
+                case '音乐': browsecat.val(408); break;
+                case 'MV': browsecat.val(406); break;
+                case '体育': browsecat.val(407); break;
+                case '学习': browsecat.val(409); break;
+            }
+            $('select[id=specialcat]').attr('disabled', true);
+            $('input[name="pt_gen"]').val(raw_info.dburl? raw_info.dburl: raw_info.url);
         }
 
         else if (forward_site == '52PT') {
