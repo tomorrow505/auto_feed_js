@@ -21014,7 +21014,7 @@ setTimeout(function(){
         }
 
         else if (forward_site == 'WT-Sakura') {
-            var browsecat = $('select[name=type]');
+            var browsecat = $('#browsecat');
             var type_dict = {'电影': 401, '剧集': 402, '动漫': 413, '综艺': 418, '音乐': 408, '纪录': 410,
                              '体育': 407, '软件': 409, '学习': 409, '': 0, '游戏': 409, 'MV': 406};
             if (type_dict.hasOwnProperty(raw_info.type)){
@@ -21022,7 +21022,7 @@ setTimeout(function(){
                 browsecat.val(index);
             }
             if (['动漫', '剧集', '综艺'].indexOf(raw_info.type) >= 0) {
-                if (raw_info.namt.match(/S\d+|Complete/i) || raw_info.small_descr.match(/全\d+集/)) {
+                if (raw_info.name.match(/S\d+|Complete/i) || raw_info.small_descr.match(/全\d+集/)) {
                     if (raw_info.type == '动漫') {
                         browsecat.val(423);
                     } else if (raw_info.type == '剧集') {
@@ -21045,39 +21045,6 @@ setTimeout(function(){
                 }
             }
 
-            if (raw_info.type == '剧集') {
-                switch (raw_info.source_sel){
-                    case '大陆': case '台湾': case '香港': case '港台':
-                        if (raw_info.name.match(/(complete|S\d{2}[^E])/i) && (!raw_info.name.match(/E\d{2,3}/i))) {
-                            browsecat.val(414);
-                        } else {
-                            browsecat.val(402);
-                        }
-                        break;
-                    case '日本': case '韩国': case '欧美':
-                        if (raw_info.name.match(/(S\d{2}E\d{2})/i)) {
-                            browsecat.val(416);
-                        } else {
-                            browsecat.val(417);
-                        }
-                        break;
-                    default: browsecat.val(402);
-                }
-            } else if (raw_info.type == '综艺') {
-                switch (raw_info.source_sel){
-                    case '日本': case '韩国': case '欧美':
-                        if (raw_info.name.match(/(S\d{2}E\d{2})/i)) {
-                            browsecat.val(418);
-                        } else {
-                            browsecat.val(419);
-                        }
-                        break;
-                    default: browsecat.val(403);
-                }
-            }
-            if (raw_info.name.match(/(pad$|ipad)/i)){
-                $('#browsecat').val(412);
-            }
             var medium_box = $('select[name="medium_sel"]');
             switch(raw_info.medium_sel){
                 case 'UHD':
