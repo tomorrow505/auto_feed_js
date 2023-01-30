@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.1.0
+// @version      2.0.1.1
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -11602,7 +11602,13 @@ setTimeout(function(){
                     $('#top').append(`<br><b><span id="checking"><font color="red">[缺少IMDB请自查]</font></span></b>`);
                 }
             } else {
-                $('#top').append(`<br><b><span id="checking"><font color="red">[一般资源]</font></span></b>`);
+                if ($('td:contains("标签"):eq(1)').next().text().match(/禁转/)) {
+                    $('#top').append(`<br><b><span id="checking"><font color="red">[禁转判断中……]</font></span></b>`);
+                    $('#checking').html('<font color="red">[禁转资源]</font>');
+                    if_exclusive = true;
+                } else {
+                    $('#top').append(`<br><b><span id="checking"><font color="red">[一般资源]</font></span></b>`);
+                }
             }
         } else if (['HDDolby', 'HDHome', 'PThome', 'Audiences'].indexOf(origin_site) > -1) {
             if ($('tr:contains("标签"):last').find('span.txz').length || $('tr:contains("标签"):last').find('span.tjz').length) {
@@ -13917,6 +13923,9 @@ setTimeout(function(){
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7'); }
                     if (raw_info.medium_sel == 'WEB-DL') {
                         check_label(document.getElementsByName('tags[]'), '4');
+                    }
+                    if (raw_info.name.match(/HLG/)) {
+                        check_label(document.getElementsByName('tags[]'), '13');
                     }
                     break;
                 case 'HaresClub':
