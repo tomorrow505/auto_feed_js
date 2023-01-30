@@ -14491,21 +14491,23 @@ setTimeout(function(){
                 $('#form_item_subtitle')[0].dispatchEvent(i_evt);
 
                 // 类别
-                var search_evt = new Event("search");
-                var browsecat = $('#form_item_category')
-                var type_dict = {'电影': 0, '剧集': 1, '动漫': 2, '综艺': 3, '音乐': 4, '纪录': 4,
-                                 '体育': 4, '软件': 4, '学习': 4, '': 4, 'MV': 4};
-                if (type_dict.hasOwnProperty(raw_info.type)){
-                    var index = type_dict[raw_info.type];
-                    // $('#form_item_category').attr('aria-activedescendant', `form_item_category_list_${index}`);
-                    $('#form_item_category').attr('aria-activedescendant', `form_item_category_list_${index}`);
-                    $('#form_item_category').val('Movie');
-                    // $('#form_item_category')[0].dispatchEvent(i_evt)
-                    if (index == 0) {
-                        // $('span.ant-select-selection-placeholder').first().text('Movie');
-                        // $('span.ant-select-selection-placeholder')[0].dispatchEvent(evt);
-                    }
-                }
+                // var search_evt = new Event("search");
+                // var browsecat = $('#form_item_category')
+                // var type_dict = {'电影': 0, '剧集': 1, '动漫': 2, '综艺': 3, '音乐': 4, '纪录': 4,
+                //                  '体育': 4, '软件': 4, '学习': 4, '': 4, 'MV': 4};
+                // if (type_dict.hasOwnProperty(raw_info.type)){
+                //     var index = type_dict[raw_info.type];
+                //     // $('#form_item_category').attr('aria-activedescendant', `form_item_category_list_${index}`);
+                //     $('#form_item_category').attr('aria-activedescendant', `form_item_category_list_${index}`);
+                //     $('#form_item_category').val('Movie');
+                //     // $('#form_item_category')[0].dispatchEvent(i_evt)
+                //     if (index == 0) {
+                //         // $('span.ant-select-selection-placeholder').first().text('Movie');
+                //         // $('span.ant-select-selection-placeholder')[0].dispatchEvent(evt);
+                //     }
+                // }
+                
+                $('div.ant-form-item').has('#form_item_category').before(`<div style="color:red; text-align:center">注意：当前版本转载插件分类、媒体信息和标签需要自主填写。</div>`)
 
                 // 豆瓣链接
                 if (raw_info.dburl) {
