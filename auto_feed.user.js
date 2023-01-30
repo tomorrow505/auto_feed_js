@@ -14097,24 +14097,6 @@ setTimeout(function(){
                         check_label(document.getElementsByName('tags[]'), '14');
                     }
                     break;
-                case 'ZHUQUE':
-                    function check_zhuque_label(value) {
-                        $(`input[value="${value}"]`).attr('checked', true);
-                        $(`input[value="${value}"]`)[0].dispatchEvent(evt);
-                        $(`input[value="${value}"]`).parent().addClass('ant-checkbox-checked');
-                        $(`input[value="${value}"]`).parent().parent().addClass('ant-checkbox-wrapper-checked');
-                    }
-                    setTimeout(function(){
-                        if (labels.gy){ check_zhuque_label('60'); }
-                        if (labels.zz){ check_zhuque_label('604'); }
-                        if (labels.hdr10) { check_zhuque_label('613'); }
-                        if (labels.db){ check_zhuque_label('611'); }
-                        if (labels.hdr10plus) { check_zhuque_label('613'); }
-                        if (raw_info.small_descr.match(/特效字幕/)) {
-                            check_zhuque_label('614');
-                        }
-                    }, 1000);
-                    break;
                 }
         } catch (err) {
         }
@@ -14604,6 +14586,23 @@ setTimeout(function(){
                 if (raw_info.descr.match(/转自.*?，感谢原制作者发布。/)) {
                     $('#form_item_note').val(raw_info.descr.match(/转自.*?，感谢原制作者发布。/)[0]);
                 }
+
+                // function check_zhuque_label(value) {
+                //     $(`input[value="${value}"]`).attr('checked', true);
+                //     $(`input[value="${value}"]`)[0].dispatchEvent(evt);
+                //     $(`input[value="${value}"]`).parent().addClass('ant-checkbox-checked');
+                //     $(`input[value="${value}"]`).parent().parent().addClass('ant-checkbox-wrapper-checked');
+                // }
+                // setTimeout(function(){
+                //     if (labels.gy){ check_zhuque_label('60'); }
+                //     if (labels.zz){ check_zhuque_label('604'); }
+                //     if (labels.hdr10) { check_zhuque_label('613'); }
+                //     if (labels.db){ check_zhuque_label('611'); }
+                //     if (labels.hdr10plus) { check_zhuque_label('613'); }
+                //     if (raw_info.small_descr.match(/特效字幕/)) {
+                //         check_zhuque_label('614');
+                //     }
+                // }, 1000);
             });
         }
 
