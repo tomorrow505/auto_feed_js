@@ -2,11 +2,13 @@
 PT站一键转载脚本
 
 ## 使用介绍
-使用教程：[项目wiki，点击跳转](https://github.com/tomorrow505/auto_feed_js/wiki)
+使用教程：详见项目[wiki](https://github.com/tomorrow505/auto_feed_js/wiki)
 
 安装地址：https://greasyfork.org/zh-CN/scripts/424132-auto-feed
 
 TG群链接：https://t.me/+rGUOUYZ3Ey43OWY9
+
+支持站点：[Support](https://github.com/tomorrow505/auto_feed_js/wiki/%E6%94%AF%E6%8C%81%E7%9A%84%E7%AB%99%E7%82%B9)
 
 注意：汇报bug或者提issue的时候尽量说明源站链接、问题文字说明、截图、待发布站点等尽可能详实的信息以便排查。
 
