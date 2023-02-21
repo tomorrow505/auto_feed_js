@@ -215,8 +215,11 @@ if (location.href.match(/https:\/\/desitorrents.tv\/torrents/)) {
 
 if (location.href.match(/^https:\/\/zhuque.in\//)) {
     document.addEventListener('DOMNodeInserted', function() {
-        if ($('div.ant-message').length && $('div.ant-message').is(":visible")) {
-            $('div.ant-message').hide();
+        if ($('div.ant-message-notice:contains("欢迎回来")').length && $('div.ant-message-notice:contains("欢迎回来")').is(":visible")) {
+            $('div.ant-message-notice:contains("欢迎回来")').hide();
+        }
+        if ($('div.ant-message-notice:contains("有新的")').length && $('div.ant-message-notice:contains("有新的")').is(":visible")) {
+            $('div.ant-message-notice:contains("有新的")').hide();
         }
         if ($('div.banner').length == 2 && $('div.banner:last').is(":visible")) {
             $('div.banner:last').hide();
