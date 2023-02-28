@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.1.4
+// @version      2.0.1.5
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -215,8 +215,11 @@ if (location.href.match(/https:\/\/desitorrents.tv\/torrents/)) {
 
 if (location.href.match(/^https:\/\/zhuque.in\//)) {
     document.addEventListener('DOMNodeInserted', function() {
-        if ($('div.ant-message').length && $('div.ant-message').is(":visible")) {
-            $('div.ant-message').hide();
+        if ($('div.ant-message-notice:contains("欢迎回来")').length && $('div.ant-message-notice:contains("欢迎回来")').is(":visible")) {
+            $('div.ant-message-notice:contains("欢迎回来")').hide();
+        }
+        if ($('div.ant-message-notice:contains("有新的")').length && $('div.ant-message-notice:contains("有新的")').is(":visible")) {
+            $('div.ant-message-notice:contains("有新的")').hide();
         }
         if ($('div.banner').length == 2 && $('div.banner:last').is(":visible")) {
             $('div.banner:last').hide();
@@ -12014,13 +12017,20 @@ function auto_feed() {
                         return;
                     }
                 } else if (raw_info.name.match(/chd$|chdbits|chdweb|chdtv|chdpad|chdhktv/i)) {
-                    if (['HDChina'].indexOf(e.target.id) > -1) {
-                        if (!confirm('该资源可能触发禁止发布规则，确定发布？')) {
+                    if (['HDChina'].indexOf(this.id) > -1) {
+                        if (!confirm('该资源可能触发禁止发布规则(岛资源禁转到HDC)，确定发布？')) {
                             e.preventDefault();
                             return;
                         }
                     }
-                } else if (e.target.id == 'OurBits' && (raw_info.medium_sel == 'Remux' || raw_info.name.medium_sel() == 'Remux')) {
+                } else if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$/i)) {
+                    if (['PTT'].indexOf(this.id) > -1) {
+                        if (!confirm('该资源可能触发禁止发布规则(观众资源禁转到PTT)，确定发布？')) {
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                }else if (this.id == 'OurBits' && (raw_info.medium_sel == 'Remux' || raw_info.name.medium_sel() == 'Remux')) {
                     e.preventDefault();
                     alert('该站禁止Remux资源转发！');
                     return;
@@ -12040,7 +12050,7 @@ function auto_feed() {
                     check_exist_tid(this.id);
                 }
 
-                if (e.target.id == 'GainB') {
+                if (this.id == 'GainB') {
                     if (search_mode == 0) {
                         return;
                     }
@@ -12052,7 +12062,7 @@ function auto_feed() {
                         }
                     }
                 }
-                if (e.target.id == 'CarPt') {
+                if (this.id == 'CarPt') {
                     if (search_mode == 0) {
                         return;
                     }
@@ -14014,6 +14024,7 @@ function auto_feed() {
                     if (labels.diy){ check_label(document.getElementsByName('tags[]'), '4'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[]'), '12'); }
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '13'); }
                     break;
                 case 'HHClub':
                     if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
@@ -14150,11 +14161,13 @@ function auto_feed() {
                     if (labels.hdr10 || labels.hdr10plus) { try { $('input[name="tags[]"][value="7"]').attr('checked', true); } catch(err) {}}
                     break;
                 case 'CyanBug':
-                    if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
-                    if (labels.yy){ check_label(document.getElementsByName('tags[]'), '5'); }
-                    if (labels.zz){ check_label(document.getElementsByName('tags[]'), '6'); }
-                    if (labels.diy){ check_label(document.getElementsByName('tags[]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7');}
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.hdr10){ check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.db){ check_label(document.getElementsByName('tags[4][]'), '8'); }
+                    if (raw_info.name.match(/DV/)) { check_label(document.getElementsByName('tags[4][]'), '8'); }
                     break;
                 case 'HDMaYi':
                     if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
@@ -14528,7 +14541,7 @@ function auto_feed() {
 
             var pic_str = raw_info.imgs_cmct ? raw_info.imgs_cmct: cmctimgs;
             pic_info = '';
-            pic_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).forEach((item)=>{
+            pic_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp|jpeg)/g).forEach((item)=>{
                 item = item.replace(/\[.*\]/g, '');
                 if (item.match(/imgbox/)) {
                     pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
@@ -17663,12 +17676,23 @@ function auto_feed() {
             }
 
             //音频编码
-            var audiocodec_box = document.getElementsByName('audiocodec_sel[4]')[0];
-            var audiocodec_dict = { 'TrueHD': 6, 'Atmos': 1, 'DTS': 2, 'DTS-HD': 5, 'DTS-HDMA': 4, 'DTS-HDMA:X 7.1': 4, 'DTS-X': 3,
+            var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
+            var audiocodec_dict = { 'TrueHD': 6, 'Atmos': 1, 'DTS': 2, 'DTS-HD': 5, 'DTS-HDMA': 4, 'DTS-HDMA:X 7.1': 3, 'DTS-X': 3,
                                     'AC3': 10, 'LPCM': 7, 'Flac': 12, 'MP3': 10, 'AAC': 11, 'APE': 13, '': 19 };
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
-                audiocodec_box.options[index].selected = true;
+                audiocodec_box.val(index);
+            }
+            if (raw_info.name.match(/HD.?HR/)) {
+                audiocodec_box.val(5);
+            }
+            if (raw_info.name.match(/DDP|DD\+/i)) {
+                audiocodec_box.val(21);
+                if (raw_info.name.match(/atmos/i) || raw_info.descr.match(/atmos/i)) {
+                    audiocodec_box.val(23);
+                }
+            } else if (raw_info.name.match(/ DD /)) {
+                audiocodec_box.val(19);
             }
 
             //分辨率
@@ -17708,61 +17732,71 @@ function auto_feed() {
         }
 
         else if (forward_site == 'CyanBug'){
-            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, '体育': 407, 'MV': 406, '': 409};
-            if (type_dict.hasOwnProperty(raw_info.type)){
+            console.log(raw_info)
+            // 类型
+            var browsecat = $('#browsecat')
+            var type_dict = {
+                '电影': 401, '剧集': 402, '动漫': 405, '纪录': 404, '综艺': 403, '体育': 407, 
+                'MV': 406, '音乐': 408, '软件': 409, '学习': 409, '游戏': 409, '': 409
+            };
+            browsecat.val(409)
+            if (type_dict.hasOwnProperty(raw_info.type)) {
                 var index = type_dict[raw_info.type];
-                $('select[name="type"]').val(index);
+                browsecat.val(index);
             }
+
+            // 显示质量与标签
+            setTimeout(function () {
+                $('tr.mode_4').wait(function(){
+                    $('tr.mode_4').css('display', '');
+                });
+            }, 1000);
 
             // 媒介
-            var medium_box = $('select[name=medium_sel]');
-            switch(raw_info.medium_sel){
-                case 'Blu-ray': medium_box.val(1); break;
-                case 'DVD':  medium_box.val(2); break;
-                case 'Remux': medium_box.val(3); break;
-                case 'HDTV': medium_box.val(5); break;
-                case 'WEB-DL': medium_box.val(7); break;
-                case 'Encode': medium_box.val(7); break;
-                default: medium_box.val(9);
+            var medium_box = $('select[name="medium_sel[4]"]');
+            var medium_dict = { 'Blu-ray': 1,'UHD':11, 'DVD': 2, 'Remux': 3, 'HDTV': 5, 'WEB-DL': 7, 'Encode': 7, '': 12 }
+            medium_box.val(12)
+            if (medium_dict.hasOwnProperty(raw_info.medium_sel)) {
+                var index = medium_dict[raw_info.medium_sel];
+                medium_box.val(index);
+            }
+            if (raw_info.name.match(/MiniBD/i)) {
+                medium_box.val(5);
             }
 
-            //视频编码
-            var codec_box = document.getElementsByName('codec_sel')[0];
-            switch (raw_info.codec_sel){
-                case 'H264': codec_box.options[1].selected = true; break;
-                case 'X264': codec_box.options[1].selected = true; break;
-                case 'H265': codec_box.options[2].selected = true; break;
-                case 'X265': codec_box.options[2].selected = true; break;
-                case 'VC-1': codec_box.options[3].selected = true; break;
-                case 'MPEG-2': codec_box.options[5].selected = true; break;
-                case 'MPEG-4': codec_box.options[6].selected = true; break;
-                case 'XVID': codec_box.options[4].selected = true; break;
-                default: codec_box.options[7].selected = true;
+            // 视频编码
+            var codec_box = $('select[name="codec_sel[4]"]');
+            var codec_dict = { "H265": 6, 'X265': 6, 'H264': 1, 'X264': 1, 'VC-1': 2, 'XVID': 3, 'MPEG-4': 7, 'MPEG-2': 4, '': 5 }
+            codec_box.val(5);
+            if (codec_dict.hasOwnProperty(raw_info.codec_sel)) {
+                var index = codec_dict[raw_info.codec_sel];
+                codec_box.val(index);
             }
 
             //音频编码
-            var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
+            var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             var audiocodec_dict = {
-                'DTS-HD': 1, 'DTS-HDMA:X 7.1': 2, 'DTS-HDMA': 3, 'TrueHD': 4, 'Atmos': 5, 'DTS': 6,
-                'AC3': 7, 'AAC': 8, 'Flac': 9, 'APE': 10, 'LPCM': 11, 'WAV': 12, '': 13
-            };
-            if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
+                'DTS-HD': 15, 'DTS-HDMA:X 7.1': 11, 'DTS-HDMA': 12, 'TrueHD': 10, 'Atmos': 13,
+                'DTS': 3, 'AC3': 8, 'AAC': 6, 'Flac': 1, 'APE': 2, 'LPCM': 14, 'WAV': 9, '': 7
+            }
+            codec_box.val(7);
+            if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)) {
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
-                audiocodec_box.options[index].selected = true;
+                audiocodec_box.val(index);
             }
 
             //分辨率
-            var standard_box = document.getElementsByName('standard_sel')[0];
-            var standard_dict = {'4K': 1, '1080p': 2, '1080i': 3, '720p': 4};
-            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+            var standard_box = $('select[name="standard_sel[4]"]');
+            var standard_dict = { '4K': 5, '1080p': 1, '1080i': 2, '720p': 3, 'SD':4 };
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)) {
                 var index = standard_dict[raw_info.standard_sel];
-                standard_box.options[index].selected = true;
+                standard_box.val(index);
             }
 
-            $('select[name="team_sel"]').val('5');
-            $('select[name="team_sel"]>option').map(function(index,e){
+            $('select[name="team_sel[4]"]').val(5);
+            $('select[name="team_sel[4]"]>option').map(function (index, e) {
                 if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
+                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
                 }
             });
         }
@@ -19737,7 +19771,7 @@ function auto_feed() {
                 case 'Remux': medium_box.val(3); break;
                 case 'HDTV': medium_box.val(5); break;
                 case 'Encode': medium_box.val(7); break;
-                case 'WEB-DL': medium_box.val(9);
+                case 'WEB-DL': medium_box.val(10);
             }
             if (raw_info.name.match(/HD.?DVD/i)) {
                 medium_box.val(2);
@@ -19748,12 +19782,29 @@ function auto_feed() {
             var codec_box = document.getElementsByName('codec_sel')[0];
             codec_box.options[5].selected = true;
             switch (raw_info.codec_sel){
-                case 'H265': case 'X265': codec_box.options[5].selected = true; break;
+                case 'H265': case 'X265': codec_box.options[6].selected = true; break;
                 case 'H264': case 'X264': codec_box.options[1].selected = true; break;
                 case 'VC-1': codec_box.options[2].selected = true; break;
                 case 'MPEG-2': case 'MPEG-4': codec_box.options[4].selected = true; break;
                 case 'XVID': codec_box.options[3].selected = true;
             }
+
+            var audiocodec_box = $('select[name=audiocodec_sel]');
+            switch (raw_info.audiocodec_sel){
+                case 'DTS-HD':  audiocodec_box.val(11); break;
+                case 'DTS-HDMA:X 7.1': audiocodec_box.val(10); break;
+                case 'DTS-HDMA': audiocodec_box.val(12); break;
+                case 'TrueHD': audiocodec_box.val(15); break;
+                case 'Atmos': audiocodec_box.val(15); break;
+                case 'DTS': audiocodec_box.val(3); break;
+                case 'AC3': audiocodec_box.val(8); break;
+                case 'AAC': audiocodec_box.val(6); break;
+                case 'Flac': audiocodec_box.val(1); break;
+                case 'APE': audiocodec_box.val(2); break;
+                case 'LPCM': audiocodec_box.val(13); break;
+                case 'WAV': audiocodec_box.val(14);
+            }
+
             //分辨率
             var standard_box = $('select[name=standard_sel]');
             var standard_dict = {
