@@ -10892,7 +10892,7 @@ function auto_feed() {
                         if (!score.replace('分', '')) score = '暂无评分';
                         if (data.data.votes) score += `|${data.data.votes}人`;
                         $('h1.meta__title').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank" style="display: inline; width: auto; border-bottom: 0px !important; text-decoration: none; color: #d3d3d3; font-weight: bold;">${data.data.title.split(' ')[0]}[${score}]</a>`);
-                        if (data.data.summary) {
+                        if (data.data.summary && data.data.summary.length < 700) {
                             $('p.meta__description').text(data.data.summary.replace(/ 　　/g, ''));
                         }
                     }
@@ -10911,7 +10911,7 @@ function auto_feed() {
                 mediainfo_lack = true;
             }
 
-            if (mediainfo_lack && (origin_site == 'BLU' || origin_site == 'Telly' || origin_site == 'HDPost')) {
+            if (mediainfo_lack && (origin_site == 'Telly' || origin_site == 'HDPost')) {
                 mediainfo = $('pre[class="decoda-code"]').eq(0).text();
                 mediainfo_lack = false;
             }
