@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.1.7
+// @version      2.0.1.8
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -6371,7 +6371,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#dealimg').append(`<div>结果展示 <a href="#" id="up_text" style="color:red; font-size:4px">↑将结果移入输入框</a><br><textarea id="result" style="width:700px;" rows="15"></textarea></div>`);
 
         var descr = GM_getValue('descr') === undefined ? '': GM_getValue('descr');
-        var imgs_to_deal = descr.match(/(\[url=.*?\])?\[img\].*?(png|jpg|webp)\[\/img\](\[\/url\])?/g);
+        var imgs_to_deal = descr.match(/(\[url=.*?\])?\[img\].*?(png|jpg|webp)\[\/img\](\[\/url\])?/ig);
         try {
             if (imgs_to_deal) {
                 $('#picture').val(imgs_to_deal.join('\n'));
@@ -6384,7 +6384,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                 return;
             }
             var origin_str = $('#picture').val();
-            var imgs_to_show = origin_str.match(/\[img\]https?:.*?(jpg|png|webp)\[\/img\]/g).map(item=>{ return item.replace(/\[.*?\]/g, '') });
+            var imgs_to_show = origin_str.match(/\[img\]https?:.*?(jpg|png|webp)\[\/img\]/ig).map(item=>{ return item.replace(/\[.*?\]/g, '') });
             if (imgs_to_show.length) {
                 $('#imgs_to_show').html('');
                 imgs_to_show.map((item)=>{
@@ -6397,7 +6397,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#getsource').click((e)=>{
             var origin_str = $('#picture').val();
             pic_info = '';
-            origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).forEach((item)=>{
+            origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/ig).forEach((item)=>{
                 item = item.replace(/\[.*\]/g, '');
                 if (item.match(/imgbox/)) {
                     pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
@@ -6430,7 +6430,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         $('#send_ptpimg').click((e)=>{
             var origin_str = $('#picture').val();
-            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
+            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/ig).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
             if (images.length) {
                 ptp_send_images(images, used_ptp_img_key)
                 .then(function(new_urls){
@@ -6446,7 +6446,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         $('#send_imgbox').click((e)=>{
             var origin_str = $('#picture').val();
-            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
+            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/ig).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
             if (images.length) {
                 var name = 'set your gallary name';
                 try {
@@ -6464,7 +6464,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         $('#send_hdbits').click((e)=>{
             var origin_str = $('#picture').val();
-            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
+            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/ig).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
             if (images.length) {
                 var name = 'set your gallary name';
                 try {
@@ -6481,9 +6481,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         });
 
         $('#send_pixhost').click((e)=>{
-            if ($('#picture').val().match(/http[^\[\]]*?(jpg|png|webp)/g).length > 0) {
+            if ($('#picture').val().match(/http[^\[\]]*?(jpg|png|webp)/ig).length > 0) {
                 var origin_str = $('#picture').val();
-                images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/g).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
+                images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/ig).map((item)=>{ return item.replace(/\[.*?\]/g, ''); });
                 if (images[0].match(/t.hdbits.org/)) {
                     var name = 'set your gallary name';
                     try {
@@ -6531,7 +6531,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             }
             var source_str = $('#img_source').val();
             var dest_str = $('#img_dest').val();
-            images = origin_str.match(/http[^\[\]]*?(jpg|png)/g);
+            images = origin_str.match(/http[^\[\]]*?(jpg|png)/ig);
             images.map(item=>{
                 var new_img = item.replace(source_str, dest_str);
                 origin_str = origin_str.replace(item, new_img);
@@ -6561,7 +6561,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                 return p;
             }
             var origin_str = $('#picture').val();
-            var imgbb_urls = origin_str.match(/https?:\/\/i.ibb.co[^\[\]]*?(jpg|png)/g);
+            var imgbb_urls = origin_str.match(/https?:\/\/i.ibb.co[^\[\]]*?(jpg|png)/ig);
             if (imgbb_urls === null) {
                 // alert("没有监测到imgbb链接");
             } else {
@@ -6575,11 +6575,11 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                     for (i=0; i<data.length; i++) {
                         origin_str = origin_str.replace(imgbb_urls[i], data[i]);
                     }
-                    origin_str = origin_str.match(/\[img\]https?:.*?(jpg|png)\[\/img\]/g).join('\n');
+                    origin_str = origin_str.match(/\[img\]https?:.*?(jpg|png)\[\/img\]/ig).join('\n');
                     $('#result').val(origin_str);
                 })
             }
-            var postimg_urls = origin_str.match(/https?:\/\/i.postimg.cc[^\[\]]*?(jpg|png)/g);
+            var postimg_urls = origin_str.match(/https?:\/\/i.postimg.cc[^\[\]]*?(jpg|png)/ig);
             if (postimg_urls === null) {
                 // alert("没有监测到imgbb链接");
             } else {
@@ -6595,7 +6595,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                     for (i=0; i<data.length; i++) {
                         origin_str = origin_str.replace(postimg_urls[i], data[i]);
                     }
-                    origin_str = origin_str.match(/\[img\]https?:.*?(jpg|png)\[\/img\]/g).join('\n');
+                    origin_str = origin_str.match(/\[img\]https?:.*?(jpg|png)\[\/img\]/ig).join('\n');
                     $('#result').val(origin_str);
                 })
             }
@@ -6605,7 +6605,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             var origin_str = $('#picture').val();
             console.log(origin_str)
             var dest_str = '';
-            var images = origin_str.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
+            var images = origin_str.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/ig);
             var start = parseInt($('#start').val() ? $('#start').val(): 1);
             var encode_index = parseInt($('#number').val());
             var step = parseInt($('#step').val());
@@ -6618,7 +6618,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         $('#350px').click((e)=>{
             var origin_str = $('#picture').val();
-            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)\[\/img\]/g).join('\n');
+            images = origin_str.match(/\[img\]http[^\[\]]*?(jpg|png)\[\/img\]/ig).join('\n');
             if (images.length) {
                 $('#result').val(deal_img_350(images));
             }
@@ -10846,19 +10846,25 @@ function auto_feed() {
         }
 
         if (origin_site == "BLU") {
-            raw_info.descr = `[quote]\n${$('div.bbcode-rendered:eq(0)').text().trim()}\n[/quote]`;
+            var mediainfo = '';
+            try {
+                mediainfo = $('h2.panel__heading:contains("MediaInfo")').next().find('div.bbcode-rendered:eq(0)').text().trim();
+                raw_info.descr = `[quote]\n${mediainfo}\n[/quote]`;
+            } catch (err) {}
             raw_info.name = $('h1.torrent__name').text().trim();
             raw_info.type = $('li.torrent__category').text().get_type();
-            picture_info = $('div.bbcode-rendered:eq(1)')[0].getElementsByTagName('img');
+
             var img_urls = '';
-            for (i = 0; i < picture_info.length; i++){
-                if (picture_info[i].parentNode.href){
-                    img_urls += '[url='+ picture_info[i].parentNode.href +'][img]' + picture_info[i].src + '[/img][/url] ';
-                } else {
-                    img_urls += '[img]' + picture_info[i].src + '[/img] ';
+            try {
+                var picture_info = $('h2.panel__heading:contains("Description")').next()[0].getElementsByTagName('img');
+                for (i = 0; i < picture_info.length; i++){
+                    if (picture_info[i].parentNode.href){
+                        img_urls += '[url='+ picture_info[i].parentNode.href +'][img]' + picture_info[i].src + '[/img][/url] ';
+                    } else {
+                        img_urls += '[img]' + picture_info[i].src + '[/img] ';
+                    }
                 }
-            }
-            picture_info = img_urls;
+            } catch (err) {}
             var vob_info = '';
             if ($('summary').length && raw_info.descr.match(/IFO/)) {
                 try{
@@ -10886,7 +10892,6 @@ function auto_feed() {
 
             if (raw_info.url && all_sites_show_douban) {
                 getData(raw_info.url, function(data){
-                    console.log(data);
                     if (data.data) {
                         var score = data.data.average + '分';
                         if (!score.replace('分', '')) score = '暂无评分';
@@ -12600,10 +12605,18 @@ function auto_feed() {
         if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$/i) && forward_site == 'PTT') {
             return;
         }
+        if (raw_info.descr.match(/img1.doubanio.com/)) {
+            raw_info.descr = raw_info.descr.replace(/img1.doubanio.com/, 'img9.doubanio.com');
+        }
 
         if (raw_info.codec_sel == 'H264' && raw_info.name.match(/x264/)) {
             raw_info.codec_sel = 'X264';
         }
+
+        if (raw_info.medium_sel == 'Encode' && raw_info.name.match(/web/i)) {
+            raw_info.medium_sel = 'WEB-DL';
+        }
+
         //副标题加上原盘版本信息
         if (check_descr(raw_info.descr) && !raw_info.name.match(/(diy|@|remux)/i) && judge_forward_site_in_domestic(forward_site)){
             if (blurayVersion(raw_info.name) && raw_info.small_descr.indexOf(blurayVersion(raw_info.name).replace(/【|】/g, '')) < 0){
@@ -17933,7 +17946,7 @@ function auto_feed() {
                 var index = type_dict[raw_info.type];
                 $('select[name="type"]').val(index);
             }
-             // 显示质量与标签
+            // 显示质量与标签
             setTimeout(function () {
                 $('tr.mode_4').wait(function(){
                     $('tr.mode_4').css('display', '');
@@ -18854,7 +18867,6 @@ function auto_feed() {
             var medium_box = document.getElementsByName('medium_sel')[0];
             medium_box.options[9].selected = true;
             switch(raw_info.medium_sel){
-                case '8K原盘': medium_box.options[1].selected = true; break;
                 case 'UHD': medium_box.options[2].selected = true; break;
                 case 'Remux': medium_box.options[3].selected = true; break;
                 case 'Encode': medium_box.options[4].selected = true; break;
@@ -19278,14 +19290,21 @@ function auto_feed() {
             var browsecat = document.getElementsByName('type')[0];
             var type_dict = {'电影': 2, '剧集': 3, '动漫': 5, '综艺': 6, '音乐': 8, '纪录': 4,
                              '体育': 7, '软件': 9, '学习': 1, '': 9, '游戏': 9, 'MV': 7};
-            browsecat.options[9].selected = true;//默认其他
+            browsecat.options[9].selected = true;
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.options[index].selected = true;
             }
 
+            // 显示质量与标签
+            setTimeout(function () {
+                $('tr.mode_4').wait(function(){
+                    $('tr.mode_4').css('display', '');
+                });
+            }, 1000);
+
             //媒介
-            var medium_box = document.getElementsByName('medium_sel')[0];
+            var medium_box = document.getElementsByName('medium_sel[4]')[0];
             medium_box.options[5].selected = true;
             if (raw_info.medium_sel == 'Encode') {
                 medium_box.options[1].selected = true;
@@ -19298,39 +19317,36 @@ function auto_feed() {
             }
 
             //编码
-            var codec_box = document.getElementsByName('codec_sel')[0];
+            var codec_box = document.getElementsByName('codec_sel[4]')[0];
             switch (raw_info.codec_sel){
                 case 'H264': case 'X264': codec_box.options[1].selected = true; break;
                 case 'H265': case 'X265': codec_box.options[2].selected = true; break;
                 default: codec_box.options[3].selected = true;
             }
-            //格式
-            var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
-            audiocodec_box.options[5].selected = true;
-
             //分辨率
-            var standard_box = document.getElementsByName('standard_sel')[0];
+            var standard_box = document.getElementsByName('standard_sel[4]')[0];
             var standard_dict = {'4K': 3, '1080p': 1, '1080i': 2, '720p': 4, 'SD': 4, '': 4, '8K': 4};
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.options[index].selected = true;
             }
 
-            //类别
-            var source_box = document.getElementsByName('processing_sel')[0];
-            source_box.options[12].selected = true;
-
             disableother('browsecat','specialcat');
 
-            //类别
-            var source_box = document.getElementsByName('processing_sel')[0];
-            source_box.options[13].selected = true;
-
-            $('select[name="team_sel"]>option').map(function(index,e){
+            $('select[name="team_sel[4]"]').val(5);
+            $('select[name="team_sel[4]"]>option').map(function(index,e){
                 if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
+                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
                 }
             });
+            if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+            if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+            if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+            if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+            if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+            if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '12');}
+            if (raw_info.name.match(/DV/)) { check_label(document.getElementsByName('tags[4][]'), '12'); }
+            if (raw_info.small_descr.match(/特效字幕/)) { check_label(document.getElementsByName('tags[4][]'), '9'); }
         }
 
         else if (forward_site == 'DiscFan') {
@@ -20518,7 +20534,6 @@ function auto_feed() {
                     $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
                 }
             });
-
         }
 
         else if (forward_site == 'PTNIC') {
