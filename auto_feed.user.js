@@ -20,6 +20,7 @@
 // @match        https://desitorrents.tv/torrents*
 // @match        https://hdf.world/*
 // @match        https://broadcity.in/*
+// @match        https://blutopia.cc/upload*
 // @match        https://secret-cinema.pw/torrents.php?id=*
 // @match        https://filelist.io/*
 // @match        https://bluebird-hd.org/*
@@ -85,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.1.8
+// @version      2.0.1.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -3119,9 +3120,9 @@ function set_jump_href(raw_info, mode) {
                 } else if (key == 'Tik') {
                     forward_url = used_site_info[key].url + 'upload.php';
                 } else if (key == 'BLU' && (raw_info.type == '剧集' || raw_info.type == '纪录' || raw_info.type == '综艺')) {
-                    forward_url = used_site_info[key].url + 'upload/2';
+                    forward_url = used_site_info[key].url + 'upload?category_id=2';
                 } else if (key == 'BLU') {
-                    forward_url = used_site_info[key].url + 'upload/1';
+                    forward_url = used_site_info[key].url + 'upload?category_id=1';
                 } else if ((key == 'avz' || key == 'CNZ' || key == 'PHD') && (raw_info.type == '电影' || raw_info.type == '纪录')) {
                     forward_url = used_site_info[key].url + 'upload/movie';
                 } else if (key == 'avz' || key == 'CNZ' || key == 'PHD') {
@@ -6246,8 +6247,8 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         //自制ptgen
         $table.append(`<tr style="display:none;"><td width="1%" class="rowhead nowrap" valign="top" align="right">PTGen</td><td width="99%" class="rowfollow" valign="top" align="left" id="ptgen"></td></tr>`);
-        $('#ptgen').append(`<label><b>输入豆瓣/IMDB链接查询:</b></label><input type="text" name="url" style="width: 475px; margin-left:5px">`);
-        $('#ptgen').append(`<input type="button" id="go_ptgen" value="获取信息" style="margin-left:15px"><br><br>`);
+        $('#ptgen').append(`<label><b>输入豆瓣/IMDB链接查询:</b></label><input type="text" name="url" style="width: 380px; margin-left:5px">`);
+        $('#ptgen').append(`<input type="button" id="go_ptgen" value="获取信息" style="margin-left:15px"><input type="button" id="douban2ptp" value="海报转存PTPimg" style="margin-left:15px"><br><br>`);
         $('#ptgen').append(`<textarea name="douban_info" style="width:700px" rows="20"></textarea><br>`);
 
         $('#go_ptgen').click(function(){
@@ -6336,6 +6337,19 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                     } else {
                         window.open(url, target='_blank');
                     }
+                }
+            });
+            $('#douban2ptp').click(function(){
+                var textarea = $('textarea[name="douban_info"]');
+                if (textarea.val().match(/https:\/\/img\d.doubanio.com.*?jpg/)) {
+                    var poster = textarea.val().match(/https:\/\/img\d.doubanio.com.*?jpg/)[0];
+                    ptp_send_images([poster], used_ptp_img_key)
+                    .then(function(new_url){
+                        new_url = new_url.toString().split(',').join('\n').replace(/\[.*?\]/g, '');
+                        textarea.val(textarea.val().replace(/https:\/\/img\d.doubanio.com.*?jpg/, new_url));
+                    }).catch(function(err){
+                        alert(err);
+                    });
                 }
             });
         });
@@ -16986,15 +17000,19 @@ function auto_feed() {
 
                 getcategory('class2','browsecat');
 
+
                 setTimeout(function(){
                     //中文译名填写
-                    cname = raw_info.descr.match(/译.{0,5}名[^\r\n]+/i);
-                    if (cname) {
-                        vidoename = raw_info.descr.match(/译.*?名([^\r\n]+)/)[1];
+                    try {
+                        if (raw_info.source_sel == '大陆') {
+                            vidoename = raw_info.descr.match(/片.*?名([^\r\n]+)/)[1];
+                        } else {
+                            vidoename = raw_info.descr.match(/译.*?名([^\r\n]+)/)[1];
+                        }
                         videoname = vidoename.trim(); //去除首尾空格
                         cname_box = document.getElementById('cname');
                         cname_box.value = videoname.split('/')[0].trim();
-                    }
+                    } catch (Err) {}
 
                     //英文名填写
                     ename_box = document.getElementById('ename');
