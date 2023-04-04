@@ -1683,7 +1683,7 @@ function walkDOM(n) {
         } else if (n.nodeName == '#text' && site_url.match(/npupt/)) {
             n.data = n.data.replace(/^ +| +$/g, '');
         } else if (n.nodeName == 'BR') {
-            if (site_url.match(/u2.dmhy.org|ourbits.club\/details.php.*|totheglory.im.*|blutopia.cc.*|desitorrents.tv|hudbt|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv/i)) {
+            if (site_url.match(/u2.dmhy.org|ourbits.club|totheglory.im.*|blutopia.cc.*|desitorrents.tv|hudbt|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv|sharkpt.net/i)) {
                 n.innerHTML = '\r\n';
             }
         } else if (n.nodeName == 'LEGEND') {
@@ -8004,20 +8004,28 @@ function auto_feed() {
                 }
             }
 
+
             if ($('.nexus-media-info-raw').length) {
                 var mediainfo = $('.nexus-media-info-raw').text();
                 if ($('.spoiler-content').length) {
                     mediainfo = $('.spoiler-content').text();
                 }
+
+                raw_info.descr += `\n  \n[quote]${mediainfo.trim()}[/quote]\n  \n`;
                 try{
-                    var intro = raw_info.descr.match(/◎简　　介[\s]*.*/i)[0];
-                    intro = raw_info.descr.split(intro)[0] + intro;
-                    var pictures = raw_info.descr.split(intro)[1];
-                    raw_info.descr = intro + `\n\n[quote]${mediainfo}[/quote]` + pictures;
-                } catch(err) {
-                    raw_info.descr += `\n\n[quote]${mediainfo}[/quote]`;
-                }
-                console.log(raw_info.descr)
+                    var intro = raw_info.descr.indexOf('◎简　　介');
+                    var pictures = raw_info.descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
+                    pictures.forEach(item=>{
+                        if (raw_info.descr.indexOf(item) > 300) {
+                            raw_info.descr = raw_info.descr.replace(item, '');
+                            raw_info.descr += item + '\n';
+                        }
+                    });
+                } catch(err) {}
+            }
+
+            if (origin_site == 'SharkPT') {
+                raw_info.descr = raw_info.descr.replace(/\n(\n ?)+/g, '\n').trim();
             }
 
             //ourbits没有简介的话补充简介
