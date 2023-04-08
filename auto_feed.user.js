@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.1.9
+// @version      2.0.2.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8659,7 +8659,7 @@ function auto_feed() {
         if (['HDPost', 'ACM', 'HDOli', 'jptv', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
             var iii = document.getElementsByTagName('h4')[0].parentNode.parentNode;
             var div_box = iii.getElementsByClassName('table-responsive')[0];
-            if (origin_site == 'HDPost' || origin_site == 'DTR') {
+            if (origin_site == 'HDPost' || origin_site == 'DTR' || origin_site == 'Monika') {
                 div_box = iii.getElementsByClassName('table-responsive')[1];
                 $('h4').first().click();
             }
@@ -10937,8 +10937,7 @@ function auto_feed() {
             } catch (err) {
                 mediainfo_lack = true;
             }
-
-            if (mediainfo_lack && (origin_site == 'Telly' || origin_site == 'HDPost')) {
+            if (mediainfo_lack && (origin_site == 'Telly' || origin_site == 'HDPost' || origin_site == 'Monika')) {
                 mediainfo = $('pre[class="decoda-code"]').eq(0).text();
                 mediainfo_lack = false;
             }
