@@ -10694,14 +10694,21 @@ function auto_feed() {
             descr = descr.cloneNode(true);
             descr = walkDOM(descr);
 
-            var reg_img = descr.match(/\[url=.*?]\[img\].*?\[\/img\]/i);
+            var reg_img = descr.match(/\[url=.*?]\[img\].*?\[\/img\]/ig);
             if (reg_img) {
-                var replace_str = '[/quote]\n\n' + reg_img[0];
-                raw_info.descr = '[quote]{descr}\n\n'.format({'descr': descr.replace(reg_img, replace_str)});
+                var quoted = false;
+                reg_img.forEach(item=>{
+                    if (descr.indexOf(item) >30 && !quoted) {
+                        var replace_str = '[/quote]\n\n' + item;
+                        raw_info.descr = '[quote]{descr}\n\n'.format({'descr': descr.replace(item, replace_str)});
+                        quoted = true;
+                    }
+                });
             }
             else{
                 raw_info.descr = '[quote]{descr}\n[/quote]\n\n'.format({'descr': raw_info.descr});
             }
+
             raw_info.descr = raw_info.descr.replace("Torrent:", "").replace("Quote:", "");
             raw_info.descr = raw_info.descr.replace("Torrent:", "").replace("Quote:", "").replace(/\[\/?font.*?\]/g, '');
             raw_info.descr = raw_info.descr.replace(/^\[quote\][\s\S]*?(DISC Info|Disc Title)/i, '[quote]$1');
