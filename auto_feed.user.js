@@ -11302,6 +11302,12 @@ function auto_feed() {
             console.log(raw_info.descr)
         }
 
+        if (origin_site == 'Audiences') {
+            if ($('span[class="tags tdh"]').length) {
+                raw_info.type = "动漫";
+            }
+        }
+
         if (raw_info.type == '音乐' && raw_info.descr.match(/Bit.*?Rate|视频码率|VideoCode/i)) {
             raw_info.type = 'MV';
         }
@@ -14015,6 +14021,11 @@ function auto_feed() {
         if (raw_info.name.match(/(x|H)(264|265)/i)) {
             labels.diy = false;
         }
+        if ( (raw_info.name.match(/S\d+/) && !raw_info.name.match(/S\d+E\d+/)) || (raw_info.name.match(/Complete/) && raw_info.source_sel == '大陆')) {
+            labels.complete = true;
+        } else {
+            labels.complete = false;
+        }
         console.log(labels)
         try {
             switch (forward_site){
@@ -14074,6 +14085,9 @@ function auto_feed() {
                     if (labels.diy){ check_label(document.getElementsByName('tags[]'), 'diy'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), 'hdr10'); }
                     if (labels.db) {check_label(document.getElementsByName('tags[]'), 'db');}
+                    if (labels.complete && forward_site == 'Audiences') {
+                        check_label(document.getElementsByName('tags[]'), 'wj');
+                    }
                     break;
                 case 'HDPt':
                     if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
@@ -14091,6 +14105,7 @@ function auto_feed() {
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7'); }
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '10'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[]'), '12'); }
+                    if (labels.complete) { check_label(document.getElementsByName('tags[]'), '17'); }
                     break;
                 case 'WT-Sakura':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
@@ -14172,6 +14187,7 @@ function auto_feed() {
                     if (raw_info.name.match(/HLG/)) {
                         check_label(document.getElementsByName('tags[]'), '13');
                     }
+                    if (labels.complete) { check_label(document.getElementsByName('tags[]'), '17'); }
                     break;
                 case 'HaresClub':
                     if (labels.gy){
