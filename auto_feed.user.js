@@ -11473,7 +11473,11 @@ function auto_feed() {
                 else{
                     img_url = used_site_info[key].url + 'favicon.ico';
                 }
-                para.innerHTML = '<div style="display:inline-block"><img src='+ img_url+ ' class="round_icon" style="display:inline-block">' + ' ' + key + '</div>';
+ 
+                img_url_wsrv = 'https://wsrv.nl/?url=' + img_url
+                para.innerHTML = '<div style="display:inline-block"><img src="' + img_url_wsrv +
+                                 '"onerror="this.onerror=null; this.src=' + "'" + img_url + "'" +
+                                 '"class="round_icon" style="display:inline-block">' + key + '</div>'
             }
         }
 
