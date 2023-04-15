@@ -931,7 +931,8 @@ const default_site_info = {
     '2xFree': {'url': 'https://pt.2xfree.org/', 'enable': 1},
     'ZHUQUE': {'url': 'https://zhuque.in/', 'enable': 1},
     '海棠': {'url': 'https://www.htpt.cc/', 'enable': 1},
-    '杏林': {'url': 'https://xinglin.one/', 'enable': 1}
+    '杏林': {'url': 'https://xinglin.one/', 'enable': 1},
+    'SRVFI': {'url': 'https://srvfi.top/', 'enable': 1}
 };
 
 //初始化数据site_order/used_site_info等等
