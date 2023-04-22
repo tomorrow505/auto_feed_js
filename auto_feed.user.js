@@ -850,6 +850,7 @@ const default_site_info = {
     'CMCT': {'url': "https://springsunday.net/", 'enable': 1},
     'CNZ': {'url': 'https://cinemaz.to/', 'enable': 1},
     'CHDBits': {'url': "https://chdbits.co/", 'enable': 1},
+    'DaJiao': {'url': 'https://dajiao.cyou/', 'enable': 1},
     'DICMusic': {'url': "https://dicmusic.club/", 'enable': 1},
     'DiscFan': {'url': 'https://discfan.net/', 'enable': 1},
     'Dragon': {'url': 'https://www.dragonhd.xyz/', 'enable': 1},
@@ -14136,6 +14137,12 @@ function auto_feed() {
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     break;
+                case 'DaJiao':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    break;
                 case 'PigGo':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
@@ -17574,6 +17581,73 @@ function auto_feed() {
             }
         }
 
+        else if (forward_site == 'DaJiao') {
+            var browsecat = $('#browsecat')
+            var type_dict = {
+                '电影': 401, '剧集': 402, '动漫': 405, '纪录': 404, '综艺': 403,
+                'MV': 409, '音乐': 409, '软件': 409, '学习': 413, '游戏': 414
+            };
+            if (type_dict.hasOwnProperty(raw_info.type)) {
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            // 显示质量与标签
+            setTimeout(function () {
+                $('tr.mode_4').wait(function(){
+                    $('tr.mode_4').css('display', '');
+                });
+            }, 1000);
+            // 媒介
+            var medium_box = $('select[name="medium_sel[4]"]');
+            var medium_dict = { 'Blu-ray': 1,'UHD':1, 'DVD': 6, 'Remux': 3, 'HDTV': 5, 'WEB-DL': 10, 'Encode': 7, '': 12 }
+            medium_box.val(12)
+            if (medium_dict.hasOwnProperty(raw_info.medium_sel)) {
+                var index = medium_dict[raw_info.medium_sel];
+                medium_box.val(index);
+            }
+            if (raw_info.name.match(/MiniBD/i)) {
+                medium_box.val(4);
+            }
+            if (labels.diy) {
+                medium_box.val(11);
+            } else if (raw_info.name.match(/HD.?DVD/i)) {
+                medium_box.val(2);
+            }
+            // 视频编码
+            var codec_box = $('select[name="codec_sel[4]"]');
+            var codec_dict = { "H265": 6, 'X265': 6, 'H264': 1, 'X264': 1, 'VC-1': 2, 'XVID': 3, 'MPEG-4': 4, 'MPEG-2': 4, '': 5 }
+            codec_box.val(5);
+            if (codec_dict.hasOwnProperty(raw_info.codec_sel)) {
+                var index = codec_dict[raw_info.codec_sel];
+                codec_box.val(index);
+            }
+            //音频编码
+            var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
+            var audiocodec_dict = {
+                'DTS-HD': 11, 'DTS-HDMA:X 7.1': 10, 'DTS-HDMA': 11, 'TrueHD': 9, 'Atmos': 8,
+                'DTS': 3, 'AC3': 13, 'AAC': 6, 'Flac': 1, 'APE': 2, 'LPCM': 14, 'WAV': 9, '': 7
+            }
+            audiocodec_box.val(7);
+            if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)) {
+                var index = audiocodec_dict[raw_info.audiocodec_sel];
+                audiocodec_box.val(index);
+            }
+
+            //分辨率
+            var standard_box = $('select[name="standard_sel[4]"]');
+            var standard_dict = { '4K': 5, '1080p': 1, '1080i': 2, '720p': 3, 'SD':4 };
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)) {
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.val(index);
+            }
+            $('select[name="team_sel[4]"]').val(5);
+            $('select[name="team_sel[4]"]>option').map(function (index, e) {
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
+        }
+
         else if (forward_site == 'HDfans') {
             //类型
             var browsecat = document.getElementsByName('type')[0];
@@ -17696,7 +17770,6 @@ function auto_feed() {
         }
 
         else if (forward_site == 'CyanBug'){
-            console.log(raw_info)
             // 类型
             var browsecat = $('#browsecat')
             var type_dict = {
@@ -17725,7 +17798,7 @@ function auto_feed() {
                 medium_box.val(index);
             }
             if (raw_info.name.match(/MiniBD/i)) {
-                medium_box.val(5);
+                medium_box.val(4);
             }
 
             // 视频编码
@@ -17743,7 +17816,7 @@ function auto_feed() {
                 'DTS-HD': 15, 'DTS-HDMA:X 7.1': 11, 'DTS-HDMA': 12, 'TrueHD': 10, 'Atmos': 13,
                 'DTS': 3, 'AC3': 8, 'AAC': 6, 'Flac': 1, 'APE': 2, 'LPCM': 14, 'WAV': 9, '': 7
             }
-            codec_box.val(7);
+            audiocodec_dict.val(7);
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)) {
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
                 audiocodec_box.val(index);
