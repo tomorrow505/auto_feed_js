@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.2.1
+// @version      2.0.2.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -10134,9 +10134,9 @@ function auto_feed() {
                     descr_info = descr_box[i].textContent;
                     if (descr_info.match(/Complete.*?name.*?(VOB|IFO)/i)) {
                         if (descr_info.match(/Complete.*?name.*?VOB/i)){
-                            descr_info += '\n\n' + descr_box[i+1].textContent;
+                            descr_info += '[/quote]\n\n[quote]' + descr_box[i+1].textContent;
                         } else {
-                            descr_info = descr_box[i+1].textContent + '\n\n' + descr_info;
+                            descr_info = descr_box[i+1].textContent + '[/quote]\n\n[quote]' + descr_info;
                         }
                     }
                     break;
