@@ -14,10 +14,12 @@
 // @match        https://pixhost.to*
 // @match        https://*/upload/*
 // @match        https://*.open.cd/plugin_upload.php*
+// @match        https://www.myanonamouse.net*
 // @match        https://img.hdbits.org/
 // @match        http*://*/offer*php*
 // @match        https://xthor.tk/*
 // @match        https://desitorrents.tv/torrents*
+// @match        https://www.imdb.com/title/tt*
 // @match        https://hdf.world/*
 // @match        https://broadcity.in/*
 // @match        https://blutopia.cc/upload*
@@ -7739,6 +7741,17 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
             }
         } catch(err) {console.log(err)}
     });
+    return;
+}
+
+if (site_url.match(/^https:\/\/www.imdb.com\/title\/tt\d+/)) {
+    var imdbid = site_url.match(/tt\d+/i)[0];
+    var imdbno = imdbid.substring(2);
+    var search_name = $('title').text().trim().split(/ \(\d+\) - /)[0];
+    search_name = search_name.replace(/season/i, '');
+    var $container = $('h1[data-testid*=pageTitle]');
+    add_search_urls($container, imdbid, imdbno, search_name, 1);
+    $('.search_urls').find('a').css('color', 'yellow');
     return;
 }
 
