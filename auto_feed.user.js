@@ -10749,7 +10749,7 @@ function auto_feed() {
                     }
                 });
             }
-            raw_info.torrent_url = $('a[href*="me/download"]').attr('href');
+            raw_info.torrent_url = $('a[href*="me/download"][role=button]').attr('href');
         }
 
         if (origin_site == "BLU") {
