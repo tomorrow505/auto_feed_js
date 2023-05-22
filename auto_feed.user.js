@@ -22068,7 +22068,26 @@ function auto_feed() {
                     descr = descr.format({'poster': infos.pic_info});
                 } else {
                     $('#noimg').show();
-                    $('#t1').val(infos.pic_info);
+                    var pic_info = '';
+                    infos.pic_info.match(/\[img\]http[^\[\]]*?(jpg|png)/g).forEach((item)=>{
+                        item = item.replace(/\[.*\]/g, '');
+                        if (item.match(/imgbox/)) {
+                            pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
+                        } else if (item.match(/pixhost/)) {
+                            pic_info += '[img]' + item.replace('//t', '//img').replace('thumbs', 'images') + '[/img]\n';
+                        } else if (item.match(/pterclub.com|beyondhd.co\/images/)) {
+                            pic_info += '[img]' + item.replace(/th.png/, 'png') + '[/img]\n';
+                        } else if (item.match(/tu.totheglory.im/)) {
+                            pic_info += '[img]' + item.replace(/_thumb.png/, '.png') + '[/img]\n';
+                        } else if (item.match(/img.hdchina.org/)) {
+                            pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
+                        } else if (item.match(/img4k.net/)) {
+                            pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
+                        } else {
+                            pic_info += '[img]' + item + '[/img]\n';
+                        }
+                    });
+                    $('#t1').val(pic_info);
                     descr = descr.format({'poster': `[img]URL SCREENSHOT HERE[/img]\n[img]URL SCREENSHOT HERE[/img]\n[img]URL SCREENSHOT HERE[/img]`});
                 }
                 container.val(descr);
@@ -22090,6 +22109,8 @@ function auto_feed() {
                     .then(function(new_urls){
                         new_urls = new_urls.toString().split(',').join('\n');
                         $('#t2').val(new_urls);
+                        var container = $('textarea[name="desc"]');
+                        container.val(container.val().replace(`[img]URL SCREENSHOT HERE[/img]\n[img]URL SCREENSHOT HERE[/img]\n[img]URL SCREENSHOT HERE[/img]`,new_urls));
                     }).catch(function(err){
                         alert(err);
                     });
