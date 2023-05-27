@@ -18339,10 +18339,6 @@ function auto_feed() {
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.options[index].selected = true;
             }
-
-            //制作组
-            var create_box = document.getElementsByName('team_sel[4]')[0];
-            create_box.options[14].selected = true;
             
             //音频编码
             var audiocodec_box = document.getElementsByName('audiocodec_sel[4]')[0];
@@ -18369,10 +18365,8 @@ function auto_feed() {
                 audiocodec_box.options[index].selected = true;
             }
             
-
-            disableother('browsecat','specialcat');
-
-            $('select[name="team_sel[4]"]').val(5);
+            //制作组
+            $('select[name="team_sel[4]"]').val(14);
             $('select[name="team_sel[4]"]>option').map(function(index,e){
                 if (raw_info.name.match(e.innerText)) {
                     $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
