@@ -2096,6 +2096,8 @@ String.prototype.codec_sel = function() { //编码
         result = 'H264';
     } else if (result.match(/(HEVC|H265|H\.265)/i)) {
         result = 'H265';
+    } else if (result.match(/(VVC|H266|H\.266)/i)) {
+        result = 'H266';
     } else if (result.match(/(X265)/i)) {
         result = 'X265';
     } else if (result.match(/(X264)/i)) {
@@ -5622,7 +5624,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         $('#begin_sign').click((e)=>{
             e.preventDefault();
-            var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'OurBits', 'GainB', 'PigGo', 'SoulVoice', 'UltraHD', 'CarPt',
+            var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'OurBits', 'GainB', 'PigGo', 'SoulVoice','OKPT', 'UltraHD', 'CarPt',
             'HHClub', '红叶', 'ptchina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT',
             'ICC', 'CyanBug', '2xFree', '杏林', '海棠'];
 
@@ -18275,6 +18277,116 @@ function auto_feed() {
             if (raw_info.name.match(/DV/)) { check_label(document.getElementsByName('tags[4][]'), '12'); }
             if (raw_info.small_descr.match(/特效字幕/)) { check_label(document.getElementsByName('tags[4][]'), '9'); }
         }
+
+        else if (forward_site == 'OKPT') {
+            //类型
+            var browsecat = $('#browsecat')
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+                             '体育': 407, '软件': 409, '学习': 409, '': 409, '游戏': 409, 'MV': 406};
+            //如果当前类型在上述字典中
+            browsecat.val(409)
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            
+            // 显示质量与标签
+            setTimeout(function () {
+                $('tr.mode_4').wait(function(){
+                    $('tr.mode_4').css('display', '');
+                });
+            }, 1000);
+
+            //媒介
+            var medium_box = document.getElementsByName('medium_sel[4]')[0];
+            medium_box.options[5].selected = true;
+            if (raw_info.medium_sel == 'UHDTV') {
+                medium_box.options[1].selected = true;
+            } else if (raw_info.medium_sel == 'Blu-ray'){
+                medium_box.options[2].selected = true;
+            } else if (raw_info.name.match(/MiniBD/i)) {
+                medium_box.options[3].selected = true;
+            } else if (raw_info.medium_sel == 'Remux'){
+                medium_box.options[4].selected = true;
+            } else if (raw_info.medium_sel == 'Encode'){
+                medium_box.options[5].selected = true;
+            } else if (raw_info.medium_sel == 'WEB-DL'){
+                medium_box.options[6].selected = true;
+            } else if (raw_info.medium_sel == 'HDTV'){
+                medium_box.options[7].selected = true;
+            } else if (raw_info.medium_sel == 'DVD'){
+                medium_box.options[8].selected = true;
+            } else if (raw_info.name.match(/CD/i)) {
+                medium_box.options[3].selected = true;
+            }
+
+            //编码
+            var codec_box = document.getElementsByName('codec_sel[4]')[0];
+            switch (raw_info.codec_sel){
+                case 'H266': codec_box.options[1].selected = true; break;
+                case 'H265': codec_box.options[2].selected = true; break;
+                case 'H264': codec_box.options[3].selected = true; break;
+                case 'X265': codec_box.options[4].selected = true; break;
+                case 'VC-1': codec_box.options[8].selected = true; break;
+                case 'VP9': codec_box.options[9].selected = true; break;
+                case 'X264': codec_box.options[11].selected = true; break;
+                default: codec_box.options[0].selected = true;
+            }
+            //分辨率
+            var standard_box = document.getElementsByName('standard_sel[4]')[0];
+            var standard_dict = {'8k': 1, '4K': 2, '1080p': 3, '1080i': 4, '720p': 5, 'SD': 4, '': 7};
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.options[index].selected = true;
+            }
+
+            //制作组
+            var create_box = document.getElementsByName('team_sel[4]')[0];
+            create_box.options[14].selected = true;
+            
+            //音频编码
+            var audiocodec_box = document.getElementsByName('audiocodec_sel[4]')[0];
+            audiocodec_box.options[0].selected = true;
+            var audiocodec_dict = {
+                'AAC': 1,
+                'AC3': 2,
+                'APE': 3,
+                'Audio Vivid': 4,
+                'DTS-HD': 5,
+                'DTS-HDMA': 6,
+                'DTS-X': 7,
+                'DTS': 8,
+                'Flac': 9,
+                'DTS-HD': 10,
+                'EAC3': 11,
+                'MP3': 12,
+                'MPEG': 13,
+                'OGG': 14,
+                'DD/DD+': 15
+            };
+            if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
+                var index = audiocodec_dict[raw_info.audiocodec_sel];
+                audiocodec_box.options[index].selected = true;
+            }
+            
+
+            disableother('browsecat','specialcat');
+
+            $('select[name="team_sel[4]"]').val(5);
+            $('select[name="team_sel[4]"]>option').map(function(index,e){
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
+            if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+            if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+            if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+            if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+            if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+            if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '12');}
+            if (raw_info.small_descr.match(/特效字幕/)) { check_label(document.getElementsByName('tags[4][]'), '8'); }
+        }
+
 
         else if (forward_site == 'DiscFan') {
             var browsecat = document.getElementsByName('type')[0];
