@@ -934,6 +934,8 @@ const default_site_info = {
     '杏林': {'url': 'https://xingtan.one/', 'enable': 1},
     'SRVFI': {'url': 'https://srvfi.top/', 'enable': 1},
     'UBits': {'url': 'https://ubits.club/', 'enable': 1},
+    'OKPT': {'url': 'https://www.okpt.net/', 'enable': 1},
+    'GGPT': {'url': 'https://www.gamegamept.com/', 'enable': 1},
     'RS': {'url': 'https://resource.xidian.edu.cn/', 'enable': 1} // 西电睿思
 };
 
