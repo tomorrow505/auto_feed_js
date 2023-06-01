@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.2.3
+// @version      2.0.2.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1516,6 +1516,15 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
             tmp_search_list = used_search_list;
         }
     }
+     tmp_search_list = tmp_search_list.map(item => {
+        if (item.includes('ZHUQUE')) {
+            const zhuquejson = JSON.parse('{"page":1,"size":20,"type":"title","sorter":"id","order":"desc","keyword":"PTer","tags":[],"category":[],"medium":[],"videoCoding":[],"audioCoding":[],"resolution":[],"group":[],"more":false}');
+            zhuquejson.keyword = search_name.trim();
+            const b64 = btoa(encodeURIComponent(JSON.stringify(zhuquejson)));
+            return `<a href="https://zhuque.in/torrent/search/${b64}" target="_blank">ZHUQUE</a>`;
+        }
+        return item;
+    });
     var site_search_lists = tmp_search_list.join(' | ');
     if ($('.search_urls').length == 1) {
         $('.search_urls').hide();
