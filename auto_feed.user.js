@@ -6890,7 +6890,7 @@ async function getFullCredits(url) {
 async function getFullDescr(url) {
     return new Promise(resolve => {
         getDoc(url, null, function (docx) {
-            imdb_descr = $('#plot-summaries-content', docx).find('p').text().trim();
+            imdb_descr = $('div[data-testid="sub-section-summaries"]', docx).text().trim();
             resolve(imdb_descr);
         });
     });
@@ -23488,10 +23488,8 @@ function auto_feed() {
                             $('input[name="newdir"]').val(director);
                         }
                         var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
-                        console.log(imdb_descr)
                         if (imdb_descr.match(/Read all/)){
                             var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
-                            console.log(full_descr_url)
                             imdb_descr = await getFullDescr(full_descr_url);
                         } else if (imdb_descr.match(/Add a Plot/)) {
                             imdb_descr =  `No data from IMDB: ${raw_info.url}`;
@@ -23580,10 +23578,8 @@ function auto_feed() {
 
                 console.log(descr)
                 var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
-                console.log(imdb_descr)
                 if (imdb_descr.match(/Read all/)){
                     var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
-                    console.log(full_descr_url)
                     imdb_descr = await getFullDescr(full_descr_url);
                 } else if (imdb_descr.match(/Add a Plot/)) {
                     imdb_descr =  `No data from IMDB: ${raw_info.url}`;
