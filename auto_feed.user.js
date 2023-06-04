@@ -463,7 +463,7 @@ if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.co|pixhost.to|img.hdbits.
                 $('#add_images').val("拉取成功！");
             });
         });
-    } 
+    }
     if (site_url.match(/pixhost.to|img.hdbits.org/)) {
         if (images.length && images[0]) {
             $('div.logo').append(`<br><br><input type="button" value="拉取图片" id="add_images"/>`);
@@ -500,7 +500,7 @@ if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.co|pixhost.to|img.hdbits.
                     $('#thumbsize').val('w350');
                     $('#galleryname').val(gallary_name);
                 }
-                
+
                 $('#add_images').val("拉取成功！");
                 GM_setValue('HDB_images', '');
             });
@@ -806,6 +806,7 @@ var used_tmdb_key = GM_getValue('used_tmdb_key') === undefined ? '': GM_getValue
 var if_uplver = GM_getValue('if_uplver') === undefined ? 1: GM_getValue('if_uplver');
 
 var if_douban_jump = GM_getValue('if_douban_jump') === undefined ? 1: GM_getValue('if_douban_jump');
+var if_imdb_jump = GM_getValue('if_imdb_jump') === undefined ? 1: GM_getValue('if_imdb_jump');
 
 //额外的功能选项
 const default_extra_settings = {
@@ -6105,6 +6106,10 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         if (if_douban_jump) {
             $(`input[name="douban_jump"]`).prop('checked', true);
         }
+        $('#setting').append(`<input type="checkbox" name="imdb_jump" value="yes">是否显示IMDB页面跳转选项，默认开启。`);
+        if (if_imdb_jump) {
+            $(`input[name="imdb_jump"]`).prop('checked', true);
+        }
 
         $('#setting').append(`<input type="checkbox" name="hdb_hide_douban" value="yes">是否折叠HDB中文豆瓣信息，默认展开。<br><br>`);
         if (hdb_hide_douban) {
@@ -6186,6 +6191,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
             if_douban_jump = $(`input[name="douban_jump"]`).prop('checked') ? 1: 0;
             GM_setValue('if_douban_jump', if_douban_jump);
+
+            if_imdb_jump = $(`input[name="imdb_jump"]`).prop('checked') ? 1: 0;
+            GM_setValue('if_imdb_jump', if_imdb_jump);
 
             hdb_hide_douban = $(`input[name="hdb_hide_douban"]`).prop('checked') ? 1: 0;
             GM_setValue('hdb_hide_douban', hdb_hide_douban);
@@ -7604,7 +7612,7 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
     return;
 }
 
-if (site_url.match(/^https:\/\/www.imdb.com\/title\/tt\d+/)) {
+if (site_url.match(/^https:\/\/www.imdb.com\/title\/tt\d+/) && if_imdb_jump) {
     var imdbid = site_url.match(/tt\d+/i)[0];
     var imdbno = imdbid.substring(2);
     var search_name = $('title').text().trim().split(/ \(\d+\) - /)[0];
@@ -8270,7 +8278,7 @@ function auto_feed() {
             }
             raw_info.name = $('h1').text();
             raw_info.torrent_url = 'https://iptorrents.com/' + $('a[href*="download.php"]').attr('href');
-        } 
+        }
 
         if (origin_site == 'torrentseeds') {
             $('#meta-info').append(`
@@ -9348,7 +9356,7 @@ function auto_feed() {
                             "checkMarkSize": "20px",
                             "fadeCheckMark": false
                         });
-                    } 
+                    }
                     raw_info.descr += '\n\n' + img_urls;
                 })
             }, 2000);
@@ -10788,7 +10796,7 @@ function auto_feed() {
             var vob_info = '';
             if ($('summary').length && raw_info.descr.match(/IFO/)) {
                 try{
-                    
+
                     $('details').has('pre').map((index,e)=>{
                         var info = $(e).find('code')[0].innerHTML;
                         console.log(index, info)
@@ -10801,7 +10809,7 @@ function auto_feed() {
                             vob_info = vob_info.replace(/&nbsp;/g, ' ');
                         }
                     })
-                    
+
                 } catch (err) {
                     vob_info = ''
                 }
@@ -11361,7 +11369,7 @@ function auto_feed() {
                 para.innerHTML = '<div style="display:inline-block"><img src="' + img_url_wsrv +
                                  '"onerror="this.onerror=null; this.src=' + "'" + img_url + "'" +
                                  '"class="round_icon" style="display:inline-block">' + key + '</div>';
-                
+
             }
         }
 
@@ -24112,8 +24120,8 @@ function auto_feed() {
                         }
                     });
                     $('#country').after(`<div id="common_country" style="display:inline-block;margin-left:5px">
-                            <a class="s_country" href="#" id="China">China</a> | 
-                            <a class="s_country" href="#" id="Hong Kong">Hong Kong</a> | 
+                            <a class="s_country" href="#" id="China">China</a> |
+                            <a class="s_country" href="#" id="Hong Kong">Hong Kong</a> |
                             <a class="s_country" href="#" id="South Korea">South Korea</a>
                             <div style="display:inline-block;margin-left:5px" id="country_selected"><font color="red">请选择剧集对应的国家！！</font></div>
                         </div>`);
