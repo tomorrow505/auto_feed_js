@@ -7741,7 +7741,6 @@ if (origin_site == "HDF" || origin_site == "PTP" || origin_site == 'HaresClub' |
 if (origin_site == 'BYR') {
     delete Array.prototype.remove;
 }
-
 function auto_feed() {
     if (judge_if_the_site_as_source() == 1) {
         raw_info.origin_site = origin_site;
@@ -9193,32 +9192,23 @@ function auto_feed() {
         }
 
         if (origin_site == 'ZHUQUE') {
-            function according_Label_to_span(label_txt, order) {
-                if (order === undefined) {
-                    order = 0;
-                }
-                var label = $(`label:contains(${label_txt}):eq(${order})`);
-                var span = label.parent().next();
-                return span.text();
-            }
-            raw_info.name = according_Label_to_span('标题');
-            raw_info.small_descr = according_Label_to_span('副标题');
-            var info = according_Label_to_span('信息', 1);
+
+            raw_info.name = $('div.ant-card-body:eq(0)').find('span:first').text();
+            raw_info.small_descr = $('div.ant-card-body:eq(0)').find('span:eq(1)').text();
+            var info = $('div.ant-card-body:eq(0)').find('span:eq(2)').text();
             raw_info.type = info.get_type();
             raw_info.url = match_link('imdb', $('body').html());
-            var url_info = according_Label_to_span('信息平台');
-            try { raw_info.dburl = 'https://movie.douban.com/subject/' + url_info.match(/豆瓣.*?(\d+)/)[1]; } catch (err) {}
 
             raw_info.torrent_url = 'https://zhuque.in' + $('a[href*="/api/torrent/download/"]').attr('href');
 
-            var mediainfo = according_Label_to_span('媒体信息');
+            var mediainfo = $('div.ant-card-body:eq(3)').find('span:eq(0)').text();
             raw_info.descr += `[quote]\n${mediainfo.trim()}\n[/quote]\n\n`;
 
-            $('div.ant-form-item-control-input-content:gt(0)').has('img').find('img').map((index, e)=>{
-                raw_info.descr += `[img]${$(e).attr('data-src')}[/img]\n`;
+            $('div.ant-card-body:eq(2)').find('img').map((index, e)=>{
+                raw_info.descr += `[img]${$(e).attr('src')}[/img]\n`;
             });
 
-            $('label:contains(副标题)').parent().parent().after(`
+            $('div.ant-card-body:eq(0)').parent().after(`
                 <div class="ant-row ant-form-item" data-v-0e4c1106="" style="row-gap: 0px;">
                     <div class="ant-col ant-col-3 ant-form-item-label ant-form-item-label-wrap">
                         <label for="form_item_transfer" class="" title="auto_feed">auto-feed<!----></label>
@@ -14203,11 +14193,11 @@ function auto_feed() {
                 }
 
                 // 类别
-                var type_dict = {'电影': 'Movie', '剧集': 'Series', '动漫': 'Anime', '综艺': 'Show', '音乐': 4, '纪录': 'Other',
-                                 '体育': 'Other', '软件': 'Other', '学习': 'Other', '': 'Other', 'MV': 'Other'};
+                var type_dict = {'电影': '电影', '剧集': '电视剧', '动漫': '动画', '综艺': '综艺节目', '音乐': '其它', '纪录': '其它',
+                                 '体育': '其它', '软件': '其它', '学习': '其它', '': '其它', 'MV': '其它'};
                 if (type_dict.hasOwnProperty(raw_info.type)){
                     var category = type_dict[raw_info.type];
-                    trigger_select('form_item_category', category, 1000, 0);
+                    trigger_select('form_item_category', raw_info.type, 1000, 0);
                 }
 
                 // 媒介
@@ -14239,8 +14229,8 @@ function auto_feed() {
                 // 格式
                 var codec = 'Other';
                 switch (raw_info.codec_sel){
-                    case 'H265': codec = 'H.265'; break;
-                    case 'H264': codec = 'H.264'; break;
+                    case 'H265': codec = 'H265/HEVC'; break;
+                    case 'H264': codec = 'H264/AVC'; break;
                     case 'X265': case 'X264': codec = raw_info.codec_sel.toLowerCase();
                 }
                 trigger_select('rc_select_2', codec, 1200, 2);
@@ -24985,7 +24975,7 @@ function auto_feed() {
 if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/info\/\d+/)) {
     var executed = false;
     document.addEventListener('DOMNodeInserted', function() {
-        if ($('a:contains(".torrent")').length && !executed) {
+        if ($('a[href*=download]').length && !executed) {
             setTimeout(auto_feed, sleep_time);
             executed = true;
         }
