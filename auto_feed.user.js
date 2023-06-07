@@ -17097,7 +17097,7 @@ function auto_feed() {
 
             // 媒介
             var medium_box = $('select[name="medium_sel[4]"]');
-            var medium_dict = { 'Blu-ray': 1,'UHD':11, 'DVD': 2, 'Remux': 3, 'HDTV': 5, 'WEB-DL': 7, 'Encode': 7, '': 12 }
+            var medium_dict = { 'Blu-ray': 1,'UHD':11, 'DVD': 2, 'Remux': 3, 'HDTV': 5, 'WEB-DL': 10, 'Encode': 7, '': 12 }
             medium_box.val(12)
             if (medium_dict.hasOwnProperty(raw_info.medium_sel)) {
                 var index = medium_dict[raw_info.medium_sel];
