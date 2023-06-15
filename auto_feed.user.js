@@ -20824,6 +20824,33 @@ function auto_feed() {
                     $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
                 }
             });
+            var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
+            audiocodec_box.val(7);
+            switch (raw_info.audiocodec_sel){
+                case 'Atmos': audiocodec_box.val(8); break;
+                case 'DTS:X': case 'DTS-HDMA:X 7.1': audiocodec_box.val(10); break;
+                case 'TrueHD': audiocodec_box.val(13); break;
+                case 'DTS-HD': case 'DTS-HDMA': audiocodec_box.val(11); break;
+                case 'AC3':
+                    audiocodec_box.val(17);
+                    if ((raw_info.descr + $('textarea[name="technical_info"]').val()).match(/Dolby Digital Plus/i) || raw_info.name.match(/DD[P\+]/)) {
+                        audiocodec_box.val(15);
+                        if ((raw_info.descr + $('textarea[name="technical_info"]').val()).match(/atmos/i)) {
+                            audiocodec_box.val(24);
+                        }
+                    }
+                    break;
+                case 'DTS': audiocodec_box.val(9); break;
+                case 'AAC': audiocodec_box.val(18); break;
+                case 'Flac': audiocodec_box.val(1); break;
+                case 'APE': audiocodec_box.val(2); break;
+                case 'MP3': audiocodec_box.val(10); break;
+                case 'LPCM': audiocodec_box.val(14); break;
+                case 'WAV': audiocodec_box.val(19); break;
+            }
+            if (raw_info.name.match(/dts.?hd.?hr/i)) {
+                audiocodec_box.val(12);
+            }
         }
 
         else if (forward_site == 'WT-Sakura') {
