@@ -1202,7 +1202,6 @@ const o_site_info = {
     'digitalcore': 'https://digitalcore.club/',
     'BlueBird': 'https://bluebird-hd.org/',
     'bwtorrents': 'https://bwtorrents.tv/',
-    'openlook': 'https://openlook.me/',
     'lztr': 'https://lztr.me/',
     'DICMusic': 'https://dicmusic.club/',
     'OPS': 'https://orpheus.network/',
@@ -1812,11 +1811,7 @@ function walk_ptp(n) {
                 n.innerHTML = n.innerHTML;
             }
         } else if (n.nodeName == 'IMG') {
-            if (site_url.match(/openlook/)) {
-                n.innerHTML = '[img]' + 'https://openlook.me/' + $(n).attr('data-src') + '[/img]';
-            } else {
-                n.innerHTML = '[img]' + n.src + '[/img]';
-            }
+            n.innerHTML = '[img]' + n.src + '[/img]';
         } else if (n.nodeName == 'BLOCKQUOTE' && n.textContent.match(/general|Disc Title|DISC INFO|mpls/i)) {
             n.innerHTML = `[quote]${n.innerHTML}[/quote]`;
         }
@@ -1945,9 +1940,6 @@ function judge_if_the_site_as_source() {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/secret-cinema.pw.*torrentid.*/i)) {
-        return 1;
-    }
-    if (site_url.match(/^http(s*):\/\/openlook.me.*torrentid.*/i)) {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/www.morethantv.me.*torrentid.*/i)) {
@@ -2104,7 +2096,6 @@ String.prototype.medium_sel = function() { //媒介
 String.prototype.codec_sel = function() { //编码
 
     var result = this;
-
     if (result.match(/(H264|H\.264|AVC)/i)) {
         result = 'H264';
     } else if (result.match(/(HEVC|H265|H\.265)/i)) {
@@ -2140,7 +2131,7 @@ String.prototype.audiocodec_sel = function() { //音频编码
         result = 'DTS-HDMA:X 7.1';
     } else if (result.match(/(DTS-HD.?MA)/i)) {
         result = 'DTS-HDMA';
-    } else if (result.match(/(DTS-HD HR)/i)) {
+    } else if (result.match(/(DTS-HD.?HR)/i)) {
         result = 'DTS-HDHR';
     } else if (result.match(/(DTS-HD)/i)) {
         result = 'DTS-HD';
@@ -5299,207 +5290,6 @@ if (site_url.match(/https:\/\/filelist.io\/.*/)) {
     } else if (site_url.match(/faq.php/)) {
         getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/fl_faq.html', null, function(doc){
             $('#maincolumn').html($('#maincolumn', doc).html());
-        });
-    }
-}
-
-if (site_url.match(/https:\/\/openlook.me\/.*/)) {
-    $('#nav_logout').find('a').text('Logout').attr('title', 'Logout');
-    $('#nav_useredit').find('a').text('Edit').attr('title', 'Edit');
-    $('#nav_bonus').find('a').text($('#nav_bonus').find('a').text().replace('보너스', 'Bonus'));
-    $('#nav_invite').find('a').text('Invite');
-    $('#nav_inbox').find('a').text('Inbox');
-    $('#nav_staffinbox').find('a').text('StaffInbox');
-    $('#nav_bookmarks').find('a').text('Bookmarks');
-    $('#nav_subscriptions').find('a').text('Subscriptions');
-    $('#nav_comments').find('a').text('Comments');
-    $('#nav_friends').find('a').text('Friends');
-    $('#menu').html(`<h4 class="hidden">Site Menu</h4>
-        <ul>
-        <li id="nav_index"><a href="index.php">Index</a></li>
-        <li id="nav_torrents"><a href="torrents.php">Torrent</a></li>
-        <li id="nav_collages"><a href="collages.php">Collages</a></li>
-        <li id="nav_sub"><a href="sub.php">Subtitle</a></li>
-        <li id="nav_requests"><a href="requests.php">Requests</a></li>
-        <li id="nav_rules"><a href="rules.php">Rules</a></li>
-        <li id="nav_wiki"><a href="wiki.php">Wiki</a></li>
-        <li id="nav_forums"><a href="forums.php">Forums</a></li>
-        <li id="nav_upload"><a href="upload.php">Upload</a></li>
-        </ul>`
-    );
-    $('#menu').find('li').map((index,e)=>{
-        if (site_url.match($(e).find('a').attr('href'))) {
-            $(e).addClass('active');
-        }
-    })
-    $('div.alertbar').find('a:eq(0)').text('Staff');
-    $('div.alertbar').find('a:eq(1)').text('Releasegroup');
-    $('div.alertbar').find('span:eq(0)').text('Stat');
-    if (site_url.match(/rules.php/)) {
-        ['Basic Rules', 'Ratio', 'Upload', 'Requests', 'Allowed Client', 'Forums', 'Allowed Emails'].map((item,index)=>{
-            $('#rulesheader_wrap').find(`a:eq(${index})`).text(item);
-        })
-        getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/openlook_rules.html', null, function(doc){
-            console.log(doc)
-            if (site_url.match(/rules.php$/)){
-                $('#content').find('.rulepage').html($('#content', doc).find('.rulepage').html());
-                $('div.rulesmenu_info').find('span').text(`Your account will be permanently banned if you violate the basic rules. If it is unclear whether there is a violation, please contact the staff via message.`);
-            } else if (site_url.match(/p=ratio/)) {
-                $('div.rulesmenu_info').text('Rules related to upload/download.');
-                $('#content').find('.rulepage').html($('#ratio', doc).find('.rulepage').html());
-            } else if (site_url.match(/p=upload/)) {
-                $('div.rulesmenu_info').text(`When uploading all data from the tracker, you must upload it according to the upload rules for each category.`);
-                $('div.rulehead_cat').find('a').first().text('General Rules');
-                var upid = site_url.match(/category=(\d+)/)[1];
-                if (upid == "100") { $('div[class="pad center"]').find('strong').text("Upload General Rules"); }
-                $('div[class="rulebox pad"]').html($(`#${upid}`, doc).find('div[class="rulebox pad"]').html());
-            } else if (site_url.match(/p=requests/)) {
-                $('div.rulesmenu_info').text(`These rules apply when requesting materials.`);
-                $('div.rulepage').html($('#request', doc).find('div.rulepage').html());
-            } else if (site_url.match(/p=clients/)) {
-                $('div.rulesmenu_info').text(`Rules for which clients can use to download/upload material from the tracker.`);
-                $('div.rulepage').html($('#clients', doc).find('div.rulepage').html());
-            } else if (site_url.match(/p=forums/)) {
-                $('div.rulesmenu_info').text(`These are the rules related to writing in the forum.`);
-                $('div.rulepage').html($('#forums', doc).find('div.rulepage').html());
-            } else if (site_url.match(/p=emails/)) {
-                $('div.rulesmenu_info').text(`Rules for the list of emails that can be used for accounts on the site.`);
-                $('div.rulepage').html($('#emails', doc).find('div.rulepage').html());
-            }
-        });
-    } else if (site_url.match(/wiki.php/)) {
-        getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/openlook_wiki.html', null, function(doc){
-            console.log(doc)
-            if (site_url.match(/wiki.php$/i)) {
-                $('#content').find('div.thin').find('.sidebar').html($('#0', doc).find('.sidebar').html());
-                $('#content').find('div.thin').find('.header').html($('#0', doc).find('.header').html());
-                $('#content').find('div.thin').find('.main_column').html($('#0', doc).find('.main_column').html());
-            } else if (site_url.match(/action=article&id=\d+/)) {
-                var a_id = site_url.match(/action=article&id=(\d+)/)[1];
-                $('#content').find('div.thin').html($(`#${a_id}`, doc).html());
-            }
-        });
-    } else if (site_url.match(/torrents.php\?id=\d+/)) {
-        var infos = ["Group information", "Bookmark", "Add format"];
-        infos.map((item,index)=>{
-            $('div.linkbox').first().find(`a:eq(${index})`).text(item);
-        });
-        $('a:contains(받기)').text('DL');
-        $('a:contains(수정요청)').text('RP');
-        $('a:contains(링크)').text('PL');
-        $('strong:contains(토런트)').text('Torrent');
-        $('strong:contains(파일 크기)').text('Size');
-
-        $('a:contains("피어 리스트")').text("PeerList");
-        $('a:contains("파일 리스트")').text("FileList");
-
-        if (used_tmdb_key) {
-            var m_type = 'TV';
-            if ($('span:contains(영화 정보)').length) {
-                $('span:contains(영화 정보)').text("Movie Info");
-                m_type = 'movie';
-            }
-            var kr_name = $('h2').find('a').text();
-            var en_name = '';
-            var year = $('h2').text().match(/\[(\d{4,6})\]/)[1];
-            try{ en_name = $('h2').find('span').text().match(/\((.*)\)/)[1]; } catch (err) {}
-            $('#info_body').after(`
-                <div id="search">
-                    <div style = "margin-left:30%; width:50%">
-                        <input name="name" value="${en_name? en_name: kr_name}"></input>
-                        <select name="language">
-                            <option value="en-US">English</option>
-                            <option value="ko-KR">Korean</option>
-                        </select>
-                        <button style="height:22px" id="go">Search</button>
-                    </div>
-                    <div id="info"></div>
-                    <div id="show">
-                    </div>
-                </div>`
-            );
-            $('select[name=language]').change((e)=>{
-                if ($(e.target).val() == 'ko-KR') {
-                    $('input[name=name]').val(kr_name);
-                } else {
-                    $('input[name=name]').val(en_name);
-                }
-            });
-            $('#go').click(()=>{
-                if (m_type == 'TV') {
-                    search_url = `http://api.tmdb.org/3/search/tv?api_key=${used_tmdb_key}&language=${$('select[name=language]').val()}&query=${$('input[name=name]').val()}&include_adult=true`;
-                } else if (m_type == 'movie') {
-                    search_url = `http://api.tmdb.org/3/search/movie?api_key=${used_tmdb_key}&language=${$('select[name=language]').val()}&query=${$('input[name=name]').val()}&include_adult=true`;
-                } else {
-                    search_url = `http://api.tmdb.org/3/search/multi?api_key=${used_tmdb_key}&language=${$('select[name=language]').val()}&query=${$('input[name=name]').val()}&include_adult=true`;
-                }
-                $('#show').show();
-                getJson(search_url, null, function(data){
-                    console.log(data)
-                    if (data.results.length) {
-                        GM_addStyle(
-                            `div.img {
-                                margin: 5px;
-                                border: 1px solid #ccc;
-                                float: left;
-                                width: 120px;
-                            }
-
-                            div.img:hover {
-                                border: 1px solid #777;
-                            }
-
-                            div.img img {
-                                width: 100%;
-                                height: auto;
-                            }
-
-                            div.desc {
-                                padding: 15px;
-                                text-align: center;
-                            }`
-                        );
-
-                        data.results.map((item, index)=>{
-                            var item_year = item.release_date ? item.release_date: item.first_air_date;
-                            if ((item_year && Math.abs(item_year.match(/\d{4}/)[0]-year)<2) || m_type == 'TV') {
-                                try{
-                                    var html = `<div class="responsive">
-                                                    <div class='img' style="max-height:260px">
-                                                        <img src="https://image.tmdb.org/t/p/w300_and_h450_bestv2${item.poster_path}" style="width:120px" name="tmdb" data=${item.id} />
-                                                        <div class="desc">
-                                                            <a href="https://www.themoviedb.org/${m_type.toLowerCase()}/${item.id}" target="_blank">${(item.title ? item.title: item.name)} [${(item.release_date ? item.release_date: item.first_air_date).match(/\d{4}/)[0]}]</a>
-                                                        </div>
-                                                    </div>
-                                                </div>`;
-                                    $('#show').append(html);
-                                } catch(err) {}
-                            }
-                        });
-                        $('img[name=tmdb]').click((e)=>{
-                            console.log($(e.target).attr('data'));
-                            $('#info_head').append($(e.target).parent().find('.desc').html());
-                            var _url = `https://api.themoviedb.org/3/${m_type.toLowerCase()}/${$(e.target).attr('data')}/external_ids?api_key=${used_tmdb_key}`;
-                            getJson(_url, null, function(d){
-                                console.log(d)
-                                if (d.imdb_id) {
-                                    $('#input_box').val('https://www.imdb.com/title/' + d.imdb_id);
-                                }
-                            });
-                            $('#show').hide();
-                        });
-                    }
-                });
-            })
-        }
-    } else if (site_url.match(/torrents.php(\?page=\d|$)/)) {
-        $('a[id*=bookmarklink]').text('Bookmark');
-        $('a.torrent_browse_detail_link').map((index,e)=>{
-            var a_t = $(e).html();
-            a_t = a_t.replace(/드라마/g, 'drama').replace(/통합/g, 'integrated').replace(/오락.예능/g, 'entertainment').replace(/한글/g, 'korean').replace(/무설치/g, 'no installation');
-            a_t = a_t.replace(/영문/g, 'english').replace(/10비트/g, '10bit').replace(/한국어 더빙/, 'korean dubbing').replace(/korean판/, 'korean version');
-            a_t = a_t.replace(/korean패치판/, 'korean patch');
-            $(e).html(a_t);
         });
     }
 }
@@ -13315,7 +13105,7 @@ function auto_feed() {
                     label = /7\.1/; label_str = '7.1';
                 }
                 if (!name.match(label)) {
-                    name = name.replace(/(DDP|AAC|FLAC|DTS|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.HR|AC3)/i, `$1 ${label_str}`);
+                    name = name.replace(/(DDP|AAC|FLAC|DTS|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|AC3)/i, `$1 ${label_str}`);
                 }
                 return name;
             }
@@ -13326,7 +13116,7 @@ function auto_feed() {
                 if (raw_info.descr.match(/(AUDIO.*CODEC.*?|音频.*?)(2\.0|1\.0|5\.1|7\.1)/i)) {
                     channels = raw_info.descr.match(/(AUDIO.*CODEC.*?|音频.*?)(2\.0|1\.0|5\.1|7\.1)/i)[2];
                     if (!raw_info.name.includes(channels)) {
-                        raw_info.name = raw_info.name.replace(/(DDP|AAC|FLAC|DTS|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.HR|AC3)/i, `$1 ${channels}`);
+                        raw_info.name = raw_info.name.replace(/(DDP|AAC|FLAC|DTS|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|AC3)/i, `$1 ${channels}`);
                     }
                 } else if (raw_info.descr.match(/\d channels/i)) {
                     channels = raw_info.descr.match(/(\d) channels/i)[1];
@@ -15291,6 +15081,7 @@ function auto_feed() {
                 case 'DTS-HD': audiocodec_box.options[9].selected = true; break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.options[12].selected = true; break;
                 case 'DTS-HDMA': audiocodec_box.options[9].selected = true; break;
+                case 'DTS-HDHR': audiocodec_box.options[10].selected = true; break;
                 case 'TrueHD': audiocodec_box.options[7].selected = true; break;
                 case 'Atmos': audiocodec_box.options[11].selected = true; break;
                 case 'LPCM': audiocodec_box.options[8].selected = true; break;
@@ -15300,10 +15091,6 @@ function auto_feed() {
                 case 'Flac': audiocodec_box.options[5].selected = true; break;
                 case 'APE': audiocodec_box.options[3].selected = true; break;
                 case 'WAV': audiocodec_box.options[4].selected = true;
-            }
-
-            if (raw_info.name.match(/DTS-?HD.?HRA/i)){
-                audiocodec_box.options[10].selected = true;
             }
 
             //分辨率
@@ -17074,14 +16861,12 @@ function auto_feed() {
             //音频编码
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             var audiocodec_dict = { 'TrueHD': 6, 'Atmos': 1, 'DTS': 2, 'DTS-HD': 5, 'DTS-HDMA': 4, 'DTS-HDMA:X 7.1': 3, 'DTS-X': 3,
-                                    'AC3': 10, 'LPCM': 7, 'Flac': 12, 'MP3': 10, 'AAC': 11, 'APE': 13, '': 19 };
+                                    'AC3': 10, 'LPCM': 7, 'Flac': 12, 'MP3': 10, 'AAC': 11, 'APE': 13, '': 19, 'DTS-HDHR': 5};
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
                 audiocodec_box.val(index);
             }
-            if (raw_info.name.match(/HD.?HR/)) {
-                audiocodec_box.val(5);
-            }
+
             if (raw_info.name.match(/DDP|DD\+/i)) {
                 audiocodec_box.val(21);
                 if (raw_info.name.match(/atmos/i) || raw_info.descr.match(/atmos/i)) {
@@ -18958,6 +18743,7 @@ function auto_feed() {
                 case 'DTS-HD': audiocodec_box.val(13); break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(11); break;
                 case 'DTS-HDMA': audiocodec_box.val(12); break;
+                case 'DTS-HDHR': audiocodec_box.val(15); break;
                 case 'TrueHD': audiocodec_box.val(10); break;
                 case 'Atmos': audiocodec_box.val(9); break;
                 case 'DTS': audiocodec_box.val(13); break;
@@ -18973,9 +18759,7 @@ function auto_feed() {
                 case 'LPCM': audiocodec_box.val(3); break;
                 case 'WAV': audiocodec_box.val(17);
             }
-            if (raw_info.name.match(/DTS.?HD.?HR/)) {
-                audiocodec_box.val(15);
-            }
+
             //分辨率
             var standard_box = $('select[name=standard_sel]');
             var standard_dict = {
@@ -19356,6 +19140,7 @@ function auto_feed() {
                 case 'DTS-HD': audiocodec_box.options[5].selected = true; break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.options[5].selected = true; break;
                 case 'DTS-HDMA': audiocodec_box.options[5].selected = true; break;
+                case 'DTS-HDHR': audiocodec_box.options[10].selected = true; break;
                 case 'TrueHD': audiocodec_box.options[6].selected = true; break;
                 case 'Atmos': audiocodec_box.options[6].selected = true; break;
                 case 'LPCM': audiocodec_box.options[7].selected = true; break;
@@ -19365,10 +19150,6 @@ function auto_feed() {
                 case 'Flac': audiocodec_box.options[1].selected = true; break;
                 case 'APE': audiocodec_box.options[2].selected = true; break;
                 case 'WAV': audiocodec_box.options[9].selected = true;
-            }
-
-            if (raw_info.name.match(/DTS-?HD.?HRA/i)){
-                audiocodec_box.options[10].selected = true;
             }
 
             //分辨率
@@ -20712,30 +20493,17 @@ function auto_feed() {
             audiocodec_box.val(21);
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(6); break;
-                case 'DTS-HDMA':
-                    audiocodec_box.val(2); break;
-                case 'DTS-HD':
-                    if (raw_info.name.match(/DTS-HDHR/)) {
-                        audiocodec_box.val(3); break;
-                    }
-                case 'TrueHD': case 'Atmos':
-                    audiocodec_box.val(1); break;
-                case 'LPCM':
-                    audiocodec_box.val(7); break;
-                case 'DTS':
-                    audiocodec_box.val(14); break;
-                case 'AC3':
-                    audiocodec_box.val(4); break;
-                case 'AAC':
-                    audiocodec_box.val(13); break;
-                case 'Flac':
-                    audiocodec_box.val(9); break;
-                case 'APE':
-                    audiocodec_box.val(15); break;
-                case 'WAV':
-                    audiocodec_box.val(11); break;
-                case 'MP3':
-                    audiocodec_box.val(12); break;
+                case 'DTS-HDMA': audiocodec_box.val(2); break;
+                case 'DTS-HDHR': audiocodec_box.val(3); break;
+                case 'TrueHD': case 'Atmos': audiocodec_box.val(1); break;
+                case 'LPCM': audiocodec_box.val(7); break;
+                case 'DTS': audiocodec_box.val(14); break;
+                case 'AC3': audiocodec_box.val(4); break;
+                case 'AAC': audiocodec_box.val(13); break;
+                case 'Flac': audiocodec_box.val(9); break;
+                case 'APE': audiocodec_box.val(15); break;
+                case 'WAV': audiocodec_box.val(11); break;
+                case 'MP3': audiocodec_box.val(12); break;
             }
 
             //分辨率
