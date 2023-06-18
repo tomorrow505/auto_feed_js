@@ -13169,6 +13169,10 @@ function auto_feed() {
                 allinput[i].value = raw_info.dburl ? raw_info.dburl: raw_info.url;
             }
 
+            if (allinput[i].name == 'custom_fields[4][1]') {
+                allinput[i].value = raw_info.dburl ? raw_info.dburl: '';
+            }
+
             if (allinput[i].name == 'picture' && !site_url.split('#seperator#')[0].match(/offer/)) {
                 if (raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i)){
                     allinput[i].value = raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i)[1].split('=').pop();
