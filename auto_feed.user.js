@@ -12737,7 +12737,7 @@ function auto_feed() {
                         $(`#artist_${index}`).val(item);
                     });
                 } catch (Err) {}
-                raw_info.descr = raw_info.descr.replace(/\[quote=Tracklist\]/, 'Tracklist\n');
+                raw_info.descr = raw_info.descr.replace(/\[quote=Tracklist\]/, 'Tracklist\n').replace(/\[\/quote\]/, '');
 
                 var year = '';
                 if (raw_info.name.match(/(19|20)\d+/)){
