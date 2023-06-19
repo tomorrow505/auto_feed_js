@@ -1,5 +1,5 @@
 # auto-feed
-PT站一键转载脚本
+PT站一键转载脚本，不定时修复bug提交到GitHub，一般周末统一推送到greasyfork提供安装。
 
 ## 使用介绍
 使用教程：详见[项目wiki](https://github.com/tomorrow505/auto_feed_js/wiki)
