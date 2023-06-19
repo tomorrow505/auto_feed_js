@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.2.6
+// @version      2.0.2.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8848,6 +8848,7 @@ function auto_feed() {
         if (origin_site == 'jpop') {
             raw_info.edition_info = document.getElementsByTagName('h2')[0].textContent;
             raw_info.name = document.getElementsByTagName('h2')[0].textContent.replace(/\[|\]/g, '');
+            raw_info.releasetype = document.getElementsByTagName('h2')[0].textContent.match(/^\[(.*?)\]/)[1];
             raw_info.music_author = $('h2>a[href*="artist"]:last').text();
             raw_info.music_name = $('h2').text().split(raw_info.music_author)[1].replace(/^.?-.?|\[.*?\]/g, '').trim();
             raw_info.music_author = Array.from($('h2>a[href*="artist"]')).map((item)=>{return $(item).text()}).join(' & ');
@@ -8860,6 +8861,7 @@ function auto_feed() {
             var cover_box = document.getElementsByClassName('box')[1];
             try{
                 var cover = '[img]' + 'https://jpopsuki.eu/' + cover_box.getElementsByTagName('img')[0].getAttribute('src') + '[/img]\n\n';
+                cover = cover.replace('.th', '');
             } catch(Err) {
                 cover = '';
             }
@@ -12690,6 +12692,26 @@ function auto_feed() {
             var announce = $('a:contains(已隐藏你的个人)').attr('href');
             if (forward_site == 'OPS') {
                 announce = $('input[value*="announce"]').val();
+                if (raw_info.releasetype !== undefined) {
+                    switch (raw_info.releasetype) {
+                        case 'Single': $('#releasetype').val(9); break;
+                        case 'Album': $('#releasetype').val(1); break;
+                        case 'PV': $('#releasetype').val(11); break;
+                        case 'DVD': $('#releasetype').val(21); break;
+                        case 'TV-Music': $('#releasetype').val(21); break;
+                        case 'TV-Variety': $('#releasetype').val(21); break;
+                        case 'TV-Drama': $('#releasetype').val(21); break;
+                        case 'Fansubs': $('#releasetype').val(21); break;
+                        case 'Pictures': $('#releasetype').val(21); break;
+                    }
+                }
+                raw_info.music_author.split(' & ').forEach((item, index)=>{
+                    if (index == $('input[name="artists[]"]').length) {
+                        AddArtistField(); return false;
+                    }
+                    $(`#artist_${index}`).val(item);
+                });
+                try { if (!$('#tags').val()) { $('#tags').val(raw_info.music_type.replace(/,/g, ', ')) } } catch (err) {}
             }
             addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, announce);
             console.log(raw_info);
@@ -12742,7 +12764,6 @@ function auto_feed() {
                 }
 
                 if ($('#bitrate').val() == '---' || !$('#bitrate').val()) {
-                    console.log(raw_info.small_descr)
                     if ((raw_info.small_descr).match(/24bit Lossless/)) {
                         $('#bitrate').val('24bit Lossless');
                     } else if ((raw_info.small_descr).match(/Lossless/)) {
@@ -12805,7 +12826,6 @@ function auto_feed() {
                         }
                     }, 2000);
                 });
-
             } else {
                 add_extra_info();
             }
@@ -13243,6 +13263,10 @@ function auto_feed() {
                     if ($('textarea[name="technical_info"]').length) {
                         descr_box[0].style.height = '460px';
                     }
+                }
+                if (forward_site == 'OPS' && raw_info.origin_site == 'jpop') {
+                    descr_box[0].style.height = '400px';
+                    raw_info.descr = raw_info.descr.replace(/^\[.*?\/img\]/, '').trim();
                 }
                 if (forward_site == 'PTer') {
                     try{
