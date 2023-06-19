@@ -3435,6 +3435,7 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
             onload: (xhr) => {
                 var r = xhr.responseText;
                 var name = '';
+                console.log(r)
                 if (forward_site !== null && forward_site != 'hdb-task') {
                     if (r.match(/value="firsttime"/)) {
                         alert("加载种子失败，请先在源站进行一次种子下载操作！！！");
@@ -3476,7 +3477,7 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
                         } catch (err) {}
                     }
                     new_torrent += '8:encoding5:UTF-8';
-                    var info = r.match(/4:info[\s\S]*?privatei1e/)[0];
+                    var info = r.match(/4:info[\s\S]*?privatei\de/)[0].replace('privatei0e', 'privatei1e');
                     new_torrent += info;
                     var new_source = `6:source${forward_site.length}:${forward_site.toUpperCase()}`;
                     new_torrent += new_source;
@@ -3484,7 +3485,7 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
                     r = new_torrent;
                 }
                 var data = new Uint8Array(r.length)
-                var i = 0
+                var i = 0;
                 while (i < r.length) {
                     data[i] = r.charCodeAt(i);
                     i++
@@ -8852,6 +8853,12 @@ function auto_feed() {
             raw_info.music_author = $('h2>a[href*="artist"]:last').text();
             raw_info.music_name = $('h2').text().split(raw_info.music_author)[1].replace(/^.?-.?|\[.*?\]/g, '').trim();
             raw_info.music_author = Array.from($('h2>a[href*="artist"]')).map((item)=>{return $(item).text()}).join(' & ');
+            if (raw_info.music_author == 'V.A.') {
+                raw_info.music_author = Array.from($('.box:eq(2)').find('li').map((index,e)=>{
+                    return $(e).find('a:eq(0)').text();
+                })).join(' & ');
+            }
+
             raw_info.name = raw_info.name.replace(/album|Single/i, '').trim();
             if (site_url.match(/torrentid=(\d+)/)) {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
@@ -12705,12 +12712,6 @@ function auto_feed() {
                         case 'Pictures': $('#releasetype').val(21); break;
                     }
                 }
-                raw_info.music_author.split(' & ').forEach((item, index)=>{
-                    if (index == $('input[name="artists[]"]').length) {
-                        AddArtistField(); return false;
-                    }
-                    $(`#artist_${index}`).val(item);
-                });
                 try { if (!$('#tags').val()) { $('#tags').val(raw_info.music_type.replace(/,/g, ', ')) } } catch (err) {}
             }
             addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, announce);
@@ -12727,6 +12728,16 @@ function auto_feed() {
                 if (author_name.split('-').length > 1) {
                     music_name = author_name.split('-').pop().trim();
                 }
+
+                try {
+                    raw_info.music_author.split(' & ').forEach((item, index)=>{
+                        if (index == $('input[name="artists[]"]').length) {
+                            AddArtistField();
+                        }
+                        $(`#artist_${index}`).val(item);
+                    });
+                } catch (Err) {}
+                raw_info.descr = raw_info.descr.replace(/\[quote=Tracklist\]/, 'Tracklist\n');
 
                 var year = '';
                 if (raw_info.name.match(/(19|20)\d+/)){
@@ -12768,6 +12779,8 @@ function auto_feed() {
                         $('#bitrate').val('24bit Lossless');
                     } else if ((raw_info.small_descr).match(/Lossless/)) {
                         $('#bitrate').val('Lossless');
+                    } else if (raw_info.small_descr.match(/320|256|192|160|128|96|64/)) {
+                        $('#bitrate').val(raw_info.small_descr.match(/320|256|192|160|128|96|64/)[0]);
                     }
                 }
                 var poster = raw_info.descr.match(/\[img\](.*?)\[\/img\]/)[1].trim();
