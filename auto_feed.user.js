@@ -10610,7 +10610,8 @@ function auto_feed() {
                         if (!score.replace('分', '')) score = '暂无评分';
                         if (data.data.votes) score += `|${data.data.votes}人`;
                         $('h1.movie-heading').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank" style="display: inline; width: auto; border-bottom: 0px !important; text-decoration: none; color: #d3d3d3; font-weight: bold;">${data.data.title.split(' ')[0]}[${score}]</a>`);
-                        document.getElementById('torrentBigBookmarkExtension').childNodes[0].textContent = data.data.summary.replace(/ 　　/g, '');
+                        //document.getElementById('torrentBigBookmarkExtension').childNodes[0].textContent = data.data.summary.replace(/ 　　/g, '');
+                        $('div.movie-overview').text(data.data.summary.replace(/ 　　/g, ''));
                     }
                 });
             }
