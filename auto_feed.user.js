@@ -10609,8 +10609,10 @@ function auto_feed() {
                         var score = data.data.average + '分';
                         if (!score.replace('分', '')) score = '暂无评分';
                         if (data.data.votes) score += `|${data.data.votes}人`;
-                        $('h1.movie-heading').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank" style="display: inline; width: auto; border-bottom: 0px !important; text-decoration: none; color: #d3d3d3; font-weight: bold;">${data.data.title.split(' ')[0]}[${score}]</a>`);
-                        document.getElementById('torrentBigBookmarkExtension').childNodes[0].textContent = data.data.summary.replace(/ 　　/g, '');
+                        $('h1.bhd-title-h1').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank" style="display: inline; width: auto; border-bottom: 0px !important; text-decoration: none; color: #d3d3d3; font-weight: bold;">${data.data.title.split(' ')[0]}[${score}]</a>`);
+                        if (data.data.summary.trim() && data.data.summary.match(/[\u4e00-\u9fa5]/)) {
+                            $('div.movie-overview').text(data.data.summary.replace(/ 　　/g, ''));
+                        }
                     }
                 });
             }
@@ -18270,7 +18272,7 @@ function auto_feed() {
                 case 'DTS-HD': audiocodec_box.val(7); break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(12); break;
                 case 'DTS-HDMA': audiocodec_box.val(7); break;
-                case 'TrueHD': audiocodec_box.val(10); break;
+                case 'TrueHD': audiocodec_box.val(19); break;
                 case 'Atmos': audiocodec_box.val(10); break;
                 case 'DTS': audiocodec_box.val(3); break;
                 case 'AC3': audiocodec_box.val(15); break;
@@ -18280,7 +18282,7 @@ function auto_feed() {
                 case 'LPCM': audiocodec_box.val(16); break;
                 case 'WAV': audiocodec_box.val(7);
             }
-            
+
             //制作组
             $('select[name="team_sel[4]"]').val(14);
             $('select[name="team_sel[4]"]>option').map(function(index,e){
