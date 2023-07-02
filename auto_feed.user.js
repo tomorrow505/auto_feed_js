@@ -2262,7 +2262,7 @@ String.prototype.get_label = function(){
     var name = my_string.split('#seperator#')[0];
     var labels = {'gy': false, 'yy': false, 'zz': false, 'diy': false, 'hdr10': false, 'db': false, 'hdr10plus': false, 'yz': false};
 
-    if (my_string.match(/([简繁].{0,12}字幕|[简繁中].{0,3}字|DIY.{1,5}字|内封.{0,3}[繁中字])|(Text.*?#\d+[\s\S]*?Chinese|subtitles.*chs|subtitles.*mandarin|subtitle.*chinese)/i)){
+    if (my_string.match(/([简繁].{0,12}字幕|[简繁中].{0,3}字|DIY.{1,5}字|内封.{0,3}[繁中字])|(Text.*?#\d+[\s\S]*?Chinese|subtitles.*chs|subtitles.*mandarin|subtitle.*chinese|Presentation Graphics.*?Chinese)/i)){
         labels.zz = true;
     }
     if (my_string.match(/(英.{0,12}字幕|英.{0,3}字|内封.{0,3}英.{0,3}字)|(Text.*?#\d+[\s\S]*?English|subtitles.*eng|subtitle.*english)/i)){
@@ -2275,7 +2275,7 @@ String.prototype.get_label = function(){
             labels.gy = true;
         }
     }
-    if (my_string.match(/(粤.{0,3}语|粤.{0,3}配|Audio.*cantonese)/i)){
+    if (name.match(/(粤.{0,3}语|粤.{0,3}配|Audio.*cantonese)/i)){
         labels.yy = true;
     }
     if (name.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i)){
@@ -13407,8 +13407,11 @@ function auto_feed() {
         if (raw_info.labels > 99) {
             labels.zz = true;
         }
-        if (raw_info.descr.match(/◎语.*?言\s*汉语普通话/)) {
+        if (raw_info.descr.match(/◎语.*?言　汉语普通话/) && !label_str.match(/mpls/i)) {
             labels.gy = true;
+        }
+        if (raw_info.descr.match(/◎语.*?言　粤语/) && !label_str.match(/mpls/i)) {
+            labels.yy = true;
         }
         if (raw_info.name.match(/(x|H)(264|265)/i)) {
             labels.diy = false;
@@ -13500,14 +13503,14 @@ function auto_feed() {
                     if (labels.db) { check_label(document.getElementsByName('tags[]'), '17'); }
                     break;
                 case 'HDVideo':
-                    if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
-                    if (labels.yy){ check_label(document.getElementsByName('tags[]'), '10'); }
-                    if (labels.zz){ check_label(document.getElementsByName('tags[]'), '6'); }
-                    if (labels.diy){ check_label(document.getElementsByName('tags[]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7'); }
-                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '10'); }
-                    if (labels.db) { check_label(document.getElementsByName('tags[]'), '12'); }
-                    if (labels.complete) { check_label(document.getElementsByName('tags[]'), '17'); }
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '10'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '10'); }
+                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '12'); }
+                    if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '17'); }
                     break;
                 case 'UBits':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
@@ -13515,6 +13518,9 @@ function auto_feed() {
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.hdr10 && raw_info.standard_sel == '4K') { check_label(document.getElementsByName('tags[4][]'), '9'); }
                     if (labels.hdr10plus && raw_info.standard_sel == '4K') { check_label(document.getElementsByName('tags[4][]'), '10'); }
+                    if (!labels.hdr10 && !labels.hdr10plus && raw_info.standard_sel == '4K') {
+                        check_label(document.getElementsByName('tags[4][]'), '7');
+                    }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '8'); }
                     break;
                 case 'WT-Sakura':
@@ -13627,6 +13633,15 @@ function auto_feed() {
                     break;
                 case 'PTsbao':
                     if (labels.zz){ document.getElementsByName('zz')[0].checked=true; }
+                    if (labels.diy){ document.getElementsByName('diy')[0].checked=true; }
+                    if (raw_info.descr.match(/mpls/i) && !labels.diy) {
+                        document.getElementsByName('yp')[0].checked=true;
+                    }
+                    if (raw_info.standard_sel == '4K') { document.getElementsByName('k4')[0].checked=true; }
+                    if (labels.hdr10 || labels.hdr10plus) { document.getElementsByName('hdr')[0].checked=true; }
+                    if (raw_info.small_descr.match(/特效字幕/)) {
+                        document.getElementsByName('tx')[0].checked=true;
+                    }
                     break;
                 case 'BTSchool':
                     if (labels.gy){ document.getElementsByName('span[]')[4].checked=true; }
@@ -13762,8 +13777,8 @@ function auto_feed() {
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
-                    if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '12');}
-                    if (raw_info.small_descr.match(/特效字幕/)) { check_label(document.getElementsByName('tags[4][]'), '8'); }
+                    if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '8');}
+                    if (raw_info.small_descr.match(/特效字幕/)) { check_label(document.getElementsByName('tags[4][]'), '12'); }
                     if (raw_info.descr.match(/mpls/i) || $('textarea[name="technical_info"]').val().match(/mpls/i)) {
                         check_label(document.getElementsByName('tags[4][]'), '9');
                     }
@@ -13773,7 +13788,9 @@ function auto_feed() {
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '8');}
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '9');}
                     break;
                 case 'KuFei':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
@@ -14027,7 +14044,7 @@ function auto_feed() {
             var audiocodec_box = $('select[name="audiocodec_sel"]');
             audiocodec_box.val(99);
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': audiocodec_box.val(1); break;
+                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(1); break;
                 case 'TrueHD': case 'Atmos': audiocodec_box.val(2); break;
                 case 'LPCM': audiocodec_box.val(6); break;
                 case 'DTS': audiocodec_box.val(3); break;
@@ -14212,7 +14229,7 @@ function auto_feed() {
                 trigger_select('rc_select_2', codec, 1200, 2);
 
                 var audiocodec = 'Other';
-                var audiocodec_dict = { 'Flac': 'FLAC', 'APE': 'Other', 'AC3': 'AC3', 'WAV': 'Other', 'AAC': 'AAC',
+                var audiocodec_dict = { 'Flac': 'FLAC', 'APE': 'Other', 'AC3': 'AC3', 'WAV': 'Other', 'AAC': 'AAC', 'DTS-HDHR': 'DTS',
                     'DTS-HDMA': 'DTS-HD MA', 'Atmos': 'TrueHD Atmos', 'TrueHD': 'TrueHD', 'DTS': 'DTS', 'LPCM': 'LPCM', 'DTS-HDMA:X 7.1': 'DTS-X'
                 };
                 if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)) {
@@ -14537,7 +14554,7 @@ function auto_feed() {
             }
 
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HD':
+                case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HD': case 'DTS-HDHR':
                     $("select[name='audiocodec_sel']").val('1'); break;
                 case 'Atmos':
                     $("select[name='audiocodec_sel']").val('14'); break;
@@ -14595,6 +14612,8 @@ function auto_feed() {
                             $('#browsecat').val('16');
                         } else if (raw_info.standard_sel == '1080p'){
                             $('#browsecat').val('17');
+                        } else if (raw_info.standard_sel == '4K'){
+                            $('#browsecat').val('410');
                         }
                     }
                     break;
@@ -14711,7 +14730,9 @@ function auto_feed() {
             //音频编码
             $("select[name='audiocodec_sel']").val('7'); //默认其它
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HDMA:X 7.1': case 'DTS-HDMA':
+                case 'DTS-HDMA:X 7.1':
+                    $("select[name='audiocodec_sel']").val('14'); break;
+                case 'DTS-HDMA':
                     $("select[name='audiocodec_sel']").val('12'); break;
                 case 'Atmos':
                     $("select[name='audiocodec_sel']").val('15'); break;
@@ -14719,7 +14740,7 @@ function auto_feed() {
                     $("select[name='audiocodec_sel']").val('13'); break;
                 case 'LPCM':
                     $("select[name='audiocodec_sel']").val('11'); break;
-                case 'DTS': case 'DTS-HD':
+                case 'DTS': case 'DTS-HD': case 'DTS-HDHR':
                     if (raw_info.name.match(/DTS.?X[^ \d]/i)){
                         $("select[name='audiocodec_sel']").val('14');
                     } else {
@@ -14752,7 +14773,7 @@ function auto_feed() {
 
             $("select[name='team_sel']").val('5');
             $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
+                if (raw_info.name.match(e.innerText) && e.innerText != 'DIY') {
                     $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
                 }
             });
@@ -14828,7 +14849,7 @@ function auto_feed() {
             audiocodec_box.val(7);
             if (forward_site == 'PThome') {
                 switch (raw_info.audiocodec_sel){
-                    case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': audiocodec_box.val(19); break;
+                    case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(19); break;
                     case 'TrueHD': case 'Atmos': audiocodec_box.val(20); break;
                     case 'LPCM': audiocodec_box.val(21); break;
                     case 'DTS': audiocodec_box.val(3); break;
@@ -14843,7 +14864,7 @@ function auto_feed() {
                 }
             } else {
                 switch (raw_info.audiocodec_sel){
-                    case 'DTS-HD': case 'DTS-HDMA':
+                    case 'DTS-HD': case 'DTS-HDMA': case 'DTS-HDHR':
                         if (raw_info.name.match(/(X|MA).?7[\. ]1/i)) {
                             audiocodec_box.val(25);
                         } else {
@@ -15147,7 +15168,7 @@ function auto_feed() {
                 }
 
                 //音频编码
-                var audiocodec_dict = {'Flac': 1, 'APE': 2, 'DTS': 3, 'AC3': 12, 'WAV': 15, 'MP3': 4,
+                var audiocodec_dict = {'Flac': 1, 'APE': 2, 'DTS': 3, 'AC3': 12, 'WAV': 15, 'MP3': 4, 'DTS-HDHR': 14,
                                        'AAC': 6, 'DTS-HDMA': 10, 'Atmos': 17, 'TrueHD': 11, 'LPCM': 13};
                 if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                     var index = audiocodec_dict[raw_info.audiocodec_sel];
@@ -15232,6 +15253,7 @@ function auto_feed() {
                     'Atmos': 4,
                     'AAC': 9,
                     'DTS-HDMA': 3,
+                    'DTS-HDHR': 3,
                     'TrueHD Atmos': 4,
                     'TrueHD': 4,
                     'DTS': 1,
@@ -15472,7 +15494,7 @@ function auto_feed() {
 
             //音频编码
             var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
-            var audiocodec_dict = {'Flac': 8, 'APE': 9, 'DTS': 7, 'AC3': 4, 'WAV': 10, 'MP3': 13,
+            var audiocodec_dict = {'Flac': 8, 'APE': 9, 'DTS': 7, 'AC3': 4, 'WAV': 10, 'MP3': 13, 'DTS-HDHR': 3,
                                    'AAC': 11, 'DTS-HDMA': 5, 'Atmos': 2, 'TrueHD': 3, 'LPCM': 1};
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
@@ -15549,9 +15571,8 @@ function auto_feed() {
             var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
             audiocodec_box.options[14].selected = true;
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': audiocodec_box.options[1].selected = true; break;
-                case 'DTS-HDMA:X 7.1': audiocodec_box.options[1].selected = true; break;
-                case 'DTS-HDMA': audiocodec_box.options[1].selected = true; break;
+                case 'DTS-HD': case 'DTS-HDMA:X 7.1': audiocodec_box.options[1].selected = true; break;
+                case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.options[1].selected = true; break;
                 case 'TrueHD': audiocodec_box.options[2].selected = true; break;
                 case 'Atmos': audiocodec_box.options[2].selected = true; break;
                 case 'LPCM': audiocodec_box.options[3].selected = true; break;
@@ -15749,7 +15770,6 @@ function auto_feed() {
                     switch(raw_info.medium_sel){
                         case 'DVD': medium_box.val(4); break;
                         case 'Remux': medium_box.val(81); break;
-                        // case 'WEB-DL': medium_box.val(4); break;
                         case 'Blu-ray':
                             if (labels.diy) {
                                 medium_box.val(80);
@@ -15878,7 +15898,7 @@ function auto_feed() {
 
                 //音频编码
                 var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
-                var audiocodec_dict = { 'AAC': 1, 'AC3': 2, 'TrueHD': 3,
+                var audiocodec_dict = { 'AAC': 1, 'AC3': 2, 'TrueHD': 3, 'DTS-HDHR': 5,
                                         'DTS': 4, 'DTS-HD': 5, 'DTS-HDMA': 5, 'DTS-HDMA:X 7.1': 5,
                                         'LPCM': 6, 'WAV': 7, 'APE': 8, 'Flac': 9, 'Atmos': 10};
                 if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
@@ -15944,7 +15964,7 @@ function auto_feed() {
 
             //音频编码
             var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
-            var audiocodec_dict = { 'TrueHD': 1, 'Atmos': 1, 'DTS': 2, 'DTS-HD': 2, 'DTS-HDMA': 2, 'DTS-HDMA:X 7.1': 2,
+            var audiocodec_dict = { 'TrueHD': 1, 'Atmos': 1, 'DTS': 2, 'DTS-HD': 2, 'DTS-HDMA': 2, 'DTS-HDMA:X 7.1': 2, 'DTS-HDHR': 2,
                                     'AC3': 3, 'LPCM': 4, 'Flac': 5, 'MP3': 6, 'AAC': 7, 'APE': 8, '': 9 };
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
@@ -16334,7 +16354,7 @@ function auto_feed() {
 
                 //音频编码
                 var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
-                var audiocodec_dict = { 'TrueHD': 7, 'Atmos': 7,
+                var audiocodec_dict = { 'TrueHD': 7, 'Atmos': 7, 'DTS-HDHR': 6,
                                         'DTS': 3, 'DTS-HD': 6, 'DTS-HDMA': 6, 'DTS-HDMA:X 7.1': 6,
                                         'AC3': 4, 'LPCM': 8, 'Flac': 1, 'MP3': 10, 'AAC': 5, 'APE': 2, '': 11 };
                 if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
@@ -16693,7 +16713,6 @@ function auto_feed() {
                     $('input[name="url_poster"]').val(poster[1]);
                     raw_info.descr = raw_info.descr.replace(poster[0], '').trim()
                 }
-
             } catch(err) {
                 console.log(err);
             }
@@ -16800,7 +16819,7 @@ function auto_feed() {
             //音频编码
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             var audiocodec_dict = {
-                'DTS-HD': 11, 'DTS-HDMA:X 7.1': 10, 'DTS-HDMA': 11, 'TrueHD': 9, 'Atmos': 8,
+                'DTS-HD': 11, 'DTS-HDMA:X 7.1': 10, 'DTS-HDMA': 11, 'TrueHD': 9, 'Atmos': 8, 'DTS-HDHR': 12,
                 'DTS': 3, 'AC3': 13, 'AAC': 6, 'Flac': 1, 'APE': 2, 'LPCM': 14, 'WAV': 9, '': 7
             }
             audiocodec_box.val(7);
@@ -16811,7 +16830,7 @@ function auto_feed() {
 
             //分辨率
             var standard_box = $('select[name="standard_sel[4]"]');
-            var standard_dict = { '4K': 5, '1080p': 1, '1080i': 2, '720p': 3, 'SD':4 };
+            var standard_dict = { '4K': 6, '1080p': 1, '1080i': 2, '720p': 3, 'SD':4 };
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)) {
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
@@ -16976,7 +16995,7 @@ function auto_feed() {
             //音频编码
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             var audiocodec_dict = {
-                'DTS-HD': 15, 'DTS-HDMA:X 7.1': 11, 'DTS-HDMA': 12, 'TrueHD': 10, 'Atmos': 13,
+                'DTS-HD': 15, 'DTS-HDMA:X 7.1': 11, 'DTS-HDMA': 12, 'TrueHD': 10, 'Atmos': 13, 'DTS-HDHR': 15,
                 'DTS': 3, 'AC3': 8, 'AAC': 6, 'Flac': 1, 'APE': 2, 'LPCM': 14, 'WAV': 9, '': 7
             }
             audiocodec_box.val(7);
@@ -17605,7 +17624,6 @@ function auto_feed() {
             var browsecat = document.getElementsByName('type')[0];
             var type_dict = {'电影': 1, '剧集': 2, '动漫': 5, '综艺': 3, '音乐': 8, '纪录': 4,
                              '体育': 7, '软件': 9, '学习': 9, '': 9, '游戏': 10, 'MV': 6};
-            //如果当前类型在上述字典中
             browsecat.options[9].selected = true;//默认其他
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
@@ -17663,7 +17681,7 @@ function auto_feed() {
             //音频编码
             var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
             var audiocodec_dict = { 'TrueHD': 3, 'Atmos': 3, 'DTS': 5, 'DTS-HD': 6, 'DTS-HDMA': 2, 'DTS-HDMA:X 7.1': 1, 'WAV': 10,
-                                    'AC3': 6, 'LPCM': 4, 'Flac': 8, 'MP3': 10, 'AAC': 7, 'APE': 9, '': 11 };
+                                    'AC3': 6, 'LPCM': 4, 'Flac': 8, 'MP3': 10, 'AAC': 7, 'APE': 9, '': 11, 'DTS-HDHR': 5};
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
                 audiocodec_box.options[index].selected = true;
@@ -17738,6 +17756,7 @@ function auto_feed() {
                 case 'DTS-HD': audiocodec_box.options[1].selected = true; break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.options[3].selected = true; break;
                 case 'DTS-HDMA': audiocodec_box.options[4].selected = true; break;
+                case 'DTS-HDHR': audiocodec_box.options[5].selected = true; break;
                 case 'TrueHD': audiocodec_box.options[2].selected = true; break;
                 case 'Atmos': audiocodec_box.options[1].selected = true; break;
                 case 'LPCM': audiocodec_box.options[10].selected = true; break;
@@ -18031,7 +18050,7 @@ function auto_feed() {
             //音频编码
             var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
             var audiocodec_dict = { 'TrueHD': 2, 'Atmos': 3, 'DTS': 7, 'DTS-HD': 1, 'DTS-HDMA': 1, 'DTS-HDMA:X 7.1': 4, 'WAV': 11,
-                                    'AC3': 5, 'LPCM': 6, 'Flac': 9, 'MP3': 13, 'AAC': 8, 'APE': 10, '': 13 };
+                                    'AC3': 5, 'LPCM': 6, 'Flac': 9, 'MP3': 13, 'AAC': 8, 'APE': 10, '': 13, 'DTS-HDHR': 1 };
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
                 audiocodec_box.options[index].selected = true;
@@ -18108,7 +18127,7 @@ function auto_feed() {
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HD': audiocodec_box.options[8].selected = true; break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.options[8].selected = true; break;
-                case 'DTS-HDMA': audiocodec_box.options[8].selected = true; break;
+                case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.options[8].selected = true; break;
                 case 'TrueHD': audiocodec_box.options[7].selected = true; break;
                 case 'Atmos': audiocodec_box.options[9].selected = true; break;
                 case 'DTS': audiocodec_box.options[1].selected = true; break;
@@ -18246,7 +18265,7 @@ function auto_feed() {
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HD': audiocodec_box.val(7); break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(12); break;
-                case 'DTS-HDMA': audiocodec_box.val(7); break;
+                case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(7); break;
                 case 'TrueHD': audiocodec_box.val(19); break;
                 case 'Atmos': audiocodec_box.val(10); break;
                 case 'DTS': audiocodec_box.val(3); break;
@@ -18305,7 +18324,6 @@ function auto_feed() {
                 case 'UHD': source_box.options[1].selected = true; break;
                 case 'Blu-ray': source_box.options[2].selected = true; break;
                 case 'DVD':  source_box.options[3].selected = true; break;
-                // case 'Remux': source_box.options[3].selected = true; break;
                 case 'HDTV': source_box.options[1].selected = true; break;
                 case 'Encode': source_box.options[10].selected = true; break;
                 case 'WEB-DL': source_box.options[9].selected = true;
@@ -18445,7 +18463,7 @@ function auto_feed() {
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HD': audiocodec_box.val(9); break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(9); break;
-                case 'DTS-HDMA': audiocodec_box.val(9); break;
+                case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(9); break;
                 case 'TrueHD': audiocodec_box.val(10); break;
                 case 'Atmos': audiocodec_box.val(10); break;
                 case 'DTS': audiocodec_box.val(3); break;
@@ -18644,11 +18662,16 @@ function auto_feed() {
             var audiocodec_box = $('select[name="audiocodec_sel[5]"]');
             if (forward_site == '红叶') {
                 switch (raw_info.audiocodec_sel){
-                    case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': audiocodec_box.val(16); break;
+                    case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(16); break;
                     case 'TrueHD': audiocodec_box.val(15); break;
                     case 'Atmos': audiocodec_box.val(15); break;
                     case 'DTS': audiocodec_box.val(3); break;
-                    case 'AC3': audiocodec_box.val(8); break;
+                    case 'AC3': 
+                        audiocodec_box.val(20);
+                        if (raw_info.name.match(/DD[P\+]/)) {
+                            audiocodec_box.val(19);
+                        }
+                        break;
                     case 'AAC': audiocodec_box.val(6); break;
                     case 'Flac': audiocodec_box.val(1); break;
                     case 'APE': audiocodec_box.val(2); break;
@@ -18875,7 +18898,7 @@ function auto_feed() {
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HD': audiocodec_box.options[2].selected = true; break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.options[2].selected = true; break;
-                case 'DTS-HDMA': audiocodec_box.options[2].selected = true; break;
+                case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.options[2].selected = true; break;
                 case 'TrueHD': audiocodec_box.options[1].selected = true; break;
                 case 'Atmos': audiocodec_box.options[1].selected = true; break;
                 case 'DTS': audiocodec_box.options[2].selected = true; break;
@@ -19327,7 +19350,7 @@ function auto_feed() {
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HD': audiocodec_box.options[2].selected = true; break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.options[1].selected = true; break;
-                case 'DTS-HDMA': audiocodec_box.options[2].selected = true; break;
+                case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.options[2].selected = true; break;
                 case 'TrueHD': audiocodec_box.options[4].selected = true; break;
                 case 'Atmos': audiocodec_box.options[3].selected = true; break;
                 case 'LPCM': audiocodec_box.options[6].selected = true; break;
@@ -19454,7 +19477,7 @@ function auto_feed() {
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HD': audiocodec_box.val(10); break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(12); break;
-                case 'DTS-HDMA': audiocodec_box.val(10); break;
+                case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(10); break;
                 case 'TrueHD': audiocodec_box.val(13); break;
                 case 'Atmos': audiocodec_box.val(11); break;
                 case 'LPCM': audiocodec_box.val(15); break;
@@ -20229,7 +20252,7 @@ function auto_feed() {
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             audiocodec_box.val(7);
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS': audiocodec_box.val(3); break;
+                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HDHR': case 'DTS': audiocodec_box.val(3); break;
                 case 'AAC':  audiocodec_box.val(6); break;
                 case 'Flac': audiocodec_box.val(1); break;
                 case 'APE': audiocodec_box.val(2); break;
@@ -20262,7 +20285,7 @@ function auto_feed() {
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
-            var medium_box = $('select[name=medium_sel]');
+            var medium_box = $('select[name="medium_sel[4]"]');
             switch(raw_info.medium_sel){
                 case 'UHD': medium_box.val(10); break;
                 case 'Blu-ray': medium_box.val(11); break;
@@ -20277,7 +20300,7 @@ function auto_feed() {
                 medium_box.val(15);
             }
             //视频编码
-            var codec_box = $('select[name=codec_sel]');
+            var codec_box = $('select[name="codec_sel[4]"]');
             codec_box.val(11);
             switch (raw_info.codec_sel){
                 case 'H265': case 'X265': codec_box.val(6); break;
@@ -20287,10 +20310,10 @@ function auto_feed() {
                 case 'MPEG-2': case 'MPEG-4': codec_box.val(9);
             }
             //音频编码
-            var audiocodec_box = $('select[name=audiocodec_sel]');
+            var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             audiocodec_box.val(7);
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA':
+                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HDHR':
                     audiocodec_box.val(3); break;
                 case 'TrueHD': case 'Atmos':
                     audiocodec_box.val(11); break;
@@ -20326,13 +20349,13 @@ function auto_feed() {
             }
 
             //分辨率
-            var standard_box = $(document.getElementsByName('standard_sel')[0]);
+            var standard_box = $(document.getElementsByName('standard_sel[4]')[0]);
             var standard_dict = {'4K': 6, '1080p': 8, '1080i': 9, '720p': 10, 'SD': 11, '8K': 5};
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
             }
-            $('select[name="team_sel"]').val(4);
+            $('select[name="team_sel[4]"]').val(4);
         }
 
         else if (forward_site == 'UBits') {
@@ -20414,18 +20437,7 @@ function auto_feed() {
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
-            var source_box = $('select[name="source_sel[4]"]');
-            source_box.val(6);
-            switch(raw_info.medium_sel){
-                case 'UHD': case 'Blu-ray': case 'Remux': case 'Encode': source_box.val(1); break;
-                case 'HDTV': source_box.val(4); break;
-                case 'WEB-DL': source_box.val(7); break;
-                case 'DVD': 
-                    source_box.val(3);
-                    if (raw_info.name.match(/HD.?DVD/i)) {
-                        source_box.val(2);
-                    }
-            }
+
             var codec_box = $('select[name="codec_sel[4]"]');
             codec_box.val(5);
             switch (raw_info.codec_sel){
@@ -20438,12 +20450,18 @@ function auto_feed() {
 
             var medium_box = $('select[name="medium_sel[4]"]');
             switch(raw_info.medium_sel){
-                case 'UHD': case 'Blu-ray': medium_box.val(1); break;
+                case 'UHD': medium_box.val(11); break;
+                case 'Blu-ray': medium_box.val(1); break;
                 case 'Remux': medium_box.val(3); break;
                 case 'Encode': medium_box.val(7); break;
                 case 'WEB-DL': medium_box.val(10); break;
                 case 'HDTV': medium_box.val(5); break;
-                case 'DVD': medium_box.val(6); break;
+                case 'DVD': 
+                    medium_box.val(6);
+                    if (raw_info.name.match(/HD.?DVD/i)) {
+                        medium_box.val(2);
+                    }
+                    break;
                 case 'CD': medium_box.val(8);
             }
             if (raw_info.name.match(/HD.?DVD/i)){
@@ -20460,12 +20478,12 @@ function auto_feed() {
             }
 
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
-            audiocodec_box.val(7);
+            audiocodec_box.val(16);
             switch (raw_info.audiocodec_sel){
                 case 'Atmos': audiocodec_box.val(8); break;
                 case 'DTS:X': case 'DTS-HDMA:X 7.1': audiocodec_box.val(2); break;
                 case 'TrueHD': audiocodec_box.val(1); break;
-                case 'DTS-HD': case 'DTS-HDMA': audiocodec_box.val(3); break;
+                case 'DTS-HD': case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(3); break;
                 case 'AC3':
                     audiocodec_box.val(5);
                     if (raw_info.descr.match(/Dolby Digital Plus/i) || raw_info.name.match(/DD[P\+]/)) {
@@ -20651,7 +20669,7 @@ function auto_feed() {
                 case 'Atmos': audiocodec_box.val(8); break;
                 case 'DTS:X': case 'DTS-HDMA:X 7.1': audiocodec_box.val(10); break;
                 case 'TrueHD': audiocodec_box.val(13); break;
-                case 'DTS-HD': case 'DTS-HDMA': audiocodec_box.val(11); break;
+                case 'DTS-HD': case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(11); break;
                 case 'AC3':
                     audiocodec_box.val(17);
                     if ((raw_info.descr + $('textarea[name="technical_info"]').val()).match(/Dolby Digital Plus/i) || raw_info.name.match(/DD[P\+]/)) {
@@ -20750,9 +20768,10 @@ function auto_feed() {
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             audiocodec_box.val(21);
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD':
+                case 'DTS-HD': audiocodec_box.val(13); break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(9); break;
                 case 'DTS-HDMA': audiocodec_box.val(8); break;
+                case 'DTS-HDHR': audiocodec_box.val(22); break;
                 case 'TrueHD': audiocodec_box.val(12); break;
                 case 'Atmos': audiocodec_box.val(10); break;
                 case 'LPCM': audiocodec_box.val(14); break;
@@ -23105,7 +23124,7 @@ function auto_feed() {
                     audiocodec_box.val(1); break;
                 case 'APE':
                     audiocodec_box.val(2); break;
-                case 'DTS':
+                case 'DTS': case 'DTS-HD': case 'DTS-HDHR':
                     audiocodec_box.val(3); break;
                 case 'DTS-HDMA':
                     audiocodec_box.val(3); break;
@@ -23116,7 +23135,7 @@ function auto_feed() {
                 case 'AAC':
                     audiocodec_box.val(6); break;
                 default:
-                    audiocodec_box.val(7); // Other
+                    audiocodec_box.val(7);
             }
 
             //分辨率
