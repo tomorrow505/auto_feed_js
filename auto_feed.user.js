@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.2.8
+// @version      2.0.2.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1533,6 +1533,11 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
     } else if ($('.search_urls').length > 2) {
         $('.search_urls').show();
     }
+    if (site_url.match(/^https?:\/\/movie.douban.com/)) {
+        if (site_search_lists.match(/https:\/\/www.imdb.com.*?imdbid/)) {
+            site_search_lists = site_search_lists.replace(/www.imdb.com.*?imdbid}/, 'click_new');
+        }
+    }
     site_search_lists = site_search_lists.format({'imdbid': imdbid, 'imdbno': imdbno, 'search_name': search_name});
     container.append(`${brs}<div ${div_style} class="search_urls"><font size="2px" color=${font_color}>${text}${site_search_lists}</font></div>`);
     container.find('.disabled').attr("disabled",true).click(e=>{
@@ -1546,6 +1551,13 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
     if (mode == 1) {
         $('.search_urls').find('a').css("color", "darkblue");
     }
+    try {
+        var imdb_url = 'https://www.imdb.com/title/' + $('#info').html().match(/tt\d+/i)[0];
+        $('a[href*="click_new"').click(e=>{
+            e.preventDefault();
+            window.open(imdb_url, target="_blank");
+        });
+    } catch (err) {}
 }
 
 //函数用来豆瓣信息搜索时候进行处理, 后期准备作废
@@ -9445,7 +9457,7 @@ function auto_feed() {
             }
 
             if (['BHD', 'HDPost', 'ACM', 'HDOli', 'Telly', 'jptv', 'Monika', 'DTR'].indexOf(origin_site) > -1){
-                if (['Name', 'Nombre', '名称'].indexOf(tds[i].textContent.trim())>-1) {
+                if (['Name', 'Nombre', '名称', '标题'].indexOf(tds[i].textContent.trim())>-1) {
                     raw_info.name = tds[i+1].textContent.replace(/ *\n.*/gm, '').trim();
                     if (origin_site == 'HDOli') {
                         raw_info.name = raw_info.name.replace(/[|]/g, '');
