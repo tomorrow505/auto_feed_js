@@ -1552,7 +1552,11 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
         $('.search_urls').find('a').css("color", "darkblue");
     }
     try {
-        var imdb_url = 'https://www.imdb.com/title/' + $('#info').html().match(/tt\d+/i)[0];
+        var imdbid = $('#info').html().match(/tt\d+/i)[0];
+        var imdb_url = 'https://www.imdb.com/title/' + imdbid;
+        var html = $('#info').html();
+        html = html.replace(imdbid, `<a href="${imdb_url}" target="_blank">${imdbid}</a>`);
+        $('#info').html(html);
         $('a[href*="click_new"').click(e=>{
             e.preventDefault();
             window.open(imdb_url, target="_blank");
@@ -2009,8 +2013,8 @@ function judge_if_the_site_in_domestic() {
 //处理标题业务封装进函数
 function deal_with_title(title){
     title = title.replace(/\./g, ' ').replace(/torrent$/g, '').replace(/mkv$|mp4$/i, '').trim();
-    if (title.match(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)/)) {
-        title = title.replace(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)/, function(data){
+    if (title.match(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)[^\d]/)) {
+        title = title.replace(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)[^\d]/, function(data){
             return data.slice(0,2) + '.'+ data.slice(3,data.length);
         });
     }
@@ -13219,6 +13223,11 @@ function auto_feed() {
                         'chinese': get_small_descr_from_descr(raw_info.descr, raw_info.name).split('/')[0].split(/\| 类别/)[0].split('*')[0].trim()
                     });
                     allinput[i].value = raw_info.name;
+                } else if (forward_site == 'Panda'){
+                    raw_info.name = raw_info.name.replace(/TrueHD(\d\.\d)/, 'TrueHD $1');
+                    raw_info.name = raw_info.name.replace(/DTS-HD.?MA.?(\d\.\d)/, 'DTS-HD MA $1');
+                    raw_info.name = raw_info.name.replace(/DTS-HD.?(HRA?).?(\d\.\d)/, 'DTS-HD $1 $2');
+                    allinput[i].value = raw_info.name;
                 } else {
                     if (forward_site == 'BLU') {
                         raw_info.name = raw_info.name.replace(/Remux/i, 'REMUX');
@@ -13308,7 +13317,6 @@ function auto_feed() {
         //填写简介，一般都是textarea，特殊情况后续处理--CMCT改版兼容
         var descr_box = document.getElementsByTagName('textarea');
         if (forward_site == 'HDAtmos') {
-            // raw_info.descr = raw_info.descr.replace(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g, '').trim();
             raw_info.descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g).forEach((item)=>{
                 var index = raw_info.descr.indexOf(item);
                 if (index > 500 ) {
@@ -13803,6 +13811,7 @@ function auto_feed() {
                     if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '8');}
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '9');}
+                    if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '10');}
                     break;
                 case 'KuFei':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
@@ -17090,7 +17099,7 @@ function auto_feed() {
             //音频编码
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             var audiocodec_dict = { 'TrueHD': 6, 'Atmos': 1, 'DTS': 2, 'DTS-HD': 5, 'DTS-HDMA': 4, 'DTS-HDMA:X 7.1': 3,
-                                    'AC3': 18, 'LPCM': 7, 'Flac': 20, 'MP3': 23, 'AAC': 19, 'APE': 21, '': 24 };
+                                    'AC3': 18, 'LPCM': 7, 'Flac': 20, 'MP3': 23, 'AAC': 19, 'APE': 21, '': 24, 'DTS-HDHR': 5 };
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
                 audiocodec_box.val(index);
