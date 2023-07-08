@@ -132,6 +132,7 @@
     20230208：稍加完整适配朱雀。
     20230413：修复部分bug，去掉一些关闭了的站。
     20230511：适配转入 RS (西电睿思)。
+    20230708：修复部分bug。适配RouSi(by shmt86)。
 */
 
 var site_url = decodeURI(location.href);
@@ -936,7 +937,8 @@ const default_site_info = {
     'GGPT': {'url': 'https://www.gamegamept.com/', 'enable': 1},
     'RS': {'url': 'https://resource.xidian.edu.cn/', 'enable': 1},
     'Panda': {'url': 'https://pandapt.net/', 'enable': 1},
-    'KuFei': {'url': 'https://kufei.org/', 'enable': 1}
+    'KuFei': {'url': 'https://kufei.org/', 'enable': 1},
+    'RouSi': {'url': 'https://rousi.zip/', 'enable': 1}
 };
 
 //初始化数据site_order/used_site_info等等
@@ -5458,7 +5460,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'GainB', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao',
             'HHClub', 'ptchina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT',
-            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei'];
+            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
@@ -13527,8 +13529,8 @@ function auto_feed() {
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '10'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7'); }
-                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '10'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '11'); }
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '20'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '12'); }
                     if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '17'); }
                     break;
@@ -13627,28 +13629,36 @@ function auto_feed() {
                     break;
                 case 'HaresClub':
                     if (labels.gy){
-                        $('input[value="32"]').next().addClass('layui-form-checked');
-                        $('input[value="32"]').attr('checked', true);
+                        $('input[value="6"]').next().addClass('layui-form-checked');
+                        $('input[value="6"]').attr('checked', true);
                     }
                     if (labels.yy){
-                        $('input[value="64"]').next().addClass('layui-form-checked');
-                        $('input[value="64"]').attr('checked', true);
+                        $('input[value="7"]').next().addClass('layui-form-checked');
+                        $('input[value="7"]').attr('checked', true);
                     }
                     if (labels.zz){
-                        $('input[value="256"]').next().addClass('layui-form-checked');
-                        $('input[value="256"]').attr('checked', true);
+                        $('input[value="9"]').next().addClass('layui-form-checked');
+                        $('input[value="9"]').attr('checked', true);
                     }
                     if (labels.diy){
-                        $('input[value="1024"]').next().addClass('layui-form-checked');
-                        $('input[value="1024"]').attr('checked', true);
+                        $('input[value="11"]').next().addClass('layui-form-checked');
+                        $('input[value="11"]').attr('checked', true);
                     }
                     if (labels.hdr10) {
-                        $('input[value="4096"]').next().addClass('layui-form-checked');
-                        $('input[value="4096"]').attr('checked', true);
+                        $('input[value="13"]').next().addClass('layui-form-checked');
+                        $('input[value="13"]').attr('checked', true);
+                    }
+                    if (labels.hdr10plus) {
+                        $('input[value="14"]').next().addClass('layui-form-checked');
+                        $('input[value="14"]').attr('checked', true);
                     }
                     if (labels.db) {
-                        $('input[value="16384"]').next().addClass('layui-form-checked');
-                        $('input[value="16384"]').attr('checked', true);
+                        $('input[value="15"]').next().addClass('layui-form-checked');
+                        $('input[value="15"]').attr('checked', true);
+                    }
+                    if (raw_info.small_descr.match(/特效字幕/)) {
+                        $('input[value="10"]').next().addClass('layui-form-checked');
+                        $('input[value="10"]').attr('checked', true);
                     }
                     break;
                 case 'PTsbao':
@@ -13822,6 +13832,17 @@ function auto_feed() {
                     if (raw_info.descr.match(/◎语　　言　英语/)) {
                         check_label(document.getElementsByName('tags[4][]'), '8');
                     }
+                    break;
+                case 'RouSi':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '15'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '11');}
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '10');}
+                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '14'); }
                     break;
                 }
         } catch (err) {
@@ -16528,6 +16549,7 @@ function auto_feed() {
 
             //音频编码
             var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
+            console.log(raw_info.audiocodec_sel)
             var audiocodec_dict = {
                 'Flac': 7,
                 'APE': 8,
@@ -16539,7 +16561,7 @@ function auto_feed() {
                 'TrueHD': 2,
                 'DTS': 6,
                 'LPCM': 11,
-                'DTS-HDMA:X 7.1': 1,
+                'DTS-HDMA:X 7.1': 12,
                 'DTS-HDHR': 1,
                 'DTS-X': 6
             };
@@ -16720,8 +16742,8 @@ function auto_feed() {
 
             //音频编码
             var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
-            var audiocodec_dict = { 'TrueHD': 13, 'Atmos': 14, 'DTS': 4, 'DTS-HD': 11, 'DTS-HDMA': 11, 'DTS-HDMA:X 7.1': 11, 'DTS-X': 12,
-                                    'AC3': 1, 'EAC3': 1, 'LPCM': 9, 'Flac': 6, 'OGG': 7, 'WAV': 8, 'OPUS': 15, 'MP3': 3, 'AAC': 2, 'APE': 5, 'DTS-HDHR': 10, '': 16 };
+            var audiocodec_dict = { 'TrueHD': 13, 'Atmos': 14, 'DTS': 4, 'DTS-HD': 11, 'DTS-HDMA': 11, 'DTS-HDMA:X 7.1': 12, 'DTS-HDHR': 10,
+                                    'AC3': 1, 'EAC3': 1, 'LPCM': 9, 'Flac': 6, 'WAV': 8, 'AAC': 2, 'APE': 5, '': 16 };
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
                 audiocodec_box.options[index].selected = true;
@@ -18523,6 +18545,20 @@ function auto_feed() {
             }
         }
 
+        else if (forward_site == 'RouSi') {
+            //类型
+            var browsecat = $('#browsecat')
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 406, '纪录': 404,
+                             '体育': 407, '软件': 418, '学习': 40914, '': 409, '游戏': 409, 'MV': 406};
+            //如果当前类型在上述字典中
+            browsecat.val(409)
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            disableother('browsecat','specialcat');
+        }
+
         else if (forward_site == 'ICC') {
             var browsecat = $('#browsecat')
             var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
@@ -18623,10 +18659,20 @@ function auto_feed() {
             }
 
             try {
-                disableother('browsecat','specialcat');
+                if (raw_info.type == '游戏') {
+                    disableother('gamescat','browsecat');
+                    disableother('gamescat','specialcat');
+                } else {
+                    disableother('browsecat','specialcat');
+                    disableother('browsecat','gamescat');
+                }
             } catch (err) {}
             setTimeout(function(){
-                $('tr.mode_5').css('display', '');
+                if (raw_info.type == '游戏') {
+                    $('tr.mode_7').css('display', '');
+                } else {
+                    $('tr.mode_5').css('display', '');
+                }
             }, 1000);
             //媒介
             var medium_box = $('select[name="medium_sel[5]"]');
@@ -20589,7 +20635,8 @@ function auto_feed() {
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(6); break;
                 case 'DTS-HDMA': audiocodec_box.val(2); break;
                 case 'DTS-HDHR': audiocodec_box.val(3); break;
-                case 'TrueHD': case 'Atmos': audiocodec_box.val(1); break;
+                case 'TrueHD': audiocodec_box.val(5); break;
+                case 'Atmos': audiocodec_box.val(1); break;
                 case 'LPCM': audiocodec_box.val(7); break;
                 case 'DTS': audiocodec_box.val(14); break;
                 case 'AC3': audiocodec_box.val(4); break;
