@@ -1916,7 +1916,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/(pt.hdpost.top|asiancinema.me|hd-olimpo.club|jptv.club|blutopia.cc|desitorrents.tv|monikadesign.uk|hawke.uno)\/torrents\/\d+$/)){
         return 1;
     }
-    if (site_url.match(/^https:\/\/www.torrentseeds.org\/torrents\/\d+/)){
+    if (site_url.match(/^https:\/\/(www.)?torrentseeds.org\/torrents\/\d+/)){
         return 1;
     }
     if (site_url.match(/^https:\/\/zhuque.in\/torrent\/info\/\d+/)){
@@ -7216,7 +7216,7 @@ function get_douban_info(raw_info) {
             var data = formatInfo(await getInfo(doc, raw_info));
             raw_info.descr = data + '\n\n' + raw_info.descr;
 
-            if (!location.href.match(/usercp.php\?action=persona|pter.*upload.php|piggo.me.*upload.php|^https:\/\/movie.douban.com|\d+.\d+.\d+.\d+.*5678/)){
+            if (!location.href.match(/usercp.php\?action=persona|pter.*upload.php|piggo.me.*upload.php|^https:\/\/movie.douban.com|^https?:\/\/\d+.\d+.\d+.\d+.*5678/)){
                 if (raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
                     raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
                 }
@@ -7249,7 +7249,8 @@ function get_douban_info(raw_info) {
                         tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
                     }
                 }
-            } else if (site_url.match(/pter.*upload.php|piggo.*upload.php|\d+.\d+.\d+.\d+.*5678/)) {
+            } else if (site_url.match(/pter.*upload.php|piggo.*upload.php|^https?:\/\/\d+.\d+.\d+.\d+.*5678/)) {
+                console.log(site_url.match(/pter.*upload.php|piggo.*upload.php|\d+.\d+.\d+.\d+.*5678/)[0])
                 $('#descr').val(data + '\n\n' + $('#descr').val());
                 $('.get_descr[value=正在获取]').val("获取成功");
                 if (!$('input[name=small_descr]').val()) {
