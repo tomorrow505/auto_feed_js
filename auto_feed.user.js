@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.2.9
+// @version      2.0.3.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -13844,6 +13844,14 @@ function auto_feed() {
                     if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '10');}
                     if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '14'); }
                     break;
+                case 'SRVFI':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[]'), '4'); }
+                    if (labels.db) {check_label(document.getElementsByName('tags[]'), '12');}
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7');}
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '7');}
+                    break;
                 }
         } catch (err) {
         }
@@ -15967,6 +15975,80 @@ function auto_feed() {
                     }
                 });
             } catch(err){}
+        }
+
+        else if (forward_site == 'SRVFI') {
+            var browsecat = $('#browsecat');
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+                             '体育': 407, '软件': 414, '学习': 409, '游戏': 410, '': 409, 'MV': 406 };
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            var source_box = $('select[name="source_sel"]');
+            source_box.val(6);
+            switch(raw_info.medium_sel){
+                case 'UHD': case 'Blu-ray': case 'Remux': source_box.val(1); break;
+                case 'Encode': source_box.val(1); break;
+                case 'HDTV': source_box.val(4); break;
+                case 'WEB-DL': source_box.val(6); break;
+                case 'DVD': source_box.val(3);
+            }
+            if (raw_info.name.match(/HD.?DVD/i)) {
+                source_box.val(2);
+            }
+            //媒介
+            var medium_box = $('select[name="medium_sel"]');
+            medium_box.val(9); //默认其他
+            switch(raw_info.medium_sel){
+                case 'UHD': case 'Blu-ray': medium_box.val(1); break;
+                case 'DVD': medium_box.val(6); break;
+                case 'Remux': medium_box.val(3); break;
+                case 'HDTV': medium_box.val(5); break;
+                case 'Encode': medium_box.val(7); break;
+                case 'WEB-DL': medium_box.val(9); break;
+                case 'CD': medium_box.val(8);
+            }
+            if (raw_info.name.match(/minibd/i)) {
+                medium_box.val(4);
+            }
+            var codec_box = $('select[name="codec_sel"]');
+            switch (raw_info.codec_sel){
+                case 'H265': case 'X265': codec_box.val(2); break;
+                case 'H264': case 'X264': codec_box.val(1); break;
+                case 'AV1': codec_box.val(5); break;
+                case 'VC-1': codec_box.val(4); break;
+                case 'MPEG-2': codec_box.val(6); break;
+                case 'MPEG-4': codec_box.val(7);
+            }
+
+            var audiocodec_box = $('select[name="audiocodec_sel"]');
+            switch (raw_info.audiocodec_sel){
+                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(3); break;
+                case 'TrueHD': case 'Atmos': audiocodec_box.val(7); break;
+                case 'DTS': audiocodec_box.val(3); break;
+                case 'AC3': audiocodec_box.val(8); break;
+                case 'AAC': audiocodec_box.val(6); break;
+                case 'Flac': audiocodec_box.val(1); break;
+                case 'APE': audiocodec_box.val(2); break;
+            }
+            var standard_box = $('select[name="standard_sel"]');
+            var standard_dict = {
+                '4K': 4, '1080p': 3, '1080i': 3, '720p': 24, 'SD': 1, '': 0
+            };
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.val(index);
+            }
+
+            //制作组
+            $('select[name="team_sel"]').val(6);
+            $('select[name="team_sel"]>option').map(function(index,e){
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
+
         }
 
         else if (forward_site == 'BTSchool'){
