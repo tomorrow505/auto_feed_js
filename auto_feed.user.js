@@ -1556,9 +1556,8 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
     try {
         var imdbid = $('#info').html().match(/tt\d+/i)[0];
         var imdb_url = 'https://www.imdb.com/title/' + imdbid;
-        var html = $('#info').html();
-        html = html.replace(imdbid, `<a href="${imdb_url}" target="_blank">${imdbid}</a>`);
-        $('#info').html(html);
+        $("span.pl:contains('IMDb')").get(0).nextSibling.nodeValue = '';
+        $("span.pl:contains('IMDb')").after(`<a href="${imdb_url}" target="_blank"> ${imdbid}</a>`);
         $('a[href*="click_new"').click(e=>{
             e.preventDefault();
             window.open(imdb_url, target="_blank");
