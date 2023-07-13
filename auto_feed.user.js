@@ -855,7 +855,6 @@ const default_site_info = {
     'DiscFan': {'url': 'https://discfan.net/', 'enable': 1},
     'Dragon': {'url': 'https://www.dragonhd.xyz/', 'enable': 1},
     'FreeFarm': {'url': 'https://pt.0ff.cc/', 'enable': 1},
-    'GainB': {'url': 'https://gainbound.net/', 'enable': 1},
     'GPW': {'url': 'https://greatposterwall.com/', 'enable': 1},
     'HaiDan': {'url': 'https://www.haidan.video/', 'enable': 1},
     'HaresClub': {'url': 'https://club.hares.top/', 'enable': 1},
@@ -1090,7 +1089,6 @@ const reg_team_name = {
     'FRDS': /-FRDS|@FRDS/i,
     'BeiTai': /-BeiTai/i,
     'PigGo': /PigoHD|PigoWeb/i,
-    'GainBound': /-DGB|GBWEB/i,
     'CarPt': /CarPT/i,
     'HDVideo': /(-QHstudIo|-HDVWEB|-HDVMV)/i,
     'HDfans': /HDFans/i,
@@ -1701,7 +1699,7 @@ function walkDOM(n) {
         } else if (n.nodeName == '#text' && site_url.match(/npupt/)) {
             n.data = n.data.replace(/^ +| +$/g, '');
         } else if (n.nodeName == 'BR') {
-            if (site_url.match(/u2.dmhy.org|ourbits.club|totheglory.im.*|blutopia.cc.*|desitorrents.tv|hudbt|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse/i)) {
+            if (site_url.match(/u2.dmhy.org|ourbits.club|totheglory.im.*|blutopia.cc.*|desitorrents.tv|hudbt|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com/i)) {
                 n.innerHTML = '\r\n';
             }
         } else if (n.nodeName == 'LEGEND') {
@@ -5457,7 +5455,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         $('#begin_sign').click((e)=>{
             e.preventDefault();
-            var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'GainB', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao',
+            var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao',
             'HHClub', 'ptchina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT',
             'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi'];
 
@@ -10115,7 +10113,8 @@ function auto_feed() {
             if (!raw_info.name) {
                 raw_info.name = $(torrent_box).find('table.filelist_table').find('tr:eq(1)').find('td:eq(0)').text().replace(/\[|\]|\(|\)|mkv$|mp4$/g, '').trim();
             }
-            raw_info.descr = `[quote]\n${$(torrent_box).find('pre.MediaInfoText').text()}\n[/quote]\n\n`;
+            raw_info.descr = walkDOM(torrent_box.getElementsByClassName('MediaInfoText')[0].cloneNode(true));
+            raw_info.descr = `[quote]\n${raw_info.descr}\n[/quote]\n\n`;
             $(torrent_box).find('img[class="scale_image"]').each((index, e) => {
                 raw_info.descr += `[img]${$(e).attr('src')}[/img] `;
             });
@@ -11518,48 +11517,6 @@ function auto_feed() {
             } else {
                 $('#top').append(`<br><b><span id="checking"><font color="red">[缺少IMDB请自查]</font></span></b>`);
             }
-        } else if (origin_site == 'GainB') {
-            if (raw_info.name.match(/DGB|GBWEB/i)) {
-                if (raw_info.url) {
-                    $('#top').append(`<br><b><span id="checking"><font color="red">[禁转判断中……]</font></span></b>`);
-                    var check_url = 'https://gainbound.net/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search={imdbid}&search_area=4&search_mode=0';
-                    var imdbid = raw_info.url.match(/tt\d+/)[0];
-                    check_url = check_url.format({'imdbid': imdbid});
-                    getDoc(check_url, null, function(doc){
-                        var $table = $('table.main', doc);
-                        var torrentid = site_url.match(/id=\d+/)[0];
-                        var torrent = $table.find(`a[href*="${torrentid}"]`);
-                        if (torrent) {
-                            if (torrent.parent().html().match(/限转/)) {
-                                console.log($('#bookmark0').parent().text())
-                                if ($('#bookmark0').parent().text().match(/发布于(1天|\d+时).*前/)){
-                                    $('#checking').html('<font color="red">[限转资源]</font>');
-                                    if_exclusive = true;
-                                } else {
-                                    $('#checking').html('<font color="red">[限转资源已过期限]</font>');
-                                }
-                            } else if (torrent.parent().html().match(/禁转/)) {
-                                $('#checking').html('<font color="red">[禁转资源]</font>');
-                                if_exclusive = true;
-                            } else {
-                                $('#checking').html('<font color="red">[一般资源]</font>');
-                            }
-                        } else {
-                            $('#checking').html('<font color="red">[查找失败, 自己检查]</font>');
-                        }
-                    });
-                } else {
-                    $('#top').append(`<br><b><span id="checking"><font color="red">[缺少IMDB请自查]</font></span></b>`);
-                }
-            } else {
-                if ($('td:contains("标签"):eq(1)').next().text().match(/禁转/)) {
-                    $('#top').append(`<br><b><span id="checking"><font color="red">[禁转判断中……]</font></span></b>`);
-                    $('#checking').html('<font color="red">[禁转资源]</font>');
-                    if_exclusive = true;
-                } else {
-                    $('#top').append(`<br><b><span id="checking"><font color="red">[一般资源]</font></span></b>`);
-                }
-            }
         } else if (['HDDolby', 'HDHome', 'PThome', 'Audiences'].indexOf(origin_site) > -1) {
             if ($('tr:contains("标签"):last').find('span.txz').length || $('tr:contains("标签"):last').find('span.tjz').length) {
                 if_exclusive = true;
@@ -11911,25 +11868,12 @@ function auto_feed() {
                     e.preventDefault();
                     check_exist_tid(this.id);
                 }
-
-                if (this.id == 'GainB') {
-                    if (search_mode == 0) {
-                        return;
-                    }
-                    raw_info.standard_sel = raw_info.name.standard_sel();
-                    if ((raw_info.type != '电影' && raw_info.type != '纪录') || (raw_info.standard_sel == '4K' || raw_info.standard_sel == '720p') || raw_info.source_sel == '大陆') {
-                        if (!confirm('该资源可能不符合站点发布规则，确定发布？')) {
-                            e.preventDefault();
-                            return;
-                        }
-                    }
-                }
             }
         });
 
         if (['UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) > -1) {
             $('.forward_a').click(function(e){
-                if (['KG', 'Tik', 'PTP', 'HDCity', 'BTN', 'GPW', 'common_link', 'SC', 'avz', 'PHD', 'CNZ', 'TVV', 'GainB', 'ANT', 'NBL', 'CarPt'].indexOf(this.id) > -1) {
+                if (['KG', 'Tik', 'PTP', 'HDCity', 'BTN', 'GPW', 'common_link', 'SC', 'avz', 'PHD', 'CNZ', 'TVV', 'ANT', 'NBL', 'CarPt'].indexOf(this.id) > -1) {
                     return;
                 }
                 e.preventDefault();
@@ -13726,18 +13670,6 @@ function auto_feed() {
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '14'); }
                     if (raw_info.type == 'MV') {
                         check_label(document.getElementsByName('tags[4][]'), '12');
-                    }
-                    break;
-                case 'GainB':
-                    if (labels.gy){ $('input[name="tags[4][]"][value=5]').attr('checked', true); }
-                    if (labels.yy){ $('input[name="tags[4][]"][value=4]').attr('checked', true); }
-                    if (labels.zz){ $('input[name="tags[4][]"][value=6]').attr('checked', true); }
-                    if (labels.diy){ $('input[name="tags[4][]"][value=2]').attr('checked', true); }
-                    if (raw_info.descr.match(/mpls/i) && !labels.diy) {
-                        $('input[name="tags[4][]"][value=10]').attr('checked', true);
-                    }
-                    if (raw_info.small_descr.match(/特效字幕/)) {
-                        $('input[name="tags[4][]"][value=9]').attr('checked', true);
                     }
                     break;
                 case 'HDRoute':
@@ -18463,67 +18395,6 @@ function auto_feed() {
                 source_box.options[6].selected = true;
             } else if (raw_info.name.match(/vhsrip/i)) {
                 source_box.options[8].selected = true;
-            }
-        }
-
-        else if (forward_site == 'GainB') {
-            if (raw_info.type == '电影') {
-                $('#browsecat').val('401');
-            } else if (raw_info.type == '纪录') {
-                $('#browsecat').val('404');
-            } else if (raw_info.type == 'MV') {
-                $('#browsecat').val('406');
-            } else if (raw_info.type == '剧集' && ['香港', '台湾', '港台'].indexOf(raw_info.source_sel) >= 0) {
-                $('#browsecat').val('410');
-            }
-
-            //媒介
-            var medium_box = $('select[name="medium_sel[4]"]');
-            switch(raw_info.medium_sel){
-                case 'UHD':  case 'Blu-ray': medium_box.val(1); break;
-                case 'DVD': medium_box.val(6); break;
-                case 'Remux': medium_box.val(3); break;
-                case 'HDTV': medium_box.val(5); break;
-                case 'Encode': medium_box.val(7); break;
-                case 'WEB-DL': medium_box.val(4); break;
-                case 'CD': medium_box.val(8);
-            }
-            //视频编码
-            var codec_box = $('select[name="codec_sel[4]"]');
-            codec_box.val(5);
-            switch (raw_info.codec_sel){
-                case 'H265': case 'X265': codec_box.val(6); break;
-                case 'H264': case 'X264': codec_box.val(1); break;
-                case 'VC-1': codec_box.val(2); break;
-                case 'MPEG-2': codec_box.val(4); break;
-                case 'MPEG-4': codec_box.val(4); break;
-                case 'XVID': codec_box.options[3].selected = true;
-            }
-            //分辨率
-            var standard_box = $('select[name="standard_sel[4]"]');
-            var standard_dict = {
-                '1080p': 1, '1080i': 1, '720p': 6, 'SD': 4, '4K': 7
-            };
-            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
-                var index = standard_dict[raw_info.standard_sel];
-                standard_box.val(index);
-            }
-            //地区
-            var source_box = $('select[name="processing_sel[4]"]');
-            var source_dict = {'欧美': 4, '大陆': 0, '香港': 3, '台湾': 3, '日本': 5, '韩国': 5, '日韩': 5,
-                               '印度': 6, '': 0, '港台': 1};
-            if (source_dict.hasOwnProperty(raw_info.source_sel)){
-                var index = source_dict[raw_info.source_sel];
-                source_box.val(index);
-            }
-            if (raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/)) {
-                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
-                if (reg_region) {
-                    region = reg_region[2].trim(); //去除首尾空格
-                    if (region.match(/泰国/)){
-                        source_box.val(6);
-                    }
-                }
             }
         }
 
