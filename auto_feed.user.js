@@ -7583,6 +7583,9 @@ if (origin_site == "HDF" || origin_site == "PTP" || origin_site == 'HaresClub' |
 } else if (origin_site == "digitalcore") {
     sleep_time = 3000;
 }
+if (site_url.match(/https:\/\/redacted.ch\/upload.php#seperator#/)) {
+    sleep_time = 2500;
+}
 
 if (origin_site == 'BYR') {
     delete Array.prototype.remove;
@@ -12935,16 +12938,18 @@ function auto_feed() {
                             releaseTypes.push(releaseType.options[i].textContent.toLowerCase());
                         }
 
-                        var releaseTypeIndexJSON = parseInt(releaseJSON.response.group.releaseType);
-                        var releaseTypeNameJSON = JSONReleaseTypes[releaseTypeIndexJSON];
-                        var releaseTypeIndex = releaseTypes.indexOf(releaseTypeNameJSON.toLowerCase());
+                        try {
+                            var releaseTypeIndexJSON = parseInt(releaseJSON.response.group.releaseType);
+                            var releaseTypeNameJSON = JSONReleaseTypes[releaseTypeIndexJSON];
+                            var releaseTypeIndex = releaseTypes.indexOf(releaseTypeNameJSON.toLowerCase());
 
-                        if (releaseTypeIndex > -1) {
-                            releaseType.selectedIndex = releaseTypeIndex;
-                        } else {
-                            alert('The release type indicated in the JSON (' + releaseTypeNameJSON + ' [' + releaseTypeIndexJSON + ']) ' +
-                                  'is not one of the available release types!\n\nManually select the appropriate release type.');
-                        }
+                            if (releaseTypeIndex > -1) {
+                                releaseType.selectedIndex = releaseTypeIndex;
+                            } else {
+                                alert('The release type indicated in the JSON (' + releaseTypeNameJSON + ' [' + releaseTypeIndexJSON + ']) ' +
+                                      'is not one of the available release types!\n\nManually select the appropriate release type.');
+                            }
+                        } catch (err) {}
 
                         var editionYear = document.getElementById('remaster_year');
                         var editionTitle = document.getElementById('remaster_title');
