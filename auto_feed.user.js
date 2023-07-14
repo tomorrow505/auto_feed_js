@@ -937,7 +937,8 @@ const default_site_info = {
     'RS': {'url': 'https://resource.xidian.edu.cn/', 'enable': 1},
     'Panda': {'url': 'https://pandapt.net/', 'enable': 1},
     'KuFei': {'url': 'https://kufei.org/', 'enable': 1},
-    'RouSi': {'url': 'https://rousi.zip/', 'enable': 1}
+    'RouSi': {'url': 'https://rousi.zip/', 'enable': 1},
+    '悟空': {'url': 'https://wukongwendao.top/', 'enable': 1}
 };
 
 //初始化数据site_order/used_site_info等等
@@ -8590,19 +8591,24 @@ function auto_feed() {
             tbody = document.getElementById('details');
         }
 
+        function rebuild_href(raw_info) {
+            jump_str = dictToString(raw_info);
+            tag_aa = forward_r.getElementsByClassName('forward_a');
+            for (i = 0; i < tag_aa.length; i++) {
+                if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
+                    tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
+                }
+            }
+        }
+
         if (origin_site == 'RED'){
             if (site_url.match(/torrentid=(\d+)/)) {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
             getJson(`https://redacted.ch/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
                 raw_info.json =  JSON.stringify(data);
-                jump_str = dictToString(raw_info);
-                tag_aa = forward_r.getElementsByClassName('forward_a');
-                for (i = 0; i < tag_aa.length; i++) {
-                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
-                        tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
-                    }
-                }
+                raw_info.log_info = $(`#logs_${torrent_id}`).find('blockquote:last').text();
+                rebuild_href(raw_info);
             });
             raw_info.name = document.getElementsByTagName('h2')[0].textContent;
             raw_info.music_name = $('h2>span[dir="ltr"]').text();
@@ -8648,12 +8654,13 @@ function auto_feed() {
             }
             getJson(`https://lztr.me/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
                 raw_info.json =  JSON.stringify(data);
-                jump_str = dictToString(raw_info);
-                tag_aa = forward_r.getElementsByClassName('forward_a');
-                for (i = 0; i < tag_aa.length; i++) {
-                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
-                        tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
-                    }
+                rebuild_href(raw_info);
+                if (raw_info.small_descr.match(/Log \(\d+%\)/)) {
+                    var score = raw_info.small_descr.match(/Log \((\d+)%\)/)[1];
+                    getDoc(`https://lztr.me/torrents.php?action=log_ajax&logscore=${score}&torrentid=${torrent_id}`, null, function(doc){
+                        raw_info.log_info = $(doc).text();
+                        rebuild_href(raw_info);
+                    });
                 }
             });
             raw_info.name = document.getElementsByTagName('h2')[0].textContent;
@@ -8720,6 +8727,16 @@ function auto_feed() {
             }
             getJson(`https://orpheus.network/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
                 raw_info.json =  JSON.stringify(data);
+                if (raw_info.small_descr.match(/Log \(\d+%\)/)) {
+                    var score = raw_info.small_descr.match(/Log \((\d+)%\)/)[1];
+                    getDoc(`https://orpheus.network/torrents.php?action=viewlog&logscore=${score}&torrentid=${torrent_id}`, null, function(doc){
+                        raw_info.log_url = 'https://orpheus.network/' + $('a:contains(View Raw Log)', doc).attr('href');
+                        // getDoc(raw_info.log_url, null, function(doc) {
+                        //     console.log($(doc).text());
+                        // });
+                        rebuild_href(raw_info);
+                    });
+                }
                 rebuild_href(raw_info);
             });
             raw_info.name = document.getElementsByTagName('h2')[0].textContent.replace(/–/g, '-');
@@ -8791,8 +8808,7 @@ function auto_feed() {
             if (site_url.match(/torrentid=(\d+)/)) {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
-            getJson(`https://dicmusic.club/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
-                raw_info.json =  JSON.stringify(data);
+            function rebuild_href(raw_info) {
                 jump_str = dictToString(raw_info);
                 tag_aa = forward_r.getElementsByClassName('forward_a');
                 for (i = 0; i < tag_aa.length; i++) {
@@ -8800,6 +8816,20 @@ function auto_feed() {
                         tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
                     }
                 }
+            }
+            getJson(`https://dicmusic.club/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
+                raw_info.json =  JSON.stringify(data);
+                if (raw_info.small_descr.match(/Log \(\d+%\)/)) {
+                    var score = raw_info.small_descr.match(/Log \((\d+)%\)/)[1];
+                    getDoc(`https://dicmusic.club/torrents.php?action=viewlog&logscore=${score}&torrentid=${torrent_id}`, null, function(doc){
+                        raw_info.log_url = 'https://dicmusic.club/' + $('a:contains(查看原始 Log)', doc).attr('href');
+                        // getDoc(raw_info.log_url, null, function(doc) {
+                        //     console.log($(doc).text());
+                        // });
+                        rebuild_href(raw_info);
+                    });
+                }
+                rebuild_href(raw_info);
             });
             raw_info.name = document.getElementsByTagName('h2')[0].textContent;
             raw_info.music_name = $('h2>span[dir="ltr"]').text();
@@ -12572,6 +12602,26 @@ function auto_feed() {
                     console.log(err)
                 }
                 raw_info.descr = raw_info.descr.replace(/^\[img\].*?\[\/img\]([\n\s]*)/, '');
+
+                function add_log(name, log_txt) {
+                    var fileData = new Blob([log_txt], { type: "text/plain" });
+                    var fileName = name + ".log";
+                    console.log(log_txt);
+                    var fileInput = document.getElementsByName('nfo1')[0];
+                    let container = new DataTransfer();
+                    const files = new window.File([fileData], fileName, { type: 'text/plain' });
+                    container.items.add(files);
+                    fileInput.files = container.files;
+                }
+
+                if (raw_info.log_url !== undefined) {
+                    getDoc(raw_info.log_url, null, function(doc) {
+                        raw_info.log_info = $(doc).text();
+                        add_log(raw_info.name, raw_info.log_info);
+                    });
+                } else if (raw_info.log_info !== undefined && raw_info.log_info) {
+                    add_log(raw_info.name, raw_info.log_info);
+                }
 
                 if (raw_info.music_media) {
                     raw_info.music_media += raw_info.edition_info ? raw_info.edition_info: '';
