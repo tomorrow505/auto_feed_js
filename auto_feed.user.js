@@ -849,7 +849,7 @@ const default_site_info = {
     'CG': {'url': 'http://cinemageddon.net/', 'enable': 1},
     'CMCT': {'url': "https://springsunday.net/", 'enable': 1},
     'CNZ': {'url': 'https://cinemaz.to/', 'enable': 1},
-    'CHDBits': {'url': "https://chdbits.co/", 'enable': 1},
+    'CHDBits': {'url': "https://ptchdbits.co/", 'enable': 1},
     'DaJiao': {'url': 'https://dajiao.cyou/', 'enable': 1},
     'DICMusic': {'url': "https://dicmusic.club/", 'enable': 1},
     'DiscFan': {'url': 'https://discfan.net/', 'enable': 1},
@@ -1373,6 +1373,7 @@ var raw_info = {
     'edition_info': '',//音乐特有
     'music_name': '', //音乐特有
     'music_author': '', //音乐特有
+    'log_info': '', //音乐特有
     'animate_info': '', //动漫特有|针对北邮人北洋U2的命名方式
     'anidb': '', //动漫特有
     'torrentName': '', //动漫辅助
@@ -3084,9 +3085,7 @@ function get_size_from_descr(descr){
         } else if (descr.match(/size[^\d]{0,20}(\d+\.\d+).+GiB/i)) {
             size_ = parseInt(descr.match(/size[^\d]{0,20}(\d+\.\d+).+GiB/i)[1]);
         }
-    } catch (err) {
-        // alert(err)
-    }
+    } catch (err) {}
     return size_;
 }
 
@@ -3573,7 +3572,7 @@ function addPoster(url, forward_site) {
                 $('iframe[src*="target=cover"]').contents().find('#file')[0].files = container.files;
             }
         });
-    } catch (err) {alert(err)}
+    } catch (err) {alert('封面图加载错误，很有可能是后缀不对')}
 };
 
 function reBuildHref(raw_info, forward_r) {
@@ -7430,6 +7429,20 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
             get_douban_info(tmp_raw_info);
         });
 
+        var year = $('span.year').text().match(/\d+/)[0];
+        var ch_name = $('h1').find('span:first').text().split(' ')[0];
+        var en_name = $('h1').find('span:first').text().split(ch_name)[1].trim();
+        if (!en_name || !en_name.match(/^[a-zA-Z0-9 '-]*$/)) {
+            var aka_names = $('#info span.pl:contains("又名")')[0].nextSibling.textContent.trim();
+            aka_names.split('/').forEach((e,index)=>{
+                if (e.match(/^[a-zA-Z0-9 '-:]*$/) && !en_name) {
+                    en_name = e;
+                }
+            });
+        }
+        var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.–.', '–');
+        $('#info').append(`<br>名称: ${name}`);
+
         $('#mainpic').append(`<br><a href="#">海报转存</a>`);
         add_picture_transfer();
         var poster = $('#mainpic img')[0].src.replace(
@@ -8606,8 +8619,14 @@ function auto_feed() {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
             getJson(`https://redacted.ch/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
-                raw_info.json =  JSON.stringify(data);
-                raw_info.log_info = $(`#logs_${torrent_id}`).find('blockquote:last').text();
+                raw_info.json = JSON.stringify(data);
+                raw_info.log_info = [];
+                $(`#logs_${torrent_id}`).find('blockquote').map((index, e)=>{
+                    if (!$(e).text().match(/max 100/)) {
+                        raw_info.log_info.push($(e).text());
+                    }
+                });
+                raw_info.log_info = raw_info.log_info.join('==logs==');
                 rebuild_href(raw_info);
             });
             raw_info.name = document.getElementsByTagName('h2')[0].textContent;
@@ -8657,8 +8676,13 @@ function auto_feed() {
                 rebuild_href(raw_info);
                 if (raw_info.small_descr.match(/Log \(\d+%\)/)) {
                     var score = raw_info.small_descr.match(/Log \((\d+)%\)/)[1];
-                    getDoc(`https://lztr.me/torrents.php?action=log_ajax&logscore=${score}&torrentid=${torrent_id}`, null, function(doc){
-                        raw_info.log_info = $(doc).text();
+                    get_log(torrent_id, score);
+                    raw_info.log_info = [];
+                    $(`#logs_${torrent_id}`).find('.log_section').wait(function(){
+                        $(`#logs_${torrent_id}`).find('.log_section').map((index, e)=>{
+                            raw_info.log_info.push($(e).text());
+                        });
+                        raw_info.log_info = raw_info.log_info.join('==logs==');
                         rebuild_href(raw_info);
                     });
                 }
@@ -8729,11 +8753,14 @@ function auto_feed() {
                 raw_info.json =  JSON.stringify(data);
                 if (raw_info.small_descr.match(/Log \(\d+%\)/)) {
                     var score = raw_info.small_descr.match(/Log \((\d+)%\)/)[1];
-                    getDoc(`https://orpheus.network/torrents.php?action=viewlog&logscore=${score}&torrentid=${torrent_id}`, null, function(doc){
-                        raw_info.log_url = 'https://orpheus.network/' + $('a:contains(View Raw Log)', doc).attr('href');
-                        // getDoc(raw_info.log_url, null, function(doc) {
-                        //     console.log($(doc).text());
-                        // });
+                    $('a:contains("View logs")').click();
+                    raw_info.log_info = [];
+                    $(`#viewlog_${torrent_id}`).find('.log_section').wait(function(){
+                        $(`#viewlog_${torrent_id}`).find('.log_section').map((index, e)=>{
+                            raw_info.log_info.push($(e).find('blockquote').text().trim());
+                            console.log($(e).find('blockquote').text().trim())
+                        });
+                        raw_info.log_info = raw_info.log_info.join('==logs==');
                         rebuild_href(raw_info);
                     });
                 }
@@ -8808,24 +8835,18 @@ function auto_feed() {
             if (site_url.match(/torrentid=(\d+)/)) {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
-            function rebuild_href(raw_info) {
-                jump_str = dictToString(raw_info);
-                tag_aa = forward_r.getElementsByClassName('forward_a');
-                for (i = 0; i < tag_aa.length; i++) {
-                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
-                        tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
-                    }
-                }
-            }
             getJson(`https://dicmusic.club/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
                 raw_info.json =  JSON.stringify(data);
                 if (raw_info.small_descr.match(/Log \(\d+%\)/)) {
                     var score = raw_info.small_descr.match(/Log \((\d+)%\)/)[1];
-                    getDoc(`https://dicmusic.club/torrents.php?action=viewlog&logscore=${score}&torrentid=${torrent_id}`, null, function(doc){
-                        raw_info.log_url = 'https://dicmusic.club/' + $('a:contains(查看原始 Log)', doc).attr('href');
-                        // getDoc(raw_info.log_url, null, function(doc) {
-                        //     console.log($(doc).text());
-                        // });
+                    $('a:contains("查看Log")').click();
+                    raw_info.log_info = [];
+                    $(`#viewlog_${torrent_id}`).find('.log_section').wait(function(){
+                        $(`#viewlog_${torrent_id}`).find('.log_section').map((index, e)=>{
+                            raw_info.log_info.push($(e).find('blockquote:last').text().trim());
+                            console.log($(e).find('blockquote:last').text().trim())
+                        });
+                        raw_info.log_info = raw_info.log_info.join('==logs==');
                         rebuild_href(raw_info);
                     });
                 }
@@ -12603,24 +12624,27 @@ function auto_feed() {
                 }
                 raw_info.descr = raw_info.descr.replace(/^\[img\].*?\[\/img\]([\n\s]*)/, '');
 
-                function add_log(name, log_txt) {
+                function add_log(name, log_txt, index) {
+                    log_txt = log_txt.replace(/^\n{0,5}\[hide\]/, '').replace(/\[\/hide\]/, '').replace(/^Score.*?\(max 100\)/, '').trim();
                     var fileData = new Blob([log_txt], { type: "text/plain" });
-                    var fileName = name + ".log";
-                    console.log(log_txt);
-                    var fileInput = document.getElementsByName('nfo1')[0];
+                    var fileName = `${name}-${index+1}.log`;
+                    console.log(log_txt)
+                    var fileInput = $('input[name*=nfo1]:last')[0];
                     let container = new DataTransfer();
                     const files = new window.File([fileData], fileName, { type: 'text/plain' });
                     container.items.add(files);
                     fileInput.files = container.files;
                 }
 
-                if (raw_info.log_url !== undefined) {
-                    getDoc(raw_info.log_url, null, function(doc) {
-                        raw_info.log_info = $(doc).text();
-                        add_log(raw_info.name, raw_info.log_info);
-                    });
-                } else if (raw_info.log_info !== undefined && raw_info.log_info) {
-                    add_log(raw_info.name, raw_info.log_info);
+                if (raw_info.log_info !== '' && raw_info.log_info) {
+                    raw_info.log_info = raw_info.log_info.split('==logs==');
+                    add_log(raw_info.name, raw_info.log_info[0], 0);
+                    if (raw_info.log_info.length > 1) {
+                        for (var index = 1; index < raw_info.log_info.length; index++) {
+                            $('#nfoadd').click();
+                            add_log(raw_info.name, raw_info.log_info[index], index);
+                        }
+                    }
                 }
 
                 if (raw_info.music_media) {
@@ -21010,7 +21034,6 @@ function auto_feed() {
                     });
                     $('textarea[name="screenshots"]').val(img_urls.join('\n'));
                 } catch(Err) {
-                    alert(Err)
                     if (raw_info.full_mediainfo){
                         $('textarea[name="mediainfo"]').val(raw_info.full_mediainfo);
                     } else {
