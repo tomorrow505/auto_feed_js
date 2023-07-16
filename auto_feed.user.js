@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.3.0
+// @version      2.0.3.1
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -859,7 +859,7 @@ const default_site_info = {
     'HaiDan': {'url': 'https://www.haidan.video/', 'enable': 1},
     'HaresClub': {'url': 'https://club.hares.top/', 'enable': 1},
     'HD4FANS': {'url': 'https://pt.hd4fans.org/', 'enable': 1},
-    'HDArea': {'url': 'https://www.hdarea.co/', 'enable': 1},
+    'HDArea': {'url': 'https://www.hdarea.club/', 'enable': 1},
     'HDAtmos': {'url': 'https://hdatmos.club/', 'enable': 1},
     'HDB': {'url': 'https://hdbits.org/', 'enable': 1},
     'HDChina': {'url': "https://hdchina.org/", 'enable': 1},
@@ -1099,7 +1099,8 @@ const reg_team_name = {
     'HaresClub': /Hares?WEB|HaresTV|DIY@Hares|-hares/i,
     'HDPt': /hdptweb/i,
     'UBits': /-UBits/i,
-    'Panda': /AilMWeb|-PANDA|@Panda/i
+    'Panda': /AilMWeb|-PANDA|@Panda/i,
+    'UBits': /@UBits|-UBits/
 };
 const thanks_str = "[quote][b][color=Blue]转自{site}，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
@@ -11585,7 +11586,7 @@ function auto_feed() {
             if_exclusive = true;
         }
 
-        if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$/i)) {
+        if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$|UBits$/i)) {
             $('#PTT').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至PTT');
         }
 
