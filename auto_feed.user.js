@@ -1555,13 +1555,10 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
         $('.search_urls').find('a').css("color", "darkblue");
     }
     try {
-        var imdbid = $('#info').html().match(/tt\d+/i)[0];
-        var imdb_url = 'https://www.imdb.com/title/' + imdbid;
-        $("span.pl:contains('IMDb')").get(0).nextSibling.nodeValue = '';
-        $("span.pl:contains('IMDb')").after(`<a href="${imdb_url}" target="_blank"> ${imdbid}</a>`);
-        $('a[href*="click_new"').click(e=>{
-            e.preventDefault();
-            window.open(imdb_url, target="_blank");
+        let imdb_anchor = $('#info span.pl:contains("IMDb")');
+        let imdb_id = fetch_anchor(imdb_anchor);
+        let imdb_url = `https://www.imdb.com/title/${imdb_id}/`
+        $(imdb_anchor[0].nextSibling).replaceWith(`&nbsp;<a href="${imdb_link}" target="_blank">${imdb_id}</a>`);
         });
     } catch (err) {}
 }
