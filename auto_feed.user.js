@@ -7434,23 +7434,24 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
                 var imdb_url = 'https://www.imdb.com/title/' + imdbid;
                 $("span.pl:contains('IMDb')").get(0).nextSibling.nodeValue = '';
                 $("span.pl:contains('IMDb')").after(`<a href="${imdb_url}" target="_blank"> ${imdbid}</a>`);
-                var year = $('span.year').text().match(/\d+/)[0];
-                var ch_name = $('h1').find('span:first').text().split(' ')[0];
-                var en_name = $('h1').find('span:first').text().split(ch_name)[1].trim();
-                if (!en_name || !en_name.match(/^[a-zA-Z0-9 '-]*$/)) {
-                    var need_en_name = true;
-                    var aka_names = $('#info span.pl:contains("又名")')[0].nextSibling.textContent.trim();
-                    aka_names.split('/').forEach((e,index)=>{
-                        if (e.match(/^[a-zA-Z0-9 '-:]*$/) && need_en_name) {
-                            en_name = e;
-                            need_en_name = false;
-                        }
-                    });
-                }
-                var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.–.', '–');
-                $('#info').append(`<br><span class="pl">影视名称:</span> ${name}<br>`);
             }
         },1000)
+
+        var year = $('span.year').text().match(/\d+/)[0];
+        var ch_name = $('h1').find('span:first').text().split(' ')[0];
+        var en_name = $('h1').find('span:first').text().split(ch_name)[1].trim();
+        if (!en_name || !en_name.match(/^[a-zA-Z0-9 '-]*$/)) {
+                var need_en_name = true;
+                var aka_names = $('#info span.pl:contains("又名")')[0].nextSibling.textContent.trim();
+                aka_names.split('/').forEach((e,index)=>{
+                    if (e.match(/^[a-zA-Z0-9 '-:]*$/) && need_en_name) {
+                        en_name = e;
+                        need_en_name = false;
+                    }
+                });
+        }
+        var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.–.', '–');
+        $('#info').append(`<br><span class="pl">影视名称:</span> ${name}`);
 
         $('#mainpic').append(`<br><a href="#">海报转存</a>`);
         add_picture_transfer();
