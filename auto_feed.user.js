@@ -1557,8 +1557,6 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
     try {
         var imdbid = $('#info').html().match(/tt\d+/i)[0];
         var imdb_url = 'https://www.imdb.com/title/' + imdbid;
-        $("span.pl:contains('IMDb')").get(0).nextSibling.nodeValue = '';
-        $("span.pl:contains('IMDb')").after(`<a href="${imdb_url}" target="_blank"> ${imdbid}</a>`);
         $('a[href*="click_new"').click(e=>{
             e.preventDefault();
             window.open(imdb_url, target="_blank");
@@ -7424,25 +7422,35 @@ if (site_url.match(/jpopsuki.eu.*torrents.php\?id=/)) {
 //添加豆瓣到ptgen跳转
 if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jump){
     $(document).ready(function () {
-        $('#info').append(`描述: <a id="copy">复制</a>`);
+        $('#info').append(`<span class="pl">描述信息: </span><a id="copy">复制</a>`);
         $('#copy').click(e=>{
             var tmp_raw_info = {'url': '', 'dburl': match_link('douban', site_url), 'descr': ''};
             get_douban_info(tmp_raw_info);
         });
 
-        var year = $('span.year').text().match(/\d+/)[0];
-        var ch_name = $('h1').find('span:first').text().split(' ')[0];
-        var en_name = $('h1').find('span:first').text().split(ch_name)[1].trim();
-        if (!en_name || !en_name.match(/^[a-zA-Z0-9 '-]*$/)) {
-            var aka_names = $('#info span.pl:contains("又名")')[0].nextSibling.textContent.trim();
-            aka_names.split('/').forEach((e,index)=>{
-                if (e.match(/^[a-zA-Z0-9 '-:]*$/) && !en_name) {
-                    en_name = e;
+        setTimeout(function(){
+            if (!$('#info').find('a[href*="www.imdb.com"]').length) {
+                var imdbid = $('#info').html().match(/tt\d+/i)[0];
+                var imdb_url = 'https://www.imdb.com/title/' + imdbid;
+                $("span.pl:contains('IMDb')").get(0).nextSibling.nodeValue = '';
+                $("span.pl:contains('IMDb')").after(`<a href="${imdb_url}" target="_blank"> ${imdbid}</a>`);
+                var year = $('span.year').text().match(/\d+/)[0];
+                var ch_name = $('h1').find('span:first').text().split(' ')[0];
+                var en_name = $('h1').find('span:first').text().split(ch_name)[1].trim();
+                if (!en_name || !en_name.match(/^[a-zA-Z0-9 '-]*$/)) {
+                    var need_en_name = true;
+                    var aka_names = $('#info span.pl:contains("又名")')[0].nextSibling.textContent.trim();
+                    aka_names.split('/').forEach((e,index)=>{
+                        if (e.match(/^[a-zA-Z0-9 '-:]*$/) && need_en_name) {
+                            en_name = e;
+                            need_en_name = false;
+                        }
+                    });
                 }
-            });
-        }
-        var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.–.', '–');
-        $('#info').append(`<br>名称: ${name}`);
+                var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.–.', '–');
+                $('#info').append(`<br><span class="pl">影视名称:</span> ${name}<br>`);
+            }
+        },1000)
 
         $('#mainpic').append(`<br><a href="#">海报转存</a>`);
         add_picture_transfer();
