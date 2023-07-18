@@ -896,6 +896,7 @@ const default_site_info = {
     'OurBits': {'url': 'https://ourbits.club/', 'enable': 1},
     'PHD': {'url': 'https://privatehd.to/', 'enable': 1},
     'PigGo': {'url': 'https://piggo.me/', 'enable': 1},
+    'PTCafe': {'url': 'https://ptcafe.club/', 'enable': 1},
     'ptchina': {'url': 'https://ptchina.org/', 'enable': 1},
     'PTer': {'url': 'https://pterclub.com/', 'enable': 1},
     'PThome': {'url': 'https://www.pthome.net/', 'enable': 1},
@@ -1100,7 +1101,8 @@ const reg_team_name = {
     'HDPt': /hdptweb/i,
     'UBits': /-UBits/i,
     'Panda': /AilMWeb|-PANDA|@Panda/i,
-    'UBits': /@UBits|-UBits/
+    'UBits': /@UBits|-UBits/,
+    'PTCafe': /CafeWEB|CafeTV|DIY@PTCafe/i
 };
 const thanks_str = "[quote][b][color=Blue]转自{site}，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
@@ -5456,7 +5458,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao',
             'HHClub', 'ptchina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT',
-            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi'];
+            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
@@ -13871,6 +13873,12 @@ function auto_feed() {
                     if (labels.db) {check_label(document.getElementsByName('tags[]'), '12');}
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '7');}
+                    break;
+                case 'PTCafe':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     break;
                 }
         } catch (err) {
@@ -23259,6 +23267,112 @@ function auto_feed() {
             // TODO 处理
 
             // TODO 制作组
+        }
+
+        else if (forward_site == 'PTCafe') {
+            //类型
+            var browsecat = $('#browsecat');
+            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406, 
+                             '体育': 407, '音乐': 408, '其他': 409};
+            browsecat.val(409);
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+
+            //来源
+            var source_box = $('select[name="source_sel[4]"]');
+            source_box.val(7);
+            switch(raw_info.source_sel){
+                case '大陆': source_box.val(1); break;
+                case '港澳台': source_box.val(2); break;
+                case '欧美': source_box.val(3); break;
+                case '日本': source_box.val(4); break;
+                case '韩国': source_box.val(5); break;
+                case '印度': source_box.val(6); break;
+                case '其他': source_box.val(7); break;
+            }
+
+            //媒介
+            var medium_box = $('select[name="medium_sel[4]"]');
+            medium_box.val(13);
+            switch(raw_info.medium_sel){
+                case 'Blu-ray': case 'UHD': medium_box.val(1); break;
+                case 'Blu-ray': medium_box.val(2); break;
+                case 'Remux': case 'UHD': medium_box.val(3); break;
+                case 'Remux': medium_box.val(4); break;
+                case 'Encode': medium_box.val(5); break;
+                case 'WEB-DL': medium_box.val(6); break;
+                case 'UHDTV': medium_box.val(7); break;
+                case 'HDTV': medium_box.val(8); break;
+                case 'TV': medium_box.val(9); break;
+                case 'VHS': medium_box.val(10); break;
+                case 'DVD': medium_box.val(11); break;
+                case 'CD': medium_box.val(12); break;
+                case 'Other': medium_box.val(13); break;
+            }
+
+            //视频编码
+            var codec_box = $('select[name="codec_sel[4]"]');
+            codec_box.val(11);
+            switch (raw_info.codec_sel){
+                case 'H265': codec_box.val(1); break;
+                case 'H264': codec_box.val(2); break;
+                case 'X265': codec_box.val(3); break;
+                case 'X264': codec_box.val(4); break;
+                case 'VC-1': codec_box.val(5); break;
+                case 'MPEG-2': codec_box.val(6); break;
+                case 'MPEG-4': codec_box.val(7); break;
+                case 'XVID': codec_box.val(8); break;
+                case 'VP9': codec_box.val(9); break;
+                case 'DIVX': codec_box.val(10); break;
+                case 'Other': codec_box.val(11); break;
+            }
+
+            //音频编码
+            var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
+            audiocodec_box.val(16);
+            switch (raw_info.audiocodec_sel){
+                case 'Atmos': audiocodec_box.val(1); break;
+                case 'TrueHD': audiocodec_box.val(2); break;
+                case 'DTS-HDMA:X 7.1': audiocodec_box.val(3); break;
+                case 'DTS-HDMA': audiocodec_box.val(4); break;
+                case 'DTS-HDHR': audiocodec_box.val(5); break;
+                case 'DTS': audiocodec_box.val(6); break;
+                case 'AC3':
+                    audiocodec_box.val(7);
+                    if (raw_info.name.match(/DD\+|DDP/i)) {
+                        audiocodec_box.val(8);
+                    }
+                    break;
+                case 'AAC': audiocodec_box.val(9); break;
+                case 'LPCM': audiocodec_box.val(10); break;
+                case 'MP3': audiocodec_box.val(11); break;
+                case 'Flac': audiocodec_box.val(12); break;
+                case 'APE': audiocodec_box.val(13); break;
+                case 'OGG': audiocodec_box.val(14); break;
+                case 'WAV': audiocodec_box.val(15); break;
+                case 'Other': codec_box.val(16);
+            }
+
+            //分辨率
+            var standard_box = $('select[name="standard_sel[4]"]');
+            var standard_dict = {
+                '8K': 1, '4K': 2, '1080p': 3, '720p': 4, 'SD': 5
+            }
+            standard_box.val(6);
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.val(index);
+            }
+
+            // 制作组
+            $('select[name="team_sel[4]"]').val(1);
+            $('select[name="team_sel[4]"]>option').map(function(index,e){
+                if (raw_info.name.match(e.innerText)) {
+                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
         }
 
     } else if (judge_if_the_site_as_source() == 2) { //HDCity
