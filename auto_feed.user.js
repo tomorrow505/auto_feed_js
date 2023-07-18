@@ -859,7 +859,7 @@ const default_site_info = {
     'HaiDan': {'url': 'https://www.haidan.video/', 'enable': 1},
     'HaresClub': {'url': 'https://club.hares.top/', 'enable': 1},
     'HD4FANS': {'url': 'https://pt.hd4fans.org/', 'enable': 1},
-    'HDArea': {'url': 'https://www.hdarea.club/', 'enable': 1},
+    'HDArea': {'url': 'https://hdarea.club/', 'enable': 1},
     'HDAtmos': {'url': 'https://hdatmos.club/', 'enable': 1},
     'HDB': {'url': 'https://hdbits.org/', 'enable': 1},
     'HDChina': {'url': "https://hdchina.org/", 'enable': 1},
@@ -16004,6 +16004,7 @@ function auto_feed() {
                     standard_box.options[index].selected = true;
                 }
 
+                $('select[name="team_sel"]').val(6);
                 $('select[name="team_sel"]>option').map(function(index,e){
                     if (raw_info.name.match(e.innerText)) {
                         $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
