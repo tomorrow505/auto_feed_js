@@ -7430,29 +7430,34 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
             get_douban_info(tmp_raw_info);
         });
 
-        setTimeout(function(){
-            if (!$('#info').find('a[href*="www.imdb.com"]').length) {
-                var imdbid = $('#info').html().match(/tt\d+/i)[0];
-                var imdb_url = 'https://www.imdb.com/title/' + imdbid;
-                $("span.pl:contains('IMDb')").get(0).nextSibling.nodeValue = '';
-                $("span.pl:contains('IMDb')").after(`<a href="${imdb_url}" target="_blank"> ${imdbid}</a>`);
-                var year = $('span.year').text().match(/\d+/)[0];
-                var ch_name = $('h1').find('span:first').text().split(' ')[0];
-                var en_name = $('h1').find('span:first').text().split(ch_name)[1].trim();
-                if (!en_name || !en_name.match(/^[a-zA-Z0-9 '-]*$/)) {
-                    var need_en_name = true;
-                    var aka_names = $('#info span.pl:contains("又名")')[0].nextSibling.textContent.trim();
-                    aka_names.split('/').forEach((e,index)=>{
-                        if (e.match(/^[a-zA-Z0-9 '-:]*$/) && need_en_name) {
-                            en_name = e;
-                            need_en_name = false;
-                        }
-                    });
+        var year = $('span.year').text().match(/\d+/)[0];
+        var ch_name = $('h1').find('span:first').text().split(' ')[0];
+
+        try {
+            var imdbid = $('#info').html().match(/tt\d+/i)[0];
+            var imdb_url = 'https://www.imdb.com/title/' + imdbid;
+            setTimeout(function(){
+                if (!$('#info').find('a[href*="www.imdb.com"]').length) {
+                    $("span.pl:contains('IMDb')").get(0).nextSibling.nodeValue = '';
+                    $("span.pl:contains('IMDb')").after(`<a href="${imdb_url}" target="_blank"> ${imdbid}</a>`);
                 }
-                var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.–.', '–');
+            },1000);
+            getDoc(imdb_url, null, function(doc){
+                var en_name = $('h1', doc).text();
+                var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.-', '-');
                 $('#info').append(`<br><span class="pl">影视名称:</span> ${name}<br>`);
-            }
-        },1000)
+            });
+        } catch (err) {
+            var en_name = null;
+            var aka_names = $('#info span.pl:contains("又名")')[0].nextSibling.textContent.trim();
+            aka_names.split('/').forEach((e,index)=>{
+                if (e.match(/^[a-zA-Z0-9 '-:]*$/)) {
+                    en_name = e;
+                }
+            });
+            var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.-', '-');
+            $('#info').append(`<br><span class="pl">影视名称:</span> ${name}<br>`);
+        }
 
         $('#mainpic').append(`<br><a href="#">海报转存</a>`);
         add_picture_transfer();
@@ -11590,6 +11595,8 @@ function auto_feed() {
             if ($('strong:contains("THIS IS A BEYONDHD EXCLUSIVE.")').length) {
                 if_exclusive = true;
             }
+        } else if (origin_site == 'HDB' && $('div.torrent-title>span.exclusive').length) {
+            if_exclusive = true;
         }
 
         if ((raw_info.name + raw_info.descr + raw_info.small_descr).match(/(拒绝转发|不允许转发|严禁转发|谢绝.*?转载|禁转|禁止转载|禁转|謝絕.*?轉載|exclusive|严禁转载)/i)) {
@@ -23297,9 +23304,9 @@ function auto_feed() {
             var medium_box = $('select[name="medium_sel[4]"]');
             medium_box.val(13);
             switch(raw_info.medium_sel){
-                case 'Blu-ray': case 'UHD': medium_box.val(1); break;
+                case 'UHD': medium_box.val(1); break;
                 case 'Blu-ray': medium_box.val(2); break;
-                case 'Remux': case 'UHD': medium_box.val(3); break;
+                case 'Remux': medium_box.val(3); break;
                 case 'Remux': medium_box.val(4); break;
                 case 'Encode': medium_box.val(5); break;
                 case 'WEB-DL': medium_box.val(6); break;
@@ -23309,7 +23316,6 @@ function auto_feed() {
                 case 'VHS': medium_box.val(10); break;
                 case 'DVD': medium_box.val(11); break;
                 case 'CD': medium_box.val(12); break;
-                case 'Other': medium_box.val(13); break;
             }
 
             //视频编码
@@ -23326,7 +23332,6 @@ function auto_feed() {
                 case 'XVID': codec_box.val(8); break;
                 case 'VP9': codec_box.val(9); break;
                 case 'DIVX': codec_box.val(10); break;
-                case 'Other': codec_box.val(11); break;
             }
 
             //音频编码
@@ -23352,7 +23357,6 @@ function auto_feed() {
                 case 'APE': audiocodec_box.val(13); break;
                 case 'OGG': audiocodec_box.val(14); break;
                 case 'WAV': audiocodec_box.val(15); break;
-                case 'Other': codec_box.val(16);
             }
 
             //分辨率
