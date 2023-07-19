@@ -20411,6 +20411,19 @@ function auto_feed() {
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
+
+            //来源
+            var source_box = $('select[name="source_sel[4]"]');
+            source_box.val(28);
+            switch(raw_info.medium_sel){
+                case 'UHD': source_box.val(23);
+                case 'Blu-ray': case 'Remux': case 'Encode':
+                    source_box.val(22); break;
+                case 'HDTV': source_box.val(26); break;
+                case 'WEB-DL': source_box.val(24); break;
+                case 'DVD': source_box.val(25); break;
+                case 'CD': medium_box.val(27);
+            }
             var medium_box = $('select[name="medium_sel[4]"]');
             switch(raw_info.medium_sel){
                 case 'UHD': medium_box.val(10); break;
@@ -20422,9 +20435,7 @@ function auto_feed() {
                 case 'WEB-DL': medium_box.val(14); break;
                 case 'CD': medium_box.val(20);
             }
-            if (raw_info.name.match(/webrip/i)){
-                medium_box.val(15);
-            }
+
             //视频编码
             var codec_box = $('select[name="codec_sel[4]"]');
             codec_box.val(11);
@@ -20439,32 +20450,24 @@ function auto_feed() {
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             audiocodec_box.val(7);
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HDHR':
-                    audiocodec_box.val(3); break;
-                case 'TrueHD': case 'Atmos':
-                    audiocodec_box.val(11); break;
-                case 'LPCM':
-                    audiocodec_box.val(8); break;
-                case 'DTS':
-                    audiocodec_box.val(3); break;
+                case 'DTS-HD': case 'DTS': audiocodec_box.val(17); break;
+                case 'DTS-HDMA:X 7.1': audiocodec_box.val(16); break;
+                case 'DTS-HDMA': audiocodec_box.val(3); break;
+                case 'DTS-HDHR': audiocodec_box.val(15); break;
+                case 'TrueHD': audiocodec_box.val(11); break;
+                case 'Atmos': audiocodec_box.val(14); break;
+                case 'LPCM': audiocodec_box.val(8); break;
                 case 'AC3':
                     audiocodec_box.val(9);
                     if (raw_info.descr.match(/Dolby Digital Plus/i) || raw_info.name.match(/DD[P\+]/)) {
                         audiocodec_box.val(10);
                     }
                     break;
-                case 'AAC':
-                    audiocodec_box.val(6); break;
-                case 'Flac':
-                    audiocodec_box.val(1); break;
-                case 'APE':
-                    audiocodec_box.val(2); break;
-                case 'WAV':
-                    audiocodec_box.val(7); break;
-                case 'MP3':
-                    audiocodec_box.val(4); break;
-                case 'M4A':
-                    audiocodec_box.val(7);
+                case 'AAC': audiocodec_box.val(21); break;
+                case 'Flac': audiocodec_box.val(1); break;
+                case 'APE': audiocodec_box.val(2); break;
+                case 'WAV': audiocodec_box.val(12); break;
+                case 'MP3': audiocodec_box.val(18); break;
             }
 
             if (raw_info.descr.match(/HDR10/i)) {
