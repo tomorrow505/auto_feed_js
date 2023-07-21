@@ -22,7 +22,7 @@
 // @match        https://www.imdb.com/title/tt*
 // @match        https://hdf.world/*
 // @match        https://broadcity.in/*
-// @match        https://blutopia.cc/upload*
+// @match        https://blutopia.cc/torrents/create*
 // @match        https://secret-cinema.pw/torrents.php?id=*
 // @match        https://filelist.io/*
 // @match        https://bluebird-hd.org/*
@@ -47,7 +47,7 @@
 // @match        https://beyond-hd.me/upload*
 // @match        https://*/usercp.php?action=personal*
 // @match        https://uhdbits.org/torrents.php*
-// @match        https://blutopia.cc/upload/*
+// @match        https://blutopia.cc/torrents/create/*
 // @match        https://pt.hdpost.top/upload/*
 // @match        https://asiancinema.me/upload/*
 // @match        http*://totheglory.im/t/*
@@ -1892,7 +1892,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https?:\/\/\d+.\d+.\d+.\d+:5678/)) {
         return 7;
     }
-    if (site_url.match(/^https?:\/\/.*\/(upload|offer).*?(php)?#seperator#/i)) {
+    if (site_url.match(/^https?:\/\/.*\/(upload|create|offer).*?(php)?#seperator#/i)) {
         return 0;
     }
     if (site_url.match(/^https:\/\/.*open.cd\/plugin_upload.php#seperator#/i)) {
@@ -3132,9 +3132,9 @@ function set_jump_href(raw_info, mode) {
                 } else if (key == 'Tik') {
                     forward_url = used_site_info[key].url + 'upload.php';
                 } else if (key == 'BLU' && (raw_info.type == '剧集' || raw_info.type == '纪录' || raw_info.type == '综艺')) {
-                    forward_url = used_site_info[key].url + 'upload?category_id=2';
+                    forward_url = used_site_info[key].url + 'torrents/create?category_id=2';
                 } else if (key == 'BLU') {
-                    forward_url = used_site_info[key].url + 'upload?category_id=1';
+                    forward_url = used_site_info[key].url + 'torrents/create?category_id=1';
                 } else if ((key == 'avz' || key == 'CNZ' || key == 'PHD') && (raw_info.type == '电影' || raw_info.type == '纪录')) {
                     forward_url = used_site_info[key].url + 'upload/movie';
                 } else if (key == 'avz' || key == 'CNZ' || key == 'PHD') {
@@ -19970,7 +19970,7 @@ function auto_feed() {
                 $('textarea[name="mediainfo"]').css({'height': '600px'});
             }
             if (if_uplver) {
-                $('input[name="anonymous"][value="1"]:eq(0)').prop("checked", true);
+                $('input[name="anonymous"][value="1"], input[name="anon"][value="1"]:eq(0)').prop("checked", true);
             }
         }
 
