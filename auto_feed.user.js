@@ -10727,9 +10727,9 @@ function auto_feed() {
         if (origin_site == 'BLU') {
             var mediainfo = '';
             try {
-                mediainfo = $('h2.panel__heading:contains("MediaInfo")').next().find('div.bbcode-rendered:eq(0)').text().trim();
+                mediainfo = $('code[x-ref="mediainfo"]').text().trim();
                 if (!mediainfo) {
-                    mediainfo = $('h2.panel__heading:contains("BDInfo")').next().find('div.bbcode-rendered:eq(0)').text().trim();
+                    mediainfo = $('code[x-ref="bdinfo"]').text().trim();
                 }
                 raw_info.descr = `[quote]\n${mediainfo}\n[/quote]`;
             } catch (err) {}
@@ -10738,7 +10738,7 @@ function auto_feed() {
 
             var img_urls = '';
             try {
-                var picture_info = $('h2.panel__heading:contains("Description")').next()[0].getElementsByTagName('img');
+                var picture_info = $('h2.panel__heading:contains("Description")').parent().next()[0].getElementsByTagName('img');
                 for (i = 0; i < picture_info.length; i++){
                     if (picture_info[i].parentNode.href){
                         img_urls += '[url='+ picture_info[i].parentNode.href +'][img]' + picture_info[i].src + '[/img][/url] ';
