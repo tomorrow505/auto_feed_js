@@ -2756,6 +2756,8 @@ function fill_raw_info(raw_info, forward_site){
         }
     }
 
+    raw_info.descr = raw_info.descr.replace(/\n\n+/g, '\n\n').replace('https://dbimg.audiences.me/?', '').replace('https://imgproxy.pterclub.com/douban/?t=', '');
+
     if (raw_info.edition_info.codec_sel()) {
         raw_info.codec_sel = raw_info.edition_info.codec_sel();
     }
@@ -11141,6 +11143,8 @@ function auto_feed() {
         }
 
         raw_info.torrent_name = raw_info.torrent_name.replace('#', '').replace(':', '.');
+
+        raw_info.descr = raw_info.descr.replace(/\n\n+/g, '\n\n').replace('https://dbimg.audiences.me/?', '').replace('https://imgproxy.pterclub.com/douban/?t=', '');
 
         console.log(raw_info.torrent_name);
         console.log(raw_info.torrent_url);
