@@ -2376,9 +2376,8 @@ function get_small_descr_from_descr(descr, name){
 
 //根据简介获取来源，也就是地区国家产地之类的——尤其分类是日韩或者港台的，有的站点需要明确一下
 function get_source_sel_from_descr(descr){
-
     var region = '';
-    var reg_region = descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+    var reg_region = descr.match(/(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地)([^\r\n]+)/);
     if (reg_region) {
         region = reg_region[2].trim(); //去除首尾空格
         reg_region = RegExp(us_ue, 'i');
@@ -5496,7 +5495,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             });
 
             if (used_signin_sites.indexOf('HDArea') > -1) {
-                postData('https://www.hdarea.co/sign_in.php', encodeURI('action=sign_in'), function(data){
+                postData('https://hdarea.club/sign_in.php', encodeURI('action=sign_in'), function(data){
                     if (data.match(/该页面必须在登录后才能访问/)) {
                         console.log(`开始签到HDArea：`, '失败，请重新登录！！！');
                         $(`input[kname=HDArea]`).parent().find('a').css({"color": "blue"});
@@ -5752,11 +5751,12 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             }
 
             var np_sites = ['MTeam', 'CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', '1PTBA', 'HDSky', 'ITZMX',
-                            'NanYang', 'DiscFan', 'Dragon', 'BYR', 'U2', 'YDY', 'JoyHD', 'Oshen', 'HITPT', 'ITZMX', 'TJUPT', 'OurBits', '红叶'];
+                            'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'Oshen', 'HITPT', 'ITZMX', 'TJUPT', 'OurBits', '红叶'];
             log_in(np_sites, '#mainmenu');
 
             log_in(['PuTao'], '#userbar');
             log_in(['HDRoute'], '#nav');
+            log_in(['BYR'], '#pagemenu');
 
             log_in(['ANT'], '#nav_home');
             log_in(['NBL'], '#mainnav');
@@ -16377,6 +16377,22 @@ function auto_feed() {
             delete Array.prototype.remove;
             var origin_descr = raw_info.descr;
             raw_info.descr = raw_info.descr.replace(/^\n+/, '').replace(/\n/g, '<br />');
+            raw_info.descr = raw_info.descr.replace(/\[(quote|hide=.+?)\]/ig, '<fieldset style="font-family: Consolas,sans-serif"><legend><span style="color:white;background-color:black">&nbsp;引用&nbsp;</span></legend>');
+            raw_info.descr = raw_info.descr.replace(/\[(\/)(quote|hide)\]/ig, '<$1fieldset>');
+            raw_info.descr = raw_info.descr.replace(/\[color=(.+?)\]/ig, '<span style="color: $1">').replace(/\[\/color\]/g, '</span>');
+            raw_info.descr = raw_info.descr.replace(/\[size=(.+?)\]/ig, '<font size="$1">').replace(/\[\/size\]/g, '</font>');
+            raw_info.descr = raw_info.descr.replace(/\[url=(.+?)\](.+?)\[\/url\]/ig, '<a href="$1">$2</a>');
+            raw_info.descr = raw_info.descr.replace(/\[(\/)?b\]/ig, '<$1strong>');
+            raw_info.descr = raw_info.descr.replace(/(?!\[url=(http(s)*:\/{2}.+?)\])\[img\](.+?)\[\/img]\[url\]/g, '<a href="$1"><img src="$2"/></a>');
+            raw_info.descr = raw_info.descr.replace(/\[img\](.+?)\[\/img]/g, '<img src="$1"/>');
+
+            raw_info.descr.match(/<fieldset[\s\S]*?<\/fieldset>/g).map((e)=>{
+                if (e.match(/感谢原制作/)) {
+                    raw_info.descr = raw_info.descr.replace(e, e.replace('&nbsp;引用&nbsp;', '&nbsp;感谢&nbsp;'));
+                } else if (e.match(/General|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率|DISC INFO:|.MPLS|Video Codec|Disc Label/)) {
+                    raw_info.descr = raw_info.descr.replace(e, e.replace('&nbsp;引用&nbsp;', '&nbsp;iNFO&nbsp;'))
+                }
+            });
             $('textarea:first').val(raw_info.descr);
             console.log(raw_info)
             switch(raw_info.type) {
@@ -16393,9 +16409,9 @@ function auto_feed() {
                         case '欧美':
                             $('select[name="second_type"]').val('12');
                             $('input[name="movie_country"]').val('欧洲');
-                            raw_info.descr.match(/(◎产.*地|◎地.*区|◎国.*家).*?<br \/>/g).filter(e=>{
+                            origin_descr.match(/(◎产.*地|◎地.*区|◎国.*家).*/g).filter(e=>{
                                 if (e) {
-                                    var country = e.split(/(◎产.*地|◎地.*区|◎国.*家)/).pop().trim().replace('<br />', '').replace(/ /g, '');
+                                    var country = e.split(/(◎产.*地|◎地.*区|◎国.*家)/).pop().trim().replace(/ /g, '');
                                     if (country.match(/美国|北美/)) {
                                         $('select[name="second_type"]').val('13');
                                         $('input[name="movie_country"]').val('北美');
@@ -16411,9 +16427,9 @@ function auto_feed() {
                         }
                     });
                     $('input[name="movie_ename0day"]').val(raw_info.name.replace(/ /g, '.'));
-                    raw_info.descr.match(/◎类.*别　.*?<br \/>/g).filter(e=>{
+                    origin_descr.match(/◎类.*别.*/g).filter(e=>{
                         if (e) {
-                            var type = e.split(/◎类.*别/).pop().trim().replace('<br />', '').replace(/ /g, '');
+                            var type = e.split(/◎类.*别/).pop().trim().replace(/ /g, '');
                             if (type.split('/').length > 3) {
                                 type = type.split('/').slice(0, 3).join('/')
                             }
