@@ -7464,6 +7464,7 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
                     var en_name02 = $('div:contains("All episodes"):last', doc).parent().parent().prev().text();
                     en_name = en_name02 ? en_name02: en_name;
                     var number = $('#season option:selected').text();
+                    if (!number) { number = $('span.pl:contains("季数")')[0].nextSibling.textContent.trim(); }
                     if (number.length < 2) { number = '0' + number; }
                     en_name = en_name + ' S' + number;
                 }
