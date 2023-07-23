@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.3.1
+// @version      2.0.3.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -7460,6 +7460,13 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
             },1000);
             getDoc(imdb_url, null, function(doc){
                 var en_name = $('h1', doc).text();
+                if ($('span.pl:contains("季数")').length) {
+                    var en_name02 = $('div:contains("All episodes"):last', doc).parent().parent().prev().text();
+                    en_name = en_name02 ? en_name02: en_name;
+                    var number = $('#season option:selected').text();
+                    if (number.length < 2) { number = '0' + number; }
+                    en_name = en_name + ' S' + number;
+                }
                 var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.-', '-');
                 $('#info').append(`<br><span class="pl">影视名称:</span> ${name}<br>`);
             });
