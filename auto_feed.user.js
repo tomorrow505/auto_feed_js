@@ -877,7 +877,7 @@ const default_site_info = {
     'HDTime': {'url': 'https://hdtime.org/', 'enable': 1},
     'HDU': {'url': 'https://pt.hdupt.com/', 'enable': 1},
     'HDVideo': {'url': 'https://hdvideo.one/', 'enable': 1},
-    'HDZone': {'url': 'https://hdzone.me/', 'enable': 1},
+    'HDZone': {'url': 'https://hdfun.me/', 'enable': 1},
     'HD-Only': {'url': 'https://hd-only.org/', 'enable': 1},
     'HHClub': {'url': 'https://hhanclub.top/', 'enable': 1},
     'HITPT': {'url': 'https://www.hitpt.com/', 'enable': 1},
@@ -1658,7 +1658,7 @@ function walkDOM(n) {
             n.innerHTML = '[u]' + n.innerHTML + '[/u]';
         } else if (n.nodeName == 'A') {
             if (n.innerHTML != "" && n.href) {
-                if (site_url.match(/http(s*):\/\/chdbits.co\/details.php.*/i)) {
+                if (site_url.match(/http(s*):\/\/ptchdbits.co\/details.php.*/i)) {
                     if (!n.innerHTML.match(/pic\/hdl\.gif/g)) {
                         n.innerHTML = '[url=' + n.href + ']' + n.innerHTML + '[/url]';
                     }
@@ -1707,7 +1707,7 @@ function walkDOM(n) {
         } else if (n.nodeName == 'LEGEND') {
             n.innerHTML = '';
         } else if (n.nodeName == 'IMG') {
-            if (site_url.match(/http(s*):\/\/chdbits.co\/details.php.*/i)) {
+            if (site_url.match(/http(s*):\/\/ptchdbits.co\/details.php.*/i)) {
                 if (!n.src.match(/pic\/hdl\.gif/g)) {
                     raw_info.descr = raw_info.descr + '[img]' + n.src + '[/img]';
                 }
@@ -7665,7 +7665,7 @@ function auto_feed() {
         if (judge_if_the_site_in_domestic(site_url) || opencd_mode) {
             if (origin_site == 'TTG' || origin_site == 'PuTao' || origin_site == 'OpenCD' || origin_site == 'HDArea') {
                 title = document.getElementsByTagName("h1")[0];
-                if ($(title).text().match(/上传成功/)) {
+                if ($(title).text().match(/上传成功|编辑成功/)) {
                     title = document.getElementsByTagName("h1")[1];
                 }
             } else if (origin_site == 'HUDBT'){
@@ -8917,7 +8917,10 @@ function auto_feed() {
             tbody = document.getElementById('torrent_details');
             raw_info.edition_info = $(`#torrent${torrent_id}`).prev().text().replace('− ', '').trim();
             raw_info.small_descr = $(`#torrent${torrent_id}`).find('a:eq(5)').text();
-            raw_info.descr += $(`#torrent_${torrent_id}`).find('blockquote:last').text();
+            var blockquote = $(`#torrent_${torrent_id}`).find('blockquote:last').text();
+            if (!blockquote.match(/发布于/)) {
+                raw_info.descr += $(`#torrent_${torrent_id}`).find('blockquote:last').text();
+            }
             raw_info.music_type = Array.from($('div.box_tags').find('a[href*="taglist"]').map((index,e)=>{
                 return $(e).text();
             })).join(',');
@@ -8938,6 +8941,10 @@ function auto_feed() {
                 }
             }).join('\n');
             raw_info.torrent_url = `https://dicmusic.club/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+            raw_info.labels = Array.from($('a[href*=taglist]').map((_,e)=>{
+                return $(e).text();
+            })).join(', ');
+            console.log(raw_info.labels)
         }
 
         if (origin_site == 'SugoiMusic') {
@@ -9075,6 +9082,12 @@ function auto_feed() {
             } else {
                 tbody = tbodys[1];
             }
+
+            raw_info.music_name = $('td:contains("专辑名称"):last').next().text();
+            raw_info.music_author = $('td:contains("艺术家名"):last').next().find('a').text();
+            raw_info.labels = Array.from($('td:contains("标签列表"):last').next().find('a').map((_, e)=>{
+                return $(e).text();
+            })).join(', ');
         }
 
         if (origin_site == 'TorrentLeech') {
@@ -11564,7 +11577,7 @@ function auto_feed() {
             if (raw_info.name.match(/CHD|SGNB|STBOX|ONEHD|BLUCOOK|HQC|GBT|KAN|PLP/i)){
                 if (raw_info.url) {
                     $('#top').append(`<br><b><span id="checking"><font color="red">[禁转判断中……]</font></span></b>`);
-                    var check_url = 'https://chdbits.co/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search={imdbid}&search_area=4&search_mode=0';
+                    var check_url = 'https://ptchdbits.co/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search={imdbid}&search_area=4&search_mode=0';
                     var imdbid = raw_info.url.match(/tt\d+/)[0];
                     check_url = check_url.format({'imdbid': imdbid});
                     getDoc(check_url, null, function(doc){
@@ -16389,22 +16402,25 @@ function auto_feed() {
             delete Array.prototype.remove;
             var origin_descr = raw_info.descr;
             raw_info.descr = raw_info.descr.replace(/^\n+/, '').replace(/\n/g, '<br />');
-            raw_info.descr = raw_info.descr.replace(/\[(quote|hide=.+?)\]/ig, '<fieldset style="font-family: Consolas,sans-serif"><legend><span style="color:white;background-color:black">&nbsp;引用&nbsp;</span></legend>');
-            raw_info.descr = raw_info.descr.replace(/\[(\/)(quote|hide)\]/ig, '<$1fieldset>');
+            raw_info.descr = raw_info.descr.replace(/\[(quote|quote=.+?|hide=.+?)\]/ig, '<fieldset style="font-family: Consolas,sans-serif"><legend><span style="color:white;background-color:black">&nbsp;引用&nbsp;</span></legend>');
+            raw_info.descr = raw_info.descr.replace(/\[(\/)?(quote|hide)\]/ig, '<$1fieldset>');
             raw_info.descr = raw_info.descr.replace(/\[color=(.+?)\]/ig, '<span style="color: $1">').replace(/\[\/color\]/g, '</span>');
             raw_info.descr = raw_info.descr.replace(/\[size=(.+?)\]/ig, '<font size="$1">').replace(/\[\/size\]/g, '</font>');
             raw_info.descr = raw_info.descr.replace(/\[url=(.+?)\](.+?)\[\/url\]/ig, '<a href="$1">$2</a>');
             raw_info.descr = raw_info.descr.replace(/\[(\/)?b\]/ig, '<$1strong>');
             raw_info.descr = raw_info.descr.replace(/(?!\[url=(http(s)*:\/{2}.+?)\])\[img\](.+?)\[\/img]\[url\]/g, '<a href="$1"><img src="$2"/></a>');
             raw_info.descr = raw_info.descr.replace(/\[img\](.+?)\[\/img]/g, '<img src="$1"/>');
-
-            raw_info.descr.match(/<fieldset[\s\S]*?<\/fieldset>/g).map((e)=>{
-                if (e.match(/感谢原制作/)) {
-                    raw_info.descr = raw_info.descr.replace(e, e.replace('&nbsp;引用&nbsp;', '&nbsp;感谢&nbsp;'));
-                } else if (e.match(/General|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率|DISC INFO:|.MPLS|Video Codec|Disc Label/)) {
-                    raw_info.descr = raw_info.descr.replace(e, e.replace('&nbsp;引用&nbsp;', '&nbsp;iNFO&nbsp;'))
-                }
-            });
+            try {
+                raw_info.descr.match(/<fieldset[\s\S]*?<\/fieldset>/g).map((e)=>{
+                    if (e.match(/感谢原制作/)) {
+                        raw_info.descr = raw_info.descr.replace(e, e.replace('&nbsp;引用&nbsp;', '&nbsp;感谢&nbsp;'));
+                    } else if (e.match(/General|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率|DISC INFO:|.MPLS|Video Codec|Disc Label/)) {
+                        raw_info.descr = raw_info.descr.replace(e, e.replace('&nbsp;引用&nbsp;', '&nbsp;iNFO&nbsp;'));
+                    } else if (e.match(/曲目列表|Tracklist/i)) {
+                        raw_info.descr = raw_info.descr.replace(e, e.replace(/Tracklist[:：]?/i, '').replace('&nbsp;引用&nbsp;', '&nbsp;Tracklist&nbsp;'));
+                    }
+                });
+            } catch (err) {}
             $('textarea:first').val(raw_info.descr);
             console.log(raw_info)
             switch(raw_info.type) {
@@ -16474,7 +16490,7 @@ function auto_feed() {
                     } else {
                         $('#record_whetherend').val('单集');
                     }
-                    $('#record_ename').val(raw_info.name.replace(/ /g, '.'))
+                    $('#record_ename').val(get_search_name(raw_info.name));
                     var r_type = ['IMAX', 'BBC', 'NHK', 'PBS', 'Ch4', 'CCTV', 'BTV', '国家地理', '历史频道', '探索频道'];
                     $('#record_type').val('其他');
                     r_type.forEach((item)=>{
@@ -16485,23 +16501,23 @@ function auto_feed() {
                             $('#record_type').val(item);
                         }
                     });
-                    raw_info.descr.match(/(◎译.*名|◎片.*名).*/g).filter(e=>{
+                    origin_descr.match(/(◎译.*名|◎片.*名).*/g).filter(e=>{
                         if (e.split(/◎译.*名|◎片.*名/).pop().trim().match(/[\u4e00-\u9fa5]/)) {
                             e = e.split(/(◎译.*名|◎片.*名)/).pop().trim().replace(/ /g, '').split('/').filter((e, index)=> {return index < 2})
-                            $('input[name="cname"]').val(e.join('/'));
+                            $('input[name="record_cname"]').val(e.join('/'));
                         }
                     });
                     try{ $('#record_season').val(raw_info.name.match(/(S\d+)(E\d+)?/)[0]); } catch(err) {}
                     var standard_dict = {'4K': '2160p', '1080p': '1080p', '1080i': '1080i', '720p': '720p', 'SD': '480p'};
                     if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                         var index = standard_dict[raw_info.standard_sel];
-                        $('#record_filetype').val(index);
+                        $('#record_quality').val(index);
                     }
                     switch(raw_info.medium_sel) {
-                        case 'UHD': case 'Blu-ray': case 'Remux': case 'Encode': $('#record_source').val('BluRay'); break;
-                        case 'DVD': $('#record_source').val('DVD'); break;
-                        case 'HDTV': $('#record_source').val('TV'); break;
-                        case 'WEB-DL': $('#record_source').val('Web-DL'); break;
+                        case 'UHD': case 'Blu-ray': case 'Remux': case 'Encode': $('#record_medium').val('BluRay'); break;
+                        case 'DVD': $('#record_medium').val('DVD'); break;
+                        case 'HDTV': $('#record_medium').val('TV'); break;
+                        case 'WEB-DL': $('#record_medium').val('Web-DL'); break;
                     }
                     try{ $('#record_group').val(raw_info.name.match(/-.*/)[0].split('-').pop()); } catch(err) {}
                     var r_area = ['自然', '科学', '生理', '技术', '历史', '传记', '文化', '艺术', '社会', '军事', '旅行', '运动', '生活', '真人秀'];
@@ -16517,7 +16533,7 @@ function auto_feed() {
                         }
                         $('#record_area').val(r_areas.join('/'));
                     });
-                break;
+                    break;
                 case '综艺':
                     switch (raw_info.source_sel){
                         case '大陆': $('select[name="second_type"]').val('27'); $('input[name="show_country"]').val('大陆'); break;
@@ -16543,6 +16559,43 @@ function auto_feed() {
                             }
                         }
                     });
+                    break;
+                case '音乐': case 'MV':
+                    if (raw_info.music_media == 'CD' || raw_info.edition_info.match(/CD/)) {
+                        $('#music_type').val('CD');
+                    } else if (raw_info.medium_sel == 'WEB-DL') {
+                        $('#music_type').val('WEB');
+                    }
+                    if (raw_info.type == 'MV') { $('#music_type').val('MV'); }
+                    if (raw_info.labels) {
+                        if (raw_info.labels.match(/大陆|chinese/i)) {
+                            $('select[name="second_type"]').val(23); $('#music_country').val('大陆');
+                        } else if (raw_info.labels.match(/港台/)) {
+                            $('select[name="second_type"]').val(24); $('#music_country').val('港台');
+                        } else if (raw_info.labels.match(/日韩|korean|japan|jpop/i)) {
+                            $('select[name="second_type"]').val(25); $('#music_country').val('日韩');
+                        } else if (raw_info.labels.match(/欧美/)) {
+                            $('select[name="second_type"]').val(26); $('#music_country').val('欧美');
+                        }
+                    }
+                    if (raw_info.music_name) { $('#music_album').val(raw_info.music_name); }
+                    if (raw_info.music_author) {
+                        if (raw_info.music_author.match(/群星/)) {
+                            $('#music_artist').val('V.A.');
+                        } else {
+                            $('#music_artist').val(raw_info.music_author);
+                        }
+                    }
+                    if (raw_info.name.match(/flac/i) || raw_info.small_descr.match(/Flac/i)) {
+                        $('#music_filetype').val('FLAC');
+                    } else if (raw_info.name.match(/WAV/i) || raw_info.small_descr.match(/WAV/i)) {
+                        $('#music_filetype').val('WAV');
+                    }
+                    if (raw_info.origin_site == 'OpenCD' || raw_info.origin_site == 'DICMusic') {
+                        $('#music_quality').val('无损');
+                    }
+                    $('#music_year').val(raw_info.name.match(/(19|20)\d{2}/)[0]);
+                    if (!raw_info.small_descr) { $('input[name="small_descr"]').val(`转自${raw_info.origin_site}`); }
             }
 
             if (raw_info.descr.match(/Audio Video Interleave|AVI/i)) {
