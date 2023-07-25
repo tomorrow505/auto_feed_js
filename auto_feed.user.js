@@ -19522,6 +19522,13 @@ function auto_feed() {
             } else {
                 processing_box.options[0].selected = true;
             }
+
+            $('select[name="team_sel"]').val(11);
+            $('select[name="team_sel"]>option').map(function(index,e){
+                if (raw_info.name.match('-'+e.innerText)) {
+                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
+                }
+            });
         }
 
         else if (forward_site == 'Oshen') {
