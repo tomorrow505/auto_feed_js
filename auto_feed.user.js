@@ -7917,6 +7917,10 @@ function auto_feed() {
             raw_info.torrent_url = used_site_info[origin_site].url + $('a[href*="download.php"]').attr('href');
         }
 
+        if (origin_site == 'HDAtmos') {
+            raw_info.descr = raw_info.descr.replace(/\[url=.*?\].*?极空间新Z4\[\/url\]/, '');
+        }
+
         //------------------------------国外站点table获取(简介后续单独处理)-------------------------------------------
 
         var table, insert_row, douban_box;
