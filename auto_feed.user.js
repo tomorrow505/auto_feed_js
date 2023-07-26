@@ -8881,6 +8881,20 @@ function auto_feed() {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
             getJson(`https://dicmusic.club/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
+                $.each(data.response.torrent, function(key, value){
+                    if (typeof value === "string" && value.match(/&#\d+;/) ) {
+                        data.response.torrent[key] = value.replace(/&#(\d+);/g, function(match, code) {
+                            return String.fromCharCode(code);
+                        });
+                    }
+                });
+                $.each(data.response.group, function(key, value){
+                    if (typeof value === "string" && value.match(/&#\d+;/) ) {
+                        data.response.group[key] = value.replace(/&#(\d+);/g, function(match, code) {
+                            return String.fromCharCode(code);
+                        });
+                    }
+                });
                 raw_info.json =  JSON.stringify(data);
                 if (raw_info.small_descr.match(/Log \(\d+%\)/)) {
                     var score = raw_info.small_descr.match(/Log \((\d+)%\)/)[1];
@@ -11647,7 +11661,7 @@ function auto_feed() {
             if_exclusive = true;
         }
 
-        if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$|UBits$/i)) {
+        if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$|UBits$|HHWEB$/i)) {
             $('#PTT').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至PTT');
         }
 
