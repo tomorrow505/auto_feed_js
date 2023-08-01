@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.3.2
+// @version      2.0.3.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1101,7 +1101,8 @@ const reg_team_name = {
     'UBits': /-UBits/i,
     'Panda': /AilMWeb|-PANDA|@Panda/i,
     'UBits': /@UBits|-UBits/,
-    'PTCafe': /CafeWEB|CafeTV|DIY@PTCafe/i
+    'PTCafe': /CafeWEB|CafeTV|DIY@PTCafe/i,
+    '影': /Ying(WEB|DIY|TV|MV|MUSIC)?$/i
 };
 const thanks_str = "[quote][b][color=Blue]转自{site}，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
@@ -1215,7 +1216,8 @@ const o_site_info = {
     'Monika': 'https://monikadesign.uk/',
     'DTR': 'https://desitorrents.tv/',
     'HONE': 'https://hawke.uno/',
-    'ZHUQUE': 'https://zhuque.in/'
+    'ZHUQUE': 'https://zhuque.in/',
+    '影': 'https://shadowflow.org/'
 };
 
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
@@ -2000,7 +2002,7 @@ function judge_if_the_site_in_domestic() {
 
     var domain, reg, key;
     for (key in o_site_info){
-        if (key != 'FRDS' && key != 'BeiTai' && key != 'BYR' && key != 'U2'){
+        if (key != 'FRDS' && key != 'BeiTai' && key != 'BYR' && key != 'U2' && key != '影'){
             domain = o_site_info[key].split('//')[1].replace('/', '');
             reg = new RegExp(domain, 'i');
             if (site_url.split('#seperator#')[0].match(reg)){
@@ -5473,11 +5475,15 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao',
             'HHClub', 'PTChina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT',
-            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe'];
+            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
-                    var signin_url = used_site_info[e].url + 'attendance.php';
+                    try {
+                        var signin_url = used_site_info[e].url + 'attendance.php';
+                    } catch (Err) {
+                        signin_url = o_site_info[e] + 'attendance.php';
+                    }
                     getDoc(signin_url, null, function(doc) {
                         if ($('#outer', doc).find('table.main').find('table').length) {
                             console.log(`开始签到${e}：`, $('#outer', doc).find('table.main').find('table').text().trim());
@@ -7877,6 +7883,9 @@ function auto_feed() {
             if (origin_site == 'FRDS') {
                 raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
                 raw_info.torrent_url = 'https://pt.keepfrds.com/' + $('a[href*="download.php"]:contains(torrent)').attr('href');
+            } else if (origin_site == '影') {
+                raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
+                raw_info.torrent_url = 'https://shadowflow.org/' + $('a[href*="download.php"]:contains(torrent)').attr('href');
             } else if (origin_site == 'BeiTai') {
                 raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
                 raw_info.torrent_url = 'https://www.beitai.pt/' + $('a[href*="download.php"]:contains(torrent)').attr('href');
