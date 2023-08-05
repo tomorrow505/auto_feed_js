@@ -6084,7 +6084,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $table.append(`<tr style="display:none;"><td width="1%" class="rowhead nowrap" valign="top" align="right">PTGen</td><td width="99%" class="rowfollow" valign="top" align="left" id="ptgen"></td></tr>`);
         $('#ptgen').append(`<label><b>输入豆瓣/IMDB链接查询:</b></label><input type="text" name="url" style="width: 380px; margin-left:5px">`);
         $('#ptgen').append(`<input type="button" id="go_ptgen" value="获取信息" style="margin-left:15px"><input type="button" id="douban2ptp" value="海报转存PTPimg" style="margin-left:15px"><br><br>`);
-        $('#ptgen').append(`<textarea name="douban_info" style="width:700px" rows="20"></textarea><br>`);
+        $('#ptgen').append(`<textarea name="douban_info" style="width:720px" rows="20"></textarea><br>`);
 
         $('#go_ptgen').click(function(){
             var raw_info = {'url': '', 'dburl': '', 'descr': ''};
@@ -6591,6 +6591,10 @@ function get_video_info(video_info){
     try{
         var bit_rate = video_info.match(/bit.{0,5}rate(?!.*mode).*:(.*)/i)[1].trim();
         video_text += `Bit rate...........: ${bit_rate}${N}`;
+    } catch(err) {}
+    try{
+        var hdr_format = video_info.match(/HDR FORMAT.*:(.*)/i)[1].trim();
+        video_text += `HDR format.........: ${hdr_format}${N}`;
     } catch(err) {}
     try{
         var frame_rate = video_info.match(/frame.{0,5}rate.*:(.*fps)/i)[1].trim();
@@ -14325,14 +14329,6 @@ function auto_feed() {
                             $(`div.ant-select-item-option-content:contains("${value}")`).wait(function(){
                                 if (value == 'Blu-ray') {
                                     $(`div.ant-select-item-option-content:contains("${value}"):eq(2)`).click();
-                                } else if (value == 'TrueHD') {
-                                    $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
-                                } else if (value == 'DTS') {
-                                    $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
-                                } else if (value == 'CMCT') {
-                                    $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
-                                } else if (value == 'Hares') {
-                                    $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
                                 } else if (value == 'UHD Blu-ray') {
                                     $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
                                 } else {
@@ -14346,7 +14342,7 @@ function auto_feed() {
                 }
 
                 // 类别
-                var type_dict = {'电影': '电影', '剧集': '电视剧', '动漫': '动画', '综艺': '综艺节目', '音乐': '其它', '纪录': '其它',
+                var type_dict = {'电影': '电影', '剧集': '剧集', '动漫': '动画', '综艺': '节目', '音乐': '其它', '纪录': '其它',
                                  '体育': '其它', '软件': '其它', '学习': '其它', '': '其它', 'MV': '其它'};
                 if (type_dict.hasOwnProperty(raw_info.type)){
                     var category = type_dict[raw_info.type];
