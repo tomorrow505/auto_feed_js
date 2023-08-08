@@ -11068,7 +11068,7 @@ function auto_feed() {
                     raw_info.labels += 100;
                 }
                 break;
-            case 'HaresClub': case 'DaJiao':
+            case 'HaresClub':
                 if ($('span.gy').length) {
                     raw_info.labels += 1;
                 }
@@ -11079,7 +11079,7 @@ function auto_feed() {
                     raw_info.labels += 100;
                 }
                 break;
-            case 'HHClub':
+            case 'HHClub': case 'DaJiao':
                 var tr = $('td:contains(标签)').last().parent();
                 if (tr.find('span:contains("国语")').length) {
                     raw_info.labels = 1;
