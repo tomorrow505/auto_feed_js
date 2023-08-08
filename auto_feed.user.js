@@ -84,7 +84,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.3.3
+// @version      2.0.3.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -5761,12 +5761,13 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             }
 
             var np_sites = ['MTeam', 'CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', '1PTBA', 'HDSky', 'ITZMX',
-                            'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'Oshen', 'HITPT', 'ITZMX', 'TJUPT', 'OurBits', '红叶'];
+                            'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'Oshen', 'HITPT', 'ITZMX', 'OurBits', '红叶'];
             log_in(np_sites, '#mainmenu');
 
             log_in(['PuTao'], '#userbar');
             log_in(['HDRoute'], '#nav');
             log_in(['BYR'], '#pagemenu');
+            log_in(['TJUPT'], '#info_block');
 
             log_in(['ANT'], '#nav_home');
             log_in(['NBL'], '#mainnav');
@@ -11067,7 +11068,7 @@ function auto_feed() {
                     raw_info.labels += 100;
                 }
                 break;
-            case 'HaresClub':
+            case 'HaresClub': case 'DaJiao':
                 if ($('span.gy').length) {
                     raw_info.labels += 1;
                 }
