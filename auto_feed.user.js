@@ -1102,7 +1102,8 @@ const reg_team_name = {
     'Panda': /AilMWeb|-PANDA|@Panda/i,
     'UBits': /@UBits|-UBits/,
     'PTCafe': /CafeWEB|CafeTV|DIY@PTCafe/i,
-    '影': /Ying(WEB|DIY|TV|MV|MUSIC)?$/i
+    '影': /Ying(WEB|DIY|TV|MV|MUSIC)?$/i,
+    'DaJiao': /DJWEB|DJTV/i
 };
 const thanks_str = "[quote][b][color=Blue]转自{site}，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
@@ -13265,6 +13266,7 @@ function auto_feed() {
                             albumDescJSON = albumDescJSON.replace(/<(\/)?strong>/g, '[$1b]');
 
                             albumDesc.value = albumDescJSON;
+                            albumDesc.style.height = '400px';
                             document.querySelector('input.button_preview_0').click();
                         } else {
                             alert('No album description is included in the JSON!');
@@ -13445,7 +13447,9 @@ function auto_feed() {
                 }
             });
         }
-        if (['CMCT', 'PTsbao', 'HDPost','HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HaresClub', 'HDTime', 'HD-Only', 'HDfans', 'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'DICMusic', 'SugoiMusic', 'CG', 'ZHUQUE'].indexOf(forward_site) < 0){
+        if (['CMCT', 'PTsbao', 'HDPost','HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HaresClub', 'HDTime',
+        'HD-Only', 'HDfans', 'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'DICMusic', 'RED',
+        'SugoiMusic', 'CG', 'ZHUQUE'].indexOf(forward_site) < 0){
             if (forward_site == 'HDT') {
                 descr_box[0].style.height = '600px';
                 var mediainfo_hdt = get_mediainfo_picture_from_descr(raw_info.descr);
