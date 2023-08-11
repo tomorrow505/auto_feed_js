@@ -17,6 +17,7 @@
 // @match        https://www.myanonamouse.net/t/*
 // @match        https://img.hdbits.org/
 // @match        http*://*/offer*php*
+// @match        https://tieba.baidu.com/*
 // @match        https://xthor.tk/*
 // @match        https://desitorrents.tv/torrents*
 // @match        https://www.imdb.com/title/tt*
@@ -208,6 +209,19 @@ if (location.href.match(/^.{3,30}userdetail/i) && !site_url.match(/bluebird-hd/)
     return;
 }
 
+// 清除PT吧里边的广告
+if (location.href.match(/^https:\/\/tieba.baidu.com.*/)) {
+
+    document.addEventListener('DOMNodeInserted', function() {
+        $('div[class*="clearfix"]').wait(function(){
+            $('div[class="clearfix thread_item_box"]').hide();
+            $('div[class="l_post l_post_bright j_l_post clearfix"]').has('span:contains("立即查看")').hide();
+            $('img[data-locate="点击关闭"]').click();
+        });
+    });
+    return;
+}
+
 if (location.href.match(/https:\/\/desitorrents.tv\/torrents/)) {
     $('#torrent-list-table').find('tr:gt(0)').map((index,e)=>{
         $(e).find('td:eq(2)').find('a.torrent-listings-name').after(`<a href="${$(e).find('a.torrent-listings-name').attr('href')}" target="_blank"><font color=green>跳转</font></a>`)
@@ -326,6 +340,8 @@ if (location.href.match(/^https:\/\/greatposterwall.com\/torrents.php.*/)) {
         })
     }
 }
+
+// 解决qq打开链接非官方不跳转的问题
 if (location.href.match(/^https:\/\/c.pc.qq.com\/middlem.html\?pfurl=.*/)) {
     var url = decodeURIComponent(location.href).match(/pfurl=(.*?)&pf/)[1];
     window.location.href = url;
