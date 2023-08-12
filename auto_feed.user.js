@@ -217,6 +217,7 @@ if (location.href.match(/^https:\/\/tieba.baidu.com.*/)) {
             $('div[class="clearfix thread_item_box"]').hide();
             $('div[class="l_post l_post_bright j_l_post clearfix"]').has('span:contains("立即查看")').hide();
             $('img[data-locate="点击关闭"]').click();
+            $('#aside-ad').hide();
         });
     });
     return;
@@ -13260,6 +13261,11 @@ function auto_feed() {
                             albumDescJSON = albumDescJSON.replace(/<a .*?href="(https?:\/\/.+?)".*?>(.+?)<\/a>/g, '[url=$1]$2[/url]');
                             albumDescJSON = albumDescJSON.replace(/<span class="size(\d+)">(.+?)<\/span>/g, '[size=$1]$2[/size]');
                             albumDescJSON = albumDescJSON.replace(/<span style="font-style: italic;">(.+?)<\/span>/g, '[i]$1[/i]');
+                            albumDescJSON = albumDescJSON.replace(/<ol class="postlist">([\s\S]+?)<\/ol>/g, function(data){
+                                var data = data.replace(/<ol class="postlist">([\s\S]+?)<\/ol>/g, '$1');
+                                data = data.replace(/<li>(.+?)<\/li>/g, '[#]$1\n');
+                                return data;
+                            });
                             albumDescJSON = albumDescJSON.replace(/<span style="text-decoration: underline;">(.+?)<\/span>/g, '[u]$1[/u]');
                             albumDescJSON = albumDescJSON.replace(/<span style="text-decoration: line-through;">(.+?)<\/span>/g, '[s]$1[/s]');
                             albumDescJSON = albumDescJSON.replace(/<span style="color: (.+?);">(.+?)<\/span>/g, '[color=$1]$2[/color]');
@@ -13272,7 +13278,9 @@ function auto_feed() {
                                 '[quote=$2|$1]$3[/quote]');
                             albumDescJSON = albumDescJSON.replace(/<strong class="quoteheader">(.+?)<\/strong> wrote: <blockquote>(.+?)<\/blockquote>/g,
                                                                   '[quote=$1]$2[/quote]');
-                            albumDescJSON = albumDescJSON.replace(/<blockquote>(.+?)<\/blockquote>/g, '[quote]$1[/quote]');
+                            albumDescJSON = albumDescJSON.replace(/<blockquote>([\s\S]+?)<\/blockquote>/g, function(data) {
+                                return `[quote]${data.replace(/<blockquote>([\s\S]+?)<\/blockquote>/, '$1').trim()}[/quote]`;
+                            });
                             albumDescJSON = albumDescJSON.replace(/<strong>(.+?)<\/strong>: <a href="javascript:void\(0\);" onclick="BBCode\.spoiler\(this\);">Show<\/a><blockquote class="hidden spoiler">(.+?)<\/blockquote>/g,
                                                                   '[hide=$1]$2[/hide]');
                             albumDescJSON = albumDescJSON.replace(/<strong>Hidden text<\/strong>: <a href="javascript:void\(0\);" onclick="BBCode\.spoiler\(this\);">Show<\/a><blockquote class="hidden spoiler">(.+?)<\/blockquote>/g,
@@ -13280,6 +13288,9 @@ function auto_feed() {
                             albumDescJSON = albumDescJSON.replace(/<strong class="important_text">(.+?)<\/strong>/g, '[important]$1[/important]');
                             albumDescJSON = albumDescJSON.replace(/<(pre|code)>(.+?)<\/\1>/g, '[$1]$2[/$1]');
                             albumDescJSON = albumDescJSON.replace(/<(\/)?strong>/g, '[$1b]');
+
+                            // 没有匹配上的标签给它去掉
+                            albumDescJSON = albumDescJSON.replace(/<(\/)?span.*?>/g, '');
 
                             albumDesc.value = albumDescJSON;
                             albumDesc.style.height = '400px';
