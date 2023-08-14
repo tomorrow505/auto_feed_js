@@ -46,6 +46,7 @@
 // @match        https://broadcasthe.net/*.php*
 // @match        https://backup.landof.tv/*.php*
 // @match        https://beyond-hd.me/upload*
+// @match        http*://beyond-hd.me/library/*
 // @match        https://*/usercp.php?action=personal*
 // @match        https://uhdbits.org/torrents.php*
 // @match        https://blutopia.cc/torrents/create/*
@@ -5316,7 +5317,7 @@ if (site_url.match(/^https:\/\/bluebird-hd.org\/.*/)) {
     }
 }
 
-if (site_url.match(/https:\/\/broadcity.in\/*/)) {
+if (site_url.match(/^https:\/\/broadcity.in\/*/)) {
     if ($('span:contains(Tekrar Hoşgeldiniz)').length) {
         $('a[href*="language=english"]').find('img').click();
     }
@@ -5341,7 +5342,7 @@ if (site_url.match(/https:\/\/broadcity.in\/*/)) {
     }
 }
 
-if (site_url.match(/https:\/\/filelist.io\/.*/)) {
+if (site_url.match(/^https:\/\/filelist.io\/.*/)) {
     if (site_url.match(/rules.php/)) {
         getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/fl_rules.html', null, function(doc){
             $('div.cblock-content').html($('div.cblock-content', doc).html());
@@ -5351,6 +5352,47 @@ if (site_url.match(/https:\/\/filelist.io\/.*/)) {
             $('#maincolumn').html($('#maincolumn', doc).html());
         });
     }
+}
+
+if (site_url.match(/^https:\/\/blutopia.cc\/torrents\/similar/)) {
+    var ids = $('ul.meta__ids').html()
+    raw_info.url = match_link('imdb', ids);
+    if (raw_info.url && all_sites_show_douban) {
+        getData(raw_info.url, function(data){
+            if (data.data) {
+                var score = data.data.average + '分';
+                if (!score.replace('分', '')) score = '暂无评分';
+                if (data.data.votes) score += `|${data.data.votes}人`;
+                $('h1.meta__title').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank" style="display: inline; width: auto; border-bottom: 0px !important; text-decoration: none; color: #d3d3d3; font-weight: bold;">${data.data.title.split(' ')[0]}[${score}]</a>`);
+                if (data.data.summary && data.data.summary.length < 700 && data.data.summary.match(/[\u4e00-\u9fa5]/)) {
+                    $('p.meta__description').text(data.data.summary.replace(/ 　　/g, ''));
+                }
+            }
+        });
+    }
+    return;
+}
+
+if (site_url.match(/^https:\/\/beyond-hd.me\/library\/title/)) {
+    var imdb_box = document.getElementsByTagName('body')[0];
+    try {
+        raw_info.url = match_link('imdb', imdb_box.innerHTML);
+        if (raw_info.url && all_sites_show_douban) {
+            getData(raw_info.url, function(data){
+                console.log(data);
+                if (data.data) {
+                    var score = data.data.average + '分';
+                    if (!score.replace('分', '')) score = '暂无评分';
+                    if (data.data.votes) score += `|${data.data.votes}人`;
+                    $('h1.bhd-title-h1').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank" style="display: inline; width: auto; border-bottom: 0px !important; text-decoration: none; color: #d3d3d3; font-weight: bold;">${data.data.title.split(' ')[0]}[${score}]</a>`);
+                    if (data.data.summary.trim() && data.data.summary.match(/[\u4e00-\u9fa5]/)) {
+                        $('div.movie-overview').text(data.data.summary.replace(/ 　　/g, ''));
+                    }
+                }
+            });
+        }
+    } catch(err) {}
+    return;
 }
 
 //脚本设置简单页面，使用猫/柠檬等站点的个人设置页面来做的，涵盖转图床的部分操作
