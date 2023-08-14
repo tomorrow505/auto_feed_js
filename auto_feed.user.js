@@ -852,7 +852,7 @@ const default_site_info = {
     'CNZ': {'url': 'https://cinemaz.to/', 'enable': 1},
     'CHDBits': {'url': "https://chdbits.co/", 'enable': 1},
     'DaJiao': {'url': 'https://dajiao.cyou/', 'enable': 1},
-    'DICMusic': {'url': "https://dicmusic.club/", 'enable': 1},
+    'DICMusic': {'url': "https://dicmusic.com/", 'enable': 1},
     'DiscFan': {'url': 'https://discfan.net/', 'enable': 1},
     'Dragon': {'url': 'https://www.dragonhd.xyz/', 'enable': 1},
     'FreeFarm': {'url': 'https://pt.0ff.cc/', 'enable': 1},
