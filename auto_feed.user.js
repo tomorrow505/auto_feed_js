@@ -1224,7 +1224,7 @@ const o_site_info = {
     'BlueBird': 'https://bluebird-hd.org/',
     'bwtorrents': 'https://bwtorrents.tv/',
     'lztr': 'https://lztr.me/',
-    'DICMusic': 'https://dicmusic.club/',
+    'DICMusic': 'https://dicmusic.com/',
     'OPS': 'https://orpheus.network/',
     'bib': 'https://bibliotik.me/',
     'mam': 'https://www.myanonamouse.net',
@@ -2005,7 +2005,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^http(s*):\/\/jpopsuki.eu\/torrents.php\?id=\d+&torrentid=\d+/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/(redacted.ch|lztr.me|dicmusic.club|orpheus.network)\/torrents.php\?id=\d+&torrentid=\d+/i)) {
+    if (site_url.match(/^http(s*):\/\/(redacted.ch|lztr.me|dicmusic.com|orpheus.network)\/torrents.php\?id=\d+&torrentid=\d+/i)) {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/www\.torrentleech\.org\/torrent\/*/i)) {
@@ -8960,7 +8960,7 @@ function auto_feed() {
             if (site_url.match(/torrentid=(\d+)/)) {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
-            getJson(`https://dicmusic.club/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
+            getJson(`https://dicmusic.com/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
                 $.each(data.response.torrent, function(key, value){
                     if (typeof value === "string" && value.match(/&#\d+;/) ) {
                         data.response.torrent[key] = value.replace(/&#(\d+);/g, function(match, code) {
@@ -9034,7 +9034,7 @@ function auto_feed() {
                     return item;
                 }
             }).join('\n');
-            raw_info.torrent_url = `https://dicmusic.club/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+            raw_info.torrent_url = `https://dicmusic.com/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
             raw_info.labels = Array.from($('a[href*=taglist]').map((_,e)=>{
                 return $(e).text();
             })).join(', ');
