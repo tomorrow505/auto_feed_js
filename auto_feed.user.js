@@ -14035,10 +14035,14 @@ function auto_feed() {
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '7');}
                     break;
                 case 'PTCafe':
-                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
-                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
-                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '3');}
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '8'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '9'); }
+                    if (labels.db){ check_label(document.getElementsByName('tags[4][]'), '11'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '12');}
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '13'); }
+                    if (raw_info.name.match(/BeiTai/i)){ check_label(document.getElementsByName('tags[4][]'), '10'); }
                     break;
                 }
         } catch (err) {
