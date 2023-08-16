@@ -1239,7 +1239,6 @@ const o_site_info = {
     'HONE': 'https://hawke.uno/',
     'ZHUQUE': 'https://zhuque.in/',
     '影': 'https://shadowflow.org/',
-    'PTLSP':'https://www.ptlsp.com'
 };
 
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
