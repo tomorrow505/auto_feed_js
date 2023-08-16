@@ -14054,6 +14054,7 @@ function auto_feed() {
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '14');}
                     if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '19');}
                     if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '20'); }
+                    if (raw_info.type = "动漫") {check_label(document.getElementsByName('tags[4][]'), '12');}
                     break;
                 }
         } catch (err) {
