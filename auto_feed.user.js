@@ -14053,7 +14053,7 @@ function auto_feed() {
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '14');}
                     if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '19');}
                     if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '20'); }
-                    if (raw_info.type = "动漫") {check_label(document.getElementsByName('tags[4][]'), '12');}
+                    if (raw_info.type == "动漫") {check_label(document.getElementsByName('tags[4][]'), '12');}
                     break;
                 }
         } catch (err) {
@@ -23596,7 +23596,7 @@ function auto_feed() {
             //类型
             var browsecat = $('#browsecat');
             var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406, 
-                             '体育': 407, '音乐': 408, '其他': 409};
+                             '体育': 407, '音乐': 411, '其他': 409};
             browsecat.val(409);
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
