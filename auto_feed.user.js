@@ -869,7 +869,7 @@ const default_site_info = {
     'CNZ': {'url': 'https://cinemaz.to/', 'enable': 1},
     'CHDBits': {'url': "https://ptchdbits.co/", 'enable': 1},
     'DaJiao': {'url': 'https://dajiao.cyou/', 'enable': 1},
-    'DICMusic': {'url': "https://dicmusic.club/", 'enable': 1},
+    'DICMusic': {'url': "https://dicmusic.com/", 'enable': 1},
     'DiscFan': {'url': 'https://discfan.net/', 'enable': 1},
     'Dragon': {'url': 'https://www.dragonhd.xyz/', 'enable': 1},
     'FreeFarm': {'url': 'https://pt.0ff.cc/', 'enable': 1},
@@ -1226,7 +1226,7 @@ const o_site_info = {
     'BlueBird': 'https://bluebird-hd.org/',
     'bwtorrents': 'https://bwtorrents.tv/',
     'lztr': 'https://lztr.me/',
-    'DICMusic': 'https://dicmusic.club/',
+    'DICMusic': 'https://dicmusic.com/',
     'OPS': 'https://orpheus.network/',
     'bib': 'https://bibliotik.me/',
     'mam': 'https://www.myanonamouse.net',
@@ -1238,7 +1238,7 @@ const o_site_info = {
     'DTR': 'https://desitorrents.tv/',
     'HONE': 'https://hawke.uno/',
     'ZHUQUE': 'https://zhuque.in/',
-    '影': 'https://shadowflow.org/',
+    '影': 'https://shadowflow.org/'
 };
 
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
@@ -2008,7 +2008,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^http(s*):\/\/jpopsuki.eu\/torrents.php\?id=\d+&torrentid=\d+/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/(redacted.ch|lztr.me|dicmusic.club|orpheus.network)\/torrents.php\?id=\d+&torrentid=\d+/i)) {
+    if (site_url.match(/^http(s*):\/\/(redacted.ch|lztr.me|dicmusic.com|orpheus.network)\/torrents.php\?id=\d+&torrentid=\d+/i)) {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/www\.torrentleech\.org\/torrent\/*/i)) {
@@ -8963,7 +8963,7 @@ function auto_feed() {
             if (site_url.match(/torrentid=(\d+)/)) {
                 torrent_id = site_url.match(/torrentid=(\d+)/)[1];
             }
-            getJson(`https://dicmusic.club/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
+            getJson(`https://dicmusic.com/ajax.php?action=torrent&id=${torrent_id}`, null, function(data){
                 $.each(data.response.torrent, function(key, value){
                     if (typeof value === "string" && value.match(/&#\d+;/) ) {
                         data.response.torrent[key] = value.replace(/&#(\d+);/g, function(match, code) {
@@ -9037,7 +9037,7 @@ function auto_feed() {
                     return item;
                 }
             }).join('\n');
-            raw_info.torrent_url = `https://dicmusic.club/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+            raw_info.torrent_url = `https://dicmusic.com/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
             raw_info.labels = Array.from($('a[href*=taglist]').map((_,e)=>{
                 return $(e).text();
             })).join(', ');
@@ -14038,11 +14038,14 @@ function auto_feed() {
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '7');}
                     break;
                 case 'PTCafe':
-                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
-                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
-                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
-                    break;
+                    if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '3');}
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '8'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '9'); }
+                    if (labels.db){ check_label(document.getElementsByName('tags[4][]'), '11'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '12');}
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '13'); }
+                    if (raw_info.name.match(/BeiTai/i)){ check_label(document.getElementsByName('tags[4][]'), '10'); }
                 case 'PTLSP':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '21'); }
@@ -14055,7 +14058,7 @@ function auto_feed() {
                     if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '20'); }
                     if (raw_info.type == "动漫") {check_label(document.getElementsByName('tags[4][]'), '12');}
                     break;
-                }
+                 }
         } catch (err) {
         }
 
@@ -14110,7 +14113,7 @@ function auto_feed() {
                 }
             },100);
         } catch (err) {}
-        console.log("forward_site:"+forward_site)
+
         if (forward_site == 'PTer'){
             var type_dict = {'电影': 401, '剧集': 404, '动漫': 403, '综艺': 405, '音乐': 406, '纪录': 402,
                              '体育': 407, '软件': 410, '学习': 411, '书籍': 408, 'MV': 413};
