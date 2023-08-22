@@ -1546,10 +1546,12 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
             tmp_search_list = used_search_list;
         }
     }
-     tmp_search_list = tmp_search_list.map(item => {
+    tmp_search_list = tmp_search_list.map(item => {
         if (item.includes('ZHUQUE')) {
             const zhuquejson = JSON.parse('{"page":1,"size":20,"type":"title","sorter":"id","order":"desc","keyword":"PTer","tags":[],"category":[],"medium":[],"videoCoding":[],"audioCoding":[],"resolution":[],"group":[],"more":false}');
-            zhuquejson.keyword = search_name.trim();
+            try{
+                zhuquejson.keyword = search_name.trim();
+            } catch(err) {}
             const b64 = btoa(encodeURIComponent(JSON.stringify(zhuquejson)));
             return `<a href="https://zhuque.in/torrent/search/${b64}" target="_blank">ZHUQUE</a>`;
         }
@@ -3623,8 +3625,13 @@ function addPoster(url, forward_site) {
 
 function reBuildHref(raw_info, forward_r) {
     $('#input_box').val(raw_info.url);
-    var imdbid = raw_info.url.match(/tt\d+/i)[0];
-    var imdbno = imdbid.substring(2);
+    try{
+        var imdbid = raw_info.url.match(/tt\d+/i)[0];
+        var imdbno = imdbid.substring(2);
+    } catch(err) {
+        imdbid = '';
+        imdbno = '';
+    }
     var container = $('#forward_r');
     if ($('.search_urls').length) {
         $('.search_urls').hide();
@@ -9288,11 +9295,20 @@ function auto_feed() {
 
             raw_info.torrent_url = 'https://zhuque.in' + $('a[href*="/api/torrent/download/"]').attr('href');
 
-            var mediainfo = $('div.ant-collapse-content-box:eq(1)').find('span:eq(0)').text();
-            raw_info.descr += `[quote]\n${mediainfo.trim()}\n[/quote]\n\n`;
+            if ($('div.ant-collapse-content-box').length < 2) {
+                $('div.ant-collapse-header:eq(1)').click();
+                $('div.ant-collapse-header:eq(1)').click();
+            }
+            $('div.ant-collapse-content-box:eq(1)').wait(function(){
+                var mediainfo = $('div.ant-collapse-content-box:eq(1)').find('span:eq(0)').text();
+                raw_info.descr += `[quote]\n${mediainfo.trim()}\n[/quote]\n\n`;
 
-            $('div.ant-card-body:eq(2)').find('img').map((index, e)=>{
-                raw_info.descr += `[img]${$(e).attr('src')}[/img]\n`;
+                $('div.ant-card-body:eq(2)').find('img').map((index, e)=>{
+                    raw_info.descr += `[img]${$(e).attr('src')}[/img]\n`;
+                });
+                $('#forward_r').wait(function(){
+                    reBuildHref(raw_info, $('#forward_r')[0]);
+                });
             });
 
             $('div.ant-card-body:eq(0)').parent().after(`
@@ -25608,12 +25624,10 @@ if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/in
     });
 } else if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/list\/\d+/)) {
     document.addEventListener('DOMNodeInserted', function() {
-        var executed = false;
-        if ($('div.markdown').length && !executed) {
+        if ($('div.markdown').length) {
             setTimeout(function(){
                 if (!$('#mytable').length) {
                     setTimeout(auto_feed, sleep_time);
-                    executed = true;
                 }
             }, 1000);
             
