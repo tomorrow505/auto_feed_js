@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.3.5
+// @version      2.0.3.6
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1434,7 +1434,7 @@ var raw_info = {
     'labels': 0
 };
 
-var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic'];
+var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'HHClub'];
 
 Array.prototype.remove = function(val) {
     var index = this.indexOf(val);
@@ -1708,6 +1708,9 @@ function walkDOM(n) {
                 } else if (site_url.match(/hdroute/i) && n.className == 'quoted') {
                     n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
                 }
+            }
+            if (site_url.match(/hhanclub.top/)) {
+                n.innerHTML = n.innerHTML + '\n';
             }
         } else if (n.nodeName == 'FIELDSET' || n.nodeName == 'BLOCKQUOTE') {
             if (!site_url.match(/hudbt/i) || n.nodeName != 'BLOCKQUOTE'){
@@ -3060,7 +3063,6 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         } else if (site == 'BTN') {
             textarea.style.width = '530px';
         }
-
     } else {
         if (['BHD', 'BLU', 'HDPost', 'ACM', 'HDOli', 'Telly', 'JPTV', 'Monika', 'DTR', 'HONE'].indexOf(site) > -1){
             $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"border": "1px solid #0D8ED9", "color": "#FFFFFF", "backgroundColor": "#292929"});
@@ -7754,7 +7756,7 @@ function auto_feed() {
         }
 
         //----------------------------------标题简介获取——国内站点-------------------------------------------
-        if (judge_if_the_site_in_domestic(site_url) || opencd_mode) {
+        if ((judge_if_the_site_in_domestic(site_url) && origin_site != 'HHClub') || opencd_mode) {
             if (origin_site == 'TTG' || origin_site == 'PuTao' || origin_site == 'OpenCD' || origin_site == 'HDArea') {
                 title = document.getElementsByTagName("h1")[0];
                 if ($(title).text().match(/上传成功|编辑成功/)) {
@@ -8022,6 +8024,37 @@ function auto_feed() {
         if (origin_site == 'HDT') {
             tbody = document.getElementById("TorrentsdetailsHideShowTR");
             tbody = tbody.getElementsByTagName('tbody')[0];
+        }
+
+        if (origin_site == 'HHClub') {
+            function get_next_text(label, label_str) {
+                $(`div[class="font-bold leading-6"]`).map((index,e)=>{
+                    if ($(e).text() == label_str) {
+                        raw_info[label] = $(e).next().text();
+                    }
+                });
+            }
+            get_next_text('name', '标题');
+            get_next_text('small_descr', '副标题');
+            var info = $('div:contains(基本信息):last').next().text();
+            raw_info.type = info.get_type();
+            raw_info.medium_sel = info.medium_sel();
+            raw_info.codec_sel = info.codec_sel();
+            raw_info.audiocodec_sel = info.audiocodec_sel();
+            var div_descr = $('div:contains(简介):last').next()[0];
+            raw_info.descr = walkDOM(div_descr.cloneNode(true)).trim();
+
+            $('div:contains(副标题):last').next().after(`
+                <div class="font-bold leading-6">转载</div>
+                <div class="font-bold leading-6">
+                    <table id="mytable" border=none;>
+                    </table>
+                </div>
+            `);
+            tbody = $('#mytable')[0];
+            insert_row = tbody.insertRow(0);
+            douban_box = tbody.insertRow(0);
+            raw_info.torrent_url = 'https://hhanclub.top/' + $('a[href*="download.php"]').attr('href');
         }
 
         if (origin_site == 'Tik') {
@@ -9722,7 +9755,6 @@ function auto_feed() {
                         raw_info.medium_sel = 'WEB-DL';
                     }
                 }
-                console.log(raw_info)
             } else {
                 if (tds[i].textContent.match(/Category/)){
                     if (origin_site == 'HDB') {
@@ -11311,13 +11343,20 @@ function auto_feed() {
     *                                       part 4 源网页转发跳转及功能部署                                             *
     ******************************************************************************************************************/
         var forward_l, forward_r;
-        if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic'].indexOf(origin_site) > -1) {
+        if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'openlook', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic', 'HHClub'].indexOf(origin_site) > -1) {
             forward_r = insert_row.insertCell(0);
             forward_r.colSpan="5";
             forward_r.style.paddingLeft = '12px'; forward_r.style.paddingTop = '10px';
             forward_r.style.paddingBottom = '10px';
-            forward_l = search_row.insertCell(0);
-            forward_l.colSpan="5";
+            if (origin_site != 'HHClub') {
+                forward_l = search_row.insertCell(0);
+                forward_l.colSpan="5";
+            } else {
+                forward_r.style.paddingLeft = '0px';
+                forward_r.style.paddingTop = '0px';
+                forward_r.style.paddingRight = '60px';
+                forward_r.style.border = 'none';
+            }
             if (origin_site == 'MTV') { forward_r.colSpan="6"; forward_l.colSpan="6";}
             if (no_need_douban_button_sites.indexOf(origin_site) < 0) {
                 init_buttons_for_transfer(forward_l, origin_site, 1, raw_info);
