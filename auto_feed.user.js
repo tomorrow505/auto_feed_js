@@ -1263,7 +1263,8 @@ const site_img_info = {
     'HDT': 'https://s3.gifyu.com/images/favicon-1f27eb036f84ab3b7.png',
     'ZHUQUE': 'https://s3.gifyu.com/images/512.png',
     'Panda': 'https://i.ibb.co/K9bkd8M/favicon.png',
-    'PTLSP':'https://img.picgo.net/2023/08/22/lspd78c10dbe9344162.png'
+    'PTLSP':'https://img.picgo.net/2023/08/22/lspd78c10dbe9344162.png',
+    'HaiDan':'https://www.haidan.video/public/pic/favicon.ico'
 };
 
 //用来拼接发布站点的url和字符串,也可用于识别发布页和源页面
