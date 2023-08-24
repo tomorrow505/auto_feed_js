@@ -1102,7 +1102,7 @@ const reg_team_name = {
     'PTer': /-(Pter|.*Pter)/i,
     'HDHome': /(-hdh|.*@HDHome)/i,
     'PThome': /(-pthome|-pth|.*@pth)/i,
-    'Audiences': /(-Audies|.*@Audies|-ADE|-ADWeb)/i,
+    'Audiences': /(-Audies|.*@Audies|-ADE|-ADWeb|.*@ADWeb)/i,
     'PuTao': /-putao/i,
     'NanYang': /-nytv/i,
     'TLFbits': /-tlf/i,
