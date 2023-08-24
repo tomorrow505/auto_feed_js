@@ -19305,7 +19305,10 @@ function auto_feed() {
             } else {
                 $('select[name="processing_sel[5]"]').val(10);
             }
+
+            raw_info.descr = raw_info.descr.replace(/\n\[\/quote\]/g, '[/quote]');
             GM_setClipboard(raw_info.descr.trim());
+            $('#editor-container').css('height', '600px');
             var descr_html = '';
             raw_info.descr.trim().split('\n').forEach((e,index)=>{
                 if (e) {
