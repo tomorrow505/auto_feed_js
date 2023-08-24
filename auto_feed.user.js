@@ -2046,8 +2046,8 @@ function deal_with_title(title){
     title = title.replace(/\./g, ' ').replace(/torrent$/g, '').replace(/mkv$|mp4$/i, '').trim() + ' ';
     if (title.match(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)[^\d]/)) {
         title = title.replace(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)[^\d]/, function(data){
-            return data.slice(0,2) + '.'+ data.slice(3,data.length).trim();
-        });
+            return data.slice(0,2) + '.'+ data.slice(3,data.length);
+        }).trim();
     }
     title = title.replace(/H ?(26[45])/i, "H.$1").replace(/x265[.-]10bit/i, 'x265 10bit');
     title = title.replace(/\s+\[2?x?(免费|free)\].*$|\(限时.*\)|\(限時.*\)/ig, '').replace(/\[.*?\]/ig, '').replace(/剩余时间.*/i, '');
@@ -5553,7 +5553,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao',
             'PTChina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT',
-            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK'];
+            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK', 'HHClub'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
@@ -5571,6 +5571,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                             $(`input[kname=${e}]`).parent().find('a').css({"color": "red"});
                         } else if ($('div.mainouter', doc).find('div.main').find('table').length) {
                             console.log(`开始签到${e}：`, $('div.mainouter', doc).find('div.main').find('table').text().trim());
+                            $(`input[kname=${e}]`).parent().find('a').css({"color": "red"});
+                        } else if ($('#content', doc).length) {
+                            console.log(`开始签到${e}：`, $('#content', doc).find('p[class="register-now-info register-info"]').text().trim());
                             $(`input[kname=${e}]`).parent().find('a').css({"color": "red"});
                         } else {
                             console.log(`开始签到${e}：`, '失败！！！');
@@ -5837,7 +5840,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             }
 
             var np_sites = ['MTeam', 'CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', '1PTBA', 'HDSky', 'ITZMX',
-                            'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'Oshen', 'HITPT', 'ITZMX', 'OurBits', '红叶', 'HHClub'];
+                            'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'Oshen', 'HITPT', 'ITZMX', 'OurBits', '红叶'];
             log_in(np_sites, '#mainmenu');
 
             log_in(['PuTao'], '#userbar');
@@ -19302,9 +19305,17 @@ function auto_feed() {
             } else {
                 $('select[name="processing_sel[5]"]').val(10);
             }
-
             GM_setClipboard(raw_info.descr.trim());
-            $('#editor-container').after(`<p style="color:red"><b>注意：简介已经复制到粘贴板，第一步请直接进行粘贴操作。</b></p>`);
+            var descr_html = '';
+            raw_info.descr.trim().split('\n').forEach((e,index)=>{
+                if (e) {
+                    descr_html += `<p>${e}</p>`;
+                } else {
+                    descr_html += '<p><br></p>';
+                }
+            });
+            descr_html = descr_html.replace(/\[url=(.+?)\](.+?)\[\/url\]/ig, '<a href="$1">$2</a>');
+            editor.setHtml(descr_html.trim());
         }
 
         else if (forward_site == 'CarPt') {
