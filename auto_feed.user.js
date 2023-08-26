@@ -2715,8 +2715,11 @@ function fill_raw_info(raw_info, forward_site){
     //如果没有媒介, 从标题获取
     if (raw_info.medium_sel == ''){
         raw_info.medium_sel = raw_info.name.medium_sel();
+        if (!raw_info.medium_sel && raw_info.descr.match(/mpls/i)) {
+            raw_info.medium_sel = 'Blu-ray';
+        }
     }
-    if (raw_info.medium_sel == 'Blu-ray' && raw_info.name.match(/UHD|2160P/i)){
+    if (raw_info.medium_sel == 'Blu-ray' && (raw_info.name.match(/UHD|2160P/i) || raw_info.descr.match(/2160p/)) ){
         raw_info.medium_sel = 'UHD';
     }
 
@@ -2753,7 +2756,11 @@ function fill_raw_info(raw_info, forward_site){
             } else if (height == '2 160') {
                 raw_info.standard_sel = '4K';
             }
-        } catch(err) {}
+        } catch(err) {
+            if (raw_info.descr.match(/(1080|2160)p/)) {
+                raw_info.standard_sel = raw_info.descr.match(/(1080|2160)p/)[0].replace('2160p', '4K');
+            }
+        }
     }
 
     if (raw_info.standard_sel == '1080p') {
@@ -11696,9 +11703,7 @@ function auto_feed() {
                     mediainfo1 = mediainfo1.replace(/(<div class="codemain">|<\/div>)/g, '');
                     mediainfo1 = mediainfo1.replace(/<br>/g, '\n');
                     raw_info.full_mediainfo=mediainfo1;
-                } catch(err){
-                    // console.log('获取mediainfo失败：'+err);
-                }
+                } catch(err){}
 
                 //截图
                 var screenshot = document.getElementsByClassName("screenshots-container");
@@ -17950,6 +17955,35 @@ function auto_feed() {
                 edition.options[7].selected = true;
             } else if(raw_info.name.match(/Unrated/)){
                 edition.options[8].selected = true;
+            }
+
+            //Tags
+            if (labels.hdr10) {
+                document.getElementById('HDR10').click();
+            }
+            if (labels.hdr10plus) {
+                document.getElementById('HDR10P').click();
+            }
+            if (labels.db) {
+                document.getElementById('DV').click();
+            }
+            if (raw_info.name.match(/WEB-DL/i)) {
+                document.getElementById('WEBDL').click();
+            }
+            if (raw_info.name.match(/WEBRIP/i)) {
+                document.getElementById('WEBRip').click();
+            }
+            if (raw_info.name.match(/4K remaster/i) || raw_info.small_descr.match(/4K.?修复/i)) {
+                document.getElementById('4kRemaster').click();
+            }
+            if (raw_info.name.match(/2-Disc/) || raw_info.small_descr.match(/双碟版/)) {
+                document.getElementById('2in1').click();
+            }
+            if (raw_info.name.match(/commentary/i) || raw_info.small_descr.match(/评论音轨/)) {
+                document.getElementById('Commentary').click();
+            }
+            if (raw_info.name.match(/[\. ]3D[\. ]/) || raw_info.small_descr.match(/3D/)) {
+                document.getElementById('3D').click();
             }
 
             try{
