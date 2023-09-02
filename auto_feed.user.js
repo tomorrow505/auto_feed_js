@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.3.6
+// @version      2.0.3.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1132,12 +1132,13 @@ const thanks_str = "[quote][b][color=Blue]转自{site}，感谢原制作者发�
 const setting_host_list = {
     'PTer': 'https://pterclub.com/usercp.php?action=personal',
     'HDDolby': 'https://www.hddolby.com/usercp.php?action=personal',
-    'CMCT': 'https://springsunday.net/usercp.php?action=personal',
+    'DaJiao': 'https://dajiao.cyou/usercp.php?action=personal',
     'PThome': 'https://www.pthome.net/usercp.php?action=personal',
-    'OurBits': 'https://ourbits.club/usercp.php?action=personal',
-    'TJUPT': 'https://www.tjupt.org/usercp.php?action=personal',
-    'HDSky': 'https://hdsky.me/usercp.php?action=personal',
+    'Panda': 'https://pandapt.net/usercp.php?action=personal',
+    '红叶': 'https://leaves.red/usercp.php?action=personal',
+    'CyanBug': 'https://cyanbug.net/usercp.php?action=personal',
     'MTeam': 'https://kp.m-team.cc/usercp.php?action=personal',
+    'UBits': 'https://ubits.club/usercp.php?action=personal'
 };
 
 var used_setting_host_list = GM_getValue('setting_host_list') === undefined ? setting_host_list : JSON.parse(GM_getValue('setting_host_list'));
@@ -5419,7 +5420,7 @@ if (site_url.match(/^https:\/\/beyond-hd.me\/library\/title/)) {
     return;
 }
 
-//脚本设置简单页面，使用猫/柠檬等站点的个人设置页面来做的，涵盖转图床的部分操作
+//脚本设置简单页面，使用猫/杜比等站点的个人设置页面来做的，涵盖转图床的部分操作
 if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#mediainfo|#dealimg|#signin)/)) {
     setTimeout(function() {
         var style = `
@@ -5487,6 +5488,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['OurBits'].url + 'attendance.php'}" target="_blank"><b>OurBits</b></a></div>`);
         $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['PigGo'].url + 'attendance.php'}" target="_blank"><b>PigGo</b></a></div>`);
         $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['红叶'].url + 'attendance_new.php'}" target="_blank"><b>红叶</b></a></div>`);
+        $('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['OpenCD'].url}" target="_blank"><b>OpenCD</b></a></div>`);
 
         $('#signin').append(`<br><br><br>`);
         $('#signin').append(`<input type="button" id="ksave_setting" value="保存脚本设置！&nbsp;(只需点击一次)">`);
@@ -11814,8 +11816,11 @@ function auto_feed() {
             if_exclusive = true;
         }
 
-        if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$|UBits$|HHWEB$/i)) {
+        if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$|UBits$|HHWEB$|-beAst$|-beAstTV$/i)) {
             $('#PTT').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至PTT');
+        }
+        if (raw_info.name.match(/Dream$|DBTV$|QHstudIo$/i)) {
+            $('#HDVideo').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至HDVideo');
         }
 
         function check_exist_tid(site) {
@@ -13759,10 +13764,26 @@ function auto_feed() {
                     if (labels.diy){ document.getElementById('l_diy').checked=true; }
                     break;
                 case 'HDSky':
-                    if (labels.diy){ document.getElementsByName('option_sel[]')[3].checked=true; }
-                    if (labels.gy){ document.getElementsByName('option_sel[]')[4].checked=true; }
-                    if (labels.yy){ document.getElementsByName('option_sel[]')[5].checked=true; }
-                    if (labels.zz){ document.getElementsByName('option_sel[]')[6].checked=true; }
+                    if (labels.diy){ $('input[name="option_sel[]"][value="13"]').attr('checked', true); }
+                    if (labels.gy){ $('input[name="option_sel[]"][value="5"]').attr('checked', true); }
+                    if (labels.yy){ $('input[name="option_sel[]"][value="11"]').attr('checked', true); }
+                    if (labels.zz){ $('input[name="option_sel[]"][value="6"]').attr('checked', true); }
+                    if (raw_info.small_descr.match(/特效字幕/)) { $('input[name="option_sel[]"][value="20"]').attr('checked', true); }
+                    if (labels.db && (labels.hdr10plus || labels.hdr10)) {
+                        $('input[name="option_sel[]"][value="24"]').attr('checked', true);
+                    } else if (labels.db){
+                        $('input[name="option_sel[]"][value="15"]').attr('checked', true);
+                    } else if (labels.hdr10plus) {
+                        $('input[name="option_sel[]"][value="17"]').attr('checked', true);
+                    } else if (labels.hdr10) {
+                        $('input[name="option_sel[]"][value="9"]').attr('checked', true);
+                    }
+                    if (!labels.diy && raw_info.descr.match(/disc info|mpls/i)) {
+                        $('input[name="option_sel[]"][value=28]').attr('checked', true);
+                    }
+                    if (raw_info.descr.match(/atmos/i)) {
+                        $('input[name="option_sel[]"][value=21]').attr('checked', true);
+                    }
                     break;
                 case 'HDDolby': case 'PThome': case 'HDHome': case 'Audiences':
                     if (labels.gy){ check_label(document.getElementsByName('tags[]'), 'gy'); }
@@ -24158,11 +24179,10 @@ function auto_feed() {
                     descr = descr.format({'screenshots': img_urls.join('\n\n')});
                 }
 
-                if (raw_info.descr.match(/\/ \d+ ?kbps \//)) {
-                    descr = descr.format({'bitrate': raw_info.descr.match(/\/ (\d+ ?kbps) \//)[1]}).replace('Total Bitrate..', 'Average Bitrate');
-                }
-                else if (raw_info.descr.match(/Total.*?Bitrate:(.*)/i)) {
+                if (raw_info.descr.match(/Total.*?Bitrate:(.*)/i)) {
                     descr = descr.format({'bitrate': raw_info.descr.match(/Total.*?Bitrate:(.*)/i)[1].trim()});
+                } else if (raw_info.descr.match(/\/ \d+ ?kbps \//)) {
+                    descr = descr.format({'bitrate': raw_info.descr.match(/\/ (\d+ ?kbps) \//)[1]}).replace('Total Bitrate..', 'Average Bitrate');
                 }
 
                 if (raw_info.url) {
