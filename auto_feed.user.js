@@ -77,7 +77,6 @@
 // @match        http*://*redacted.ch/requests.php*
 // @match        http*://*redacted.ch/torrents.php*
 // @match        https://c.pc.qq.com/middlem.html?pfurl=*
-// @require      https://code.jquery.com/jquery-1.12.4.js
 // @require      https://greasyfork.org/scripts/453166-jquery/code/jquery.js?version=1105525
 // @require      https://greasyfork.org/scripts/28502-jquery-ui-v1-11-4/code/jQuery%20UI%20-%20v1114.js?version=187735
 // @require      https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js
