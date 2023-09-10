@@ -2418,7 +2418,7 @@ function get_source_sel_from_descr(descr){
     var region = '';
     var reg_region = descr.match(/(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地)([^\r\n]+)/);
     if (reg_region) {
-        region = reg_region[2].trim(); //去除首尾空格
+        region = reg_region[2].split('/')[0].trim(); //去除首尾空格
         reg_region = RegExp(us_ue, 'i');
         if (region.match(/香港/)){
             region = '香港';
@@ -3126,9 +3126,9 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
 function get_size_from_descr(descr){
    size_ = 0;
     try{
-        if (descr.match(/disc.{1,10}size.*?([\d,]+).*?bytes/i)){
-            var size = descr.match(/disc.{1,10}size.*?([\d,\.]+).*?bytes/i)[1];
-            size = size.replace(/,|\./g, '');
+        if (descr.match(/disc.{1,10}size.*?([\d, ]+).*?bytes/i)){
+            var size = descr.match(/disc.{1,10}size.*?([\d,\. ]+).*?bytes/i)[1];
+            size = size.replace(/,|\.| /g, '');
             size_ = parseInt(size)/1024/1024/1024;
         } else if (descr.match(/size[^\d]{0,20}(\d+\.\d+).+GiB/i)) {
             size_ = parseInt(descr.match(/size[^\d]{0,20}(\d+\.\d+).+GiB/i)[1]);
@@ -10715,7 +10715,7 @@ function auto_feed() {
                     raw_info.tvdb_url = 'https://www.thetvdb.com/?' + movie_as[i].href.split('?').pop();
                 }
                 if (movie_as[i].href.match(/www.imdb.com/i)) {
-                    raw_info.url = 'http://www.imdb.com/title/' + movie_as[i].innerHTML;
+                    raw_info.url = ('http://www.imdb.com/title/tt' + movie_as[i].innerHTML).replace(/tttt/, 'tt');
                 }
                 if (movie_as[i].href.match(/www.themoviedb.org/)) {
                     raw_info.tmdb_url = movie_as[i].href.split('?').pop();
@@ -13642,7 +13642,7 @@ function auto_feed() {
                 } else if (forward_site == 'Audiences') {
                     try{
                         raw_info.descr.match(/\[quote\][\s\S]*?\[\/quote\]/g).map((e)=> {
-                            if (e.match(/General.{0,2}\n?(Unique|Complete name)|Disc Title|Disc Info|Disc Label/)) {
+                            if (e.match(/General|Disc Title|Disc Info|Disc Label|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率/i)) {
                                 var ee = e.replace('[quote]', '[Mediainfo]').replace('[/quote]', '[/Mediainfo]');
                                 raw_info.descr = raw_info.descr.replace(e, ee);
                             }
@@ -13766,7 +13766,7 @@ function auto_feed() {
                     if (!labels.gy && !labels.yy) {
                         $('input[name="tag_list[]"][value=11]').attr('checked', true);
                     }
-                    if (labels.hdr10) { $('input[name="tag_list[]"][value=16]').attr('checked', true); }
+                    if (labels.hdr10 || labels.hdr10plus) { $('input[name="tag_list[]"][value=16]').attr('checked', true); }
                     if (labels.db) { $('input[name="tag_list[]"][value=15]').attr('checked', true);}
                     if (raw_info.name.match(/\.3D\.| 3D /)) {
                         $('input[name="tag_list[]"][value=14]').attr('checked', true);
@@ -13796,7 +13796,7 @@ function auto_feed() {
                     if (!labels.diy && raw_info.descr.match(/disc info|mpls/i)) {
                         $('input[name="option_sel[]"][value=28]').attr('checked', true);
                     }
-                    if (raw_info.descr.match(/atmos/i)) {
+                    if (raw_info.descr.match(/atmos /i)) {
                         $('input[name="option_sel[]"][value=21]').attr('checked', true);
                     }
                     break;
@@ -13811,7 +13811,7 @@ function auto_feed() {
                             check_label(document.getElementsByName('tags[]'), 'ybyp');
                         }
                     }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), 'hdr10'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), 'hdr10'); }
                     if (labels.db) {check_label(document.getElementsByName('tags[]'), 'db');}
                     if (labels.complete && forward_site == 'Audiences') {
                         check_label(document.getElementsByName('tags[]'), 'wj');
@@ -13842,8 +13842,18 @@ function auto_feed() {
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (labels.hdr10 && raw_info.standard_sel == '4K') { check_label(document.getElementsByName('tags[4][]'), '9'); }
-                    if (labels.hdr10plus && raw_info.standard_sel == '4K') { check_label(document.getElementsByName('tags[4][]'), '10'); }
+                    if (raw_info.standard_sel == '4K') {
+                        if (labels.hdr10 || labels.hdr10plus) {
+                            if (labels.hdr10) {
+                                check_label(document.getElementsByName('tags[4][]'), '9');
+                            }
+                            if (labels.hdr10plus) {
+                                check_label(document.getElementsByName('tags[4][]'), '10');
+                            }
+                        } else {
+                            check_label(document.getElementsByName('tags[4][]'), '7');
+                        }
+                    }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '8'); }
                     break;
                 case 'WT-Sakura':
@@ -13881,7 +13891,7 @@ function auto_feed() {
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '9');}
                     if (labels.complete) {check_label(document.getElementsByName('tags[4][]'), '13');}
                     if (raw_info.name.match(/DV/)) { check_label(document.getElementsByName('tags[4][]'), '9'); }
@@ -13889,13 +13899,15 @@ function auto_feed() {
                     if (raw_info.descr.match(/Dolby Atmos/) || $('textarea[name="technical_info"]').val().match(/Dolby Atmos/)) {
                         check_label(document.getElementsByName('tags[4][]'), '12');
                     }
+                    if (raw_info.name.match(/-BeiTai/i)) { check_label(document.getElementsByName('tags[4][]'), '22'); }
+                    if (raw_info.name.match(/-DGB/i)) { check_label(document.getElementsByName('tags[4][]'), '24'); }
                     break;
                 case 'UltraHD':
                     if (labels.gy){ check_label(document.getElementsByName('tags[]'), '5'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7');}
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '7');}
                     if (labels.db) {check_label(document.getElementsByName('tags[]'), '9');}
                     break;
                 case "CarPt":
@@ -13903,18 +13915,25 @@ function auto_feed() {
                     if (labels.yy){ check_label(document.getElementsByName('tags[]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '7'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '7'); }
                     break;
                 case 'Oshen':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     break;
                 case '3Wmg':
                     if (labels.gy){ check_label(document.getElementsByName('tags[]'), '16'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[]'), '32'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[]'), '64'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[]'), '64'); }
+                    break;
+                case 'DiscFan':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '8'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     break;
                 case 'HHClub':
                     if (labels.gy){ $('#tags-button-5').click(); }
@@ -14022,7 +14041,7 @@ function auto_feed() {
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '11'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '14'); }
                     if (raw_info.type == 'MV') {
                         check_label(document.getElementsByName('tags[4][]'), '12');
@@ -14039,6 +14058,7 @@ function auto_feed() {
                     if (labels.zz){ $('input[name="tags[4][]"][value="6"]').attr('checked', true); }
                     if (labels.diy){ $('input[name="tags[4][]"][value="4"]').attr('checked', true); }
                     if (labels.hdr10 || labels.hdr10plus) { try { $('input[name="tags[4][]"][value="7"]').attr('checked', true); } catch(err) {}}
+                    if (labels.complete) { $('input[name="tags[4][]"][value="12"]').attr('checked', true); }
                     break;
                 case '红叶':
                     if (labels.gy){ $('input[name="tags[5][]"][value="5"]').attr('checked', true); }
@@ -14121,6 +14141,10 @@ function auto_feed() {
                     if (raw_info.descr.match(/◎语　　言　英语/)) {
                         check_label(document.getElementsByName('tags[4][]'), '8');
                     }
+                    if (raw_info.type == '动漫') {
+                        check_label(document.getElementsByName('tags[4][]'), '9');
+                    }
+                    if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '12'); }
                     break;
                 case 'RouSi':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
@@ -15079,7 +15103,7 @@ function auto_feed() {
             }
 
             //海报，从简介获取
-            reg_img = raw_info.descr.match(/\[img\](.*?)\[\/img\][\s\S]+?(主.{0,6}演|译.{0,6}名)/i);
+            reg_img = raw_info.descr.match(/\[img\](.*?)\[\/img\][\s\S]+?(主.{0,12}演|译.{0,12}名)/i);
             if (reg_img){
                 $('#cover').val(reg_img[1]);
             }
@@ -18878,7 +18902,7 @@ function auto_feed() {
                 case '体育': browsecat.options[12].selected = true; break;
             }
 
-            var source_box = document.getElementsByName('source_sel')[0];
+            var source_box = document.getElementsByName('source_sel[4]')[0];
             if (raw_info.standard_sel == '4K') {
                 source_box.options[2].selected = true;
             }
@@ -18919,16 +18943,12 @@ function auto_feed() {
             var source_box = $('select[name="source_sel[4]"]');
             source_box.val(6)
             switch(raw_info.medium_sel){
-                case 'UHD': source_box.val(8); break;
+                case 'UHD': source_box.val(1); break;
                 case 'Blu-ray': case 'Remux': case 'Encode':
                     source_box.val(1); break;
-                case 'HDTV': source_box.val(4); break;
+                case 'HDTV': source_box.val(5); break;
                 case 'WEB-DL': source_box.val(7); break;
-                case 'DVD':
-                    source_box.val(3);
-                    if (raw_info.name.match(/hd ?dvd/i)) {
-                        source_box.val(2);
-                    }
+                case 'DVD':source_box.val(3);
             }
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
@@ -18979,7 +18999,7 @@ function auto_feed() {
             //分辨率
             var standard_box = $('select[name="standard_sel[4]"]');
             var standard_dict = {
-                '4K': 5, '1080p': 1, '1080i': 2, '720p': 3
+                '4K': 5, '1080p': 1, '1080i': 1, '720p': 3
             };
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
@@ -20698,9 +20718,7 @@ function auto_feed() {
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
-
             document.getElementById('browsecat').dispatchEvent(evt);
-
             //来源
             var source_box = $('select[name="source_sel[4]"]');
             source_box.val(6);
@@ -20727,7 +20745,7 @@ function auto_feed() {
 
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
-            medium_box.val(6);
+            medium_box.val(9);
             switch(raw_info.medium_sel){
                 case 'UHD': case 'Blu-ray':  medium_box.val(1); break;
                 case 'Remux': medium_box.val(3); break;
@@ -23693,9 +23711,10 @@ function auto_feed() {
             //来源
             var source_box = $('select[name="source_sel[4]"]');
             source_box.val(7);
+            console.log(raw_info.source_sel)
             switch(raw_info.source_sel){
                 case '大陆': source_box.val(1); break;
-                case '港台': source_box.val(2); break;
+                case '港台': case '香港': case '台湾': source_box.val(2); break;
                 case '欧美': source_box.val(3); break;
                 case '日本': source_box.val(4); break;
                 case '韩国': source_box.val(5); break;
@@ -23709,8 +23728,12 @@ function auto_feed() {
             switch(raw_info.medium_sel){
                 case 'UHD': medium_box.val(1); break;
                 case 'Blu-ray': medium_box.val(2); break;
-                case 'Remux': medium_box.val(3); break;
-                case 'Remux': medium_box.val(4); break;
+                case 'Remux':
+                    medium_box.val(4);
+                    if (raw_info.standard_sel == '4K') {
+                        medium_box.val(3);
+                    }
+                    break;
                 case 'Encode': medium_box.val(5); break;
                 case 'WEB-DL': medium_box.val(6); break;
                 case 'HDTV':
@@ -23887,6 +23910,7 @@ function auto_feed() {
                     break;
                 case 'Remux': medium_box.val(3); break;
                 case 'HDTV': medium_box.val(5); break;
+                case 'WEB-DL': medium_box.val(11); break;
                 case 'Encode': medium_box.val(7); break;
                 case 'CD': medium_box.val(8); break;
             }
