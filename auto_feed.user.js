@@ -82,10 +82,10 @@
 // @require      https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js
 // @require      https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
-// @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1079125
+// @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1245704
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.3.8
+// @version      2.0.3.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -6816,11 +6816,14 @@ function full_bdinfo2summary(descr) {
 
 function add_douban_info_table(container, width, data) {
     data = data.data;
-    if (data.cast.split('/').length > 8) {
-        data.cast = data.cast.split('/').slice(0,8).join('/');
+    if (data.cast.split('/').length > 9) {
+        data.cast = data.cast.split('/').slice(0, 9).join('/');
     }
     if (data.director.split('/').length > 2) {
-        data.director = data.director.split('/').slice(0,2).join('/');
+        data.director = data.director.split('/').slice(0, 2).join('/');
+    }
+    if (data.region.split('/').length > 4) {
+        data.region = data.region.split('/').slice(0, 4).join('/') + '/<br>' + data.region.split('/').slice(4).join('/');
     }
     container.append(`<table class="contentlayout" cellspacing="0"><tbody>
         <tr>
@@ -11831,6 +11834,9 @@ function auto_feed() {
         if (raw_info.name.match(/Dream$|DBTV$|QHstudIo$/i)) {
             $('#HDVideo').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至HDVideo');
         }
+        if (raw_info.name.match(/HDVWEB$|HDVMV$/i)) {
+            $('#HDDolby').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至HDDolby');
+        }
 
         function check_exist_tid(site) {
             if (site == 'PTP') {
@@ -13624,10 +13630,10 @@ function auto_feed() {
                 if (forward_site == 'PTer') {
                     try{
                         raw_info.descr.match(/\[quote\][\s\S]*?\[\/quote\]/g).map((e)=> {
-                            if (e.match(/General.{0,2}\nUnique/)) {
+                            if (e.match(/General.{0,2}\n?(Unique|Complete name)/)) {
                                 var ee = e.replace('[quote]', '[hide=mediainfo]').replace('[/quote]', '[/hide]');
                                 raw_info.descr = raw_info.descr.replace(e, ee);
-                            } else if (e.match(/Disc Title|Disc Info/)) {
+                            } else if (e.match(/Disc Title|Disc Info|Disc Label/)) {
                                 var ee = e.replace('[quote]', '[hide=bdinfo]').replace('[/quote]', '[/hide]');
                                 raw_info.descr = raw_info.descr.replace(e, ee);
                             }
@@ -13636,7 +13642,7 @@ function auto_feed() {
                 } else if (forward_site == 'Audiences') {
                     try{
                         raw_info.descr.match(/\[quote\][\s\S]*?\[\/quote\]/g).map((e)=> {
-                            if (e.match(/General.{0,2}\nUnique|Disc Title|Disc Info/)) {
+                            if (e.match(/General.{0,2}\n?(Unique|Complete name)|Disc Title|Disc Info|Disc Label/)) {
                                 var ee = e.replace('[quote]', '[Mediainfo]').replace('[/quote]', '[/Mediainfo]');
                                 raw_info.descr = raw_info.descr.replace(e, ee);
                             }
@@ -21966,7 +21972,7 @@ function auto_feed() {
 
             function get_subtitles_from_descr(descr) {
                 var subtitles = [];
-                if (descr.match(/DISC INFO|Disc Title/)) {
+                if (descr.match(/DISC INFO|Disc Title|Disc Label/)) {
                     if (descr.match(/SUBTITLES:[\s\S]{0,20}Codec/i)) {
                         var subtitle_info = descr.match(/SUBTITLES:[\s\S]{0,300}-----------([\s\S]*)/i)[1].trim();
                         subtitles = subtitle_info.split('\n').map(e=>{
