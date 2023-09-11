@@ -6622,7 +6622,7 @@ function simplifyMI(mediainfo_text, site){
     try{ var video_info = mediainfo_text.match(/(video[\s\S]*?)audio/i)[0].trim(); } catch (err) { video_info = mediainfo_text.match(/(video[\s\S]*?)Forced/i)[0].trim();}
     video_info = get_video_info(video_info);
     simplifiedMI += video_info;
-    try { var audio_info = mediainfo_text.match(/(audio[\s\S]*)(text)?/i)[0].trim(); } catch (err) { audio_info = mediainfo_text.match(/(audio[\s\S]*)(Forced)?/i)[0].trim(); }
+    try { var audio_info = mediainfo_text.match(/(audio[\s\S]*?)(text)/i)[0].trim(); } catch (err) { audio_info = mediainfo_text.match(/(audio[\s\S]*?)(Forced)/i)[0].trim(); }
     var audio_infos = audio_info.split(/audio.*?\nid.*/i).filter(audio => audio.length > 30);
     for (i=0; i < audio_infos.length; i++){
         audio_info = get_audio_info(audio_infos[i]);
