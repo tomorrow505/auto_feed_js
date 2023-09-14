@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1245704
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.3.9
+// @version      2.0.4.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -240,6 +240,14 @@ if (location.href.match(/^https:\/\/zhuque.in\//)) {
         if ($('div.banner').length == 2 && $('div.banner:last').is(":visible")) {
             $('div.banner:last').hide();
         }
+    });
+}
+
+if (site_url.match(/^https:\/\/jptv.club\/torrents\?imdb=\d+/)) {
+    var imdbno = site_url.match(/imdb=(\d+)/)[1];
+    $('#imdb').val(imdbno);
+    getDoc(`https://jptv.club/torrents/filter?imdb=${imdbno}`, null, function(doc){
+        $('.table-responsive').html($('.table-responsive', doc).html());
     });
 }
 
@@ -1069,10 +1077,11 @@ const default_search_list = [
     `<a href="http://zmk.pw/search?q={search_name}" target="_blank">ZMK</a>`,
     `<a href="https://mediaarea.net/MediaInfoOnline" target="_blank">MediaiInfo</a>`,
     `<a href="https://assrt.net/sub/?searchword={search_name}" target="_blank">SSW</a>`,
+    `<a href="https://asiancinema.me/torrents?imdb={imdbno}#page/1" target="_blank">ACM</a>`,
+    `<a href="https://jptv.club/torrents?imdb={imdbno}" target="_blank">JPTV</a>`
 ];
 
 var used_search_list = GM_getValue('used_search_list') === undefined ? default_search_list : JSON.parse(GM_getValue('used_search_list')).split(',');
-
 
 //常用站点列表，这里只是举例说明，可以替换成自己想要的站点名称即可
 const default_common_sites = ['HDPost', 'TTG', 'CMCT', 'HUDBT', 'PTer'];
@@ -1756,7 +1765,7 @@ function walkDOM(n) {
                 } else {
                     raw_info.descr = raw_info.descr + '[img]' + n.src + '[/img]';
                 }
-            } else if (site_url.match(/http(s*):\/\/www.tjupt.org\/details.php.*/i)) {
+            } else if (site_url.match(/http(s*):\/\/.*tjupt.org\/details.php.*/i)) {
                 if ($(n).attr('data-src') !== undefined) {
                     raw_info.descr = raw_info.descr + '[img]' + $(n).attr('data-src') + '[/img]';
                 } else {
@@ -2805,6 +2814,7 @@ function fill_raw_info(raw_info, forward_site){
     }
 
     raw_info.descr = raw_info.descr.replace(/\n\n+/g, '\n\n').replace('https://dbimg.audiences.me/?', '').replace('https://imgproxy.pterclub.com/douban/?t=', '');
+    raw_info.descr = raw_info.descr.replace('https://imgproxy.tju.pt/?url=', '');
 
     if (raw_info.edition_info.codec_sel()) {
         raw_info.codec_sel = raw_info.edition_info.codec_sel();
@@ -4259,10 +4269,10 @@ if (site_url.match(/^https?:\/\/hdbits.org\/browse.php*/)) {
     } else if (typeof addStyle != 'undefined') {
         addStyle(css);
     } else {
-         var node = document.createElement('style');
-         node.type = 'text/css';
-         node.appendChild(document.createTextNode(css));
-         var heads = document.getElementsByTagName('head');
+        var node = document.createElement('style');
+        node.type = 'text/css';
+        node.appendChild(document.createTextNode(css));
+        var heads = document.getElementsByTagName('head');
         if (heads.length > 0) {
             heads[0].appendChild(node);
         } else {
