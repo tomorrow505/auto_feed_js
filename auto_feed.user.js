@@ -13045,7 +13045,7 @@ function auto_feed() {
             addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, announce);
             console.log(raw_info);
             function add_extra_info() {
-                $('#artist_tr').before(`<tr class="section_tr"><td>辅助信息:</td><td>${raw_info.name}<br>${raw_info.edition_info}<br>${raw_info.small_descr}</td></tr>`)
+                $('#artist_tr').before(`<tr class="section_tr"><td class="label">辅助信息:</td><td>${raw_info.name}<br>${raw_info.edition_info}<br>${raw_info.small_descr}</td></tr>`)
                 raw_info.name = raw_info.name.trim();
                 if (raw_info.origin_site == 'OPS') {
                     raw_info.name = raw_info.name.replace(/–/g, '-');
@@ -13062,7 +13062,9 @@ function auto_feed() {
                         if (index == $('input[name="artists[]"]').length) {
                             AddArtistField();
                         }
-                        $(`#artist_${index}`).val(item);
+                        if (item) {
+                            $(`#artist_${index}`).val(item);
+                        }
                     });
                 } catch (Err) {}
                 raw_info.descr = raw_info.descr.replace(/\[quote=Tracklist\]/, 'Tracklist\n').replace(/\[\/quote\]/, '');
@@ -13084,7 +13086,6 @@ function auto_feed() {
                 }
                 var media_selected = false;
                 var standard_selected = false;
-                console.log(raw_info.music_media + raw_info.small_descr + raw_info.edition_info)
                 if ($('#format').val() == '---' || !$('#format').val()) {
                     $('#format>option').map((index,e)=>{
                         if (!standard_selected && (raw_info.music_media + raw_info.small_descr + raw_info.edition_info).toUpperCase().match(e.innerText)) {
