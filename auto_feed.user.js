@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1245704
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.4.1
+// @version      2.0.4.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -683,18 +683,10 @@ if (site_url.match(/^https:\/\/api.iyuu.cn\/ptgen\/\?imdb=/)){
             url: req,
             onload: function(res) {
                 var response = JSON.parse(res.responseText);
-                if (imdb_chosen) {
-                    if (res.status === 200 && response.data) {
-                        url = 'https://movie.douban.com/subject/' + response['data'].id;
-                    } else {
-                        url = 'https://www.imdb.com/title/' + url;
-                    }
+                if (response.length > 0) {
+                    url = 'https://movie.douban.com/subject/' + response[0].id;
                 } else {
-                    if (response.length > 0) {
-                        url = 'https://movie.douban.com/subject/' + response[0].id;
-                    } else {
-                        url = 'https://www.imdb.com/title/' + url;
-                    }
+                    url = 'https://www.imdb.com/title/' + url;
                 }
                 document.getElementById('input_value').value = url;
                 document.getElementById('query_btn').click();
@@ -814,8 +806,6 @@ if (!(window.jQuery && window.jQuery.fn.jquery)) {
 const apis = ['https://api.iyuu.cn/App.Movie.Ptgen', 'https://ptgen.tju.pt/infogen', 'https://hudbt.autofeed.workers.dev/'];
 var api_chosen = GM_getValue('api_chosen') === undefined ? 3: GM_getValue('api_chosen');
 var imdb2db_chosen = GM_getValue('imdb2db_chosen') === undefined ? 0: GM_getValue('imdb2db_chosen');
-//提供两个imdb转豆瓣id的API，有迹象表明晚上一点以后失效。
-var imdb_chosen = GM_getValue('imdb_chosen') === undefined ? 0: GM_getValue('imdb_chosen');
 
 /*
 * 设置依托站点，可以选择【PTer/HDDolby/CMCT/PThome/OurBits/TCCF/TJUPT】
@@ -2462,20 +2452,11 @@ function create_site_url_for_douban_info(raw_info, is_douban_search_needed){
                     url: req,
                     onload: function(res) {
                         var response = JSON.parse(res.responseText);
-                        if (imdb_chosen == 1) {
-                            if (res.status === 200 && response.data) {
-                                raw_info.dburl = douban_prex + response['data'].id;
-                                resolve(raw_info);
-                            } else {
-                                reject();
-                            }
+                        if (response.length > 0) {
+                            raw_info.dburl = douban_prex + response[0].id;
+                            resolve(raw_info);
                         } else {
-                            if (response.length > 0) {
-                                raw_info.dburl = douban_prex + response[0].id;
-                                resolve(raw_info);
-                            } else {
-                                reject();
-                            }
+                            reject();
                         }
                     }
                 });
@@ -3377,6 +3358,7 @@ function getJson(url, meta, callback) {
 function getData(imdb_url, callback) {
     var imdb_id = imdb_url.match(/tt\d+/)[0];
     var search_url = 'https://m.douban.com/search/?query=' + imdb_id + '&type=movie';
+    console.log('正在获取数据……');
     getDoc(search_url, null, function(doc) {
         if ($('ul.search_results_subjects', doc).length) {
             var douban_url = 'https://movie.douban.com/subject/' + $('ul.search_results_subjects', doc).find('a').attr('href').match(/subject\/(\d+)/)[1];
@@ -4543,22 +4525,6 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php.*/) && extra_set
 }
 
 if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php\?id.*/) && extra_settings.ptp_show_douban.enable){
-    $(function () {
-        const imdbLink = $('#imdb-title-link').attr('href');
-        if (!imdbLink) {
-            return;
-        }
-        console.log('正在获取数据……');
-        getData(imdbLink, function(data){
-            console.log(data);
-            if (data.data) {
-                addInfoToPage(data['data']);
-            } else {
-                return;
-            }
-        });
-    })
-
     const addInfoToPage = (data) => {
         if (isChinese(data.title)) {
             $('.page__title').prepend(`<a  target='_blank' href="https://movie.douban.com/subject/${data.id}">[${data.title.split(' ')[0]}] </a>`);
@@ -4643,6 +4609,18 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php\?id.*/) && extra
     const isChinese = (title) => {
         return /[\u4e00-\u9fa5]+/.test(title)
     }
+    const imdbLink = $('#imdb-title-link').attr('href');
+    if (!imdbLink) {
+        return;
+    }
+    getData(imdbLink, function(data){
+        console.log(data);
+        if (data.data) {
+            addInfoToPage(data['data']);
+        } else {
+            return;
+        }
+    });
 }
 
 if (site_url.match(/^https?:\/\/secret-cinema.pw\/torrents.php\?id.*/) && all_sites_show_douban){
@@ -4651,7 +4629,6 @@ if (site_url.match(/^https?:\/\/secret-cinema.pw\/torrents.php\?id.*/) && all_si
         if (!imdbLink) {
             return;
         }
-        console.log('正在获取数据……');
         getData(imdbLink, function(data){
             console.log(data);
             if (data.data) {
@@ -4718,7 +4695,6 @@ if (site_url.match(/^https?:\/\/www.morethantv.me\/torrents.php\?id.*/)) {
         if (!imdbLink) {
             return;
         }
-        console.log('正在获取数据……');
         getData(imdbLink, function(data){
             console.log(data);
             if (data.data) {
@@ -7754,7 +7730,7 @@ if (site_url.match(/^https:\/\/(music|book).douban.com\/subject\/\d+/)) {
 *                                         part 3 页面逻辑处理（源网页）                                              *
 ********************************************************************************************************************/
 var sleep_time = 0;
-if (origin_site == "HDF" || origin_site == "PTP" || origin_site == 'HaresClub' || origin_site == 'PigGo'){
+if (origin_site == "HDF" || origin_site == 'HaresClub' || origin_site == 'PigGo'){
     sleep_time = 500;
 } else if (origin_site == "digitalcore") {
     sleep_time = 3000;
