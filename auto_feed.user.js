@@ -1274,7 +1274,7 @@ const site_img_info = {
     'Panda': 'https://i.ibb.co/K9bkd8M/favicon.png',
     'PTLSP':'https://img.picgo.net/2023/08/22/lspd78c10dbe9344162.png',
     'HaiDan':'https://www.haidan.video/public/pic/favicon.ico',
-    '象站':'https://ptvicomo.net/favicon.ico'
+    '象站':'https://img.picgo.net/2023/10/04/ptvicomo0b533c8e4626fe8f.png'
 };
 
 //用来拼接发布站点的url和字符串,也可用于识别发布页和源页面
