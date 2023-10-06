@@ -166,10 +166,26 @@ jQuery.fn.wait = function (func, times, interval) {
     return this;
 }
 
+var hdb_color = 'black';
+
+if (site_url.match(/^https?:\/\/hdbits.org\/details.php\?id=.*/)) {
+    hdb_color =  GM_getValue('HDB_Color');
+    if (hdb_color === undefined) {
+        getDoc('https://hdbits.org/my.php', null, function(){
+            const css = $('input[name="custom_css"]', doc).val();
+            if (/berlin.css/.test(css)) {
+                GM_setValue('HDB_Color', 'white');
+            } else {
+                GM_setValue('HDB_Color', 'black');
+            }
+        });
+    }
+}
+
 GM_addStyle(
     `.content th {
         font-weight:bold;
-        color:black;
+        color: ${hdb_color};
         background-color:transparent;
         padding:4px 10px 4px 0;
         border:0;
@@ -4757,7 +4773,6 @@ if (site_url.match(/^https?:\/\/www.morethantv.me\/torrents.php\?id.*/)) {
     }
 }
 
-
 if (site_url.match(/^https?:\/\/hdbits.org\/details.php\?id=.*/) && extra_settings.hdb_show_douban.enable){
     try{
         var links = $('table.contentlayout').find('a[href^="https://www.imdb.com/title/"]');
@@ -8647,7 +8662,6 @@ function auto_feed() {
 
             raw_info.name = $('span[class="torrent-category badge-extra"]:first').text().replace(/\(|\)/g, '').replace(/English-/, '-');
             var search_name = get_search_name(raw_info.name);
-            // reBuildHref(raw_info, forward_r);
             if (all_sites_show_douban) {
                 getData(raw_info.url, function(data){
                     console.log(data);
