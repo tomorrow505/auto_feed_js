@@ -15912,7 +15912,7 @@ function auto_feed() {
                 case 'H264': case 'X264': codec_box.val(1); break;
                 case 'AV1': codec_box.val(11); break;
                 case 'VP9': codec_box.val(12); break;
-                case 'VC-1': val(5); break;
+                case 'VC-1': codec_box.val(5); break;
                 case 'MPEG-2': case 'MPEG-4': codec_box.val(6); break;
                 default: codec_box.val(7);
             }
@@ -15921,7 +15921,7 @@ function auto_feed() {
             var audiocodec_box = $('select[name="audiocodec_sel"]');
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(15);
-                case 'DTS-HD': case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.options[1].selected = true; break;
+                case 'DTS-HD': case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(1); break;
                 case 'Atmos': case 'TrueHD': audiocodec_box.val(2); break;
                 case 'LPCM': audiocodec_box.val(3); break;
                 case 'DTS': audiocodec_box.val(4); break;
