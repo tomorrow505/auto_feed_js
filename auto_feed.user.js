@@ -3629,7 +3629,7 @@ function addTorrent(url, name, forward_site, forward_announce) {
             $('input[name=file]')[0].files = container.files;
             if (forward_site == 'HHClub') {
                 $('#torrentName').text(name);
-            } 
+            }
         }
     });
 }
@@ -14019,7 +14019,7 @@ function auto_feed() {
                     if (labels.db){ $('input[name="tags[4][]"][value="9"]').attr('checked', true); }
                     if (labels.hdr10 || labels.hdr10plus) { try { $('input[name="tags[4][]"][value="7"]').attr('checked', true); } catch(err) {}}
                     break;
-                case "HDTime": 
+                case "HDTime":
                     if (labels.gy){ $('input[name="tags[4][]"][value="5"]').attr('checked', true); }
                     if (labels.yy){ $('input[name="tags[4][]"][value="5"]').attr('checked', true); }
                     if (labels.zz){ $('input[name="tags[4][]"][value="6"]').attr('checked', true); }
@@ -16648,7 +16648,7 @@ function auto_feed() {
             switch(raw_info.type) {
                 case '电影':
                     switch (raw_info.source_sel){
-                        case '大陆': case '台湾': case '香港': case '港台': 
+                        case '大陆': case '台湾': case '香港': case '港台':
                             $('select[name="second_type"]').val('11');
                             $('input[name="movie_country"]').val('华语');
                             break;
@@ -19185,7 +19185,7 @@ function auto_feed() {
                         medium_box.val(8);
                     }
                     break;
-                case 'CD': 
+                case 'CD':
                     if (forward_site == '红叶') { medium_sel.val(6); } else { medium_sel.val(8); }
             }
             if (raw_info.name.match(/MiniBD/i)) {
@@ -19221,7 +19221,7 @@ function auto_feed() {
                     case 'TrueHD': audiocodec_box.val(15); break;
                     case 'Atmos': audiocodec_box.val(15); break;
                     case 'DTS': audiocodec_box.val(3); break;
-                    case 'AC3': 
+                    case 'AC3':
                         audiocodec_box.val(20);
                         if (raw_info.name.match(/DD[P\+]/)) {
                             audiocodec_box.val(19);
@@ -21010,7 +21010,7 @@ function auto_feed() {
                 case 'Encode': medium_box.val(7); break;
                 case 'WEB-DL': medium_box.val(10); break;
                 case 'HDTV': medium_box.val(5); break;
-                case 'DVD': 
+                case 'DVD':
                     medium_box.val(6);
                     if (raw_info.name.match(/HD.?DVD/i)) {
                         medium_box.val(2);
@@ -22036,9 +22036,9 @@ function auto_feed() {
                         descr.match(/Text.*?\nID[\s\S]*?Forced/g).map(function(item){
                             try{
                                 var e = item.match(/Language.*?:(.*)/)[1].trim().toLowerCase();
-                                if (e == 'chinese' && item.match(/Simplified/i)) {
+                                if (e == 'chinese' && item.match(/Simplified|简体/i)) {
                                     subtitles.push('chinese_simplified');
-                                } else if (e == 'chinese' && item.match(/Traditional/i)) {
+                                } else if (e == 'chinese' && item.match(/Traditional|繁體/i)) {
                                     subtitles.push('chinese_traditional');
                                 } else {
                                     subtitles.push(e);
@@ -22486,6 +22486,7 @@ function auto_feed() {
                 $('#type_of_subtitles').append(`<input type="button" value="辅助" id="help" style="border: none;" />`);
                 $('#help').click(()=>{
                     var subtitles = get_subtitles_from_descr(raw_info.full_mediainfo ? raw_info.full_mediainfo: ($('textarea[name="mediainfo[]"]').val()+$('#release_desc').val()))
+                    //console.log(subtitles);
                     if (subtitles.length) {
                         $('#mixed_subtitles').attr('checked', true);
                         $('#other_subtitles').removeClass('hidden');
@@ -23714,7 +23715,7 @@ function auto_feed() {
         else if (forward_site == 'PTCafe') {
             //类型
             var browsecat = $('#browsecat');
-            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406, 
+            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,
                              '体育': 407, '音乐': 408, '其他': 409};
             browsecat.val(409);
             if (type_dict.hasOwnProperty(raw_info.type)){
@@ -23819,7 +23820,7 @@ function auto_feed() {
         else if (forward_site == 'PTLSP') {
             //类型
             var browsecat = $('#browsecat');
-            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406, 
+            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,
                              '体育': 407, '音乐': 411, '其他': 409};
             browsecat.val(409);
             if (type_dict.hasOwnProperty(raw_info.type)){
@@ -23903,7 +23904,7 @@ function auto_feed() {
         else if (forward_site == 'GTK') {
             //类型
             var browsecat = $('#browsecat');
-            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406, 
+            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,
                              '体育': 407, '音乐': 411, '其他': 409};
             browsecat.val(409);
             if (type_dict.hasOwnProperty(raw_info.type)){
@@ -23964,7 +23965,7 @@ function auto_feed() {
             //类型
             var browsecat = $('#browsecat');
             var specialcat = $('#specialcat')
-            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406, 
+            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,
                              '体育': 407, '音乐': 411, '其他': 409};
             browsecat.val(409);
             specialcat.attr("disabled",true);
@@ -24053,7 +24054,7 @@ function auto_feed() {
                 case 'WMA': audiocodec_box.val(12); break;
                 case 'OGG': audiocodec_box.val(5); break;
                 default : audiocodec_box.val(7); //other
-                
+
             }
 
             //分辨率
@@ -25915,7 +25916,7 @@ if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/in
                     setTimeout(auto_feed, sleep_time);
                 }
             }, 1000);
-            
+
         }
     });
 } else {
