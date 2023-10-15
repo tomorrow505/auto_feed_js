@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1245704
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.4.2
+// @version      2.0.4.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8318,21 +8318,35 @@ function auto_feed() {
         }
 
         if (origin_site == 'IPT') {
-            $('#media').prepend(`
-                <div style="padding-left:55px; padding-right:55px">
-                    <table id="mytable">
-                    </table>
-                </div>
-            `);
+            if ($('#media').length) {
+                $('#media').prepend(`
+                    <div style="padding-left:55px; padding-right:55px">
+                        <table id="mytable">
+                        </table>
+                    </div>
+                `);
+            } else {
+                $('div.info').after(`<br>
+                    <div style="padding-left:90px; padding-right:90px">
+                        <table id="mytable">
+                        </table>
+                    </div>
+                `);
+            }
             tbody = $('#mytable')[0];
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
-            raw_info.url = match_link('imdb', $('.des').has('blockquote').text());
+            try {
+                raw_info.url = match_link('imdb', $('.des').has('blockquote').text());
+                if (!raw_info.url) {
+                    raw_info.url = match_link('imdb', $('#media').html());
+                }
+            } catch (err) {}
             raw_info.type = $('div.tags').text().get_type();
-            if (!raw_info.url) {
-                raw_info.url = match_link('imdb', $('#media').html());
-            }
-            if (all_sites_show_douban) {
+            var descr = $('.des').has('blockquote')[0];
+            raw_info.descr = walkDOM(descr.cloneNode(true));
+
+            if (all_sites_show_douban && raw_info.url) {
                 getData(raw_info.url, function(data){
                     if (data.data){
                         $('td:contains(豆瓣信息)').last().parent().before(`<tr><td colSpan="2" id="douban_info"></td></tr>`);
@@ -25649,20 +25663,13 @@ function auto_feed() {
             }
 
             switch (raw_info.codec_sel){
-                case 'H265': case 'X265':
-                    $("select[name='codec_sel']").val('10'); break;
-                case 'H264':
-                    $("select[name='codec_sel']").val('1'); break;
-                case 'X264':
-                    $("select[name='codec_sel']").val('6'); break;
-                case 'XVID':
-                    $("select[name='codec_sel']").val('3'); break;
-                case 'VC-1':
-                    $("select[name='codec_sel']").val('2'); break;
-                case 'MPEG-2': case 'MPEG-4':
-                    $("select[name='codec_sel']").val('4'); break;
-                case '':
-                    $("select[name='codec_sel']").val('5');
+                case 'H265': case 'X265': $("select[name='codec_sel']").val('10'); break;
+                case 'H264': $("select[name='codec_sel']").val('1'); break;
+                case 'X264': $("select[name='codec_sel']").val('6'); break;
+                case 'XVID': $("select[name='codec_sel']").val('3'); break;
+                case 'VC-1': $("select[name='codec_sel']").val('2'); break;
+                case 'MPEG-2': case 'MPEG-4': $("select[name='codec_sel']").val('4'); break;
+                case '': $("select[name='codec_sel']").val('5');
             }
 
             //音频编码
