@@ -1098,7 +1098,7 @@ const default_signin_sites = ['HDPost', 'TTG', 'CMCT', 'HUDBT', 'PTer'];
 var used_signin_sites = GM_getValue('used_signin_sites') === undefined ? default_common_sites: JSON.parse(GM_getValue('used_signin_sites')).split(',');
 
 //欧美国家列表，可以酌情添加
-const us_ue = ['挪威|丹麦|瑞典|芬兰|英国|爱尔兰|荷兰|比利时|卢森堡|法国|西班牙|葡萄牙|德国|奥地利|瑞士|美国|加拿大|澳大利亚|意大利|波兰|新西兰|西德|苏联|俄罗斯'];
+const us_ue = ['挪威|丹麦|瑞典|芬兰|英国|爱尔兰|荷兰|比利时|卢森堡|法国|西班牙|葡萄牙|德国|奥地利|瑞士|捷克|美国|加拿大|澳大利亚|意大利|波兰|新西兰|西德|苏联|俄罗斯'];
 
 //是否在PTP/HDB/HDT/UHD种子列表显示搜索跳转功能，1表示显示，0表示隐藏
 const default_show_search_urls = {
@@ -3673,6 +3673,23 @@ function reBuildHref(raw_info, forward_r) {
             tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
         }
     }
+}
+
+function check_team(raw_info, s_name, forward_site) {
+    if (raw_info.name.match(/MTeam/) && forward_site == 'HDHome') {
+        $(`select[name="team_sel"]>option:eq(11)`).attr('selected', true);
+        return;
+    }
+    $(`select[name="${s_name}"]>option`).map(function(index,e){
+        if (raw_info.name.match(e.innerText)) {
+            if ((raw_info.name.match(/LCHD/) && e.innerText == 'CHD') || (raw_info.name.match(/PandaMoon/) && e.innerText == 'Panda') || e.innerText == 'DIY' || e.innerText == 'REMUX') {
+                console.log('小组名貌似会产生误判');
+                return;
+            } else {
+                $(`select[name="${s_name}"]>option:eq(${index})`).attr('selected', true);
+            }
+        }
+    });
 }
 
 if (site_url.match(/(broadcasthe.net|backup.landof.tv)\/.*.php.*/)) {
@@ -14060,9 +14077,9 @@ function auto_feed() {
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
-                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '14'); }
+                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '21'); }
                     if (raw_info.type == 'MV') {
-                        check_label(document.getElementsByName('tags[4][]'), '12');
+                        check_label(document.getElementsByName('tags[4][]'), '26');
                     }
                     break;
                 case 'HDRoute':
@@ -14133,6 +14150,7 @@ function auto_feed() {
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '51'); }
                     if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '8');}
                     if (raw_info.small_descr.match(/特效字幕/)) { check_label(document.getElementsByName('tags[4][]'), '12'); }
@@ -15138,11 +15156,7 @@ function auto_feed() {
             }
 
             $("select[name='team_sel']").val('5');
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText) && e.innerText != 'DIY') {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'PThome' || forward_site == 'Audiences'){
@@ -15249,11 +15263,7 @@ function auto_feed() {
                 }
             }
             $('select[name="team_sel"]').val("5");
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
 
             //分辨率
             var standard_box = document.getElementsByName('standard_sel')[0];
@@ -15507,11 +15517,7 @@ function auto_feed() {
             }
 
             $('select[name="team_sel"]').val(11);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel', forward_site);
         }
 
         else if (forward_site == 'HDSky'){
@@ -15674,12 +15680,8 @@ function auto_feed() {
             } catch (err) {
                 alert(err);
             }
-
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText) && e.innerText != 'REMUX') {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            $('select[name="source_sel"]').val(7);
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'HUDBT') {
@@ -15960,11 +15962,7 @@ function auto_feed() {
                 standard_box.val(index);
             }
             $('select[name="team_sel"]').val(8);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'ITZMX'){
@@ -16060,11 +16058,7 @@ function auto_feed() {
             }
 
             $('select[name="team_sel[4]"]').val(17);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'HDTime') {
@@ -16279,11 +16273,7 @@ function auto_feed() {
                 }
 
                 $('select[name="team_sel"]').val(6);
-                $('select[name="team_sel"]>option').map(function(index,e){
-                    if (raw_info.name.match(e.innerText)) {
-                        $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                    }
-                });
+                check_team(raw_info, 'team_sel');
             } catch(err){}
         }
 
@@ -16353,11 +16343,7 @@ function auto_feed() {
 
             //制作组
             $('select[name="team_sel"]').val(6);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
 
         }
 
@@ -16413,11 +16399,7 @@ function auto_feed() {
                 standard_box.options[index].selected = true;
             }
             $(`select[name="team_sel"]>option:eq(12)`).attr('selected', true);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'TJUPT') {
@@ -16909,11 +16891,7 @@ function auto_feed() {
                     standard_box.options[index].selected = true;
                 }
 
-                $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+                check_team(raw_info, 'team_sel');
             } catch (err){
 
             }
@@ -17093,11 +17071,7 @@ function auto_feed() {
                 processing_box.options[2].selected = true;
             }
 
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'HaiDan') {
@@ -17315,11 +17289,7 @@ function auto_feed() {
             $('select[name="processing_sel"]').parent().find('input.layui-unselect').val($('select[name="processing_sel"] option:selected').text());
 
             $('select[name="team_sel"]').val('15');
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
             $('select[name="team_sel"]').parent().find('input.layui-unselect').val($('select[name="team_sel"] option:selected').text());
 
             if (if_uplver) {
@@ -17382,11 +17352,7 @@ function auto_feed() {
                 standard_box.val(index);
             }
             $('select[name="team_sel[4]"]').val(7);
-            $('select[name="team_sel[4]"]>option').map(function (index, e) {
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'HDfans') {
@@ -17498,11 +17464,7 @@ function auto_feed() {
                 }
             }
             $('select[name="team_sel[4]"]').val('27');
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'CyanBug'){
@@ -17559,11 +17521,7 @@ function auto_feed() {
             }
 
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function (index, e) {
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'PTChina') {
@@ -17670,11 +17628,7 @@ function auto_feed() {
                 }
             }
             $('select[name="team_sel[4]"]').val(35);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'HD4FANS') {
@@ -17729,11 +17683,7 @@ function auto_feed() {
                 standard_box.options[index].selected = true;
             }
 
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'HDRoute') {
@@ -18429,11 +18379,7 @@ function auto_feed() {
 
         else if (forward_site == 'HDMaYi') {
             $('select[name="team_sel[4]"]').val(10);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match('-'+e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
 
             if (raw_info.name.match(/mteam/i)) {
                 $('select[name="team_sel"]').val(3);
@@ -18558,11 +18504,7 @@ function auto_feed() {
                 standard_box.val(index);
             }
             $("select[name='team_sel[6]']").val('5');
-            $('select[name="team_sel[6]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[6]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[6]');
 
             if (raw_info.medium_sel == 'Encode' || raw_info.name.match(/x264|x265/)) {
                 $('select[name="processing_sel[6]"]').val(2);
@@ -18661,11 +18603,7 @@ function auto_feed() {
             }
 
             $('select[name="team_sel"]').val(5);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'YDY') {
@@ -18751,11 +18689,7 @@ function auto_feed() {
                 standard_box.options[index].selected = true;
             }
             $('select[name="team_sel"]').val(9);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'SoulVoice') {
@@ -18800,11 +18734,7 @@ function auto_feed() {
             disableother('browsecat','specialcat');
 
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
             if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
             if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
             if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
@@ -18851,19 +18781,19 @@ function auto_feed() {
 
             //编码
             var codec_box = $('select[name="codec_sel[4]"]');
+            codec_box.val(14);
             switch (raw_info.codec_sel){
-                case 'H265': codec_box.val(6); break;
-                case 'H264': codec_box.val(1); break;
-                case 'X265': codec_box.val(13); break;
-                case 'VC-1': codec_box.val(2); break;
-                case 'VP9': codec_box.val(7); break;
-                case 'X264': codec_box.val(14); break;
+                case 'H265': codec_box.val(11); break;
+                case 'H264': codec_box.val(2); break;
+                case 'X265': codec_box.val(11); break;
+                case 'VP9': codec_box.val(9); break;
+                case 'X264': codec_box.val(2); break;
             }
-            if (raw_info.name.match(/H.?266/)) { codec_box.val(9); }
+            if (raw_info.name.match(/H.?266/)) { codec_box.val(10); }
 
             //分辨率
             var standard_box = $('select[name="standard_sel[4]"]');
-            var standard_dict = {'8k': 7, '4K': 6, '1080p': 1, '1080i': 2, '720p': 3, 'SD': 4, '': 8};
+            var standard_dict = {'8k': 1, '4K': 2, '1080p': 3, '1080i': 3, '720p': 4, 'SD': 5, '': 5};
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
@@ -18888,11 +18818,7 @@ function auto_feed() {
 
             //制作组
             $('select[name="team_sel[4]"]').val(14);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'DiscFan') {
@@ -18976,22 +18902,19 @@ function auto_feed() {
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
             switch(raw_info.medium_sel){
-                case 'UHD': medium_box.val(10); break;
-                case 'Blu-ray': medium_box.val(1); break;
+                case 'UHD': medium_box.val(11); break;
+                case 'Blu-ray': medium_box.val(11); break;
                 case 'DVD':
-                    medium_box.val(2);
+                    medium_box.val(11);
                     if (raw_info.name.match(/DVDr/i)) {
-                        medium_box.val(6);
+                        medium_box.val(7);
                     }
                     break;
                 case 'Remux': medium_box.val(3); break;
-                case 'HDTV': medium_box.val(5); break;
+                case 'HDTV': medium_box.val(8); break;
                 case 'Encode': medium_box.val(7); break;
-                case 'WEB-DL': medium_box.val(11); break;
+                case 'WEB-DL': medium_box.val(8); break;
                 case 'CD': medium_box.val(8);
-            }
-            if (raw_info.name.match(/MiniBD/i)) {
-                medium_box.val(4);
             }
             //视频编码
             var codec_box = $('select[name="codec_sel[4]"]');
@@ -18999,9 +18922,9 @@ function auto_feed() {
             switch (raw_info.codec_sel){
                 case 'H265': case 'X265': codec_box.val(6); break;
                 case 'H264': codec_box.val(1); case 'X264': codec_box.val(1); break;
-                case 'VC-1': codec_box.val(2); break;
-                case 'MPEG-2': case 'MPEG-4': codec_box.val(4);; break;
-                case 'XVID': codec_box.val(3);
+                case 'VC-1': codec_box.val(5); break;
+                case 'MPEG-2': case 'MPEG-4': codec_box.val(5);; break;
+                case 'XVID': codec_box.val(5);
             }
             //音频编码
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
@@ -19029,11 +18952,7 @@ function auto_feed() {
                 standard_box.val(index);
             }
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
             $('input[name="pt_gen"]').val(raw_info.dburl);
 
             if (labels.db) {
@@ -19073,11 +18992,7 @@ function auto_feed() {
             }
             try { disableother('browsecat','specialcat'); } catch (err) {}
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
             switch(raw_info.medium_sel){
@@ -19288,17 +19203,9 @@ function auto_feed() {
                 standard_box.val(index);
             }
             $('select[name="team_sel[5]"]').val(5);
-            $('select[name="team_sel[5]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[5]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[5]');
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == '海棠') {
@@ -19406,11 +19313,7 @@ function auto_feed() {
                 standard_box.val(index);
             }
             $('select[name="team_sel[5]"]').val(5);
-            $('select[name="team_sel[5]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[5]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[5]');
             if (raw_info.type == '剧集') {
                 if (raw_info.source_sel == '大陆') {
                     $('select[name="processing_sel[5]"]').val(8);
@@ -19465,7 +19368,7 @@ function auto_feed() {
                         medium_box.val(4);
                     }
                     break;
-                case 'Remux': medium_box.val(6); break;
+                case 'Remux': medium_box.val(9); break;
                 case 'HDTV': medium_box.val(3); break;
                 case 'Encode': medium_box.val(1); break;
                 case 'WEB-DL': medium_box.val(2); break;
@@ -19507,11 +19410,7 @@ function auto_feed() {
                 standard_box.options[index].selected = true;
             }
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'JoyHD') {
@@ -19585,11 +19484,7 @@ function auto_feed() {
                 case '体育': case '学习': case '软件': medium_box.options[4].selected = true; break;
             }
             $('select[name="team_sel"]').val(13);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'HDZone') {
@@ -19835,11 +19730,7 @@ function auto_feed() {
             }
 
             $('select[name="team_sel"]').val(11);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match('-'+e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'Oshen') {
@@ -19892,11 +19783,7 @@ function auto_feed() {
             }
 
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'HDAtmos') {
@@ -20768,9 +20655,9 @@ function auto_feed() {
 
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
-            medium_box.val(9);
             switch(raw_info.medium_sel){
-                case 'UHD': case 'Blu-ray':  medium_box.val(1); break;
+                case 'UHD':  medium_box.val(16); break;
+                case 'Blu-ray':  medium_box.val(1); break;
                 case 'Remux': medium_box.val(3); break;
                 case 'HDTV': medium_box.val(5); break;
                 case 'Encode': medium_box.val(7); break;
@@ -20787,13 +20674,14 @@ function auto_feed() {
             }
 
             //视频编码
-            var codec_box = document.getElementsByName('codec_sel[4]')[0];
-            codec_box.options[5].selected = true;
+            var codec_box = $('select[name="codec_sel[4]"]');
+            codec_box.val(5);
             switch (raw_info.codec_sel){
-                case 'H264': case 'X264': codec_box.options[1].selected = true; break;
-                case 'VC-1': codec_box.options[2].selected = true; break;
-                case 'XVID': codec_box.options[3].selected = true; break;
-                case 'MPEG-2': case 'MPEG-4': codec_box.options[4].selected = true;
+                case 'H264': case 'X264': codec_box.val(1); break;
+                case 'H265': case 'X265': codec_box.val(18); break;
+                case 'VC-1': codec_box.val(2); break;
+                case 'XVID': codec_box.val(3); break;
+                case 'MPEG-2': case 'MPEG-4': codec_box.val(4);
             }
 
             //音频编码
@@ -20810,7 +20698,7 @@ function auto_feed() {
             //分辨率
             var standard_box = document.getElementsByName('standard_sel[4]')[0];
             var standard_dict = {
-                '1080p': 1, '1080i': 2, '720p': 3, 'SD': 4, '': 0
+                '1080p': 1, '1080i': 2, '720p': 3, 'SD': 4, '4K': 5, '8K': 6
             };
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
@@ -20818,11 +20706,7 @@ function auto_feed() {
             }
 
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
 
             //处理
             var processing_box = document.getElementsByName('processing_sel[4]')[0];
@@ -20850,7 +20734,7 @@ function auto_feed() {
             var source_box = $('select[name="source_sel[4]"]');
             source_box.val(28);
             switch(raw_info.medium_sel){
-                case 'UHD': source_box.val(23);
+                case 'UHD': source_box.val(23); break;
                 case 'Blu-ray': case 'Remux': case 'Encode':
                     source_box.val(22); break;
                 case 'HDTV': source_box.val(26); break;
@@ -20990,11 +20874,7 @@ function auto_feed() {
                 standard_box.val(index);
             }
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'Panda') {
@@ -21227,11 +21107,7 @@ function auto_feed() {
                 standard_box.val(index);
             }
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             audiocodec_box.val(7);
             switch (raw_info.audiocodec_sel){
@@ -21367,11 +21243,7 @@ function auto_feed() {
                 standard_box.val(index);
             }
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
             if (raw_info.name.match(/beyondhd/i)) {
                 $('select[name="team_sel"]').val(9);
             }
@@ -21446,11 +21318,7 @@ function auto_feed() {
             }
             disableother('browsecat','specialcat');
             $('select[name="team_sel"]').val(4);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'PTT') {
@@ -23824,11 +23692,7 @@ function auto_feed() {
 
             // 制作组
             $('select[name="team_sel[4]"]').val(30);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'PTLSP') {
@@ -23908,11 +23772,7 @@ function auto_feed() {
 
             // 制作组
             $('select[name="team_sel[4]"]').val(22);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
         else if (forward_site == 'GTK') {
@@ -23950,8 +23810,8 @@ function auto_feed() {
             var codec_box = $('select[name="codec_sel"]');
             codec_box.val(5);
             switch (raw_info.codec_sel){
-                case 'H264': codec_box.val(1); break;
-                case 'X264': codec_box.val(1); break;
+                case 'H264': case 'X264': codec_box.val(1); break;
+                case 'H265': case 'X265': codec_box.val(6); break;
                 case 'VC-1': codec_box.val(2); break;
                 case 'XVID': codec_box.val(3); break;
                 case 'MPEG-2': case 'MPEG-4': codec_box.val(4); break;
@@ -23959,16 +23819,12 @@ function auto_feed() {
 
             // 制作组
             $('select[name="team_sel"]').val(5);
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
 
             //分辨率
             var standard_box = $('select[name="standard_sel"]');
             var standard_dict = {
-                'SD': 4, '720p': 3,'1080i': 2, '1080p': 1, '4K': 1, '8K': 1
+                'SD': 4, '720p': 3,'1080i': 2, '1080p': 1, '4K': 5, '8K': 6
             }
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
@@ -24084,11 +23940,7 @@ function auto_feed() {
 
             // 制作组
             $('select[name="team_sel[4]"]').val(5);
-            $('select[name="team_sel[4]"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel[4]"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel[4]');
         }
 
     } else if (judge_if_the_site_as_source() == 2) { //HDCity
@@ -25644,11 +25496,7 @@ function auto_feed() {
             }
 
             $("select[name='team_sel']").val('5');
-            $('select[name="team_sel"]>option').map(function(index,e){
-                if (raw_info.name.match(e.innerText)) {
-                    $(`select[name="team_sel"]>option:eq(${index})`).attr('selected', true);
-                }
-            });
+            check_team(raw_info, 'team_sel');
             document.getElementsByName('uplver')[0].checked = if_uplver;
 
             //格式
