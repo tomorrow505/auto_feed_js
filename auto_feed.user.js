@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1245704
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.4.3
+// @version      2.0.4.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -3265,6 +3265,8 @@ function set_jump_href(raw_info, mode) {
                         } else {
                             search_name = raw_info.name.split('-')[1].replace(/\*.*?\*/g, '').trim().replace(/\d{4}$/, '') + ' ' + raw_info.name.match(/(19|20)\d{2}/)[0];
                         }
+                    } else {
+                        search_name = get_search_name(raw_info.name);
                     }
                     if (key == 'TTG') {
                         forward_url = used_site_info[key].url + 'browse.php?search_field={name}&c=M'.format({'name': search_name});
@@ -20656,8 +20658,8 @@ function auto_feed() {
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
             switch(raw_info.medium_sel){
-                case 'UHD':  medium_box.val(16); break;
-                case 'Blu-ray':  medium_box.val(1); break;
+                case 'UHD': medium_box.val(16); break;
+                case 'Blu-ray': medium_box.val(1); break;
                 case 'Remux': medium_box.val(3); break;
                 case 'HDTV': medium_box.val(5); break;
                 case 'Encode': medium_box.val(7); break;
