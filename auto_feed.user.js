@@ -1132,12 +1132,11 @@ const reg_team_name = {
     'HDDolby': /-DBTV|-QHstudIo|Dream$|.*@dream/i,
     'FRDS': /-FRDS|@FRDS/i,
     'BeiTai': /-BeiTai/i,
-    'PigGo': /PigoHD|PigoWeb/i,
+    'PigGo': /PigoHD|PigoWeb|PiGoNF/i,
     'CarPt': /CarPT/i,
     'HDVideo': /(-QHstudIo|-HDVWEB|-HDVMV)/i,
     'HDfans': /HDFans/i,
     'WT-Sakura': /SakuraWEB|SakuraSUB|WScode/i,
-    'PigGo': /PiGoNF|PigoHD|PigoWeb/i,
     'HHClub': /HHWEB/i,
     'HaresClub': /Hares?WEB|HaresTV|DIY@Hares|-hares/i,
     'HDPt': /hdptweb/i,
@@ -2838,6 +2837,10 @@ function fill_raw_info(raw_info, forward_site){
         } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?MPEG Video[\s\S]{1,10}Format Version.*?Version 2/i)) {
             raw_info.codec_sel = 'MPEG-2';
         }
+    }
+
+    if (raw_info.name.match(/WEB-DL/)) {
+        raw_info.name = raw_info.name.replace(/HEVC/, 'H.265').replace(/AVC/, 'H.264');
     }
 
     return raw_info;
