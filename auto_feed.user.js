@@ -82,7 +82,7 @@
 // @require      https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js
 // @require      https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
-// @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1245704
+// @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
 // @version      2.0.4.4
@@ -13572,6 +13572,9 @@ function auto_feed() {
                 allinput[i].value = raw_info.small_descr;
                 if (forward_site == 'OpenCD') {
                     allinput[i].value = raw_info.small_descr.replace('- {自抓}', '');
+                }
+                if (forward_site == 'CMCT') {
+                    allinput[i].value = raw_info.small_descr.replace('【', '[').replace('】', ']');
                 }
             }
 
