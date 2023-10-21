@@ -1147,7 +1147,8 @@ const reg_team_name = {
     '影': /Ying(WEB|DIY|TV|MV|MUSIC)?$/i,
     'DaJiao': /DJWEB|DJTV/i,
     'PTLSP': /PTLSP|LSP(WEB|DIY|MUSIC)?$/i,
-    '象站': /Eleph(WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i
+    '象站': /Eleph(WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i,
+    'OKPT': /OK(WEB|Web)?$/i
 };
 const thanks_str = "[quote][b][color=Blue]转自{site}，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
