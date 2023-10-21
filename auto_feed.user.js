@@ -13895,7 +13895,11 @@ function auto_feed() {
                                 check_label(document.getElementsByName('tags[4][]'), '10');
                             }
                         } else {
-                            check_label(document.getElementsByName('tags[4][]'), '7');
+                            if (raw_info.descr.match(/HDR/)) {
+                                check_label(document.getElementsByName('tags[4][]'), '9');
+                            } else {
+                                check_label(document.getElementsByName('tags[4][]'), '7');
+                            }
                         }
                     }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '8'); }
