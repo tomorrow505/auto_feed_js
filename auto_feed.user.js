@@ -85,7 +85,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.4.4
+// @version      2.0.4.5
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1746,6 +1746,9 @@ function walkDOM(n) {
             if (n.nodeName == 'FIELDSET' && n.textContent.match(/(温馨提示|郑重声明|您的保种|商业盈利|相关推荐|自动发布|仅供测试宽带|不用保种|本站仅负责连接|感谢发布者|转载请注意礼节)/g)) {
                 n.innerHTML = '';
             }
+            if (n.nodeName == 'BLOCKQUOTE' && n.textContent.match(/勿作商用/)) {
+                n.innerHTML = '';
+            }
         } else if (n.nodeName == 'DIV' && n.innerHTML == '代码') {
             n.innerHTML = '';
             n.nextSibling.innerHTML = '[quote]' + n.nextSibling.innerHTML + '[/quote]';
@@ -2865,6 +2868,9 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
     input_box.className="input";
     input_box.id="input_box";
     input_box.value = raw_info.url;
+    if (!raw_info.url && raw_info.dburl) {
+        input_box.value = raw_info.dburl;
+    }
 
     if (site == 'PTP') {
         input_box.style.width = '320px';
@@ -7190,11 +7196,7 @@ async function getCelebrities(doubanid, timeout = TIMEOUT) {
                     }
                 ];
             });
-            console.log(typeof(entries))
-            console.log(entries)
             if (entries.length) {
-                // jsonCeleb = Object.fromEntries(entries);
-                // console.log(jsonCeleb)
                 jsonCeleb = entries;
             } else {
                 jsonCeleb = null;
@@ -7368,7 +7370,10 @@ function get_douban_info(raw_info) {
         const infoGenClickEvent = async e => {
             var data = formatInfo(await getInfo(doc, raw_info));
             raw_info.descr = data + '\n\n' + raw_info.descr;
-
+            var thanks = raw_info.descr.match(/\[quote\].*?转自.*?，感谢原制作者发布。.*?\[\/quote\]/);
+            if (thanks) {
+                raw_info.descr = thanks[0] + '\n' + raw_info.descr.replace(thanks[0], '');
+            }
             if (!location.href.match(/usercp.php\?action=persona|pter.*upload.php|piggo.me.*upload.php|^https:\/\/movie.douban.com|^https?:\/\/\d+.\d+.\d+.\d+.*5678/)){
                 if (raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
                     raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
@@ -8091,7 +8096,7 @@ function auto_feed() {
             raw_info.medium_sel = info.medium_sel();
             raw_info.codec_sel = info.codec_sel();
             raw_info.audiocodec_sel = info.audiocodec_sel();
-            var div_descr = $('div:contains(简介):last').next()[0];
+            var div_descr = $('div:contains(简介):last').parent().next()[0];
             raw_info.descr = walkDOM(div_descr.cloneNode(true)).trim();
 
             $('div:contains(副标题):last').next().after(`
@@ -8104,6 +8109,19 @@ function auto_feed() {
             tbody = $('#mytable')[0];
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
+            if ($('#mediainfo-raw').length) {
+                raw_info.descr = '[quote]\n' + $('#mediainfo-raw').find('code').text() + '\n[/quote]' + raw_info.descr;
+                no_need_douban_button_sites.pop();
+                search_row = tbody.insertRow(0);
+                douban_button_needed = true;
+            }
+            try {
+                raw_info.url = match_link('imdb', $('#kimdb').html());
+            } catch (err) {}
+            try {
+                raw_info.dburl = match_link('douban', $('#douban_info-content').html());
+                console.log(raw_info.dburl)
+            } catch (err) {}
             raw_info.torrent_url = 'https://hhanclub.top/' + $('a[href*="download.php"]').attr('href');
         }
 
@@ -11413,7 +11431,7 @@ function auto_feed() {
             forward_r.colSpan="5";
             forward_r.style.paddingLeft = '12px'; forward_r.style.paddingTop = '10px';
             forward_r.style.paddingBottom = '10px';
-            if (origin_site != 'HHClub') {
+            if (origin_site != 'HHClub' || no_need_douban_button_sites.indexOf('HHClub') < 0) {
                 forward_l = search_row.insertCell(0);
                 forward_l.colSpan="5";
             } else {
@@ -11447,7 +11465,6 @@ function auto_feed() {
             } else if (origin_site == 'OpenCD') {
                 forward_r.colSpan="4";
             }
-
             forward_l.innerHTML = "转发种子"; forward_l.valign = "top"; forward_l.style.fontWeight = "bold";
             if ((!judge_if_the_site_in_domestic() && no_need_douban_button_sites.indexOf(origin_site) < 0) || douban_button_needed) {
                 var direct;
@@ -12454,6 +12471,11 @@ function auto_feed() {
                             douban_info = douban_info.replace("hongleyou.cn", "doubanio.com");
                             if (douban_info != '') {
                                 raw_info.descr = douban_info + '\n\n' + raw_info.descr;
+
+                                var thanks = raw_info.descr.match(/\[quote\].*?转自.*?，感谢原制作者发布。.*?\[\/quote\]/);
+                                if (thanks) {
+                                    raw_info.descr = thanks[0] + '\n' + raw_info.descr.replace(thanks[0], '');
+                                }
 
                                 if (is_douban_needed && raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
                                     raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
