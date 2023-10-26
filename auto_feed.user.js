@@ -28,6 +28,7 @@
 // @match        https://filelist.io/*
 // @match        https://bluebird-hd.org/*
 // @match        https://iptorrents.com/torrent.php?id=*
+// @match        http*://hd-space.org/index.php?page=torrent-details*
 // @match        https://digitalcore.club/torrent/*
 // @match        http*://ptpimg.me*
 // @match        https://imgbox.com*
@@ -1235,6 +1236,7 @@ const o_site_info = {
     'SC': 'https://secret-cinema.pw/',
     'iTS': 'https://shadowthein.net/',
     'HDRoute': 'http://hdroute.org/',
+    'HDSpace': 'https://hd-space.org/',
     'ACM': 'https://asiancinema.me/',
     'HDOli': 'https://hd-olimpo.club/',
     'Tik': 'https://www.cinematik.net/',
@@ -1761,7 +1763,7 @@ function walkDOM(n) {
         } else if (n.nodeName == '#text' && site_url.match(/npupt/)) {
             n.data = n.data.replace(/^ +| +$/g, '');
         } else if (n.nodeName == 'BR') {
-            if (site_url.match(/u2.dmhy.org|ourbits.club|totheglory.im.*|blutopia.cc.*|desitorrents.tv|hudbt|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com/i)) {
+            if (site_url.match(/u2.dmhy.org|ourbits.club|hd-space.org|totheglory.im.*|blutopia.cc.*|desitorrents.tv|hudbt|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com/i)) {
                 n.innerHTML = '\r\n';
             }
         } else if (n.nodeName == 'LEGEND') {
@@ -1985,6 +1987,9 @@ function judge_if_the_site_as_source() {
         return 1;
     }
     if (site_url.match(/^https:\/\/www.myanonamouse.net\/t\/\d+/)) {
+        return 1;
+    }
+    if (site_url.match(/^https:\/\/hd-space.org\/index.php\?page=torrent-details/)) {
         return 1;
     }
     if (site_url.match(/^https:\/\/digitalcore.club\/torrent\/\d+/)){
@@ -7778,7 +7783,7 @@ if (site_url.match(/^https:\/\/(music|book).douban.com\/subject\/\d+/)) {
 var sleep_time = 0;
 if (origin_site == "HDF" || origin_site == 'HaresClub' || origin_site == 'PigGo'){
     sleep_time = 500;
-} else if (origin_site == "digitalcore") {
+} else if (origin_site == "digitalcore" || origin_site == 'HDSpace') {
     sleep_time = 3000;
 }
 if (site_url.match(/https:\/\/redacted.ch\/upload.php#seperator#/)) {
@@ -8110,7 +8115,7 @@ function auto_feed() {
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
             if ($('#mediainfo-raw').length) {
-                raw_info.descr = '[quote]\n' + $('#mediainfo-raw').find('code').text() + '\n[/quote]' + raw_info.descr;
+                raw_info.descr = '[quote]\n' + $('#mediainfo-raw').find('code').text() + '\n[/quote]\n' + raw_info.descr;
                 no_need_douban_button_sites.pop();
                 search_row = tbody.insertRow(0);
                 douban_button_needed = true;
@@ -8401,6 +8406,28 @@ function auto_feed() {
             raw_info.torrent_url = 'https://iptorrents.com/' + $('a[href*="download.php"]').attr('href');
         }
 
+        if (origin_site == 'HDSpace') {
+            tbody = $('#mcol').find('table:first').find('table:contains("Info Hash")')[0];
+            raw_info.url = match_link('imdb', $(tbody).html());
+            insert_row = tbody.insertRow(3);
+            douban_box = tbody.insertRow(3);
+            raw_info.name = $(tbody).find('td:contains("Name"):first').next().text();
+            $(tbody).find('td').map((index, e)=>{
+                if ($(e).text() == "Description") {
+                    descr = $(e).next()[0];
+                }
+            })
+            raw_info.descr = walkDOM(descr.cloneNode(true));
+            raw_info.descr = raw_info.descr.replace(/#[\s\S]*?Nfo hack/, '').replace(/# End[\s\S]*?#+/, '');
+            raw_info.descr = raw_info.descr.replace(/(\[url=.*?\])[\s\S]*?(\[img\])/g, '$1$2').trim();
+            raw_info.descr = `[quote]\n${raw_info.descr}\n[/quote]\n\n`;
+            raw_info.descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g).map(e=>{
+                raw_info.descr = raw_info.descr.replace(e, '') + e + '\n';
+            });
+            raw_info.descr = raw_info.descr.replace(/ +\n/g, '\n').replace(/\n\n+/, '\n\n');
+            raw_info.torrent_url = 'https://hd-space.org/' + $('a[href*="download.php"]').attr('href');
+        }
+
         if (origin_site == 'torrentseeds') {
             $('#meta-info').append(`
                 <div style="padding-left:55px; padding-right:55px; padding-bottom: 15px">
@@ -8464,7 +8491,6 @@ function auto_feed() {
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
             raw_info.name = $('i[class="fa fa-comments-o fa-fw"]').next().text().split('  ')[1].trim();
-            console.log(raw_info.name)
             raw_info.type = "电影";
         }
 
@@ -11518,6 +11544,13 @@ function auto_feed() {
                 box_left.style.border = "1px solid #D0D0D0";
                 box_right.style.border = "1px solid #D0D0D0";
             }
+        }
+        if (origin_site == 'HHClub' && douban_button_needed) {
+            $(tbody).find('td').css('border', 'none');
+        }
+        if (origin_site == 'HDSpace') {
+            $(tbody).find('td:even').addClass('header');
+            $(tbody).find('td:odd').addClass('lista');
         }
 
         if (origin_site == 'HDT') {
