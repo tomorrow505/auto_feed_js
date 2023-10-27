@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.4.5
+// @version      2.0.4.6
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8103,6 +8103,9 @@ function auto_feed() {
             raw_info.audiocodec_sel = info.audiocodec_sel();
             var div_descr = $('div:contains(简介):last').parent().next()[0];
             raw_info.descr = walkDOM(div_descr.cloneNode(true)).trim();
+
+            var screen = $('#screenshot-content')[0];
+            raw_info.descr += '\n' + walkDOM(screen.cloneNode(true));
 
             $('div:contains(副标题):last').next().after(`
                 <div class="font-bold leading-6">转载</div>
