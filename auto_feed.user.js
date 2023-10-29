@@ -810,11 +810,6 @@ if (site_url.match(/^https:\/\/nebulance.io\/torrents.php\?id=\d+#seperator#/)) 
     return;
 }
 
-if (!(window.jQuery && window.jQuery.fn.jquery)) {
-    alert('当前jQuery环境未正常引入，尝试以下解决方案：\n1、翻墙开通全局引入，刷新成功后会生成缓存，之后关闭全局即可\n2、加TG群联系开发者https://t.me/+rGUOUYZ3Ey43OWY9');
-    return;
-}
-
 /*******************************************************************************************************************
 *                                          part 1 变量初始化层                                                       *
 ********************************************************************************************************************/
@@ -8101,11 +8096,13 @@ function auto_feed() {
             raw_info.medium_sel = info.medium_sel();
             raw_info.codec_sel = info.codec_sel();
             raw_info.audiocodec_sel = info.audiocodec_sel();
-            var div_descr = $('div:contains(简介):last').parent().next()[0];
+            var div_descr = $('div:contains(其他信息):last').parent().next()[0];
             raw_info.descr = walkDOM(div_descr.cloneNode(true)).trim();
 
-            var screen = $('#screenshot-content')[0];
-            raw_info.descr += '\n' + walkDOM(screen.cloneNode(true));
+            try {
+                var screen = $('#screenshot-content')[0];
+                raw_info.descr += '\n' + walkDOM(screen.cloneNode(true));
+            } catch (err) {}
 
             $('div:contains(副标题):last').next().after(`
                 <div class="font-bold leading-6">转载</div>
@@ -8127,8 +8124,7 @@ function auto_feed() {
                 raw_info.url = match_link('imdb', $('#kimdb').html());
             } catch (err) {}
             try {
-                raw_info.dburl = match_link('douban', $('#douban_info-content').html());
-                console.log(raw_info.dburl)
+                raw_info.dburl = match_link('douban', $('#douban_info-content').parent().html());
             } catch (err) {}
             raw_info.torrent_url = 'https://hhanclub.top/' + $('a[href*="download.php"]').attr('href');
         }
