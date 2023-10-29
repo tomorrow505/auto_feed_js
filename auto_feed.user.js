@@ -8096,9 +8096,10 @@ function auto_feed() {
             raw_info.medium_sel = info.medium_sel();
             raw_info.codec_sel = info.codec_sel();
             raw_info.audiocodec_sel = info.audiocodec_sel();
-            var div_descr = $('div:contains(其他信息):last').parent().next()[0];
-            raw_info.descr = walkDOM(div_descr.cloneNode(true)).trim();
-
+            try {
+                var div_descr = $('div:contains(其他信息):last').parent().next()[0];
+                raw_info.descr = walkDOM(div_descr.cloneNode(true)).trim();
+            } catch (err) {}
             try {
                 var screen = $('#screenshot-content')[0];
                 raw_info.descr += '\n' + walkDOM(screen.cloneNode(true));
