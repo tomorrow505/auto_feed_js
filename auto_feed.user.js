@@ -172,7 +172,7 @@ var hdb_color = 'black';
 if (site_url.match(/^https?:\/\/hdbits.org\/details.php\?id=.*/)) {
     hdb_color =  GM_getValue('HDB_Color');
     if (hdb_color === undefined) {
-        getDoc('https://hdbits.org/my.php', null, function(){
+        getDoc('https://hdbits.org/my.php', null, function(doc){
             const css = $('input[name="custom_css"]', doc).val();
             if (/berlin.css/.test(css)) {
                 GM_setValue('HDB_Color', 'white');
@@ -10606,16 +10606,13 @@ function auto_feed() {
                     raw_info.descr = raw_info.descr.replace('Quote', '');
                     raw_info.descr = raw_info.descr.replace(/[\n ]*\[\/quote\]/gi, '[/quote]');
 
-                    var mediainfo = descr.previousElementSibling;
-                    if (mediainfo.textContent.match(/Technical Information/)){
-                        var log_a = mediainfo.getElementsByTagName('a')[0];
-                        var url = log_a.getAttribute('href');
-                        if (url.match(/mediainfo/)){
-                            getDoc(url, null, function(doc){
-                                var mediainfo = $('body', doc).text();
-                                raw_info.descr = '[quote]' + mediainfo + '[/quote]\n\n' + raw_info.descr;
-                            });
-                        }
+                    if ($('a[href*=mediainfo]').length) {
+                        var url = 'https://hdbits.org' + $('a[href*=mediainfo]').attr("href");
+                        getDoc(url, null, function(doc){
+                            var mediainfo = $('body', doc).text();
+                            raw_info.descr = '[quote]' + mediainfo + '[/quote]\n\n' + raw_info.descr;
+                            console.log(raw_info.descr)
+                        });
                     }
                     break;
                 }
