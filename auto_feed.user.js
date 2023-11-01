@@ -2142,7 +2142,7 @@ String.prototype.format = function(args) {
 
 //下面几个函数为字符串赋予获取各种编码信息的方法——适用于页面基本信息和字符串
 String.prototype.medium_sel = function() { //媒介
-    var result = this;
+    var result = this.toString();
     if (result.match(/(Webdl|Web-dl|WEB)/i)) {
         result = 'WEB-DL';
     } else if (result.match(/(UHDTV)/i)) {
@@ -2844,8 +2844,8 @@ function fill_raw_info(raw_info, forward_site){
         }
     }
 
-    if (raw_info.name.match(/WEB-DL/)) {
-        raw_info.name = raw_info.name.replace(/HEVC/, 'H.265').replace(/AVC/, 'H.264');
+    if (raw_info.name.match(/dvdrip/i)) {
+        raw_info.medium_sel = 'DVD';
     }
 
     return raw_info;
@@ -5604,7 +5604,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao',
             'PTChina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT',
-            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK', 'HHClub','象站'];
+            'ICC', 'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK', 'HHClub', '象站', '麒麟'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
@@ -13580,6 +13580,9 @@ function auto_feed() {
                     channels = raw_info.descr.match(/(\d) channels/i)[1];
                     raw_info.name = re_build_name(channels, raw_info.name);
                 }
+            }
+            if (raw_info.name.match(/WEB-DL/)) {
+                raw_info.name = raw_info.name.replace(/HEVC/, 'H.265').replace(/AVC/, 'H.264');
             }
         }
         if (raw_info.origin_site == 'BHD' && raw_info.name.match(/-FraMeSToR/)) {
