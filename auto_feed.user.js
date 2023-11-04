@@ -19444,12 +19444,13 @@ function auto_feed() {
                 browsecat.val(index);
             }
             try {
+                $('select[name="processing_sel[4]"]').val(9);
                 var year = raw_info.name.match(/(19|20)\d{2}/g).pop();
-                if (parseInt(year) >= 2016) {
-                    $('select[name="processing_sel[4]"]').val(2024 - parseInt(year));
-                } else {
-                    $('select[name="processing_sel[4]"]').val(9);
-                }
+                $('select[name="processing_sel[4]"]>option').map(function(index,e){
+                    if (e.innerText.match(year)) {
+                        $(`select[name="processing_sel[4]"]>option:eq(${index})`).attr('selected', true);
+                    }
+                });
             } catch (Err) {}
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
@@ -19478,13 +19479,10 @@ function auto_feed() {
             var codec_box = $('select[name="codec_sel[4]"]');
             codec_box.val(5);
             switch (raw_info.codec_sel){
-                case 'H265': codec_box.val(6); break;
-                case 'X265': codec_box.val(7); break;
-                case 'H264': codec_box.val(1); break;
-                case 'X264': codec_box.val(17); break;
+                case 'H265': case 'X265': codec_box.val(6); break;
+                case 'H264': case 'X264': codec_box.val(1); break;
                 case 'VC-1': codec_box.val(2); break;
-                case 'MPEG-2': codec_box.val(4); break;
-                case 'MPEG-4': codec_box.val(14); break;
+                case 'MPEG-2': case 'MPEG-4': codec_box.val(4); break;
                 case 'XVID': codec_box.val(3);
             }
             //音频编码
