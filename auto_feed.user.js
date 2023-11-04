@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.4.7
+// @version      2.0.4.8
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -2787,8 +2787,13 @@ function fill_raw_info(raw_info, forward_site){
     if (raw_info.standard_sel == '1080p') {
         if (raw_info.name.standard_sel() == '1080i') {
             raw_info.standard_sel = '1080i';
-        } else if (raw_info.descr.match(/1080i|Scan.*?type.*?(Interleaved|Interlaced)/)) {
-            raw_info.standard_sel = '1080i';
+        } else {
+            try {
+                var mi = get_mediainfo_picture_from_descr(raw_info.descr).mediainfo;
+                if (mi.match(/1080i|Scan.*?type.*?(Interleaved|Interlaced)/)) {
+                    raw_info.standard_sel = '1080i';
+                }
+            } catch (err) {}
         }
     }
 
@@ -12700,6 +12705,7 @@ function auto_feed() {
         var search_name = get_search_name(raw_info.name);
 
         raw_info = fill_raw_info(raw_info, forward_site);
+
         if (raw_info.origin_site == 'MTeam') {
             raw_info.descr = raw_info.descr.replace(/░/g, '');
         }
@@ -15307,6 +15313,7 @@ function auto_feed() {
             //音频编码
             var audiocodec_box = $('select[name="audiocodec_sel"]');
             audiocodec_box.val(7);
+            console.log(raw_info.audiocodec_sel)
             if (forward_site == 'PThome') {
                 switch (raw_info.audiocodec_sel){
                     case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(19); break;
