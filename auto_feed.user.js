@@ -23009,22 +23009,33 @@ function auto_feed() {
                     $('#mediainfo').val(infos.mediainfo.replace(/\[.*?\]/g, ''));
                 }
                 var pic_info = '';
-                infos.pic_info.match(/http[^\[\]]*?(jpg|png)/g).forEach((item)=>{
+                infos.pic_info.match(/\[img\]http[^\[\]]*?(jpg|png)/g).forEach((item)=>{
+                    item = item.replace(/\[.*\]/g, '');
                     if (item.match(/imgbox/)) {
                         pic_info += item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '\n';
-                    } else if (item.match(/ptpimg|.*/)) {
+                    } else if (item.match(/pixhost/)) {
+                        pic_info += item.replace('//t', '//img').replace('thumbs', 'images') + '\n';
+                    } else if (item.match(/pterclub.com|beyondhd.co\/images/)) {
+                        pic_info += item.replace(/th.png/, 'png') + '\n';
+                    } else if (item.match(/tu.totheglory.im/)) {
+                        pic_info += item.replace(/_thumb.png/, '.png') + '\n';
+                    } else if (item.match(/img.hdchina.org/)) {
+                        pic_info += item.replace(/md.png/, 'png') + '\n';
+                    } else if (item.match(/img4k.net/)) {
+                        pic_info += item.replace(/md.png/, 'png') + '\n';
+                    } else {
                         pic_info += item + '\n';
                     }
                 });
                 $('#screenshots').val(pic_info);
-                $('#screenshots').css({'height': '100px'});
-                if (pic_info) {
-                    var img_box = $(`<div><font color="red">这里展示了所有的图片，请保留除缩略图最多两张！！</font></br></div>`)
-                    pic_info.match(/http.*?(jpg|png)/g).map((item)=>{
-                        img_box.append(`<img src=${item} style="max-width:600px" />`);
-                    });
-                    $('#screenshots').after(img_box);
-                }
+                // $('#screenshots').css({'height': '100px'});
+                // if (pic_info) {
+                //     var img_box = $(`<div><font color="red">这里展示了所有的图片，请保留除缩略图最多两张！！</font></br></div>`)
+                //     pic_info.match(/http.*?(jpg|png)/g).map((item)=>{
+                //         img_box.append(`<img src=${item} style="max-width:600px" />`);
+                //     });
+                //     $('#screenshots').after(img_box);
+                // }
             } catch(err) {
                 if (raw_info.full_mediainfo){
                     $('#mediainfo').val(raw_info.full_mediainfo);
@@ -23109,6 +23120,24 @@ function auto_feed() {
                     $('select[name="lang"]').find(`option:contains(${lange})`).attr('selected', true);
                 }
             } catch (err) {}
+
+            //get tmdb id
+            setTimeout(function(){
+                $('#autofill').click(function(e){
+                    e.preventDefault();
+                    if (raw_info.url && used_tmdb_key) {
+                        var imdb_id = raw_info.url.match(/tt\d+/)[0];
+                        var search_url = `https://api.themoviedb.org/3/find/${imdb_id}?api_key=${used_tmdb_key}&external_source=imdb_id&include_adult=false&language=zh-CN`;
+                        getJson(search_url, null, function(data){
+                            console.log(data)
+                            if (data.movie_results.length) {
+                                $('#tmdbid').val(data.movie_results[0].id);
+                            }
+                        });
+                    }
+                });
+                $('#autofill').click();
+            }, 2000);
         }
 
         else if (forward_site == 'avz' || forward_site == 'PHD' || forward_site == 'CNZ') {
