@@ -14354,13 +14354,14 @@ function auto_feed() {
                 case 'Agsv':
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (raw_info.small_descr.match(/特效字幕/)) {
-                        check_label(document.getElementsByName('tags[4][]'), '8');
+                        check_label(document.getElementsByName('tags[4][]'), '4');
                     }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
-                    if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '9');}
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '11');}
-                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '10');} 
+                    if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '13');}
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '17');}
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');} 
+                    if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '19');}
                     break;    
                 }
         } catch (err) {
@@ -24494,7 +24495,7 @@ function auto_feed() {
             $('input[name="hr[4]"]:first').click();
 
             // 制作组
-            $('select[name="team_sel[4]"]').val(5);
+            $('select[name="team_sel[4]"]').val(22);
             check_team(raw_info, 'team_sel[4]');
         }
 
