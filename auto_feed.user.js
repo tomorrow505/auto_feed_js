@@ -14362,6 +14362,11 @@ function auto_feed() {
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '17');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');} 
                     if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '19');}
+                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '20'); }
+                    if (raw_info.type == '剧集'){
+                        if (raw_info.source_sel == '欧美'){check_label(document.getElementsByName('tags[4][]'), '31');} 
+                        if (raw_info.source_sel == '韩国'){check_label(document.getElementsByName('tags[4][]'), '26');}
+                    }
                     break;    
                 }
         } catch (err) {
@@ -24468,7 +24473,7 @@ function auto_feed() {
             //分辨率
             var standard_box = $('select[name="standard_sel[4]"]');
             var standard_dict = {
-                '1080i': 6, '1080p': 6, '4K': 5, '8K': 6, '720p': '3','SD':4
+                '1080i': 1, '1080p': 1, '4K': 5, '8K': 6, '720p': 3,'SD':4
             }
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
