@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.4.8
+// @version      2.0.4.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1266,7 +1266,7 @@ const o_site_info = {
     'DTR': 'https://desitorrents.tv/',
     'HONE': 'https://hawke.uno/',
     'ZHUQUE': 'https://zhuque.in/',
-    '影': 'https://shadowflow.org/'
+    '影': 'https://star-space.net/'
 };
 
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
@@ -14353,10 +14353,8 @@ function auto_feed() {
                     break;
                 case 'Agsv':
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (raw_info.small_descr.match(/特效字幕/)) {
-                        check_label(document.getElementsByName('tags[4][]'), '4');
-                    }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '21'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '13');}
                     if (labels.hdr10plus || labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');} 
@@ -14366,7 +14364,7 @@ function auto_feed() {
                         if (raw_info.source_sel == '欧美'){check_label(document.getElementsByName('tags[4][]'), '31');} 
                         if (raw_info.source_sel == '韩国'){check_label(document.getElementsByName('tags[4][]'), '26');}
                     }
-                    break;    
+                    break;
                 }
         } catch (err) {
         }
