@@ -12691,9 +12691,10 @@ function auto_feed() {
         }
 
         if ($('td:contains(你没有发布种子的权限)').length || $('td:contains(请提交候选)').length || $('a[href="?add_offer=1"]').length) {
-            alert(1)
             if (forward_site == "CMCT") {
                 upload_site = upload_site.replace('upload.php', 'upload.php?offer=1');
+            } else if (forward_site == "HHClub") {
+                upload_site = upload_site.replace('offers.php', 'offers.php?add_offer=1');
             } else {
                 upload_site = upload_site.replace('upload.php', 'offers.php?add_offer=1');
             }
@@ -13660,7 +13661,7 @@ function auto_feed() {
                 }
             }
 
-            if (['url', 'pt_gen[imdb][link]'].indexOf(allinput[i].name) > -1 && allinput[i].type == 'text') { //填充imdb信息
+            if (['url', 'pt_gen[imdb][link]', 'imdb'].indexOf(allinput[i].name) > -1 && allinput[i].type == 'text') { //填充imdb信息
                 if (forward_site == 'OurBits' && raw_info.url == ''){
                     if (raw_info.dburl){
                         raw_info.url = raw_info.dburl;
@@ -13770,38 +13771,45 @@ function auto_feed() {
             }
         }
 
-        if ($('textarea[name="technical_info"]').length) {
+        if ($('textarea[name="technical_info"]').length || (forward_site == 'HHClub' && site_url.match(/add_offer/))) {
             for (i=0; i<skip_img.length; i++) {
                 raw_info.descr = raw_info.descr.replace(skip_img[i], '');
             }
             raw_info.descr = raw_info.descr.replace(/\n\n+/, '\n\n');
+            var container = $('textarea[name="technical_info"]');
+            if (forward_site == 'HHClub' && site_url.match(/add_offer/)) {
+                container = $('textarea[name="mediainfo"]');
+            }
             try{
                 var infos = get_mediainfo_picture_from_descr(raw_info.descr);
-                var container = $('textarea[name="technical_info"]');
                 if (raw_info.full_mediainfo){
                     container.val(raw_info.full_mediainfo.trim());
                 } else {
                     container.val(infos.mediainfo.trim());
                 }
-                $('textarea[name="technical_info"]').css({'height': '600px'});
+                if ($('input[name="screenshot"]').length) {
+                    $('input[name="screenshot"]').val(infos.pic_info.match(/\[img\].*?\[\/img\]/g).map(i => {
+                        return i.replace(/\[.*?\]/g, '');
+                    }).join(','));
+                }
+                container.css({'height': '600px'});
                 var tmp_descr = raw_info.descr.replace(infos.mediainfo, '');
                 tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}\[\/quote\]/g, '');
                 if (raw_info.full_mediainfo) {
                     tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}(General|Disc)[\s\S]{50,30000}?\[\/quote\]/g, '');
                 }
                 raw_info.descr = tmp_descr;
-                //判断官种表达感谢
                 if (reg_team_name.hasOwnProperty(raw_info.origin_site) && raw_info.name.match(reg_team_name[raw_info.origin_site])){
                     raw_info.descr = thanks_str.format({'site': raw_info.origin_site, 'descr': raw_info.descr});
                 }
                 $('textarea[name="descr"]').val(raw_info.descr.trim().replace(/\n{2,15}/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\['));
             } catch(Err) {
                 if (raw_info.full_mediainfo){
-                    $('textarea[name="technical_info"]').val(raw_info.full_mediainfo);
+                    container.val(raw_info.full_mediainfo);
                 } else {
-                    $('textarea[name="technical_info"]').val(raw_info.descr);
+                    container.val(raw_info.descr);
                 }
-                $('textarea[name="technical_info"]').css({'height': '600px'});
+                container.css({'height': '600px'});
             }
         }
 
@@ -19546,10 +19554,10 @@ function auto_feed() {
         }
 
         else if (forward_site == 'HHClub') {
-            var browsecat = $('#browsecat')
+            var browsecat = $('select[name="type"]');
             var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
                              '体育': 407, '软件': 409, '学习': 409, '': 409, '游戏': 409, 'MV': 406};
-            browsecat.val(409)
+            browsecat.val(409);
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
@@ -19657,7 +19665,11 @@ function auto_feed() {
                 }
             });
             descr_html = descr_html.replace(/\[url=(.+?)\](.+?)\[\/url\]/ig, '<a href="$1">$2</a>');
-            editor.setHtml(descr_html.trim());
+            if (site_url.match(/add_offer/)) {
+                contentEditor.setHtml(descr_html.trim());
+            } else {
+                editor.setHtml(descr_html.trim());
+            }
         }
 
         else if (forward_site == '麒麟') {
