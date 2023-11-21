@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.4.9
+// @version      2.0.5.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1292,7 +1292,8 @@ const site_img_info = {
     'Panda': 'https://i.ibb.co/K9bkd8M/favicon.png',
     'PTLSP':'https://img.picgo.net/2023/08/22/lspd78c10dbe9344162.png',
     'HaiDan':'https://www.haidan.video/public/pic/favicon.ico',
-    '象站':'https://img.picgo.net/2023/10/04/ptvicomo0b533c8e4626fe8f.png'
+    '象站':'https://img.picgo.net/2023/10/04/ptvicomo0b533c8e4626fe8f.png',
+    'DaJiao': 'https://www.z4a.net/images/2023/11/20/35c0bb255890b394e4ce76f5718ef1a4.png'
 };
 
 //用来拼接发布站点的url和字符串,也可用于识别发布页和源页面
@@ -2147,7 +2148,7 @@ String.prototype.format = function(args) {
 //下面几个函数为字符串赋予获取各种编码信息的方法——适用于页面基本信息和字符串
 String.prototype.medium_sel = function() { //媒介
     var result = this.toString();
-    if (result.match(/(Webdl|Web-dl|WEB)/i)) {
+    if (result.match(/(Webdl|Web-dl|WEB[\. ])/i)) {
         result = 'WEB-DL';
     } else if (result.match(/(UHDTV)/i)) {
         result = 'UHDTV';
@@ -12689,7 +12690,8 @@ function auto_feed() {
             transfer_mode = 1;
         }
 
-        if ($('td:contains(你没有发布种子的权限)').length || $('td:contains(请提交候选)').length) {
+        if ($('td:contains(你没有发布种子的权限)').length || $('td:contains(请提交候选)').length || $('a[href="?add_offer=1"]').length) {
+            alert(1)
             if (forward_site == "CMCT") {
                 upload_site = upload_site.replace('upload.php', 'upload.php?offer=1');
             } else {
@@ -19219,7 +19221,12 @@ function auto_feed() {
                 case 'Remux': medium_box.val(3); break;
                 case 'HDTV': medium_box.val(8); break;
                 case 'Encode': medium_box.val(7); break;
-                case 'WEB-DL': medium_box.val(8); break;
+                case 'WEB-DL':
+                    medium_box.val(11);
+                    if (raw_info.name.match(/webrip/i)) {
+                        medium_box.val(7);
+                    }
+                    break;
                 case 'CD': medium_box.val(8);
             }
             //视频编码
