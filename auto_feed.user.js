@@ -13633,6 +13633,15 @@ function auto_feed() {
                             });
                         }
                     }
+                    if (['BLU', 'ACM'].indexOf(forward_site) > -1) {
+                        raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
+                        if (['ACM'].indexOf(forward_site) > -1) {
+                            raw_info.name = raw_info.name.replace(/(DD|DD\+|AAC|HDMA|TrueHD|DTS|PCM|FLAC)[ \.](.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1$3')
+                        }
+                    }
+                    if (['BHD'].indexOf(forward_site) > -1) {
+                        raw_info.name = raw_info.name.replace(/DD\+/i, 'DDP');
+                    }
                     allinput[i].value = raw_info.name;
                 }
             }
@@ -19668,8 +19677,8 @@ function auto_feed() {
             if (site_url.match(/add_offer/)) {
                 contentEditor.setHtml(descr_html.trim());
             } else {
-                editor.setHtml(descr_html.trim());
-            }
+            editor.setHtml(descr_html.trim());
+        }
         }
 
         else if (forward_site == '麒麟') {
