@@ -21074,7 +21074,7 @@ function auto_feed() {
                 if (raw_info.name.match(/-/)) {
                     var team = raw_info.name.split('-').pop().split('@').pop();
                     if (!team.match(/^DL[ \.]/)) {
-                        infos.pic_info = `[img]https://kimoji.club/img/friendsite/${team}.png[/img]\n` + infos.pic_info;
+                        team_image = `[center][color=#bbff88][size=24][b][spoiler=转载致谢][img]https://kimoji.club/img/friendsite/${team}.webp[/img][/spoiler][/b][/size][/color]\n`;
                     }
                 }
                 var img_info = '';
@@ -21098,7 +21098,9 @@ function auto_feed() {
                     }
                     img_info += '\n[img]' + item + '[/img]';
                 }
-                $('#bbcode-description').val(img_info).trigger('input');
+                img_info = `[center][color=#bbff88][size=24][b][spoiler=截图赏析]` + img_info + `[/spoiler][/b][/size][/color]`;
+                var final_output = team_image + img_info;
+                $('#bbcode-description').val(final_output).trigger('input');
             } catch(err) {
                 if (raw_info.full_mediainfo){
                     $('textarea[name="mediainfo"]').val(raw_info.full_mediainfo);
