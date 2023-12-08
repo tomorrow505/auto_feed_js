@@ -6410,7 +6410,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                 return;
             }
             var origin_str = $('#picture').val();
-            var imgs_to_show = origin_str.match(/\[img\]https?:.*?(jpg|png|webp)\[\/img\]/ig).map(item=>{ return item.replace(/\[.*?\]/g, '') });
+            var imgs_to_show = origin_str.match(/(\[img(?:=\d+)?\])(http[^\[\]]*?(jpg|jpeg|png|gif|webp))/ig).map(item=>{ return item.replace(/\[.*?\]/g, '') });
             if (imgs_to_show.length) {
                 $('#imgs_to_show').html('');
                 imgs_to_show.map((item)=>{
@@ -20633,7 +20633,7 @@ function auto_feed() {
                     }
                 });
                 $('#apimatch').parent().parent().after($div);
-                $('#apimatch').parent().parent().after(`<output name="apimatch" id="apimatch" for="torrent">${raw_info.name}</output>`)
+                $('#apimatch').parent().parent().after(`<output name="apimatch" id="apimatch" for="torrent" style="color: white;">${raw_info.name}</output>`)
             }
 
             try{ $('#autoimdb').val(raw_info.url.match(/tt(\d+)/i)[1]); } catch(err) {}
@@ -20851,7 +20851,7 @@ function auto_feed() {
                     }
                 });
                 $('#apimatch').parent().parent().after($div);
-                $('#apimatch').parent().parent().after(`<output name="apimatch" id="apimatch" for="torrent">${raw_info.name}</output>`);
+                $('#apimatch').parent().parent().after(`<output name="apimatch" id="apimatch" for="torrent" style="color: white;">${raw_info.name}</output>`);
             }
 
             try{ $('#autoimdb').val(raw_info.url.match(/tt(\d+)/i)[1]); } catch(err) {}
@@ -20998,7 +20998,7 @@ function auto_feed() {
                         });
                     }
                 });
-                $('#apimatch').parent().parent().after(`<output name="apimatch" id="apimatch" for="torrent">资源名称：${raw_info.name}${jump_mal}</output>`);
+                $('#apimatch').parent().parent().after(`<output name="apimatch" id="apimatch" for="torrent" style="color: white;">资源名称：${raw_info.name}${jump_mal}</output>`);
             } else if (search_name && used_tmdb_key) {
                 var $div = $(`<div style="margin-top: 10px;"></div>`);
                 var $table = $(`<table id="tmdb" class="table table-condensed table-bordered table-striped table-hover"></table>`);
@@ -21053,7 +21053,7 @@ function auto_feed() {
                     }
                 });
                 $('#apimatch').parent().parent().after($div);
-                $('#apimatch').parent().parent().after(`<output name="apimatch" for="torrent">资源名称：${raw_info.name}<br>由于当前资源没有IMDB，请手动选择适配资源点选USE-T按钮获取TMDB ID。<br>如果转载的资源为动漫资源，同理点选USE-M按钮获取MAL ID。${jump_mal}</output>`);
+                $('#apimatch').parent().parent().after(`<output name="apimatch" for="torrent" style="color: white;">资源名称：${raw_info.name}<br>由于当前资源没有IMDB，请手动选择适配资源点选USE-T按钮获取TMDB ID。<br>如果转载的资源为动漫资源，同理点选USE-M按钮获取MAL ID。${jump_mal}</output>`);
             }
             try{ $('#autoimdb').val(raw_info.url.match(/tt(\d+)/i)[1]); } catch(err) {}
             if (raw_info.descr.match(/◎类.*?别.*?儿童/)) {
@@ -21100,7 +21100,14 @@ function auto_feed() {
                 }
                 img_info = `[center][color=#bbff88][size=24][b][spoiler=截图赏析]` + img_info + `[/spoiler][/b][/size][/color]`;
                 var final_output = team_image + img_info;
-                $('#bbcode-description').val(final_output).trigger('input');
+                function triggerInputEvent(element) {
+                    var event = new Event('input', { bubbles: true });
+                    element.dispatchEvent(event);
+                }
+
+                var bbcodeTextArea = document.getElementById('bbcode-description');
+                bbcodeTextArea.value = final_output;
+                triggerInputEvent(bbcodeTextArea);
             } catch(err) {
                 if (raw_info.full_mediainfo){
                     $('textarea[name="mediainfo"]').val(raw_info.full_mediainfo);
