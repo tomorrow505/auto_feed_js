@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.5.0
+// @version      2.0.5.1
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -20643,7 +20643,7 @@ function auto_feed() {
             try{
                 var infos = get_mediainfo_picture_from_descr(raw_info.descr);
                 var container = $('textarea[name="mediainfo"]');
-                if (raw_info.descr.match(/MPLS/)) {
+                if (raw_info.descr.match(/MPLS/) && (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD')) {
                     container = $('textarea[name="bdinfo"]');
                 }
                 if (raw_info.full_mediainfo){
@@ -20651,7 +20651,7 @@ function auto_feed() {
                 } else {
                     container.val(infos.mediainfo);
                 }
-                $('textarea[name="mediainfo"]').css({'height': '600px'});
+                container.css({'height': '600px'});
                 var pic_info;
                 if (forward_site == 'BLU'){
                     pic_info = deal_img_350_ptpimg(infos.pic_info);
@@ -20679,8 +20679,12 @@ function auto_feed() {
                 } else{
                     pic_info = infos.pic_info;
                 }
+                var event = new Event('input', { bubbles: true });
                 $('#upload-form-description').val(pic_info);
                 $('#bbcode-description').val(pic_info);
+
+                try { $('#upload-form-description')[0].dispatchEvent(event); } catch (err) {}
+                try { $('#bbcode-description')[0].dispatchEvent(event); } catch (err) {}
             } catch(Err) {
                 if (raw_info.full_mediainfo){
                     $('textarea[name="mediainfo"]').val(raw_info.full_mediainfo);
@@ -20867,7 +20871,9 @@ function auto_feed() {
                     container.val(infos.mediainfo);
                 }
                 $('textarea[name="mediainfo"]').css({'height': '600px'});
+                var event = new Event('input', { bubbles: true });
                 $('#bbcode-description').val(infos.pic_info);
+                $('#bbcode-description')[0].dispatchEvent(event);
                 pic_info = deal_img_350_ptpimg(infos.pic_info);
                 $('#upload-form-mediainfo').parent().before(`<div style="margin-bottom:5px"><a id="img350" style="margin-left:5px" href="#">IMG350</a>
                     <font style="margin-left:5px" color="red">选中要转换的bbcode图片部分点击即可。</font></div>
