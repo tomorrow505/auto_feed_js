@@ -11337,7 +11337,7 @@ function auto_feed() {
                     raw_info.labels += 100;
                 }
                 break;
-            case 'HHClub': case 'DaJiao':
+            case 'HHClub': case 'DaJiao': case '象站': case 'Agsv':
                 var tr = $('td:contains(标签)').last().parent();
                 if (tr.find('span:contains("国语")').length) {
                     raw_info.labels = 1;
