@@ -5706,7 +5706,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                 getDoc('https://hdchina.org/', null, function(doc){
                     var data = encodeURI('csrf=' + $('head', doc).find('meta[name="x-csrf"]').attr("content"));
                     postData('https://hdchina.org/plugin_sign-in.php?cmd=signin', data, function(docc) {
-                        if (docc.match(/该页面必须在登录后才能访问|Contact your hosting provider letting them know your web server is not responding./)) {
+                        if (docc.match(/该页面必须在登录后才能访问|Contact your hosting provider letting them know your web server is not responding|522: Connection timed out/)) {
                             console.log(`开始签到瓷器：`, '失败，请重新登录！！！');
                             $(`input[kname=HDChina]`).parent().find('a').css({"color": "blue"});
                         } else {
