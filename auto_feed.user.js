@@ -12548,7 +12548,7 @@ function auto_feed() {
                             if (douban_info != '') {
                                 raw_info.descr = douban_info + '\n\n' + raw_info.descr;
 
-                                var thanks = raw_info.descr.match(/\[quote\].*?转自.*?，感谢原制作者发布。.*?\[\/quote\]/);
+                                var thanks = raw_info.descr.match(/\[quote\].*?，感谢原制作者发布。.*?\[\/quote\]/);
                                 if (thanks) {
                                     raw_info.descr = thanks[0] + '\n' + raw_info.descr.replace(thanks[0], '');
                                 }
