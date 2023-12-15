@@ -11952,6 +11952,9 @@ function auto_feed() {
 
         if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$|UBits$|HHWEB$|-beAst$|-beAstTV$/i)) {
             $('#PTT').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至PTT');
+            if (raw_info.name.match(/HHWEB$/i)) {
+                $('#SharkPT').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至SharkPT');
+            }
         }
         if (raw_info.name.match(/Dream$|DBTV$|QHstudIo$/i)) {
             $('#HDVideo').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至HDVideo');
