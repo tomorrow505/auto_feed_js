@@ -1171,7 +1171,7 @@ const reg_team_name = {
     'OKPT': /OK(WEB|Web)?$/i,
     'Agsv': /AGSV(E|WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i,
 };
-const thanks_str = "[quote][b][color=Blue]转自{site}，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
+const thanks_str = "[quote][b][color=Blue]{site}官组作品，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
 //设置依托界面站点列表
 const setting_host_list = {
@@ -11415,9 +11415,12 @@ function auto_feed() {
         }
 
         //判断官种表达感谢
-        if (reg_team_name.hasOwnProperty(origin_site) && raw_info.name.match(reg_team_name[origin_site])){
-            raw_info.descr = thanks_str.format({'site': origin_site, 'descr': raw_info.descr});
+        for (var key in reg_team_name) {
+            if (raw_info.name.match(reg_team_name[key])) {
+                raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
+            }
         }
+        raw_info.descr = raw_info.descr.replace(/\[quote\].*?转自.*?感谢.*?\[\/quote\]/, '');
 
         if (origin_site == 'HaresClub') {
             console.log($('div[class="layui-col-md2 layui-col-sm2 layui-col-xs2"]:first').html())
@@ -11852,7 +11855,11 @@ function auto_feed() {
                     }
                 }
 
-                raw_info.descr = thanks_str.format({'site': origin_site, 'descr': raw_info.descr});
+                for (var key in reg_team_name) {
+                    if (raw_info.name.match(reg_team_name[key])) {
+                        raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
+                    }
+                }
             }, 1000);
         }
 
@@ -12402,10 +12409,11 @@ function auto_feed() {
                     return;
                 }
                 raw_info.descr = '';
-                if (reg_team_name.hasOwnProperty(origin_site) && raw_info.name.match(reg_team_name[origin_site])){
-                    raw_info.descr = thanks_str.format({'site': origin_site, 'descr': raw_info.descr});
+                for (var key in reg_team_name) {
+                    if (raw_info.name.match(reg_team_name[key])) {
+                        raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
+                    }
                 }
-
                 descr = document.getElementById('kt_d');
                 descr_box = descr.cloneNode(true);
                 raw_info.descr = walkDOM(descr_box);
@@ -13835,8 +13843,10 @@ function auto_feed() {
                     tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}(General|Disc)[\s\S]{50,30000}?\[\/quote\]/g, '');
                 }
                 raw_info.descr = tmp_descr;
-                if (reg_team_name.hasOwnProperty(raw_info.origin_site) && raw_info.name.match(reg_team_name[raw_info.origin_site])){
-                    raw_info.descr = thanks_str.format({'site': raw_info.origin_site, 'descr': raw_info.descr});
+                for (var key in reg_team_name) {
+                    if (raw_info.name.match(reg_team_name[key])) {
+                        raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
+                    }
                 }
                 $('textarea[name="descr"]').val(raw_info.descr.trim().replace(/\n{2,15}/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\['));
             } catch(Err) {
