@@ -2873,15 +2873,16 @@ function fill_raw_info(raw_info, forward_site){
     if (raw_info.name.match(/dvdrip/i)) {
         raw_info.medium_sel = 'DVD';
     }
-
-    if (raw_info.descr.match(/\[quote\].*?官组作品.*?\[\/quote\]/g).length >= 2) {
-        raw_info.descr = raw_info.descr.split(/\[quote\].*?官组作品.*?\[\/quote\]/g).pop();
-        for (var key in reg_team_name) {
-            if (raw_info.name.match(reg_team_name[key])) {
-                raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
+    try {
+        if (raw_info.descr.match(/\[quote\].*?官组作品.*?\[\/quote\]/g).length >= 2) {
+            raw_info.descr = raw_info.descr.split(/\[quote\].*?官组作品.*?\[\/quote\]/g).pop();
+            for (var key in reg_team_name) {
+                if (raw_info.name.match(reg_team_name[key])) {
+                    raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
+                }
             }
         }
-    }
+    } catch() {}
 
     return raw_info;
 }
