@@ -1153,7 +1153,7 @@ const reg_team_name = {
     'BeiTai': /-BeiTai/i,
     'PigGo': /PigoHD|PigoWeb|PiGoNF/i,
     'CarPt': /CarPT/i,
-    'HDVideo': /(-QHstudIo|-HDVWEB|-HDVMV)/i,
+    'HDVideo': /(-HDVWEB|-HDVMV)/i,
     'HDfans': /HDFans/i,
     'WT-Sakura': /SakuraWEB|SakuraSUB|WScode/i,
     'HHClub': /HHWEB/i,
