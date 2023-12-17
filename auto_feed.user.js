@@ -86,7 +86,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.5.1
+// @version      2.0.5.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -2872,6 +2872,15 @@ function fill_raw_info(raw_info, forward_site){
 
     if (raw_info.name.match(/dvdrip/i)) {
         raw_info.medium_sel = 'DVD';
+    }
+
+    if (raw_info.descr.match(/\[quote\].*?官组作品.*?\[\/quote\]/g).length >= 2) {
+        raw_info.descr = raw_info.descr.split(/\[quote\].*?官组作品.*?\[\/quote\]/g).pop();
+        for (var key in reg_team_name) {
+            if (raw_info.name.match(reg_team_name[key])) {
+                raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
+            }
+        }
     }
 
     return raw_info;
@@ -14922,8 +14931,8 @@ function auto_feed() {
                 }, 200);
 
                 var note = '';
-                if (raw_info.descr.match(/转自.*?，感谢原制作者发布。/)) {
-                    note += raw_info.descr.match(/转自.*?，感谢原制作者发布。/)[0];
+                if (raw_info.descr.match(/Blue\](.*?，感谢原制作者发布。)/)) {
+                    note += raw_info.descr.match(/Blue\](.*?，感谢原制作者发布。)/)[1];
                 }
                 if (raw_info.url) {
                     note += `资源IMDB链接：${raw_info.url}`;
