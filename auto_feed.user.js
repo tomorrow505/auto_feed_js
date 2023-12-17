@@ -2882,7 +2882,7 @@ function fill_raw_info(raw_info, forward_site){
                 }
             }
         }
-    } catch() {}
+    } catch(err) {}
 
     return raw_info;
 }
