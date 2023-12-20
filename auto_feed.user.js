@@ -20698,7 +20698,7 @@ function auto_feed() {
                         }
                     })
                 } else if (forward_site == 'ACM' || forward_site == 'JPTV'){
-                    pic_info = deal_img_350_ptpimg(infos.pic_info);
+                    pic_info = deal_img_350(infos.pic_info);
                 } else{
                     pic_info = infos.pic_info;
                 }
