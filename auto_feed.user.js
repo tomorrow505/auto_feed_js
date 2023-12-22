@@ -21051,7 +21051,7 @@ function auto_feed() {
             }
 
          var jump_mal = '';
-            //tvdb与malid
+            //tvdb与malid均由站点后端异步获取
             $('#automal').val(0);
 
             /*if (raw_info.type != '动漫' && !raw_info.descr.match(/◎类.*?别.*?动画/)) {
