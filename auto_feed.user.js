@@ -21051,6 +21051,7 @@ function auto_feed() {
             }
 
          var jump_mal = '';
+            //tvdb与malid
             $('#automal').val(0);
 
             /*if (raw_info.type != '动漫' && !raw_info.descr.match(/◎类.*?别.*?动画/)) {
