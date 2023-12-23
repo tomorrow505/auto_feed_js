@@ -21032,7 +21032,7 @@ function auto_feed() {
                     setTimeout(function(){
                         $('#autoimdb').val(tid);
                     }, 500);
-                } else if (this.value == '2' || this.value == '4' || $('#autocat').val() == '5' || $('#autocat').val() == '6' || $('#autocat').val() == '8') {
+                } else if (this.value == '2') {
                     var tid = $('#autoimdb').val();
                     setTimeout(function(){
                         $('#autoimdb').val(tid);
@@ -21041,14 +21041,20 @@ function auto_feed() {
                     }, 500);
                 }
             });
-            if ($('#autocat').val() == '2' || $('#autocat').val() == '4' || $('#autocat').val() == '5' || $('#autocat').val() == '6' || $('#autocat').val() == '8') {
+            if ($('#autocat').val() == '2'){
+                $('#autotvdb').val(0);
                 try { $('#season_number').val(parseInt(raw_info.name.match(/S(\d+)/i)[1])) } catch (err) {$('#season_number').val("1")}
                 try { $('#episode_number').val(parseInt(raw_info.name.match(/E(\d+)/i)[1])) } catch (err) {
                     $('#episode_number').val(0);
+
                 }
             }
-            var jump_mal = '';
-            if (raw_info.type != '动漫' && !raw_info.descr.match(/◎类.*?别.*?动画/)) {
+
+         var jump_mal = '';
+            //tvdb与malid均由站点后端异步获取
+            $('#automal').val(0);
+
+            /*if (raw_info.type != '动漫' && !raw_info.descr.match(/◎类.*?别.*?动画/)) {
                 $('#automal').val(0);
             } else {
                 var search_name = get_search_name(raw_info.name);
@@ -21075,9 +21081,9 @@ function auto_feed() {
                     $('.fill_mal').click(function(){
                         $('#automal').val($(this).attr('name'));
                     });
-                });
+                });*!/
                 $('#apimatch').parent().parent().after($div);
-            }
+            }*/
             if (raw_info.url && used_tmdb_key) {
                 var imdb_id = raw_info.url.match(/tt\d+/)[0];
                 var search_url = `https://api.themoviedb.org/3/find/${imdb_id}?api_key=${used_tmdb_key}&external_source=imdb_id&include_adult=false&language=zh-CN`;
@@ -21160,7 +21166,15 @@ function auto_feed() {
                 $('#apimatch').parent().parent().after($div);
                 $('#apimatch').parent().parent().after(`<output name="apimatch" for="torrent" style="color: white;">资源名称：${raw_info.name}<br>由于当前资源没有IMDB，请手动选择适配资源点选USE-T按钮获取TMDB ID。<br>如果转载的资源为动漫资源，同理点选USE-M按钮获取MAL ID。${jump_mal}</output>`);
             }
-            try{ $('#autoimdb').val(raw_info.url.match(/tt(\d+)/i)[1]); } catch(err) {}
+            try {
+                var imdbIDMatch = raw_info.url.match(/tt(\d+)/);
+                var imdbID = imdbIDMatch ? imdbIDMatch[1] : null;
+                if (imdbID) {
+                    $('#autoimdb').val(imdbID);
+                }
+            } catch (err) {
+                console.error("IMDb提取失败:", err);
+            }
             if (raw_info.descr.match(/◎类.*?别.*?儿童/)) {
                 $('#sd').prop('checked', 1);
             }
