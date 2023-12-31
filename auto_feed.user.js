@@ -13808,7 +13808,7 @@ function auto_feed() {
                             });
                         }
                         raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
-                        raw_info.name = raw_info.name.replace(/(DD|DDP|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
+                        raw_info.name = raw_info.name.replace(/(DD|DD\+|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
                     }
                     if (['ACM'].indexOf(forward_site) > -1) {
                         raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
