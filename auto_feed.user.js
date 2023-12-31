@@ -13807,15 +13807,16 @@ function auto_feed() {
                                 return 'Hybrid ' + data;
                             });
                         }
-                    }
-                    if (['BLU', 'ACM'].indexOf(forward_site) > -1) {
                         raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
-                        if (['ACM'].indexOf(forward_site) > -1) {
-                            raw_info.name = raw_info.name.replace(/(DD|DD\+|AAC|HDMA|TrueHD|DTS|PCM|FLAC)[ \.](.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1$3')
-                        }
+                        raw_info.name = raw_info.name.replace(/(DD|DDP|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
+                    }
+                    if (['ACM'].indexOf(forward_site) > -1) {
+                        raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
+                        raw_info.name = raw_info.name.replace(/(DD|DD\+|AAC|HDMA|TrueHD|DTS|PCM|FLAC)[ \.](.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1$3');
                     }
                     if (['BHD'].indexOf(forward_site) > -1) {
                         raw_info.name = raw_info.name.replace(/DD\+/i, 'DDP');
+                        raw_info.name = raw_info.name.replace(/(DD|DDP|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
                     }
                     allinput[i].value = raw_info.name;
                 }
@@ -21095,7 +21096,7 @@ function auto_feed() {
                 }
             }
 
-            var jump_mal = '';
+         var jump_mal = '';
             $('#automal').val(0);
             if (raw_info.url && used_tmdb_key) {
                 var imdb_id = raw_info.url.match(/tt\d+/)[0];
@@ -23235,10 +23236,10 @@ function auto_feed() {
                     flag = true;
                     $(`a[onclick="remasterTags(this, 'remaster')"]`).click();
                 }
-                if (flag) {
-                    $('input[id=movie_edition_information]').attr('checked', true);
-                    $('#movie_edition_information_container').css({'display': 'block'});
-                }
+                    if (flag) {
+                        $('input[id=movie_edition_information]').attr('checked', true);
+                        $('#movie_edition_information_container').css({'display': 'block'});
+                    }
             } else {
                 var flag = false;
                 if (raw_info.name.match(/Unrated/i) || raw_info.small_descr.match(/未分级版/)) {
