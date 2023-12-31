@@ -17853,8 +17853,6 @@ function auto_feed() {
                 case 'UHD':
                     if (labels.diy) {
                         medium_box.val(2);
-                    } else if (raw_info.name.match(/remux/i)){
-                        medium_box.val(3);
                     } else {
                         medium_box.val(1);
                     }
@@ -17862,13 +17860,16 @@ function auto_feed() {
                 case 'Blu-ray':
                     if (labels.diy) {
                         medium_box.val(6);
-                    } else if (raw_info.name.match(/remux/i)){
-                        medium_box.val(7);
                     } else {
                         medium_box.val(5);
                     }
                     break;
-                case 'Remux': medium_box.val(7); break;
+                case 'Remux': 
+                    medium_box.val(7);
+                    if (raw_info.standard_sel == '4K') {
+                        medium_box.val(3);
+                    }
+                    break;
                 case 'HDTV': medium_box.val(12); break;
                 case 'WEB-DL': medium_box.val(9); break;
                 case 'Encode':
