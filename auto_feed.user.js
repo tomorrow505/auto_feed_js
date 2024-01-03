@@ -1172,7 +1172,7 @@ const reg_team_name = {
     'PTLSP': /PTLSP|LSP(WEB|DIY|MUSIC)?$/i,
     '象站': /Eleph(WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i,
     'OKPT': /OK(WEB|Web)?$/i,
-    'Agsv': /AGSV(E|WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i,
+    'Agsv': /AGSV(E|WEB|REMUX|Rip|TV|DIY|MUS)?$/i,
 };
 const thanks_str = "[quote][b][color=Blue]{site}官组作品，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
@@ -24801,12 +24801,20 @@ function auto_feed() {
         else if (forward_site == 'Agsv') {
             //类型
             var browsecat = $('#browsecat');
-            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,
-                             '体育': 407, '音乐': 411, '': 409, '学习': 417};
+            var specialcat = $('#specialcat')
+            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,'体育': 407, '音乐': 411, '': 409, '学习': 417,'短剧': 419,'音频': 408,'游戏': 413,'漫画': 416,'软件': 412,'图片': 418,'电子书': 415};
             browsecat.val(409);
+            specialcat.attr("disabled",true);
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
-                browsecat.val(index);
+                if (index == 412 || index == 413 || index == 415 ||index == 416||index == 417 ||index == 418) {
+                    specialcat.attr("disabled",false);
+                    browsecat.attr("disabled",true);
+                    specialcat.val(index)
+                } else {
+                    specialcat.attr("disabled",true);
+                    browsecat.val(index);
+                }
             }
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
