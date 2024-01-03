@@ -24652,12 +24652,13 @@ function auto_feed() {
             //类型
             var browsecat = $('#browsecat');
             var specialcat = $('#specialcat')
-            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,'体育': 407, '音乐': 411, '': 409, '学习': 417, '游戏': 413, '软件': 412};
+            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,'体育': 407, '音乐': 411,
+                '': 409, '学习': 417, '游戏': 413, '软件': 412, '书籍': 415 };
             browsecat.val(409);
             specialcat.attr("disabled",true);
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
-                if (index == 412 || index == 413 || index == 417) {
+                if (index == 412 || index == 413 || index == 417 || index == 415) {
                     specialcat.attr("disabled",false);
                     browsecat.attr("disabled",true);
                     specialcat.val(index)
