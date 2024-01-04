@@ -13781,7 +13781,7 @@ function auto_feed() {
         var allinput = document.getElementsByTagName("input");
         if (forward_site == 'BLU' || forward_site == 'Audiences') {
             if (raw_info.descr.match(/Atmos/) && !raw_info.name.match(/atmos/i)) {
-                raw_info.name = raw_info.name.replace(/(DD|DDP|AAC|HDMA|TrueHD|DTS|PCM|FLAC)[ \.](.*?)(\d.\d)/i, '$1 $2 $3 Atmos').replace(/ +/g, ' ');
+                raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|HDMA|TrueHD|DTS|PCM|FLAC)[ \.](.*?)(\d.\d)/i, '$1 $2 $3 Atmos').replace(/ +/g, ' ');
             }
         }
         if (forward_site == 'PTer' || forward_site == 'Dragon') {
@@ -13854,15 +13854,15 @@ function auto_feed() {
                             });
                         }
                         raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
-                        raw_info.name = raw_info.name.replace(/(DD|DD\+|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
+                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
                     }
                     if (['ACM'].indexOf(forward_site) > -1) {
                         raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
-                        raw_info.name = raw_info.name.replace(/(DD|DD\+|AAC|HDMA|TrueHD|DTS|PCM|FLAC)[ \.](.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1$3');
+                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|HDMA|TrueHD|DTS|PCM|FLAC)[ \.](.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1$3');
                     }
                     if (['BHD'].indexOf(forward_site) > -1) {
                         raw_info.name = raw_info.name.replace(/DD\+/i, 'DDP');
-                        raw_info.name = raw_info.name.replace(/(DD|DDP|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
+                        raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
                     }
                     allinput[i].value = raw_info.name;
                 }
@@ -26033,11 +26033,11 @@ function auto_feed() {
                     label_str = '7.1';
                 }
                 if (!name.match(label)) {
-                    name = name.replace(/(DD|AAC|DD\+|FLAC|DTS|LPCM|TrueHD)/, `$1${label_str}`);
+                    name = name.replace(/(DD\+|DD|AAC|FLAC|DTS|LPCM|TrueHD)/, `$1${label_str}`);
                 }
                 if (type == 'WEB-DL' || type == 'Encode') {
-                    if (name.match(/(H.265|H.264|x264|x265)(.*?)(DD|AAC|DD\+|FLAC|DTS|LPCM|TrueHD) ?(2\.0|1\.0|5\.1|7\.1)/i)) {
-                        name = name.replace(/(H.265|H.264|x264|x265)(.*?)(DD|AAC|DD\+|FLAC|DTS|LPCM|TrueHD) ?(2\.0|1\.0|5\.1|7\.1)/, '$3 $4 $1 $2');
+                    if (name.match(/(H.265|H.264|x264|x265)(.*?)(DD\+|DD|AAC|FLAC|DTS|LPCM|TrueHD) ?(2\.0|1\.0|5\.1|7\.1)/i)) {
+                        name = name.replace(/(H.265|H.264|x264|x265)(.*?)(DD\+|DD|AAC|FLAC|DTS|LPCM|TrueHD) ?(2\.0|1\.0|5\.1|7\.1)/, '$3 $4 $1 $2');
                     }
                 }
                 if (!name.match(audio_codec)) {
@@ -26057,10 +26057,10 @@ function auto_feed() {
                 if (raw_info.descr.match(/(AUDIO.*CODEC.*?|音频编码.*?)(2\.0|1\.0|5\.1|7\.1)/i)) {
                     channels = raw_info.descr.match(/(AUDIO.*CODEC.*?|音频编码.*?)(2\.0|1\.0|5\.1|7\.1)/i)[2];
                     if (!name.includes(channels)) {
-                        name = name.replace(/(DD|AAC|DD\+|FLAC|DTS|LPCM|TrueHD)/, `$1${channels}`);
+                        name = name.replace(/(DD\+|DD|AAC|FLAC|DTS|LPCM|TrueHD)/, `$1${channels}`);
                     }
-                    if (name.match(/(H.265|H.264|x264|x265)(.*?)(DD|AAC|DD\+|FLAC|DTS|LPCM|TrueHD)(2\.0|1\.0|5\.1|7\.1)/i)) {
-                        name = name.replace(/(H.265|H.264|x264|x265)(.*?)(DD|AAC|DD\+|FLAC|DTS|LPCM|TrueHD)(2\.0|1\.0|5\.1|7\.1)/i, '$3 $4 $1 $2');
+                    if (name.match(/(H.265|H.264|x264|x265)(.*?)(DD\+|DD|AAC|FLAC|DTS|LPCM|TrueHD)(2\.0|1\.0|5\.1|7\.1)/i)) {
+                        name = name.replace(/(H.265|H.264|x264|x265)(.*?)(DD\+|DD|AAC|FLAC|DTS|LPCM|TrueHD)(2\.0|1\.0|5\.1|7\.1)/i, '$3 $4 $1 $2');
                     }
                 } else if (raw_info.descr.match(/\d channels/i)) {
                     channels = raw_info.descr.match(/(\d) channels/i)[1];
@@ -26070,7 +26070,7 @@ function auto_feed() {
             if (name.match(/(WEB-DL|Bluray|HDTV).(1080p|4K|2160p|720p|480p)/i)) {
                 name = name.replace(/(WEB-DL|Bluray|HDTV).(1080p|4K|2160p|720p|480p)/i, '$2 $1');
             }
-            name = name.replace(/(DD|DD\+|FLAC|LPCM|TrueHD|MA|HR) (2\.0|1\.0|5\.1|7\.1)/, '$1$2');
+            name = name.replace(/(DD\+|DD|FLAC|LPCM|TrueHD|MA|HR) (2\.0|1\.0|5\.1|7\.1)/, '$1$2');
             if (raw_info.type == '剧集' || raw_info.type == '综艺' || raw_info.type == '纪录') {
                 year = name.match(/(19|20)\d{2}[^pP]/g);
                 try{
