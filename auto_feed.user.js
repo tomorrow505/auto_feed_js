@@ -10203,6 +10203,9 @@ function auto_feed() {
                     raw_info.descr = '[quote]' + raw_info.descr + '[/quote]\n\n' + imgs_str;
                 }  else if (tds[i].textContent == 'Source') {
                     raw_info.medium_sel = tds[i+1].textContent.medium_sel();
+                    if (tds[i+1].textContent.trim() == 'WEB') {
+                        raw_info.medium_sel = 'WEB-DL';
+                    }
                 }
             }
 
@@ -19411,6 +19414,10 @@ function auto_feed() {
 
             if (raw_info.type == '纪录' && forward_site == 'ZMPT') {
                 browsecat.val(422);
+            }
+
+            if (raw_info.type == '书籍' && forward_site == 'ZMPT' && raw_info.descr.match(/m4a|mp3/i)) {
+                browsecat.val(424);
             }
 
             if (raw_info.type == '动漫' && forward_site == 'ZMPT') {
