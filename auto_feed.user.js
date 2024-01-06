@@ -2756,7 +2756,7 @@ function get_mediainfo_picture_from_descr(descr){
 function fill_raw_info(raw_info, forward_site){
 
     raw_info.descr = raw_info.descr.replace(/%3A/g, ':').replace(/%2F/g, "/");
-
+    raw_info.descr = raw_info.descr.replace('[quote][/quote]', '').replace(/\n\n+/, '\n\n');
     //标题肯定都有，副标题可能没有，从简介获取
     if (raw_info.small_descr == ''){
         raw_info.small_descr = get_small_descr_from_descr(raw_info.descr, raw_info.name);
@@ -12095,7 +12095,7 @@ function auto_feed() {
             if (raw_info.name.match(/CHD|SGNB|STBOX|ONEHD|BLUCOOK|HQC|GBT|KAN|PLP/i)){
                 if (raw_info.url) {
                     $('#top').append(`<br><b><span id="checking"><font color="red">[禁转判断中……]</font></span></b>`);
-                    var check_url = 'https://ptchdbits.co/torrents.php?incldead=0&spstate=0&inclbookmarked=0&search={imdbid}&search_area=4&search_mode=0';
+                    var check_url = default_site_info[origin_site].url + 'torrents.php?incldead=0&spstate=0&inclbookmarked=0&search={imdbid}&search_area=4&search_mode=0';
                     var imdbid = raw_info.url.match(/tt\d+/)[0];
                     check_url = check_url.format({'imdbid': imdbid});
                     getDoc(check_url, null, function(doc){
