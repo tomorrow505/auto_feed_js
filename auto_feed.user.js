@@ -89,7 +89,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.5.5
+// @version      2.0.5.6
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -22582,18 +22582,21 @@ function auto_feed() {
                     });
                 } else {
                     try{
-                        descr.match(/Text.*?\nID[\s\S]*?Forced/g).map(function(item){
+                        descr.match(/Text.*?\nID[\s\S]*?\nForced/g).map(function(item){
                             try{
                                 var e = item.match(/Language.*?:(.*)/)[1].trim().toLowerCase();
-                                e = e.replace(/\(.*?\)/, '');
+                                e = e.replace(/\(.*?\)/, '').trim();
                                 if (e == 'chinese' && item.match(/Simplified|简体/i)) {
+                                    alert(1)
                                     subtitles.push('chinese_simplified');
-                                } else if (e == 'chinese' && item.match(/Traditional|繁體/i)) {
+                                } else if (e == 'chinese' && item.match(/Traditional|繁體|繁体/i)) {
                                     subtitles.push('chinese_traditional');
                                 } else {
                                     subtitles.push(e);
                                 }
-                            } catch(err) {}
+                            } catch(err) {
+                                console.log(err)
+                            }
                         });
                     } catch(err) {
                         if (descr.match(/Subtitle.*?:(.*)/i)) {
