@@ -283,8 +283,8 @@ function disableother(select,target){
 function get_group_name(name, torrent_info) {
     name = name.replace(/\[.*?\]|web-dl|dts-hd|Blu-ray|MPEG-2|MPEG-4/ig, '');
     name = name.split(/\.mkv|\.mp4|\.iso|\.avi/)[0];
-    if (name.match(/(KJNU|tomorrow505|KG)$/)) {
-        return name.match(/(KJNU|tomorrow505|KG)$/)[1];
+    if (name.match(/(KJNU|tomorrow505|KG|BMDru)$/)) {
+        return name.match(/(KJNU|tomorrow505|KG|BMDru)$/)[1];
     }
     try{
         tmp_name = name.match(/-(.*)/)[1].split(/-/).pop();
@@ -312,6 +312,7 @@ function get_group_name(name, torrent_info) {
     }
     if (!name || name.match(/\)|^\d\d/)) name = 'Null';
     if (name == 'Z0N3') name = 'D-Z0N3';
+    if (name == 'AVC.ZONE') name = 'ZONE';
     if (name.match(/CultFilms/)) name = 'CultFilms';
     if (name.match(/™/) && !name.match(/CultFilms/)) {
         name = 'Null';
@@ -2756,7 +2757,7 @@ function get_mediainfo_picture_from_descr(descr){
 function fill_raw_info(raw_info, forward_site){
 
     raw_info.descr = raw_info.descr.replace(/%3A/g, ':').replace(/%2F/g, "/");
-    raw_info.descr = raw_info.descr.replace('[quote][/quote]', '').replace(/\n\n+/, '\n\n');
+    raw_info.descr = raw_info.descr.replace('[quote][/quote]', '').replace('[b][/b]', '').replace(/\n\n+/, '\n\n');
     //标题肯定都有，副标题可能没有，从简介获取
     if (raw_info.small_descr == ''){
         raw_info.small_descr = get_small_descr_from_descr(raw_info.descr, raw_info.name);
@@ -4615,7 +4616,12 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php.*/) && extra_set
             imdb_urls[movie.GroupId] = movie.ImdbId;
             movie.GroupingQualities.forEach(function(torrentgroup){
                 torrentgroup.Torrents.forEach(function(torrent){
-                    releases[torrent.TorrentId] = torrent.ReleaseGroup;
+                    if (torrent.ReleaseGroup) {
+                        releases[torrent.TorrentId] = torrent.ReleaseGroup;
+                    } else {
+                        var groupname = get_group_name(torrent.ReleaseName, '');
+                        releases[torrent.TorrentId] = groupname;
+                    }
                 });
             });
         });
@@ -4638,7 +4644,7 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php.*/) && extra_set
             var obsConfig = {childList: true, characterData: false, attributes: false, subtree: false};
 
             targetNodes.each(function (){
-                myObserver.observe (this, obsConfig);
+                myObserver.observe(this, obsConfig);
             });
 
             function mutationHandler (mutationRecords) {
@@ -4665,7 +4671,13 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php.*/) && extra_set
     } else{
         $('table#torrent-table a.torrent-info-link').each(function(){
             var groupname = $(this).parent().parent().data('releasegroup');
-            setGroupName(groupname, this);
+            if (groupname) {
+                setGroupName(groupname, this);
+            } else {
+                var release_name = $(this).parent().parent().data('releasename');
+                groupname = get_group_name(release_name, '');
+                setGroupName(groupname, this);
+            }
         });
     }
 
@@ -8621,7 +8633,7 @@ function auto_feed() {
 
         if (origin_site == 'SpeedApp') {
             $('div.cover-overlay-bottom:first').after(`
-                <div class="row card card-custom rounded-lg card-smoke backdrop-blur card-body d-flex flex-row" style="padding-left:55px; padding-right:55px; padding-bottom: 100px; margin-top:25px; border-radius: 10px; height:800px">
+                <div class="row card card-custom rounded-lg card-smoke backdrop-blur card-body d-flex flex-row" style="padding-left:55px; padding-right:55px; padding-bottom: 120px; margin-top:10px;">
                     <table id="mytable">
                     </table>
                 </div>
