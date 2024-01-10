@@ -283,18 +283,18 @@ function disableother(select,target){
 function get_group_name(name, torrent_info) {
     name = name.replace(/\[.*?\]|web-dl|dts-hd|Blu-ray|MPEG-2|MPEG-4/ig, '');
     name = name.split(/\.mkv|\.mp4|\.iso|\.avi/)[0];
-    if (name.match(/(KJNU|tomorrow505|KG|BMDru)$/)) {
-        return name.match(/(KJNU|tomorrow505|KG|BMDru)$/)[1];
+    if (name.match(/(KJNU|tomorrow505|KG|BMDru|BobDobbs)$/)) {
+        return name.match(/(KJNU|tomorrow505|KG|BMDru|BobDobbs)$/)[1];
     }
     try{
         tmp_name = name.match(/-(.*)/)[1].split(/-/).pop();
-        if (tmp_name.match(/x264|x265|h264|h265/i)){
+        if (tmp_name.match(/x264|x265|h264|h265|NTSC|PAL|DVD9|DVD5/i)){
             if (torrent_info.match(/Scene/)) {
                 name = name.split('-')[0];
             } else {
-                tmp_name = tmp_name.split(/AC3|[\. ]DD[\. \+]|AAC|x264|x265|h264|h265/i);
+                tmp_name = tmp_name.split(/AC3|[\. ]DD[\. \+]|AAC|x264|x265|h264|h265|NTSC|PAL|DVD9|DVD5/i);
                 if (tmp_name.length > 1) {
-                    name = tmp_name[1].replace(/\.| /g, '');
+                    name = tmp_name.pop().replace(/\.| /g, '');
                 } else {
                     name = 'Null';
                 }
@@ -303,9 +303,9 @@ function get_group_name(name, torrent_info) {
             name = tmp_name;
         }
     } catch(err) {
-        name = name.split(/AC3|[\. ]DD[\. \+]|AAC|x264|x265|h264|h265/i);
+        name = name.split(/AC3|[\. ]DD[\. \+]|AAC|x264|x265|h264|h265|NTSC|PAL|DVDRip|DVD9|DVD5/i);
         if (name.length > 1) {
-            name = name[1].replace(/\.| /g, '');
+            name = name.pop().replace(/\.| /g, '');
         } else {
             name = 'Null';
         }
@@ -319,6 +319,9 @@ function get_group_name(name, torrent_info) {
     }
     if (name.search('.nfo')) {
         name = name.replace('.nfo', '');
+    }
+    if (name.match(/[_\.]/)) {
+        name = 'Null';
     }
     if (name.length == 1) {
         name = 'Null';
@@ -2593,16 +2596,14 @@ function get_full_size_picture_urls(raw_info, imgs, container, need_img_label, c
                     item = item.replace('thumbs2', 'images2').replace('t.png', 'o.png');
                 } else if (item.match(/pixhost/)) {
                     item = item.replace('//t', '//img').replace('thumbs', 'images');
-                } else if (item.match(/shewang.net|pterclub.com|beyondhd.co\/images/)) {
+                } else if (item.match(/shewang.net|pterclub.com|img4k.net|img.hdhome.org|img.hdchina.org/)) {
                     item = item.replace(/th.png/, 'png').replace(/md.png/, 'png');
+                } else if (item.match(/beyondhd.co\/(images|cache)/)) {
+                    item = item.replace(/th.png/, 'png').replace(/md.png/, 'png').replace('/t/', '/i/');
                 } else if (item.match(/tu.totheglory.im/)) {
                     item = item.replace(/_thumb.png/, '.png');
-                } else if (item.match(/img.hdchina.org/)) {
-                    item = item.replace(/md.png/, 'png');
                 } else if (item.match(/cinematik/)) {
-                    item = '[img]' + item.replace(/thu/, 'big');
-                } else if (item.match(/img4k.net|img.hdhome.org/)) {
-                    item = item.replace(/md.png/, 'png');
+                    item = item.replace(/thu/, 'big');
                 }
                 if (need_img_label) {
                     img_info += '\n' + `[img]${item}[/img]`;
@@ -5637,7 +5638,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#signin').append(`<b>&nbsp;&nbsp;&nbsp;</b><a href="#", target="_blank" id="begin_sign"><font color="red"><b>→开始签到←</b></font></a>`);
         $('#signin').append(`<br><div id="ksortable"></div>`);
 
-        var unsupported_sites = ['digitalcore', 'HD-Only'];
+        var unsupported_sites = ['digitalcore', 'HD-Only', 'WT-Sakura', 'HOU', 'OMG', 'TorrentLeech'];
 
         for (index=0; index < site_order.length; index++) {
             var key = site_order[index];
@@ -6534,30 +6535,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         $('#getsource').click((e)=>{
             var origin_str = $('#picture').val();
-            pic_info = '';
-            origin_str.match(/\[img\]http[^\[\]]*?(jpg|png|webp)/ig).forEach((item)=>{
-                item = item.replace(/\[.*\]/g, '');
-                if (item.match(/imgbox/)) {
-                    pic_info += '[img]' + item.replace('thumbs2', 'images2').replace('t.png', 'o.png') + '[/img]\n';
-                } else if (item.match(/pixhost/)) {
-                    pic_info += '[img]' + item.replace('//t', '//img').replace('thumbs', 'images') + '[/img]\n';
-                } else if (item.match(/pterclub.com|beyondhd.co\/(images|cache)|z4a.net\/images/)) {
-                    pic_info += '[img]' + item.replace(/th.png/g, 'png').replace(/md.png/g, 'png').replace(/t\/mages/, 'i/mages') + '[/img]\n';
-                } else if (item.match(/tu.totheglory.im/)) {
-                    pic_info += '[img]' + item.replace(/_thumb.png/, '.png') + '[/img]\n';
-                } else if (item.match(/img.hdchina.org/)) {
-                    pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
-                } else if (item.match(/cinematik/)) {
-                    pic_info += '[img]' + item.replace(/thu/, 'big') + '[/img]\n';
-                } else if (item.match(/img4k.net|img.hdhome.org/)) {
-                    pic_info += '[img]' + item.replace(/md.png/, 'png') + '[/img]\n';
-                } else {
-                    pic_info += '[img]' + item + '[/img]\n';
-                }
-            });
-            if (pic_info) {
-                $('#result').val(pic_info);
-            }
+            get_full_size_picture_urls(null, origin_str, $('#result'), true);
         });
 
         $('#enter2space').click((e)=>{
@@ -8632,8 +8610,8 @@ function auto_feed() {
         }
 
         if (origin_site == 'SpeedApp') {
-            $('div.cover-overlay-bottom:first').after(`
-                <div class="row card card-custom rounded-lg card-smoke backdrop-blur card-body d-flex flex-row" style="padding-left:55px; padding-right:55px; padding-bottom: 120px; margin-top:10px;">
+            $('div.row:eq(1)').after(`
+                <div class="row card card-custom rounded-lg card-smoke backdrop-blur card-body d-flex flex-row" style="margin-bottom:20px; margin-left:1px; margin-right:1px;">
                     <table id="mytable">
                     </table>
                 </div>
@@ -12201,13 +12179,18 @@ function auto_feed() {
                         return;
                     }
                 }
+                if (raw_info.name.match(/BMDru/)) {
+                    if (!confirm('该小组作品被PTP认定为劣质资源，确定发布？')) {
+                        e.preventDefault();
+                        return;
+                    }
+                }
                 if (raw_info.url){
                     var url = 'https://passthepopcorn.me/torrents.php?searchstr=' + raw_info.url.match(/tt\d+/)[0];
                     GM_xmlhttpRequest({
                         method: 'GET',
                         url: url,
                         onload: function(res) {
-                            console.log(res)
                             var upload_url = 'https://passthepopcorn.me/upload.php';
                             if (res.finalUrl.match(/id=\d+/)) {
                                 upload_url += '?group' + res.finalUrl.match(/id=\d+/)[0];
@@ -12252,7 +12235,6 @@ function auto_feed() {
                         method: 'GET',
                         url: url,
                         onload: function(res) {
-                            console.log(res)
                             doc = res.responseText;
                             var upload_url = 'https://secret-cinema.pw/upload.php';
                             if ($('div.torrent_card_container', doc).length) {
@@ -12293,7 +12275,6 @@ function auto_feed() {
                         method: 'GET',
                         url: url,
                         onload: function(res) {
-                            console.log(res)
                             doc = res.responseText;
                             console.log(doc)
                             var upload_url = 'http://tv-vault.me/upload.php';
@@ -12344,7 +12325,6 @@ function auto_feed() {
                         method: 'GET',
                         url: url,
                         onload: function(res) {
-                            console.log(res)
                             doc = res.responseText;
                             if ($('div.overlay-container', doc).length) {
                                 upload_url += '?movie_id=' + $('div.overlay-container', doc).find('a').attr('href').match(/\d+/)[0];
@@ -12386,7 +12366,6 @@ function auto_feed() {
                         if ($('#torrent_table', doc).length) {
                             var table = $('#torrent_table', doc);
                             ids = table.find('tr.group').map((index, e)=>{
-                                console.log(e)
                                 var imdburl = $(e).find('a:contains(IMDb:)').attr('href');
                                 console.log(imdburl)
                                 if (imdbid && imdburl.match(imdbid)) {
@@ -14052,17 +14031,18 @@ function auto_feed() {
                 }
                 container.css({'height': '600px'});
                 var tmp_descr = raw_info.descr.replace(infos.mediainfo, '');
-                tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}\[\/quote\]/g, '');
+                tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}\[\/quote\]/g, '').replace(/ +\n/g, '\n');
                 if (raw_info.full_mediainfo) {
                     tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}(General|Disc)[\s\S]{50,30000}?\[\/quote\]/g, '');
                 }
+                tmp_descr = tmp_descr.replace('[img]https://i.ibb.co/8KwqmMK/Shark-PT-More-Screenshot.png[/img]', '');
                 raw_info.descr = tmp_descr;
                 for (var key in reg_team_name) {
                     if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
                         raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
                     }
                 }
-                $('textarea[name="descr"]').val(raw_info.descr.trim().replace(/\n{2,15}/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\['));
+                $('textarea[name="descr"]').val(raw_info.descr.trim().replace(/\n\n+/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\['));
             } catch(Err) {
                 if (raw_info.full_mediainfo){
                     container.val(raw_info.full_mediainfo);
