@@ -22147,11 +22147,13 @@ function auto_feed() {
 
             try {
                 infos = get_mediainfo_picture_from_descr(raw_info.descr);
-                if (raw_info.full_mediainfo) {
-                    $('#release_desc').val(raw_info.full_mediainfo + '\n\n' + infos.pic_info);
-                } else {
-                    $('#release_desc').val(infos.mediainfo + '\n\n' + infos.pic_info);
-                }
+                get_full_size_picture_urls(null, infos.pic_info, $('#nowhere'), true, function(data){
+                    if (raw_info.full_mediainfo) {
+                        $('#release_desc').val(raw_info.full_mediainfo + '\n\n' + data.trim());
+                    } else {
+                        $('#release_desc').val(infos.mediainfo + '\n\n' + data.trim());
+                    }
+                });
             } catch (err) {
                 raw_info.descr = raw_info.descr.replace(/\[\/?.{1,20}\]\n?/g, '');
                 $('#release_desc').val(raw_info.descr);
@@ -22169,7 +22171,6 @@ function auto_feed() {
                 $('#container').val('m2ts');
             }
             $('#container')[0].dispatchEvent(evt);
-
             $('#preview_button').before(`<font color="red">由于PTP预览可以自动勾选字幕并且看图床是否正确显示，请先勾选预览后返回发布。<br><br></font>`);
         }
 
@@ -24853,7 +24854,6 @@ function auto_feed() {
                     descr = descr.format({'BDInfo': raw_info.descr});
                 }
 
-                console.log(raw_info.descr)
                 if (raw_info.medium_sel == 'DVD') {
                     if (raw_info.name.match('NTSC') || raw_info.descr.match('NTSC')) {
                         descr = descr.format({'format': 'NTSC'});
@@ -24958,7 +24958,6 @@ function auto_feed() {
                             }
                             if (raw_info.descr.match(/Audio:[\s\S]{0,20}Codec/i)) {
                                 var audio_info = raw_info.descr.match(/Audio:[\s\S]{0,300}-----------([\s\S]*)/i)[1].split(/subtitles|\[.*quote\]/i)[0].trim();
-                                // alert(audio_info)
                                 descr = descr.format({'audio': audio_info.split('\n').map(e=>{
                                     var info = e.split(/  /).filter(function(e){return e;});
                                     return `${info[1].trim()} ${info[0].replace('Audio', '').replace(/Master/, 'MA').trim()} ${info[3].split('/')[0].trim()}`
@@ -24988,10 +24987,12 @@ function auto_feed() {
                 $('input[name="name"]').val(torrent_name);
 
                 descr = descr.format({'year': year});
-                var img_urls = raw_info.descr.match(/\[img\].*?\[\/img\]/g);
-                if (img_urls && img_urls.length) {
-                    descr = descr.format({'screenshots': img_urls.join('\n\n')});
-                }
+                try{
+                    var infos = get_mediainfo_picture_from_descr(raw_info.descr);
+                    get_full_size_picture_urls(null, infos.pic_info, $('#nowhere'), true, function(data) {
+                        descr = descr.format({'screenshots': data.trim()});
+                    })
+                } catch (err) {}
 
                 if (raw_info.descr.match(/Total.*?Bitrate:(.*)/i)) {
                     descr = descr.format({'bitrate': raw_info.descr.match(/Total.*?Bitrate:(.*)/i)[1].trim()});
@@ -25079,7 +25080,6 @@ function auto_feed() {
         }
 
         var page = parseInt(title.split(' ').pop());
-
         if (page == 1) {
             $('input[name=title]').val(raw_info.url);
         } else if (page == 2) {
@@ -25116,13 +25116,11 @@ function auto_feed() {
                 }
 
                 var poster = await getPoster(poster_url);
-                // console.log($('div[class*=Media__PosterContainer] > div > a', doc).length)
                 descr = descr.format({'poster': poster});
                 descr = descr.format({'title': $('h1:eq(0)', doc).text().trim()});
                 descr = descr.format({'genres': Array.from($('div[data-testid*=genres]', doc).find('a')).map(function(e){
                     return $(e).text();
                 }).join(', ').replace(/, Read all/g, '')});
-
                 descr = descr.format({'date': $('li.ipc-metadata-list__item:contains("Release date")', doc).find('div').find('li').text()});
                 descr = descr.format({'score': $('div[data-testid*=aggregate-rating__score]:eq(0)', doc).text()});
                 descr = descr.format({'imdb_url': raw_info.url});
@@ -25138,8 +25136,6 @@ function auto_feed() {
                     return $(e).text();
                 }).join(', ');
                 descr = descr.format({'cast': actors});
-
-                console.log(descr)
                 var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
                 if (imdb_descr.match(/Read all/)){
                     var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
@@ -25149,15 +25145,12 @@ function auto_feed() {
                 }
                 descr = descr.format({'en_descr': imdb_descr});
 
-                var screenshots = raw_info.descr.match(/\[img\].*?\[\/img\]/g);
-                if (screenshots !== null) {
-                    descr = descr.format({'screenshots': screenshots.filter(function(e){
-                        if (!e.match(/douban/)) {
-                            return e;
-                        }
-                    }).join('\n')});
-                }
-
+                try{
+                    var infos = get_mediainfo_picture_from_descr(raw_info.descr);
+                    get_full_size_picture_urls(null, infos.pic_info, $('#nowhere'), true, function(data) {
+                        descr = descr.format({'screenshots': data.trim()});
+                    })
+                } catch (err) {}
                 $('textarea[name=descr]').val(descr);
                 var language = Array.from($('li[data-testid="title-details-languages"]', doc).find('ul').find('a')).map(function(e){
                     return $(e).text();
@@ -25208,7 +25201,6 @@ function auto_feed() {
                 $('select[name=hdrip]').val(standard_dict[raw_info.standard_sel]);
             }
 
-            // console.log(raw_info.descr);
             if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
                 $('select[name=hdrip]').val('3');
                 var bluray_info = kg_bluray_base_content;
