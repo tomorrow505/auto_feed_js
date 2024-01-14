@@ -23023,6 +23023,9 @@ function auto_feed() {
                             } catch (err) {}
                         })
                     }
+                    else {
+                        $('#no_subtitles').attr('checked', true);
+                    }
                 })
             }
             if (raw_info.version_info) {
