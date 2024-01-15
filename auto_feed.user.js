@@ -89,7 +89,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.5.6
+// @version      2.0.5.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -894,7 +894,6 @@ const default_site_info = {
     'CNZ': {'url': 'https://cinemaz.to/', 'enable': 1},
     'CHDBits': {'url': "https://ptchdbits.co/", 'enable': 1},
     'DaJiao': {'url': 'https://dajiao.cyou/', 'enable': 1},
-    'DICMusic': {'url': "https://dicmusic.com/", 'enable': 1},
     'DiscFan': {'url': 'https://discfan.net/', 'enable': 1},
     'Dragon': {'url': 'https://www.dragonhd.xyz/', 'enable': 1},
     'FreeFarm': {'url': 'https://pt.0ff.cc/', 'enable': 1},
@@ -3384,7 +3383,7 @@ function set_jump_href(raw_info, mode) {
         } else {
             for (key in used_site_info) {
                 if (used_site_info[key].enable) {
-                    if (['OpenCD', 'OPS', 'DICMusic', 'RED'].indexOf(key) >= 0 ) {
+                    if (['OpenCD', 'OPS', 'RED'].indexOf(key) >= 0 ) {
                         if (raw_info.music_name) {
                             search_name = raw_info.music_name.replace(/\(.*?\)/, '') + ' ' + raw_info.name.match(/(19|20)\d{2}/)[0];
                         } else {
@@ -3415,8 +3414,6 @@ function set_jump_href(raw_info, mode) {
                         forward_url = used_site_info[key].url + 'torrents.php?action=basic&searchsubmit=1&searchstr={url}&order_by=time&order_way=desc&tags_type=0'.format({'url': search_name});
                     } else if (key == 'HDB') {
                         forward_url = used_site_info[key].url + 'browse.php?descriptions=0&season_packs=0&from=&to=&imdbgt=0&imdblt=10&imdb=&primary_language=&country=&yeargt=&yearlt=&tagsearchtype=or&search={name}'.format({'name': search_name});
-                    } else if (key == 'DICMusic') {
-                        forward_url = used_site_info[key].url + 'torrents.php?searchstr={name}&order_by=time&order_way=desc&group_results=1&action=basic&searchsubmit=1'.format({'name': search_name});
                     } else if (key == 'OpenCD') {
                         forward_url = used_site_info[key].url + 'torrents.php?incldead=0&spstate=0&inclbookmarked=0&search={name}&search_area=0&search_mode=0'.format({'name': search_name});
                     } else if (key == 'OPS') {
@@ -3738,7 +3735,7 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
 function fill_torrent(forward_site, container, name) {
     if (['HDPost', 'BHD', 'BLU', 'ACM', 'HDSpace', 'xthor', 'JPTV', 'Monika', 'KIMOJI'].indexOf(forward_site) > -1) {
         $('#torrent')[0].files = container.files;
-    } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'DICMusic', 'OPS', 'RED', 'SugoiMusic'].indexOf(forward_site) > -1) {
+    } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'OPS', 'RED', 'SugoiMusic'].indexOf(forward_site) > -1) {
         $('input[name=file_input]')[0].files = container.files;
         setTimeout(function(){$('#file')[0].dispatchEvent(evt);}, 1000);
     } else if (forward_site == 'CHDBits') {
@@ -13365,7 +13362,7 @@ function auto_feed() {
             raw_info.descr += '\n\n' + '[quote]' + raw_info.tracklist + '[/quote]'
         }
 
-        if (forward_site == 'DICMusic' || forward_site == 'OPS') {
+        if (forward_site == 'OPS') {
             var announce = $('a:contains(已隐藏你的个人)').attr('href');
             if (forward_site == 'OPS') {
                 announce = $('input[value*="announce"]').val();
@@ -13385,7 +13382,6 @@ function auto_feed() {
                 try { if (!$('#tags').val()) { $('#tags').val(raw_info.music_type.replace(/,/g, ', ')) } } catch (err) {}
             }
             addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, announce);
-            console.log(raw_info);
             function add_extra_info() {
                 $('#artist_tr').before(`<tr class="section_tr"><td class="label">辅助信息:</td><td>${raw_info.name}<br>${raw_info.edition_info}<br>${raw_info.small_descr}</td></tr>`)
                 raw_info.name = raw_info.name.trim();
@@ -13486,11 +13482,7 @@ function auto_feed() {
                 }
                 categories.val(index).triggerHandler('change');
                 WaitForCategory(function() {
-                    if (forward_site == 'DICMusic') {
-                        ParseForm(group, torrent);
-                    } else {
-                        fillMusicForm(group, torrent);
-                    }
+                    fillMusicForm(group, torrent);
                     add_extra_info();
                     setTimeout(function(){
                         if (group.wikiBody.match(/\<(br|span).*?\>/)) {
@@ -13982,7 +13974,7 @@ function auto_feed() {
             raw_info.descr = raw_info.descr.replace(/\[color=.*?\].*?\[\/color\]/i, '').trim();
         }
         if (['CMCT', 'PTsbao', 'HDPost','HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HaresClub', 'HDTime', 'KIMOJI',
-        'HD-Only', 'HDfans', 'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'DICMusic', 'RED',
+        'HD-Only', 'HDfans', 'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED',
         'SugoiMusic', 'CG', 'ZHUQUE', 'KIMOJI'].indexOf(forward_site) < 0){
             if (forward_site == 'HDT') {
                 descr_box[0].style.height = '600px';
