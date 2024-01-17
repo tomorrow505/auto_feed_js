@@ -1177,7 +1177,7 @@ const reg_team_name = {
     'PTLSP': /PTLSP|LSP(WEB|DIY|MUSIC)?$/i,
     '象站': /Eleph(WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i,
     'OKPT': /OK(WEB|Web)?$/i,
-    'Agsv': /AGSV(E|WEB|REMUX|Rip|TV|DIY|MUS)?$/i,
+    'Agsv': /AGSV(PT|E|WEB|REMUX|Rip|TV|DIY|MUS)?$/i,
 };
 const thanks_str = "[quote][b][color=Blue]{site}官组作品，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
