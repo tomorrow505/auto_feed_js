@@ -24664,7 +24664,16 @@ function auto_feed() {
                 case 'APE': audiocodec_box.val(2); break;
                 case 'AAC': audiocodec_box.val(6); break;
             }
-
+            //根据种审组要求 出现DD 或者EAC3 优先匹配DD
+            if (raw_info.name.match(/DD\+|EAC3/i)) {
+                audiocodec_box.val(11);
+            }
+            //出现DDP去匹配DDP
+            //听劝
+            if (raw_info.name.match(/DDP/i)) {
+                audiocodec_box.val(19);
+            }
+            
             //分辨率
             var standard_box = $('select[name="standard_sel[4]"]');
             var standard_dict = {
