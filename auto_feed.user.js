@@ -988,7 +988,8 @@ const default_site_info = {
     '麒麟': {'url': 'https://www.hdkyl.in/', 'enable': 1},
     'Agsv': {'url': 'https://www.agsvpt.com/', 'enable': 1},
     'KIMOJI': {'url': 'https://kimoji.club/', 'enable': 1},
-    'ECUST': {'url': 'https://public.ecustpt.eu.org/', 'enable': 1}
+    'ECUST': {'url': 'https://public.ecustpt.eu.org/', 'enable': 1},
+    'iloli': {'url': 'https://share.ilolicon.com/', 'enable': 1}
 };
 
 var chd_use_backup_url = GM_getValue('chd_use_backup_url') === undefined ? 0: GM_getValue('chd_use_backup_url');
@@ -5762,7 +5763,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao', 'ECUST',
             'PTChina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT', '悟空',
-            'ICC', 'CyanBug', 'SharkPT','2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK', 'HHClub', '象站', '麒麟','Agsv'];
+            'ICC', 'CyanBug', 'SharkPT','2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK', 'HHClub', '象站', '麒麟','Agsv','iloli'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
@@ -14636,6 +14637,17 @@ function auto_feed() {
                     if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (raw_info.type == '游戏'){ check_label(document.getElementsByName('tags[4][]'), '9'); }
                     if (raw_info.type == '学习'){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    break;
+                case 'iloli':
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    else {
+                        if (raw_info.descr.match(/mpls/i) || $('textarea[name="technical_info"]').val().match(/mpls|untouched/i) || (raw_info.medium_sel == 'DVD' && !raw_info.name.match(/DVDRip/i))) {
+                            check_label(document.getElementsByName('tags[4][]'), '9');
+                        }//特判RAW
+                    }
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.hdr10||labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     break;
                 }
         } catch (err) {
@@ -24731,6 +24743,70 @@ function auto_feed() {
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
             }
+        }
+
+        else if (forward_site == 'iloli'){
+            // 类型
+            var browsecat = $('#browsecat');
+            var type_dict = {
+                '电影': 401, '剧集': 402, '动漫': 405, '纪录': 404, '综艺': 402, '体育': 402,
+                 '音乐': 408, '软件': 413, '学习': 409, '游戏': 412, '': 411
+            };//综艺体育默认剧集,lossy audio默认不选择
+            browsecat.val(411);//默认photo
+            if (type_dict.hasOwnProperty(raw_info.type)) {
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            // 媒介
+            var medium_box = $('select[name="medium_sel[4]"]');
+            var medium_dict = { 'Blu-ray': 1, 'DVD': 2, 'UHD': 1, 'Remux': 3, 'HDTV': 5, 'WEB-DL': 12, 'Encode': 7, '': 11, 'CD': 8 };
+            medium_box.val(11);//默认other，tracker默认不选择
+            if (medium_dict.hasOwnProperty(raw_info.medium_sel)) {
+                var index = medium_dict[raw_info.medium_sel];
+                medium_box.val(index);
+            }
+            if (raw_info.name.match(/MiniBD/i)) {
+                medium_box.val(4);
+            }//特判MiniBD
+            if (raw_info.name.match(/DVDRip/i)) {
+                medium_box.val(6);
+            }//特判DVDRip
+
+            // 视频编码
+            var codec_box = $('select[name="codec_sel[4]"]');
+            var codec_dict = { "H265": 6, 'X265': 8, 'H264': 1, 'X264': 9, 'VC-1': 2, 'XVID': 3, 'MPEG-4': 10, 'MPEG-2': 4, '': 5 };
+            codec_box.val(5);//默认other,h26[4|5]和x26[4|5]未作特判
+            if (codec_dict.hasOwnProperty(raw_info.codec_sel)) {
+                var index = codec_dict[raw_info.codec_sel];
+                codec_box.val(index);
+            }
+
+            //音频编码
+            var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
+            var audiocodec_dict = {
+                'DTS-HD': 3, 'DTS-HDMA:X 7.1': 10, 'DTS-HDMA': 10, 'TrueHD': 9, 'Atmos': 18, 'DTS-HDHR': 3,'MP3': 4,
+                'DTS': 3, 'AC3': 13, 'AAC': 6, 'Flac': 1, 'APE': 2, 'LPCM': 15, 'WAV': 9, '': 14
+            };//OGG/ALAC/WMVA 未作判断
+            audiocodec_box.val(14);//默认other
+            if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)) {
+                var index = audiocodec_dict[raw_info.audiocodec_sel];
+                audiocodec_box.val(index);
+                if(index==13 && raw_info.name.match(/5\.1/i))
+                audiocodec_box.val(16);//特判DD5.1/AC3
+            }
+
+            //分辨率
+            var standard_box = $('select[name="standard_sel[4]"]');
+            var standard_dict = { '4K': 5, '1080p': 1, '1080i': 2, '720p': 3, 'SD':4 };
+            standard_box.val(4);//默认选择SD，8K未作判断
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)) {
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.val(index);
+            }
+            
+            //制作组
+            $('select[name="team_sel[4]"]').val(5);
+            check_team(raw_info, 'team_sel[4]');//未作特别判断，太多了
         }
 
     } else if (judge_if_the_site_as_source() == 2) { //HDCity
