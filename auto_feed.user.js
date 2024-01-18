@@ -24670,7 +24670,7 @@ function auto_feed() {
             }
             //出现DDP等等去匹配DDP
             //听劝
-            if (raw_info.name.match(/DDP|DD+|EAC3/i)) {
+            if (raw_info.name.match(/DDP|DD\+|E-?AC3/i)) {
                 audiocodec_box.val(19);
             }
             
