@@ -4683,7 +4683,11 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php.*/) && extra_set
                 setGroupName(groupname, this);
             } else {
                 var release_name = $(this).parent().parent().data('releasename');
-                groupname = get_group_name(release_name, '');
+                if (release_name !== undefined) {
+                    groupname = get_group_name(release_name, '');
+                } else {
+                    groupname = 'Null';
+                }
                 setGroupName(groupname, this);
             }
         });
