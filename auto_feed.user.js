@@ -1147,7 +1147,7 @@ const reg_team_name = {
     'CMCT': /-(CMCT|cmctv)/i,
     'HDSky': /-(hds|.*@HDSky)/i,
     'CHDBits': /-(CHD|.*@CHDBits)/i,
-    'OurBits': /(-Ao|-.*OurBits|-FLTTH|-IloveTV)/i,
+    'OurBits': /(-Ao|-.*OurBits|-FLTTH|-IloveTV|OurTV|-IloveHD|OurPad|-MGs)$/i,
     'TTG': /-(WiKi|DoA|.*TTG|NGB|ARiN)/i,
     'HDChina': /-(HDC)/i,
     'PTer': /-(Pter|.*Pter)/i,
@@ -1179,6 +1179,7 @@ const reg_team_name = {
     '象站': /Eleph(WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i,
     'OKPT': /OK(WEB|Web)?$/i,
     'Agsv': /AGSV(PT|E|WEB|REMUX|Rip|TV|DIY|MUS)?$/i,
+    'TJUPT': /TJUPT$/,
 };
 const thanks_str = "[quote][b][color=Blue]{site}官组作品，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
@@ -2937,6 +2938,9 @@ function fill_raw_info(raw_info, forward_site){
 
     if (raw_info.name.match(/dvdrip/i)) {
         raw_info.medium_sel = 'DVD';
+    }
+    if (raw_info.origin_site == 'OurBits') {
+        raw_info.descr = raw_info.descr.replace(/\[quote\]\n/g, '[quote]')
     }
     try {
         if (raw_info.descr.match(/\[quote\].*?官组作品.*?\[\/quote\]/g).length >= 2) {
@@ -9676,6 +9680,7 @@ function auto_feed() {
         }
 
         if (origin_site == 'FileList') {
+
             raw_info.name = document.getElementsByTagName('h4')[0].textContent;
 
             var mydiv = document.getElementsByClassName('cblock-innercontent')[0];
@@ -9683,7 +9688,7 @@ function auto_feed() {
             raw_info.tmdb_url = match_link('tmdb', mydiv.innerHTML);
             var filelist_tmdb = match_link('tmdb', mydiv.innerHTML);
 
-            if(filelist_tmdb){
+            if(filelist_tmdb && $('#descr').length){
                 var bbbs = document.getElementsByTagName('b');
                 for(i=0; i<bbbs.length; i++) {
                     if(bbbs[i].textContent == 'Category') {
@@ -11808,6 +11813,10 @@ function auto_feed() {
         if (origin_site == 'HDSpace') {
             $(tbody).find('td:even').addClass('header');
             $(tbody).find('td:odd').addClass('lista');
+        }
+
+        if (origin_site == 'FileList' && !$('#descr').length) {
+            $(tbody).find('td:even').addClass('colhead');
         }
 
         if (origin_site == 'HDT') {
