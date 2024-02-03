@@ -13835,7 +13835,7 @@ function auto_feed() {
             raw_info.descr = raw_info.descr.replace(/\[color=.*?\].*?\[\/color\]/i, '').trim();
         }
         if (['CMCT', 'PTsbao', 'HDPost','HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HaresClub', 'HDTime', 'KIMOJI',
-        'HD-Only', 'HDfans', 'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED',
+        'HD-Only', 'HDfans', 'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED', 'Tik',
         'SugoiMusic', 'CG', 'ZHUQUE', 'KIMOJI'].indexOf(forward_site) < 0){
             if (forward_site == 'HDT') {
                 descr_box[0].style.height = '600px';
@@ -14532,7 +14532,7 @@ function auto_feed() {
             $('input[name="anonymous"]:eq(1)').prop('checked', if_uplver);
         } else if (forward_site == 'KIMOJI') {
             $('#anon').prop('checked', if_uplver);
-        } else if (['HDPost', 'BLU', 'BHD', 'iTS', 'PTP', 'ACM', 'JPTV', 'Monika'].indexOf(forward_site) < 0){
+        } else if (['HDPost', 'BLU', 'Tik', 'BHD', 'iTS', 'PTP', 'ACM', 'JPTV', 'Monika'].indexOf(forward_site) < 0){
             setTimeout(()=>{
                 try {
                     document.getElementsByName('uplver')[0].checked = if_uplver;
@@ -14551,7 +14551,7 @@ function auto_feed() {
                 torrent_box.parentNode.innerHTML = ' <input class="beta-form-main" type="file" accept=".torrent" name="torrent" id="torrent" style="width: 100% !important;" required="">';
             } else if (forward_site == 'HDPost' || forward_site == 'ACM' || forward_site == 'JPTV' || forward_site == 'Monika' || forward_site == 'KIMOJI') {
                 torrent_box.parentNode.innerHTML = '<label for="torrent" class="form__label">Torrent 文件</label><input class="upload-form-file form__file" type="file" accept=".torrent" name="torrent" id="torrent" required="">';
-            } else if (forward_site == 'BLU') {
+            } else if (forward_site == 'BLU' || forward_site == 'Tik') {
                 torrent_box.parentNode.innerHTML = '<label for="torrent" class="form__label">Torrent File</label><input class="upload-form-file form__file" type="file" accept=".torrent" name="torrent" id="torrent" required="">';
             } else if (forward_site != 'xthor') {
                 torrent_box.parentNode.innerHTML = '<input type="file" class="file" id="torrent" name="file" accept=".torrent">';
@@ -20317,10 +20317,12 @@ function auto_feed() {
             $('textarea[name="info"]').val(mediainfo_hdt);
         }
 
-        else if (forward_site == 'BLU' || forward_site == 'ACM' || forward_site == 'JPTV' || forward_site == 'Monika') {
+        else if (forward_site == 'BLU' || forward_site == 'ACM' || forward_site == 'JPTV' || forward_site == 'Monika' || forward_site == 'Tik') {
 
             if (forward_site == 'BLU') {
                 var announce = $('a[href*="https://blutopia.cc/announce/"]').attr('href');
+            } else if (forward_site == 'Tik') {
+                var announce = $('a[href*="https://cinematik.net/"]').attr('href');
             } else {
                 var announce = $('h2:contains(announce)').text().replace('Announce URL:', '').trim();
             }
@@ -20408,6 +20410,33 @@ function auto_feed() {
                 if (raw_info.name.match(/webrip/i)) {
                     source_box.options[8].selected = true;
                 }
+            } else if (forward_site == 'Tik') {
+                if (raw_info.name.match(/dvd5/i)) {
+                    if (raw_info.descr.match(/Standard.*?PAL/)) {
+                        $('#autotype').val('10');
+                    } else {
+                        $('#autotype').val('8');
+                    }
+                } else if (raw_info.name.match(/dvd9/i)) {
+                    if (raw_info.descr.match(/Standard.*?PAL/)) {
+                        $('#autotype').val('9');
+                    } else {
+                        $('#autotype').val('7');
+                    }
+                } else if (raw_info.descr.match(/mpls/i) && (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD')) {
+                    try {
+                        var size = get_size_from_descr(raw_info.descr);
+                        if (0 <= size && size < 23.28) {
+                            $('#autotype').val('6');
+                        } else if (size < 46.57) {
+                            $('#autotype').val('5');
+                        } else if (size < 61.47) {
+                            $('#autotype').val('4');
+                        } else {
+                            $('#autotype').val('3');
+                        }
+                    } catch (Err) {}
+                }
             } else {
                 switch(raw_info.medium_sel){
                     case 'UHD': source_box.options[1].selected = true; break;
@@ -20423,28 +20452,28 @@ function auto_feed() {
             }
 
             //分辨率
-            var standard_box = document.getElementsByName('resolution_id')[0];
-            var standard_dict = {'4K': 2, '1080p': 3, '1080i': 4, '720p': 5, 'SD': 6, '': 10, '8K': 1};
+            var standard_box = $('#autores');
+            var standard_dict = {'4K': 2, '1080p': 3, '1080i': 4, '720p': 5, 'SD': 10, '': 10, '8K': 1};
             if (forward_site == 'ACM') {
                 standard_dict = {'4K': 1, '1080p': 2, '1080i': 2, '720p': 3, 'SD': 4, '': 0, '8K': 0};
             }
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
-                standard_box.options[index].selected = true;
+                standard_box.val(index);
             }
 
-            if (raw_info.standard_sel == 'SD') {
-                $('input[name="sd"]:eq(0)').prop("checked", true);
+            if (raw_info.standard_sel == 'SD' || raw_info.medium_sel == 'DVD') {
+                $('#sd').prop("checked", true);
             }
 
             if (raw_info.name.match(/576p/i)) {
-                standard_box.options[6].selected = true;
+                standard_box.val(6);
             } else if (raw_info.name.match(/576i/i)) {
-                standard_box.options[7].selected = true;
+                standard_box.val(7);
             } else if (raw_info.name.match(/480p/i)) {
-                standard_box.options[8].selected = true;
+                standard_box.val(8);
             } else if (raw_info.name.match(/480i/i)) {
-                standard_box.options[9].selected = true;
+                standard_box.val(9);
             }
 
             $('#apimatch').attr('disabled', false);
