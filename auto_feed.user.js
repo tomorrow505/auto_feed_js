@@ -13728,19 +13728,19 @@ function auto_feed() {
                             });
                         }
                         raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
-                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
+                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|HDMA|TrueHD|DTS.HD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
                         raw_info.name = raw_info.name.replace(/(WEB-DL)(.*?)(AVC|x264|H264)/i, '$1$2H.264');
                         raw_info.name = raw_info.name.replace(/(WEB-DL)(.*?)(HEVC|x265|H265)/i, '$1$2H.265');
                     }
                     if (['ACM'].indexOf(forward_site) > -1) {
                         raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
-                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|HDMA|TrueHD|DTS|PCM|FLAC)[ \.](.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1$3');
+                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|HDMA|TrueHD|DTS.HD|DTS|PCM|FLAC)[ \.](.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1$3');
                         raw_info.name = raw_info.name.replace(/(WEB-DL|HDTV|SDTV)(.*?)(AVC|x264|H264)/i, '$1$2H.264');
                         raw_info.name = raw_info.name.replace(/(WEB-DL|HDTV|SDTV)(.*?)(x265|H265|H.265)/i, '$1$2HEVC');
                     }
                     if (['BHD'].indexOf(forward_site) > -1) {
                         raw_info.name = raw_info.name.replace(/DD\+/i, 'DDP');
-                        raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|HDMA|TrueHD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
+                        raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|HDMA|TrueHD|DTS.HD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
                     }
                     allinput[i].value = raw_info.name;
                 }
@@ -20617,6 +20617,49 @@ function auto_feed() {
             }
             if (if_uplver) {
                 $('input[name="anonymous"][value="1"], input[name="anon"][value="1"]:eq(0)').prop("checked", true);
+            }
+            if (forward_site == 'Tik') {
+                var torrent_name = '';
+                var search_name = get_search_name(raw_info.name).trim();
+                var year = raw_info.name.match(/(19|20)\d{2}/) ? raw_info.name.match(/(19|20)\d{2}/g).pop(): '';
+                if (raw_info.medium_sel == 'DVD') {
+                    if (raw_info.name.match('NTSC') || raw_info.descr.match('NTSC')) {
+                        torrent_name = search_name + (year ? ` (${year})`: ' (year)') + ' NTSC';
+                    } else {
+                        torrent_name = search_name + (year ? ` (${year})`: ' (year)') + ' PAL';
+                    }
+                    if (raw_info.name.match(/dvd9/i)) {
+                        torrent_name += ' DVD9';
+                    } else {
+                        torrent_name += ' DVD5';
+                    }
+                } else {
+                    var medium_sel = 'BD25';
+                    var size = get_size_from_descr(raw_info.descr);
+                    if (size > 23.28 && size < 46.57) {
+                        medium_sel = 'BD50';
+                    } else if (size > 46.57 && size < 61.47) {
+                        medium_sel = 'BD66';
+                    } else {
+                        medium_sel = 'BD100';
+                    }
+                    if (raw_info.medium_sel == 'UHD') {
+                        medium_sel = medium_sel.replace(/BD/, 'UHD');
+                    }
+                    torrent_name = search_name + (year ? ` (${year}) `: ' (year) ') + medium_sel;
+                    if (raw_info.standard_sel == '1080p' || raw_info.standard_sel == '1080i') {
+                        torrent_name += ' ' + raw_info.standard_sel;
+                    }
+                    if (raw_info.codec_sel == 'MPEG-2') {
+                        torrent_name += ' MPEG-2';
+                    } else if (raw_info.codec_sel == 'VC-1') {
+                        torrent_name += ' VC-1';
+                    } else {
+                        torrent_name += ' AVC';
+                    }
+
+                }
+                $('#title').val(torrent_name);
             }
         }
 
