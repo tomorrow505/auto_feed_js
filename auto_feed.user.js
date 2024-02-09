@@ -8148,7 +8148,7 @@ function auto_feed() {
                 raw_info.torrent_url = 'https://pt.keepfrds.com/' + $('a[href*="download.php"]:contains(torrent)').attr('href');
             } else if (origin_site == '影') {
                 raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
-                raw_info.torrent_url = 'https://shadowflow.org/' + $('a[href*="download.php"]:contains(torrent)').attr('href');
+                raw_info.torrent_url = 'https://star-space.net/' + $('a[href*="download.php"]:contains(torrent)').attr('href');
             } else if (origin_site == 'BeiTai') {
                 raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
                 raw_info.torrent_url = 'https://www.beitai.pt/' + $('a[href*="download.php"]:contains(torrent)').attr('href');
@@ -13655,7 +13655,7 @@ function auto_feed() {
         var allinput = document.getElementsByTagName("input");
         if (forward_site == 'BLU' || forward_site == 'Audiences' || forward_site == 'Tik') {
             if (raw_info.descr.match(/Atmos/) && !raw_info.name.match(/atmos/i)) {
-                raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|HDMA|TrueHD|DTS|PCM|FLAC)[ \.](.*?)(\d.\d)/i, '$1 $2 $3 Atmos').replace(/ +/g, ' ');
+                raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|HDMA|TrueHD|DTS.HD|DTS|PCM|FLAC)[ \.](.*?)(\d.\d)/i, '$1 $2 $3 Atmos').replace(/ +/g, ' ');
             }
         }
         if (forward_site == 'PTer' || forward_site == 'Dragon') {
@@ -20660,6 +20660,7 @@ function auto_feed() {
 
                 }
                 $('#title').val(torrent_name);
+                $('#automal').val(0);
             }
         }
 
