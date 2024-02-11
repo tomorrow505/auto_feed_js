@@ -1026,7 +1026,7 @@ if (used_site_info === undefined) {
         if (!used_site_info.hasOwnProperty(key)) {
             used_site_info[key] = default_site_info[key];
             if_new_site_added = true;
-        } else if (default_site_info[key].url != used_site_info[key].url) {
+        } else if (default_site_info[key].url != used_site_info[key].url && key != 'Agsv') {
             used_site_info[key].url = default_site_info[key].url
         }
         if (site_order.indexOf(key) < 0) {
@@ -1085,6 +1085,14 @@ if (site_url.match(/^https?:\/\/backup.landof.tv\/.*/)) {
     GM_setValue('used_site_info', JSON.stringify(used_site_info));
 }
 
+if (site_url.match(/^https?:\/\/www..agsvpt.com\/.*/)) {
+    used_site_info.Agsv.url = 'https://www.agsvpt.com/';
+    GM_setValue('used_site_info', JSON.stringify(used_site_info));
+} else if (site_url.match(/^https?:\/\/abroad.agsvpt.com\/.*/)) {
+    used_site_info.Agsv.url = 'https://abroad.agsvpt.com/';
+    GM_setValue('used_site_info', JSON.stringify(used_site_info));
+}
+
 //支持快速搜索的默认站点列表，可自行添加，举例：imdbid表示tt123456, imdbno表示123456，search_name表示the big bang thoery
 const default_search_list = [
     `<a href="https://passthepopcorn.me/torrents.php?searchstr={imdbid}" target="_blank">PTP</a>`,
@@ -1140,48 +1148,6 @@ var show_search_urls = GM_getValue('show_search_urls') === undefined ? default_s
 if (!show_search_urls.hasOwnProperty('LHD')) {
     show_search_urls['LHD'] = default_show_search_urls['LHD'];
 }
-
-//这部分是属于官种名称匹配，用于声明感谢，可自定义匹配正则以及感谢bbcode
-const reg_team_name = {
-    'MTeam': /-(.*mteam|mpad|tnp|BMDru)/i,
-    'CMCT': /-(CMCT|cmctv)/i,
-    'HDSky': /-(hds|.*@HDSky)/i,
-    'CHDBits': /-(CHD|.*@CHDBits)/i,
-    'OurBits': /(-Ao|-.*OurBits|-FLTTH|-IloveTV|OurTV|-IloveHD|OurPad|-MGs)$/i,
-    'TTG': /-(WiKi|DoA|.*TTG|NGB|ARiN)/i,
-    'HDChina': /-(HDC)/i,
-    'PTer': /-(Pter|.*Pter)/i,
-    'HDHome': /(-hdh|.*@HDHome)/i,
-    'PThome': /(-pthome|-pth|.*@pth)/i,
-    'Audiences': /(-Audies|.*@Audies|-ADE|-ADWeb|.*@ADWeb)/i,
-    'PuTao': /-putao/i,
-    'NanYang': /-nytv/i,
-    'TLFbits': /-tlf/i,
-    'HDDolby': /-DBTV|-QHstudIo|Dream$|.*@dream/i,
-    'FRDS': /-FRDS|@FRDS/i,
-    'BeiTai': /-BeiTai/i,
-    'PigGo': /PigoHD|PigoWeb|PiGoNF/i,
-    'CarPt': /CarPT/i,
-    'HDVideo': /(-HDVWEB|-HDVMV)/i,
-    'HDfans': /HDFans/i,
-    'WT-Sakura': /SakuraWEB|SakuraSUB|WScode/i,
-    'HHClub': /HHWEB/i,
-    'HaresClub': /Hares?WEB|HaresTV|DIY@Hares|-hares/i,
-    'HDPt': /hdptweb/i,
-    'UBits': /-UBits/i,
-    'Panda': /AilMWeb|-PANDA|@Panda/i,
-    'UBits': /@UBits|-UBits/,
-    'SharkPT': /-Shark/,
-    'PTCafe': /CafeWEB|CafeTV|DIY@PTCafe/i,
-    '影': /Ying(WEB|DIY|TV|MV|MUSIC)?$/i,
-    'DaJiao': /DJWEB|DJTV/i,
-    'PTLSP': /PTLSP|LSP(WEB|DIY|MUSIC)?$/i,
-    '象站': /Eleph(WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i,
-    'OKPT': /OK(WEB|Web)?$/i,
-    'Agsv': /AGSV(PT|E|WEB|REMUX|Rip|TV|DIY|MUS)?$/i,
-    'TJUPT': /TJUPT$/,
-};
-const thanks_str = "[quote][b][color=Blue]{site}官组作品，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
 
 //设置依托界面站点列表
 const setting_host_list = {
@@ -1683,6 +1649,57 @@ function find_origin_site(url){
         }
     }
     return 'other';
+}
+
+function add_thanks(descr) {
+    //这部分是属于官种名称匹配，用于声明感谢，可自定义匹配正则以及感谢bbcode
+    const reg_team_name = {
+        'MTeam': /-(.*mteam|mpad|tnp|BMDru)/i,
+        'CMCT': /-(CMCT|cmctv)/i,
+        'HDSky': /-(hds|.*@HDSky)/i,
+        'CHDBits': /-(CHD|.*@CHDBits)/i,
+        'OurBits': /(-Ao|-.*OurBits|-FLTTH|-IloveTV|OurTV|-IloveHD|OurPad|-MGs)$/i,
+        'TTG': /-(WiKi|DoA|.*TTG|NGB|ARiN)/i,
+        'HDChina': /-(HDC)/i,
+        'PTer': /-(Pter|.*Pter)/i,
+        'HDHome': /(-hdh|.*@HDHome)/i,
+        'PThome': /(-pthome|-pth|.*@pth)/i,
+        'Audiences': /(-Audies|.*@Audies|-ADE|-ADWeb|.*@ADWeb)/i,
+        'PuTao': /-putao/i,
+        'NanYang': /-nytv/i,
+        'TLFbits': /-tlf/i,
+        'HDDolby': /-DBTV|-QHstudIo|Dream$|.*@dream/i,
+        'FRDS': /-FRDS|@FRDS/i,
+        'BeiTai': /-BeiTai/i,
+        'PigGo': /PigoHD|PigoWeb|PiGoNF/i,
+        'CarPt': /CarPT/i,
+        'HDVideo': /(-HDVWEB|-HDVMV)/i,
+        'HDfans': /HDFans/i,
+        'WT-Sakura': /SakuraWEB|SakuraSUB|WScode/i,
+        'HHClub': /HHWEB/i,
+        'HaresClub': /Hares?WEB|HaresTV|DIY@Hares|-hares/i,
+        'HDPt': /hdptweb/i,
+        'UBits': /-UBits/i,
+        'Panda': /AilMWeb|-PANDA|@Panda/i,
+        'UBits': /@UBits|-UBits/,
+        'SharkPT': /-Shark/,
+        'PTCafe': /CafeWEB|CafeTV|DIY@PTCafe/i,
+        '影': /Ying(WEB|DIY|TV|MV|MUSIC)?$/i,
+        'DaJiao': /DJWEB|DJTV/i,
+        'PTLSP': /PTLSP|LSP(WEB|DIY|MUSIC)?$/i,
+        '象站': /Eleph(WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i,
+        'OKPT': /OK(WEB|Web)?$/i,
+        'Agsv': /AGSV(PT|E|WEB|REMUX|Rip|TV|DIY|MUS)?$/i,
+        'TJUPT': /TJUPT$/,
+        'FileList': /Play(HD|SD|WEB|TV)?$/i,
+    };
+    const thanks_str = "[quote][b][color=Blue]{site}官组作品，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
+    for (var key in reg_team_name) {
+        if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
+            descr = thanks_str.format({'site': key, 'descr': descr});
+        }
+    }
+    return descr;
 }
 
 //标签及其字标签转换为字符串，主要用于获取简介等等, 根据网页树的结构，采用前序遍历递归呈现。
@@ -2897,11 +2914,7 @@ function fill_raw_info(raw_info, forward_site){
     try {
         if (raw_info.descr.match(/\[quote\].*?官组作品.*?\[\/quote\]/g).length >= 2) {
             raw_info.descr = raw_info.descr.split(/\[quote\].*?官组作品.*?\[\/quote\]/g).pop();
-            for (var key in reg_team_name) {
-                if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
-                    raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
-                }
-            }
+            raw_info.descr = add_thanks(raw_info.descr);
         }
     } catch(err) {}
     return raw_info;
@@ -9718,9 +9731,11 @@ function auto_feed() {
                     var email = $('#maincolumn', doc).find('div[class="cblock-innercontent"]').find('a[class="__cf_email__"]');
                     get_email(email);
                     var mediainfo = $('#maincolumn', doc).find('div[class="cblock-innercontent"]')[0];
+                    raw_info.descr = '';
                     descr = walkDOM(mediainfo.cloneNode(true));
                     descr = descr.replace(/\[.?font.*?\]/g, '');
                     raw_info.descr = '[quote]' + descr + '[/quote]';
+                    raw_info.descr = add_thanks(raw_info.descr);
                     $('h4:first').after('<h4 style="margin-left:5px;"><font color="red"><--Mediainfo/BDinfo加载成功！！！--></font></h4>');
                     if (img_urls.match(/yes.ilikeshots.club\/images/)) {
                         $('.checkable_IMG').imgCheckbox({
@@ -11498,12 +11513,7 @@ function auto_feed() {
             });
         }
 
-        //判断官种表达感谢
-        for (var key in reg_team_name) {
-            if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
-                raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
-            }
-        }
+        raw_info.descr = add_thanks(raw_info.descr);
         raw_info.descr = raw_info.descr.replace(/\[quote\].*?转自.*?感谢.*?\[\/quote\]/, '');
 
         if (origin_site == 'HaresClub') {
@@ -11942,12 +11952,7 @@ function auto_feed() {
                         }
                     }
                 }
-
-                for (var key in reg_team_name) {
-                    if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
-                        raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
-                    }
-                }
+                raw_info.descr = add_thanks(raw_info.descr);
             }, 1000);
         }
 
@@ -12484,14 +12489,10 @@ function auto_feed() {
                     return;
                 }
                 raw_info.descr = '';
-                for (var key in reg_team_name) {
-                    if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
-                        raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
-                    }
-                }
                 descr = document.getElementById('kt_d');
                 descr_box = descr.cloneNode(true);
                 raw_info.descr = walkDOM(descr_box);
+                raw_info.descr = add_thanks(raw_info.descr);
 
                 var reg_img = raw_info.descr.match(/\[img\]http(s*):\/\/totheglory.im\/pic\/ico_(free|half|30).gif\[\/img\].*/i);
                 if (reg_img) {
@@ -13917,11 +13918,7 @@ function auto_feed() {
                 }
                 tmp_descr = tmp_descr.replace('[img]https://i.ibb.co/8KwqmMK/Shark-PT-More-Screenshot.png[/img]', '');
                 raw_info.descr = tmp_descr;
-                for (var key in reg_team_name) {
-                    if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
-                        raw_info.descr = thanks_str.format({'site': key, 'descr': raw_info.descr});
-                    }
-                }
+                raw_info.descr = add_thanks(raw_info.descr);
                 $('textarea[name="descr"]').val(raw_info.descr.trim().replace(/\n\n+/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\['));
             } catch(Err) {
                 if (raw_info.full_mediainfo){
@@ -24555,7 +24552,7 @@ function auto_feed() {
         else if (forward_site == 'Agsv') {
             //类型
             var browsecat = $('#browsecat');
-            var specialcat = $('#specialcat')
+            var specialcat = $('#specialcat');
             var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,'体育': 407, '音乐': 411,
                 '': 409, '学习': 417, '游戏': 413, '软件': 412, '书籍': 415 };
             browsecat.val(409);
