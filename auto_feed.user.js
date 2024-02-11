@@ -25099,8 +25099,8 @@ function auto_feed() {
             } else if (raw_info.name.match(/complete/i) && raw_info.name.match(/S\d+/i)) {
                 raw_info.name = raw_info.name.replace(/complete/i, '');
             }
-            raw_info.name = raw_info.name.replace(/ +/g, ' ')
-            if ($('#post').parent().parent().parent().parent().css('display') != 'none') {
+            raw_info.name = raw_info.name.replace(/ +/g, ' ');
+            if ($('#table_manual_upload_2').css('display') == 'table') {
                 try{
                     var announce = $('input[value*="announce"]').val();
                     addTorrent(raw_info.torrent_url, raw_info.torrent_name, 'BTN', announce);
