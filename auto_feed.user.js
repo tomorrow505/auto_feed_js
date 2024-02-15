@@ -20315,7 +20315,6 @@ function auto_feed() {
         }
 
         else if (forward_site == 'BLU' || forward_site == 'ACM' || forward_site == 'JPTV' || forward_site == 'Monika' || forward_site == 'Tik' || forward_site == 'Aither') {
-
             if (forward_site == 'BLU') {
                 var announce = $('a[href*="https://blutopia.cc/announce/"]').attr('href');
             } else if (forward_site == 'Tik') {
@@ -20562,6 +20561,8 @@ function auto_feed() {
             if (forward_site == 'BLU') {
                 $('#automal').val(0);
             }
+
+            var event = new Event('input', { bubbles: true });
             try{
                 var infos = get_mediainfo_picture_from_descr(raw_info.descr);
                 var container = $('textarea[name="mediainfo"]');
@@ -20575,7 +20576,7 @@ function auto_feed() {
                 }
                 container.css({'height': '600px'});
                 var pic_info;
-                if (forward_site == 'BLU'){
+                if (forward_site == 'BLU' || forward_site == 'Tik'){
                     pic_info = deal_img_350_ptpimg(infos.pic_info);
                     if (raw_info.name.match(/DV HDR/i)) {
                         pic_info = '[CODE]This release contains a derived Dolby Vision profile 8 layer. Comparisons not required as DV and HDR are from same provider.[/CODE]\n\n' + pic_info;
@@ -20598,13 +20599,32 @@ function auto_feed() {
                     })
                 } else if (forward_site == 'ACM' || forward_site == 'JPTV'){
                     pic_info = deal_img_350(infos.pic_info);
+                }
+                if (forward_site == 'Tik') {
+                    var en_descr = '';
+                    if (raw_info.url) {
+                        async function formatDescr () {
+                            var doc = await getimdbpage(raw_info.url);
+                            var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
+                            if (imdb_descr.match(/Read all/)){
+                                var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
+                                imdb_descr = await getFullDescr(full_descr_url);
+                            } else if (imdb_descr.match(/Add a Plot/)) {
+                                imdb_descr =  `No data from IMDB: ${raw_info.url}`;
+                            }
+                            pic_info = infos.pic_info + `\n\nFILM SYNOPSIS/BRIEF REVIEW:\n${imdb_descr}\n\nExtras:\n`;
+                            $('#bbcode-description').val(pic_info);
+                            try { $('#bbcode-description')[0].dispatchEvent(event); } catch (err) {}
+                        }
+                        formatDescr();
+                    } else {
+                        pic_info = infos.pic_info + `\n\nFILM SYNOPSIS/BRIEF REVIEW:\n\nExtras:\n`;
+                    }
                 } else{
                     pic_info = infos.pic_info;
                 }
-                var event = new Event('input', { bubbles: true });
                 $('#upload-form-description').val(pic_info);
                 $('#bbcode-description').val(pic_info);
-
                 try { $('#upload-form-description')[0].dispatchEvent(event); } catch (err) {}
                 try { $('#bbcode-description')[0].dispatchEvent(event); } catch (err) {}
             } catch(Err) {
@@ -20643,12 +20663,11 @@ function auto_feed() {
                     } else {
                         medium_sel = 'BD100';
                     }
-                    if (raw_info.medium_sel == 'UHD') {
-                        medium_sel = medium_sel.replace(/BD/, 'UHD');
-                    }
                     torrent_name = search_name + (year ? ` (${year}) `: ' (year) ') + medium_sel;
                     if (raw_info.standard_sel == '1080p' || raw_info.standard_sel == '1080i') {
                         torrent_name += ' ' + raw_info.standard_sel;
+                    } else if (raw_info.standard_sel == '4K') {
+                        torrent_name += ' 2160p';
                     }
                     if (raw_info.codec_sel == 'MPEG-2') {
                         torrent_name += ' MPEG-2';
