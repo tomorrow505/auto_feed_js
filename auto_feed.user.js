@@ -20354,45 +20354,48 @@ function auto_feed() {
                 switch(raw_info.medium_sel){
                     case 'UHD':
                         if (raw_info.name.match(/remux/i)) {
-                            source_box.options[4].selected = true;
+                            $('#autotype').val('12');
                         } else {
-                            if (0 <= size && size < 50) {
-                                source_box.options[3].selected = true;
-                            } else if (size < 66) {
-                                source_box.options[2].selected = true;
+                            if (0 <= size && size < 46.57) {
+                                $('#autotype').val('3');
+                            } else if (size < 61.47) {
+                                $('#autotype').val('2');
                             } else {
-                                source_box.options[1].selected = true;
+                                $('#autotype').val('1');
                             }
                         }
                         break;
                     case 'Blu-ray':
-                        if (0 <= size && size < 25) {
-                            source_box.options[5].selected = true;
-                        } else if (size < 50) {
-                            source_box.options[6].selected = true;
+                        if (0 <= size && size < 23.28) {
+                            $('#autotype').val('5');
+                        } else if (size < 46.57) {
+                            $('#autotype').val('4');
                         }
                         break;
-                    case 'Remux': source_box.options[8].selected = true; break;
-                    case 'HDTV': source_box.options[16].selected = true; break;
+                    case 'Remux': $('#autotype').val('7'); break;
+                    case 'HDTV': $('#autotype').val('17'); break;
                     case 'Encode':
                         if (raw_info.standard_sel == '4K') {
-                            source_box.options[9].selected = true;
+                            $('#autotype').val('8');
                         } else if (raw_info.standard_sel == '1080p' || raw_info.standard_sel == '1080i') {
-                            source_box.options[11].selected = true;
+                            $('#autotype').val('10');
                         } else if (raw_info.standard_sel == '720p') {
-                            source_box.options[12].selected = true;
+                            $('#autotype').val('11');
                         } else if (raw_info.standard_sel == 'SD') {
-                            source_box.options[13].selected = true;
+                            $('#autotype').val('13');
                         }
                         break;
                     case 'DVD':
                         if (raw_info.name.match(/dvd5/i)) {
-                            source_box.options[7].selected = true;
+                            $('#autotype').val('14');
+                        } else {
+                            $('#autotype').val('16');
                         }
-                    case 'WEB-DL': source_box.options[10].selected = true;
+                        break;
+                    case 'WEB-DL': $('#autotype').val('9');
                 }
                 if (raw_info.name.match(/webrip/i)) {
-                    source_box.options[10].selected = true;
+                    $('#autotype').val('9');
                 }
             } else if (forward_site == 'JPTV') {
                 switch(raw_info.medium_sel){
@@ -20472,7 +20475,6 @@ function auto_feed() {
                 standard_box.val(9);
             }
 
-            $('#apimatch').attr('disabled', false);
             if (raw_info.url && used_tmdb_key) {
                 var imdb_id = raw_info.url.match(/tt\d+/)[0];
                 var search_url = `https://api.themoviedb.org/3/find/${imdb_id}?api_key=${used_tmdb_key}&external_source=imdb_id&include_adult=false&language=zh-CN`;
@@ -20612,13 +20614,13 @@ function auto_feed() {
                             } else if (imdb_descr.match(/Add a Plot/)) {
                                 imdb_descr =  `No data from IMDB: ${raw_info.url}`;
                             }
-                            pic_info = infos.pic_info + `\n\nFILM SYNOPSIS/BRIEF REVIEW:\n${imdb_descr}\n\nExtras:\n`;
+                            pic_info = infos.pic_info + `\n\n[b][color=red]SYNOPSIS:[/color][/b]\n${imdb_descr}\n\n[b][color=red]Extras:[/color][/b]\n - \n - \n - \n`;
                             $('#bbcode-description').val(pic_info);
                             try { $('#bbcode-description')[0].dispatchEvent(event); } catch (err) {}
                         }
                         formatDescr();
                     } else {
-                        pic_info = infos.pic_info + `\n\nFILM SYNOPSIS/BRIEF REVIEW:\n\nExtras:\n`;
+                        pic_info = infos.pic_info + `\n\n[b][color=red]SYNOPSIS:[/color][/b]\n\n[b][color=red]Extras:[/color][/b]\n - \n - \n - \n`;
                     }
                 } else{
                     pic_info = infos.pic_info;
@@ -20654,9 +20656,11 @@ function auto_feed() {
                         torrent_name += ' DVD5';
                     }
                 } else {
-                    var medium_sel = 'BD25';
-                    var size = get_size_from_descr(raw_info.descr);
-                    if (size > 23.28 && size < 46.57) {
+                    var medium_sel = '';
+                    var size = parseFloat(get_size_from_descr(raw_info.descr));
+                    if (size <= 23.28) {
+                        medium_sel = 'BD25';
+                    } else if (size > 23.28 && size < 46.57) {
                         medium_sel = 'BD50';
                     } else if (size > 46.57 && size < 61.47) {
                         medium_sel = 'BD66';
@@ -20745,7 +20749,7 @@ function auto_feed() {
                 var imdb_id = raw_info.url.match(/tt\d+/)[0];
                 var search_url = `https://api.themoviedb.org/3/find/${imdb_id}?api_key=${used_tmdb_key}&external_source=imdb_id&include_adult=false&language=zh-CN`;
                 getJson(search_url, null, function(data){
-                    console.log(data)
+                    console.log(data);
                     if (data.movie_results.length) {
                         $('#autotmdb').val(data.movie_results[0].id);
                         if (data.movie_results[0].title.match(/[\u4e00-\u9fa5]/)) {
@@ -20855,7 +20859,7 @@ function auto_feed() {
                 } else {
                     container.val(infos.mediainfo);
                 }
-                $('textarea[name="mediainfo"]').css({'height': '600px'});
+                container.css({'height': '600px'});
                 var event = new Event('input', { bubbles: true });
                 $('#bbcode-description').val(infos.pic_info);
                 $('#bbcode-description')[0].dispatchEvent(event);
