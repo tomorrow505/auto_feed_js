@@ -89,7 +89,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.5.8
+// @version      2.0.5.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1756,7 +1756,7 @@ function walkDOM(n) {
             }
         } else if (n.nodeName == 'FIELDSET' || n.nodeName == 'BLOCKQUOTE') {
             if (!site_url.match(/hudbt/i) || n.nodeName != 'BLOCKQUOTE'){
-                n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
+                n.innerHTML = '[quote]' + n.innerHTML.trim() + '[/quote]';
             }
             if (n.nodeName == 'FIELDSET' && n.textContent.match(/(温馨提示|郑重声明|您的保种|商业盈利|相关推荐|自动发布|仅供测试宽带|不用保种|本站仅负责连接|感谢发布者|转载请注意礼节)/g)) {
                 n.innerHTML = '';
@@ -2348,7 +2348,7 @@ String.prototype.get_label = function(){
     var name = my_string.split('#seperator#')[0];
     var labels = {'gy': false, 'yy': false, 'zz': false, 'diy': false, 'hdr10': false, 'db': false, 'hdr10plus': false, 'yz': false};
 
-    if (my_string.match(/([简繁].{0,12}字幕|[简繁中].{0,3}字|DIY.{1,5}字|内封.{0,3}[繁中字])|(Text.*?[\s\S]*?Chinese|Text.*?[\s\S]*?Mandarin|subtitles.*chs|subtitles.*mandarin|subtitle.*chinese|Presentation Graphics.*?Chinese)/i)){
+    if (my_string.match(/([简繁].{0,12}字幕|[简繁中].{0,3}字|简中|DIY.{1,5}字|内封.{0,3}[繁中字])|(Text.*?[\s\S]*?Chinese|Text.*?[\s\S]*?Mandarin|subtitles.*chs|subtitles.*mandarin|subtitle.*chinese|Presentation Graphics.*?Chinese)/i)){
         labels.zz = true;
     }
     if (my_string.match(/(英.{0,12}字幕|英.{0,3}字|内封.{0,3}英.{0,3}字)|(Text.*?[\s\S]*?English|subtitles.*eng|subtitle.*english)/i)){
@@ -7986,9 +7986,12 @@ function auto_feed() {
                 }
             }
 
-            if (origin_site == 'PThome' || origin_site == 'Audiences') {
+            if (origin_site == 'PThome' || origin_site == 'Audiences' || origin_site == 'OurBits') {
                 try{
-                    var mediainfo1 = document.getElementsByClassName("codemain")[0].getElementsByTagName('font')[0];
+                    var mediainfo1 = document.getElementsByClassName("codemain")[0];
+                    if (origin_site != 'OurBits') {
+                        mediainfo1 = mediainfo1.getElementsByTagName('font')[0];
+                    }
                     mediainfo1 = walkDOM(mediainfo1.cloneNode(true));
                     mediainfo1 = mediainfo1.replace(/(<div class="codemain">|<\/div>|\[.{1,20}\])/g, '');
                     mediainfo1 = mediainfo1.replace(/<br>/g, '\n');
@@ -8003,15 +8006,14 @@ function auto_feed() {
             descr = descr.cloneNode(true);
 
             try{
-                
                 var codetop = descr.getElementsByClassName('codetop');
                 Array.from(codetop).map((e, index)=>{
                     try{descr.removeChild(e);} catch(err){e.parentNode.removeChild(e)}
                 });
                 var codemain = descr.getElementsByClassName('codemain');
                 Array.from(codemain).map((e, index)=>{
-                    if (!e.innerHTML.match(/<table>/)) {
-                        try{e.innerHTML = '[quote]{mediainfo}[/quote]'.format({ 'mediainfo': e.innerHTML.trim() });} catch(err){}
+                    if (!e.innerHTML.match(/<table>/) && origin_site != 'OurBits') {
+                        try{e.innerHTML = '[quote]{mediainfo}[/quote]'.format({'mediainfo': e.innerHTML.trim() });} catch(err){}
                     }
                 });
                 if ((origin_site == 'PTer' || origin_site == 'FRDS' || origin_site == 'Audiences') && descr.getElementsByTagName('table')[0]){
@@ -8033,6 +8035,8 @@ function auto_feed() {
                     raw_info.descr = raw_info.descr.replace(/(\[img\].*?6170004c2ab3f51d91c7782a.*?\[\/img\][\s\S]*?)(\[quote\].*?General[\s\S]*?\[\/quote\])/, '$2\n$1');
                 }
             }
+
+            raw_info.descr = raw_info.descr.replace(/\[img\]https:\/\/ourbits.club\/pic\/(Ourbits_MoreScreens|Ourbits_info).png\[\/img\]/g, '');
 
             if (origin_site == 'U2') {
                 tmp_descr = raw_info.descr;
@@ -11439,7 +11443,7 @@ function auto_feed() {
             case 'HHClub': case 'DaJiao': case '象站': case 'Agsv':
                 var tr = $('td:contains(标签)').last().parent();
                 if (tr.find('span:contains("国语")').length) {
-                    raw_info.labels = 1;
+                    raw_info.labels += 1;
                 }
                 if (tr.find('span:contains("粤语")').length) {
                     raw_info.labels += 10;
@@ -11447,6 +11451,24 @@ function auto_feed() {
                 if (tr.find('span:contains("中字")').length) {
                     raw_info.labels += 100;
                 }
+                break;
+            case 'OurBits':
+                var ob_link = raw_info.origin_url.replace('***', '/');
+                var search_url = `https://ourbits.club/torrents.php?search=${raw_info.small_descr}&search_area=0&search_mode=0`;
+                getDoc(search_url, null, function(doc) {
+                    $('.torrentname', doc).map((index, e) => {
+                        ob_url = $(e).find('a:first').attr('href');
+                        if (ob_link.includes(ob_url)) {
+                            if ($(e).find('.tag-gy').length) {
+                                raw_info.labels += 1;
+                            }
+                            if ($(e).find('.tag-zz').length) {
+                                raw_info.labels += 100;
+                            }
+                        }
+                    });
+                    rebuild_href(raw_info);
+                });
                 break;
         }
 
