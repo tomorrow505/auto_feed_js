@@ -8880,12 +8880,14 @@ function auto_feed() {
             }
         }
 
-        if (['HDPost', 'ACM', 'HDOli', 'JPTV', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
+        if (['ACM', 'HDOli', 'JPTV', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
             var iii = document.getElementsByTagName('h4')[0].parentNode.parentNode;
             var div_box = iii.getElementsByClassName('table-responsive')[0];
-            if (origin_site == 'HDPost' || origin_site == 'DTR' || origin_site == 'Monika') {
+            if (origin_site == 'DTR' || origin_site == 'Monika') {
                 div_box = iii.getElementsByClassName('table-responsive')[1];
-                $('h4').first().click();
+                if (origin_site != 'DTR') {
+                    $('h4').first().click();
+                }
             }
             tbody = div_box.getElementsByTagName('table')[0];
             var imdb_box = document.getElementsByClassName('movie-details')[0];
@@ -8895,7 +8897,7 @@ function auto_feed() {
                 if (tmdb_url) {
                     var _url = `https://api.themoviedb.org/3/${tmdb_url.match(/(tv|movie)\/\d+/)[0]}/external_ids?api_key=${used_tmdb_key}`;
                     getJson(_url, null, function(d){
-                        console.log(d)
+                        console.log(d);
                         if (d.imdb_id) {
                             raw_info.url = 'https://www.imdb.com/title/' + d.imdb_id;
                             reBuildHref(raw_info, forward_r);
@@ -8905,7 +8907,7 @@ function auto_feed() {
             }
         }
 
-        if (origin_site == 'KIMOJI') {
+        if (origin_site == 'KIMOJI' || origin_site == 'HDPost') {
             raw_info.url = match_link('imdb', $('section.meta').html());
             raw_info.type = $('.torrent__tags').text().get_type();
             raw_info.name = $('h1.torrent__name').text().trim().match(/([\u4e00-\u9fa5]* )?(.*)/)[2];
@@ -8919,11 +8921,21 @@ function auto_feed() {
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
             raw_info.descr = `[quote]\n${$('code[x-ref="mediainfo"]').text()}\n[/quote]\n\n`;
-            $('summary:contains("截图")').next().find('img').map((index,e)=> {
-                if (!$(e).attr("src").match(/friendsite/)) {
-                    raw_info.descr += `[img]${$(e).attr("src")}[/img]`;
-                }
-            });
+            if (origin_site == 'KIMOJI') {
+                $('summary:contains("截图")').next().find('img').map((index,e)=> {
+                    if (!$(e).attr("src").match(/friendsite/)) {
+                        raw_info.descr += `[img]${$(e).attr("src")}[/img]`;
+                    }
+                });
+            } else {
+                $('.panel__heading:contains("描述")').parent().next().find('img').map((index,e)=> {
+                    if ($(e)[0].parentNode.href){
+                        raw_info.descr += '[url='+ $(e)[0].parentNode.href +'][img]' + $(e)[0].src + '[/img][/url] ';
+                    } else {
+                        raw_info.descr += '[img]' + $(e)[0].src + '[/img] ';
+                    }
+                });
+            }
             raw_info.torrent_url = $('a[href*="download/"]').attr('href');
         }
 
@@ -10003,7 +10015,7 @@ function auto_feed() {
                 }
             }
 
-            if (['BHD', 'HDPost', 'ACM', 'HDOli', 'JPTV', 'Monika', 'DTR', 'KIMOJI'].indexOf(origin_site) > -1){
+            if (['BHD', 'ACM', 'HDOli', 'JPTV', 'Monika', 'DTR'].indexOf(origin_site) > -1){
                 if (['Name', 'Nombre', '名称', '标题'].indexOf(tds[i].textContent.trim())>-1) {
                     raw_info.name = tds[i+1].textContent.replace(/ *\n.*/gm, '').trim();
                     if (origin_site == 'HDOli') {
@@ -11206,7 +11218,7 @@ function auto_feed() {
             raw_info.torrent_url = $('a[href*="torrents/download"]').attr('href');
         }
 
-        if (['HDPost', 'ACM', 'HDOli', 'JPTV', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
+        if (['ACM', 'HDOli', 'JPTV', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
             var mediainfo_lack = false;
             try {
                 var mediainfo_box = document.getElementsByClassName('slidingDiv')[0];
@@ -11215,7 +11227,7 @@ function auto_feed() {
             } catch (err) {
                 mediainfo_lack = true;
             }
-            if (mediainfo_lack && (origin_site == 'HDPost' || origin_site == 'Monika')) {
+            if (mediainfo_lack && (origin_site == 'Monika' || origin_site == 'DTR')) {
                 mediainfo = $('pre[class="decoda-code"]').eq(0).text();
                 mediainfo_lack = false;
             }
@@ -11665,7 +11677,7 @@ function auto_feed() {
                 box_left.innerHTML = '豆瓣信息';
                 if (origin_site == 'NBL' || origin_site == 'IPT' || origin_site == 'torrentseeds' || origin_site == 'HONE') {
                     box_left.style.width = '60px';
-                } else if (['IN', 'digitalcore', 'BlueBird', 'bwtorrents', 'HOU', 'BLU', 'KIMOJI', 'Tik', 'Aither'].indexOf(origin_site) >= 0) {
+                } else if (['IN', 'digitalcore', 'BlueBird', 'bwtorrents', 'HOU', 'BLU', 'KIMOJI', 'Tik', 'Aither', 'HDPost'].indexOf(origin_site) >= 0) {
                     box_left.style.width = '80px';
                 }
                 box_left.align = direct;
