@@ -123,7 +123,7 @@
     20220802：支持转入ITZMX、HDPt(明教)，修复1PTBA、3Wmg部分bug。(by shmt86)
     20220807：一键签到取消天空和北洋，增加支持妞的转入。具体见教程：https://github.com/tomorrow505/auto_feed_js/wiki/%E8%BD%AC%E8%BD%BD%E5%88%B0BTN
     20220808：适配海豚从gz音乐站转入。
-    20220816：适配azusa by shmt86; 适配OPS/RED从GZ音乐站转入。修复部分bug。
+    20220816：适配OPS/RED从GZ音乐站转入。修复部分bug。
     20220820：适配sugoimusic转出，修复部分bug。
     20220920：支持HDT备用域名，支持CG转入，待测试。修复部分bug。
     20221013：适配monika，修复部分bug。
@@ -880,7 +880,6 @@ const default_site_info = {
     '52PT': {'url': 'https://52pt.site/', 'enable': 1},
     'ACM': {'url': 'https://asiancinema.me/', 'enable': 1},
     'ANT': {'url': 'https://anthelion.me/', 'enable': 1},
-    'AZUSA': {'url': 'https://azusa.wiki/', 'enable': 1},
     'avz': {'url': 'https://avistaz.to/', 'enable': 1},
     'Audiences': {'url': 'https://audiences.me/', 'enable': 1},
     'BHD' : {'url': 'https://beyond-hd.me/', 'enable': 1},
@@ -22002,16 +22001,6 @@ function auto_feed() {
             var browsecat = $('select[name=type]');
             var type_dict = {'电影': 401, '剧集': 402, '动漫': 431, '综艺': 403, '音乐': 408, '纪录': 404,
                              '体育': 490, '软件': 450, '学习': 420, '': 490, '游戏': 406, 'MV': 408};
-            if (type_dict.hasOwnProperty(raw_info.type)){
-                var index = type_dict[raw_info.type];
-                browsecat.val(index);
-            }
-        }
-
-        else if (forward_site == 'AZUSA') {
-            var browsecat = $('select[name=type]');
-            var type_dict = {'电影': 400, '剧集': 400, '动漫': 402, '综艺': 400, '音乐': 409, '纪录': 400,
-                             '体育': 400, '软件': 400, '学习': 403, '': 400, '游戏': 404, 'MV': 400};
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
