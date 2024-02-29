@@ -1375,6 +1375,45 @@ Extras contain: {extras}
 Blu-Ray runtime(s): {runtime}
 `;
 
+//tik的简介模板，用于获取数据替换后填充
+const tik_base_content = `
+[center][img]{poster}[/img]
+{screenshots}
+[/center]
+
+[b][color=red]SYNOPSIS:[/color][/b]
+{en_descr}
+
+[code]
+IMDb...............: [url]http://www.imdb.com/title/{imdbid}/[/url]
+
+Year...............: {year}
+Country............: {country}
+Runtime............: {runtime} Minutes
+Audio..............: {audio}
+Subtitles..........: {subtitles}
+Video Format.......: {format}
+Film Aspect Ratio..: {aspect_ratio}{dvdformat}
+Source.............: {source}
+Film Distributor...: [url=addlink]To be specified.[/url]
+Ripping Program....: Not my rip
+Total  Bitrate.....: {bitrate}
+
+Menus......: [x] Untouched
+Video......: [x] Untouched
+Extras.....: [x] Untouched
+Audio......: [x] Untouched
+[/code]
+
+[b][color=red]Extras:[/color][/b]
+[*]
+[*]
+[*]
+
+[b][color=red]Uploader Comments:[/color][/b]
+- All credit goes to the original uploader.
+`;
+
 //需要从源网页获取的信息，有些可能没有
 var raw_info = {
     //填充类信息
@@ -2667,8 +2706,8 @@ var skip_img = [
     '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c77825.png[/img]',
     '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c7782a.png[/img]',
     '[img]https://img.pterclub.com/images/CS.png[/img]',
-    '[img]https://img.pterclub.com/images/2022/10/19/1.gif[/img]'
-
+    '[img]https://img.pterclub.com/images/2022/10/19/1.gif[/img]',
+    '[img]https://img93.pixhost.to/images/86/435614074_c5134549f13c2c087d67c9fa4089c49e-removebg-preview.png[/img]'
 ];
 
 //从简介拆分出来mediainfo和截图
@@ -2916,6 +2955,7 @@ function fill_raw_info(raw_info, forward_site){
             raw_info.descr = add_thanks(raw_info.descr);
         }
     } catch(err) {}
+    raw_info.descr = raw_info.descr.trim();
     return raw_info;
 }
 
@@ -8015,11 +8055,22 @@ function auto_feed() {
                         try{e.innerHTML = '[quote]{mediainfo}[/quote]'.format({'mediainfo': e.innerHTML.trim() });} catch(err){}
                     }
                 });
-                if ((origin_site == 'PTer' || origin_site == 'FRDS' || origin_site == 'Audiences') && descr.getElementsByTagName('table')[0]){
-                    var descr_table = descr.getElementsByTagName('table')[0];
-                    if (descr_table.textContent.match(/general/i)){
-                        descr_table.parentNode.removeChild(descr_table);
-                        raw_info.full_mediainfo = $('div.codemain:contains("General"):first').text();
+                if ((origin_site == 'PTer' || origin_site == 'FRDS' || origin_site == 'Audiences') && descr.getElementsByTagName('table').length){
+                    var descr_table = descr.getElementsByTagName('table');
+                    var table_id = 0;
+                    while (true) {
+                        console.log(descr_table.length)
+                        descr_table = descr_table[0];
+                        if (descr_table.textContent.match(/general/i)){
+                            descr_table.parentNode.removeChild(descr_table);
+                            raw_info.full_mediainfo += $(`div.codemain:contains("General"):eq(${table_id})`).text() + '\n';
+                        }
+                        descr_table = descr.getElementsByTagName('table');
+                        if (!descr_table.length) {
+                            console.log(0)
+                            break;
+                        }
+                        table_id += 1;
                     }
                 }
             }catch(err){
@@ -20502,9 +20553,9 @@ function auto_feed() {
                 standard_box.val(6);
             } else if (raw_info.name.match(/576i/i)) {
                 standard_box.val(7);
-            } else if (raw_info.name.match(/480p/i)) {
+            } else if (raw_info.name.match(/480p/i) || (!raw_info.descr.match(/Scan type.*Interlaced/) && raw_info.descr.match(/Height.*?480 pixels/))) {
                 standard_box.val(8);
-            } else if (raw_info.name.match(/480i/i)) {
+            } else if (raw_info.name.match(/480i/i) || (raw_info.descr.match(/Scan type.*Interlaced/) && raw_info.descr.match(/Height.*?480 pixels/))) {
                 standard_box.val(9);
             }
 
@@ -20605,9 +20656,9 @@ function auto_feed() {
                     container = $('textarea[name="bdinfo"]');
                 }
                 if (raw_info.full_mediainfo){
-                    container.val(raw_info.full_mediainfo);
+                    container.val(raw_info.full_mediainfo.trim());
                 } else {
-                    container.val(infos.mediainfo);
+                    container.val(infos.mediainfo.trim());
                 }
                 container.css({'height': '600px'});
                 var pic_info;
@@ -20635,36 +20686,16 @@ function auto_feed() {
                 } else if (forward_site == 'ACM' || forward_site == 'JPTV'){
                     pic_info = deal_img_350(infos.pic_info);
                 }
-                if (forward_site == 'Tik') {
-                    var en_descr = '';
-                    if (raw_info.url) {
-                        async function formatDescr () {
-                            var doc = await getimdbpage(raw_info.url);
-                            var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
-                            if (imdb_descr.match(/Read all/)){
-                                var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
-                                imdb_descr = await getFullDescr(full_descr_url);
-                            } else if (imdb_descr.match(/Add a Plot/)) {
-                                imdb_descr =  `No data from IMDB: ${raw_info.url}`;
-                            }
-                            pic_info = infos.pic_info + `\n\n[b][color=red]SYNOPSIS:[/color][/b]\n${imdb_descr}\n\n[b][color=red]Extras:[/color][/b]\n - \n - \n - \n`;
-                            $('#bbcode-description').val(pic_info);
-                            try { $('#bbcode-description')[0].dispatchEvent(event); } catch (err) {}
-                        }
-                        formatDescr();
-                    } else {
-                        pic_info = infos.pic_info + `\n\n[b][color=red]SYNOPSIS:[/color][/b]\n\n[b][color=red]Extras:[/color][/b]\n - \n - \n - \n`;
-                    }
-                } else{
+                if (forward_site != 'Tik') {
                     pic_info = infos.pic_info;
+                    $('#upload-form-description').val(pic_info);
+                    $('#bbcode-description').val(pic_info);
+                    try { $('#upload-form-description')[0].dispatchEvent(event); } catch (err) {}
+                    try { $('#bbcode-description')[0].dispatchEvent(event); } catch (err) {}
                 }
-                $('#upload-form-description').val(pic_info);
-                $('#bbcode-description').val(pic_info);
-                try { $('#upload-form-description')[0].dispatchEvent(event); } catch (err) {}
-                try { $('#bbcode-description')[0].dispatchEvent(event); } catch (err) {}
             } catch(Err) {
                 if (raw_info.full_mediainfo){
-                    $('textarea[name="mediainfo"]').val(raw_info.full_mediainfo);
+                    $('textarea[name="mediainfo"]').val(raw_info.full_mediainfo.trim());
                 } else {
                     $('textarea[name="mediainfo"]').val(raw_info.descr);
                 }
@@ -20677,34 +20708,88 @@ function auto_feed() {
                 var torrent_name = '';
                 var search_name = get_search_name(raw_info.name).trim();
                 var year = raw_info.name.match(/(19|20)\d{2}/) ? raw_info.name.match(/(19|20)\d{2}/g).pop(): '';
+                var descr = tik_base_content;
+                descr = descr.format({'year': year});
+                try {
+                    var infos = get_mediainfo_picture_from_descr(raw_info.descr);
+                    descr = descr.format({'screenshots': infos.pic_info});
+                } catch (Err) {}
+
                 if (raw_info.medium_sel == 'DVD') {
                     if (raw_info.name.match('NTSC') || raw_info.descr.match('NTSC')) {
                         torrent_name = search_name + (year ? ` (${year})`: ' (year)') + ' NTSC';
+                        descr = descr.format({'format': 'NTSC'});
                     } else {
                         torrent_name = search_name + (year ? ` (${year})`: ' (year)') + ' PAL';
+                        descr = descr.format({'format': 'PAL'});
                     }
                     if (raw_info.name.match(/dvd9/i)) {
                         torrent_name += ' DVD9';
+                        descr = descr.format({'source': 'DVD9'});
                     } else {
                         torrent_name += ' DVD5';
+                        descr = descr.format({'source': 'DVD5'});
                     }
+                    descr = descr.format({'dvdformat': '\nDVD Format.........: Anamorphic / Non-Anamorphic'});
+                    if (raw_info.descr.match(/Display.*?aspect.*?ratio.*?:(.*)/i)) {
+                        descr = descr.format({'aspect_ratio': raw_info.descr.match(/Display.*?aspect.*?ratio.*?:(.*)/i)[1].trim()});
+                    }
+                    if (raw_info.descr.match(/Overall.*?bit.*?rate *?:(.*)/i)) {
+                        descr = descr.format({'bitrate': raw_info.descr.match(/Overall.*?bit.*?rate *?:(.*)/i)[1].trim()});
+                    }
+
+                    try{
+                        var audio_info = raw_info.descr.match(/(audio[\s\S]*)(text)?/i)[0].trim();
+                        var audio_infos = audio_info.split(/audio.*?\nid.*/i).filter(audio => audio.match(/Language/i));
+                        audio_infos = audio_infos.map(e=>{
+                            var audio_text = '';
+                            if (e.match(/language.*:(.*)/i)) {
+                                audio_text += e.match(/language.*:(.*)/i)[1].trim();
+                            }
+                            return audio_text;
+                        });
+                        audio_infos = [...new Set(audio_infos)];
+                        descr = descr.format({'audio': audio_infos.join(' / ')});
+                    } catch (err) {console.log(err)}
+
+                    try{
+                        var text_info = raw_info.descr.match(/(text[\s\S]*)$/i)[0].trim();
+                        var text_infos = text_info.split(/text.*?\nid.*/i).filter(text => text.split(/General/i)[0].match(/language/i));
+                        text_infos = text_infos.map(e=>{
+                            var subtitle_text = '';
+                            if (e.match(/language.*:(.*)/i)) {
+                                subtitle_text += e.match(/language.*:(.*)/i)[1].trim();
+                            }
+                            return subtitle_text;
+                        });
+                        text_infos = [...new Set(text_infos)];
+                        descr = descr.format({'subtitles': text_infos.join(' / ')});
+                    } catch (err) {console.log(err)}
+
                 } else {
                     var medium_sel = '';
                     var size = parseFloat(get_size_from_descr(raw_info.descr));
                     if (size <= 23.28) {
                         medium_sel = 'BD25';
+                        descr = descr.format({'source': 'BD25'});
                     } else if (size > 23.28 && size < 46.57) {
                         medium_sel = 'BD50';
+                        descr = descr.format({'source': 'BD50'});
                     } else if (size > 46.57 && size < 61.47) {
                         medium_sel = 'BD66';
+                        descr = descr.format({'source': 'BD66'});
                     } else {
                         medium_sel = 'BD100';
+                        descr = descr.format({'source': 'BD100'});
                     }
+                    descr = descr.format({'dvdformat': ''});
                     torrent_name = search_name + (year ? ` (${year}) `: ' (year) ') + medium_sel;
                     if (raw_info.standard_sel == '1080p' || raw_info.standard_sel == '1080i') {
                         torrent_name += ' ' + raw_info.standard_sel;
+                        descr = descr.format({'format': raw_info.standard_sel});
                     } else if (raw_info.standard_sel == '4K') {
                         torrent_name += ' 2160p';
+                        descr = descr.format({'format': '2160p'});
                     }
                     if (raw_info.codec_sel == 'MPEG-2') {
                         torrent_name += ' MPEG-2';
@@ -20713,10 +20798,104 @@ function auto_feed() {
                     } else {
                         torrent_name += ' AVC';
                     }
+                    try{
+                        if (raw_info.descr.match(/DISC INFO:/)) {
+                            if (raw_info.descr.match(/SUBTITLES:[\s\S]{0,20}Codec/i)) {
+                                var subtitle_info = raw_info.descr.match(/SUBTITLES:[\s\S]{0,300}-----------([\s\S]*)/i)[1].trim();
+                                subtitle_info = subtitle_info.split('\n').map(e=>{
+                                    var info = e.split(/  /).filter(function(e){return e;});
+                                    if (info.length > 2) {
+                                        return `${info[1].trim()}`.replace('[/quote]', '').trim();
+                                    } else {
+                                        return '';
+                                    }
+                                });
+                                subtitle_info = [...new Set(subtitle_info)];
+                                descr = descr.format({'subtitles': subtitle_info.join(' / ')});
+                            }
+                            if (raw_info.descr.match(/Audio:[\s\S]{0,20}Codec/i)) {
+                                var audio_info = raw_info.descr.match(/Audio:[\s\S]{0,300}-----------([\s\S]*)/i)[1].split(/subtitles/i)[0].trim();
+                                audio_info = audio_info.split('\n').map(e=>{
+                                    var info = e.split(/  /).filter(function(e){return e;});
+                                    return `${info[1].trim()}`
+                                });
+                                audio_info = [...new Set(audio_info)];
+                                descr = descr.format({'audio': audio_info.join(' / ')});
+                                console.log(audio_info)
+                            }
+                        } else {
+                            if (raw_info.descr.match(/Subtitle:(.*)/i)) {
+                                descr = descr.format({'subtitles': raw_info.descr.match(/Subtitle:(.*)/ig).map(e=>{
+                                    return e.replace(/Subtitle.*?:?/i, '').split('/')[0].trim();
+                                }).join('\n                     ')});
+                            }
+                            if (raw_info.descr.match(/Audio:(.*)/i)) {
+                                descr = descr.format({'audio': raw_info.descr.match(/Audio:(.*)/ig).map(e=>{
+                                    return e.replace(/Audio.*?:?/i, '').split('/').slice(0,3).join('').trim().replace('Audio', '').replace(/Master/ig, 'MA').replace(/ +/g, ' ');
+                                }).join('\n                     ')});
+                            }
+                        }
+                    } catch(err) {}
 
+                    if (raw_info.descr.match(/Length:.*?(\d+:\d+:\d+)/)) {
+                        var duration = raw_info.descr.match(/Length:.*?(\d+:\d+:\d+)/)[1].split(':');
+                        descr = descr.format({'runtime': parseInt(duration[0]) * 60 + parseInt(duration[1]) });
+                    }
                 }
                 $('#title').val(torrent_name);
                 $('#automal').val(0);
+
+                if (raw_info.descr.match(/Total.*?Bitrate:(.*)/i)) {
+                    descr = descr.format({'bitrate': raw_info.descr.match(/Total.*?Bitrate:(.*)/i)[1].trim()});
+                }
+
+                if (raw_info.url) {
+                    var imdbid = raw_info.url.match(/tt\d+/)[0];
+                    descr = descr.format({"imdbid": imdbid});
+                    async function formatDescr () {
+                        var doc = await getimdbpage(raw_info.url);
+                        var poster_url = 'https://www.imdb.com/' + $('a[href*=tt_ov_i]', doc).first().attr('href');
+                        if ($('a[href*=tt_ov_i]', doc).length == 0) {
+                            poster_url = 'https://www.imdb.com/' + $('div[class*=ipc-poster] > div > a', doc).last().attr('href');
+                        }
+
+                        var poster = await getPoster(poster_url);
+                        descr = descr.format({'poster': poster});
+
+                        descr = descr.format({'aspect_ratio': $('li.ipc-metadata-list__item:contains("Aspect ratio")', doc).text().replace('Aspect ratio', '').trim()});
+                        descr = descr.format({'country': Array.from($('li.ipc-metadata-list__item:contains("Countr")', doc).find('a')).map(function(e){
+                            return $(e).text();
+                        }).join(', ')});
+                        descr = descr.format({'runtime': $('li.ipc-metadata-list__item:contains("Runtime")', doc).text().split(' ')[1]});
+                        var genre = Array.from($('div[class*=GenresAndPlot]', doc).find('a')).map(function(e){
+                            return $(e).text().trim();
+                        });
+                        var genre_selected = false;
+                        genre.map(function(e){
+                            if ($('select[name="type"]').find(`option:contains(${e.trim()})`).length) {
+                                if (!genre_selected){
+                                    genre_selected = true;
+                                    $('select[name="type"]').find(`option:contains(${e.trim()})`).attr('selected', true);
+                                }
+                            }
+                        });
+                        var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
+                        if (imdb_descr.match(/Read All/)){
+                            var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
+                            imdb_descr = await getFullDescr(full_descr_url);
+                        } else if (imdb_descr.match(/Add a Plot/)) {
+                            imdb_descr =  `No data from IMDB: ${raw_info.url}`;
+                        }
+                        descr = descr.format({'en_descr': imdb_descr});
+                        console.log(descr)
+                        $('#bbcode-description').val(descr);
+                        $('#bbcode-description')[0].dispatchEvent(event);
+                    }
+                    formatDescr();
+                } else {
+                    $('#bbcode-description').val(descr);
+                    $('#bbcode-description')[0].dispatchEvent(event);
+                }
             }
         }
 
