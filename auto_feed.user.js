@@ -20821,18 +20821,21 @@ function auto_feed() {
                                 });
                                 audio_info = [...new Set(audio_info)];
                                 descr = descr.format({'audio': audio_info.join(' / ')});
-                                console.log(audio_info)
                             }
                         } else {
                             if (raw_info.descr.match(/Subtitle:(.*)/i)) {
-                                descr = descr.format({'subtitles': raw_info.descr.match(/Subtitle:(.*)/ig).map(e=>{
+                                subtitle_info = raw_info.descr.match(/Subtitle:(.*)/ig).map(e=>{
                                     return e.replace(/Subtitle.*?:?/i, '').split('/')[0].trim();
-                                }).join('\n                     ')});
+                                });
+                                subtitle_info = [...new Set(subtitle_info)];
+                                descr = descr.format({'subtitles': subtitle_info.join(' / ')});
                             }
                             if (raw_info.descr.match(/Audio:(.*)/i)) {
-                                descr = descr.format({'audio': raw_info.descr.match(/Audio:(.*)/ig).map(e=>{
-                                    return e.replace(/Audio.*?:?/i, '').split('/').slice(0,3).join('').trim().replace('Audio', '').replace(/Master/ig, 'MA').replace(/ +/g, ' ');
-                                }).join('\n                     ')});
+                                audio_info = raw_info.descr.match(/Audio:(.*)/ig).map(e=>{
+                                    return e.replace(/Audio.*?:?/i, '').split('/')[0].trim();
+                                });
+                                audio_info = [...new Set(audio_info)];
+                                descr = descr.format({'audio': audio_info.join(' / ')});
                             }
                         }
                     } catch(err) {}
@@ -20867,28 +20870,17 @@ function auto_feed() {
                             return $(e).text();
                         }).join(', ')});
                         descr = descr.format({'runtime': $('li.ipc-metadata-list__item:contains("Runtime")', doc).text().split(' ')[1]});
-                        var genre = Array.from($('div[class*=GenresAndPlot]', doc).find('a')).map(function(e){
-                            return $(e).text().trim();
-                        });
-                        var genre_selected = false;
-                        genre.map(function(e){
-                            if ($('select[name="type"]').find(`option:contains(${e.trim()})`).length) {
-                                if (!genre_selected){
-                                    genre_selected = true;
-                                    $('select[name="type"]').find(`option:contains(${e.trim()})`).attr('selected', true);
-                                }
-                            }
-                        });
                         var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
-                        if (imdb_descr.match(/Read All/)){
+                        if (imdb_descr.match(/Read All/i)){
                             var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
+                            console.log(full_descr_url)
                             imdb_descr = await getFullDescr(full_descr_url);
                         } else if (imdb_descr.match(/Add a Plot/)) {
                             imdb_descr =  `No data from IMDB: ${raw_info.url}`;
                         }
                         descr = descr.format({'en_descr': imdb_descr});
-                        console.log(descr)
                         $('#bbcode-description').val(descr);
+                        $('#bbcode-description').css('height', '400px');
                         $('#bbcode-description')[0].dispatchEvent(event);
                     }
                     formatDescr();
