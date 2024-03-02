@@ -89,7 +89,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.5.9
+// @version      2.0.6.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -5833,15 +5833,19 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             if (used_signin_sites.indexOf('HDChina') > -1) {
                 getDoc('https://hdchina.org/', null, function(doc){
                     var data = encodeURI('csrf=' + $('head', doc).find('meta[name="x-csrf"]').attr("content"));
-                    postData('https://hdchina.org/plugin_sign-in.php?cmd=signin', data, function(docc) {
-                        if (docc.match(/该页面必须在登录后才能访问|Contact your hosting provider letting them know your web server is not responding|522: Connection timed out/)) {
-                            console.log(`开始签到瓷器：`, '失败，请重新登录！！！');
-                            $(`input[kname=HDChina]`).parent().find('a').css({"color": "blue"});
-                        } else {
-                            $(`input[kname=HDChina]`).parent().find('a').css({"color": "red"});
-                            console.log(`开始签到瓷器：`, docc);
-                        }
-                    });
+                    if ($('head', doc).find('meta[name="x-csrf"]').attr("content") === undefined) {
+                        $(`input[kname=HDChina]`).parent().find('a').css({"color": "blue"});
+                    } else {
+                        postData('https://hdchina.org/plugin_sign-in.php?cmd=signin', data, function(docc) {
+                            if (docc.match(/该页面必须在登录后才能访问|Contact your hosting provider letting them know your web server is not responding|522: Connection timed out/)) {
+                                console.log(`开始签到瓷器：`, '失败，请重新登录！！！');
+                                $(`input[kname=HDChina]`).parent().find('a').css({"color": "blue"});
+                            } else {
+                                $(`input[kname=HDChina]`).parent().find('a').css({"color": "red"});
+                                console.log(`开始签到瓷器：`, docc);
+                            }
+                        });
+                    }
                 });
             }
             if (used_signin_sites.indexOf('PTer') > -1) {
