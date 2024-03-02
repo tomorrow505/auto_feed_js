@@ -362,7 +362,7 @@ if (location.href.match(/^https:\/\/greatposterwall.com\/torrents.php.*/)) {
                     show_files(tid, 'detail');
                 });
             } else {
-                $(e).prev().find('span.TorrentTitle ').append(`/<span style="font-weight:bold;color:#20B2AA">${torrent_name}</span>`);
+                $(e).prev().find('span.TorrentTitle ').append(` / <span style="font-weight:bold;color:#20B2AA">${torrent_name}</span>`);
             }
         });
     } else {
@@ -1534,11 +1534,13 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
     var text = '快速搜索：';
     var brs = '</br></br>';
     var font_color = 'red';
+    var font_size = '';
 
     if (mode == 1) {
         div_style = '';  font_color = 'green'; text = ''; brs = '</br>';
     } else if (mode == 2) {
         div_style = ''; brs = '</br>';
+        font_size = 'size = 2px';
     } else if (mode == 3) {
         div_style = ''; font_color = 'green'; text = ''; brs = '';
     }
@@ -1595,7 +1597,7 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
         }
     }
     site_search_lists = site_search_lists.format({'imdbid': imdbid, 'imdbno': imdbno, 'search_name': search_name});
-    container.append(`${brs}<div ${div_style} class="search_urls"><color=${font_color}>${text}${site_search_lists}</font></div>`);
+    container.append(`${brs}<div ${div_style} class="search_urls"><font ${font_size} color=${font_color}>${text}${site_search_lists}</font></div>`);
     container.find('.disabled').attr("disabled",true).click(e=>{
         e.preventDefault();
         alert('当前影视没有IMDB信息！！');
@@ -11827,7 +11829,7 @@ function auto_feed() {
         forward_r.id = 'forward_r';
         var style = document.createElement("style");
         style.type = "text/css";
-        var text = document.createTextNode(".round_icon{ width: 11px; height: 11px; border-radius: 90%; padding-right: 2px;} #douban_button {outline:none;}");
+        var text = document.createTextNode(".round_icon{ width: 11px; height: 11px; border-radius: 90%; margin-right: 2px;} #douban_button {outline:none;}");
         style.appendChild(text);
         var head = document.getElementsByTagName("head")[0];
         head.appendChild(style);
@@ -12493,7 +12495,7 @@ function auto_feed() {
                     return;
                 }
                 e.preventDefault();
-                if (if_exclusive) {
+                if (if_exclusive && search_mode) {
                     return;
                 }
                 if (search_mode == 0) {
@@ -12555,7 +12557,7 @@ function auto_feed() {
         } else if (origin_site == 'CMCT' && cmct_mode == 2) {
             $('.forward_a').click(function(e){
                 e.preventDefault();
-                if (if_exclusive) {
+                if (if_exclusive && search_mode) {
                     return;
                 }
                 if (search_mode == 0) {
@@ -12582,7 +12584,7 @@ function auto_feed() {
         } else if (origin_site == 'TTG') {
             $('.forward_a').click(function(e){
                 e.preventDefault();
-                if (if_exclusive) {
+                if (if_exclusive && search_mode) {
                     return;
                 }
                 if (search_mode == 0) {
