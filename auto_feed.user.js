@@ -11858,7 +11858,7 @@ function auto_feed() {
                 } else {
                     img_url_wsrv = img_url;
                 }
-                para.innerHTML = '<div style="display:inline-block;"><img src="' + img_url_wsrv +
+                para.innerHTML = '<div style="display:inline-block; margin-bottom: 2px;"><img src="' + img_url_wsrv +
                                  '"onerror="this.onerror=null; this.src=' + "'" + img_url + "'" +
                                  '"class="round_icon" style="display:inline-block">' + key + '</div>';
 
