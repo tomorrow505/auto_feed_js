@@ -19175,9 +19175,33 @@ function auto_feed() {
                 case 'WAV': audiocodec_box.val(7);
             }
 
-            //制作组
             $('select[name="team_sel[4]"]').val(14);
-            check_team(raw_info, 'team_sel[4]');
+            var team = raw_info.name.split('-').pop().trim();
+            var team2 = raw_info.name.split('@').pop().trim();
+            if (/^PTer/.test(team)) {
+                $('select[name="team_sel[4]"]').val(21);
+            } else if (/^CHD/.test(team)) {
+                $('select[name="team_sel[4]"]').val(17);
+            } else if (/^Our/.test(team) || (/^Our/.test(team2))) {
+                $('select[name="team_sel[4]"]').val(2);
+            } else if (/^RL/.test(team) || team.startsWith("R²"))  {
+                $('select[name="team_sel[4]"]').val(23);
+            } else if (team.startsWith("beAst"))  {
+                $('select[name="team_sel[4]"]').val(1);
+            } else if (team.startsWith("CMCT"))  {
+                $('select[name="team_sel[4]"]').val(16);
+            } else {
+                if ($('select[name="team_sel[4]"]').find(`option:contains(${team})`).length) {
+                    $('select[name="team_sel[4]"]').find(`option:contains(${team})`).attr('selected', true);
+                }
+            }
+
+            var team_box = $('select[name="processing_sel[4]"]');
+            var team_dict = {'欧美': 6, '大陆': 8, '香港': 7, '台湾': 7, '日本': 5, '韩国': 4, '': 3 };
+            if (team_dict.hasOwnProperty(raw_info.source_sel)){
+                var index = team_dict[raw_info.source_sel];
+                team_box.val(index);
+            }
         }
 
         else if (forward_site == 'DiscFan') {
