@@ -5791,6 +5791,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                         } else if ($('#content', doc).length) {
                             console.log(`开始签到${e}：`, $('#content', doc).find('p[class="register-now-info register-info"]').text().trim());
                             $(`input[kname=${e}]`).parent().find('a').css({"color": "red"});
+                        } else if (e == "PTT" && $("table.main").length) {
+                            console.log(`开始签到${e}：`, $("table.main").text().trim());
+                            $(`input[kname=${e}]`).parent().find('a').css({"color": "red"});
                         } else {
                             console.log(`开始签到${e}：`, '失败！！！');
                             $(`input[kname=${e}]`).parent().find('a').css({"color": "blue"});
