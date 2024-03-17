@@ -1538,6 +1538,9 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
 
     if (mode == 1) {
         div_style = '';  font_color = 'green'; text = ''; brs = '</br>';
+        if (site_url.match(/^https:\/\/www.imdb.com\/title\/tt\d+\/$/)) {
+            font_size = 'size = 2px';
+        }
     } else if (mode == 2) {
         div_style = ''; brs = '</br>';
         font_size = 'size = 2px';
