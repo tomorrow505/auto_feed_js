@@ -89,7 +89,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.6.0
+// @version      2.0.6.1
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -6684,7 +6684,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                         if (doc == 'error') {
                             reject('error');
                         } else {
-                            var source_img_url = $('#embed-code-2', doc).val();
+                            var source_img_url = $('#embed-code-3', doc).val();
                             resolve(source_img_url);
                         }
                     });
@@ -6722,7 +6722,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                     })
                     Promise.all(imgbb_tasks).then((data)=>{
                         for (i=0; i<data.length; i++) {
-                            origin_str = origin_str.replace(imgbb_urls[i], `[img]${data[i]}[/img]`);
+                            origin_str = origin_str.replace(imgbb_urls[i], `${data[i]}`);
                         }
                         get_full_size_picture_urls(null, origin_str, $('#result'), true);
                     })
@@ -11235,6 +11235,7 @@ function auto_feed() {
                     }
                 }
             } catch (err) {}
+            img_urls = img_urls.replace(/https:\/\/wsrv.nl\/\?n=-1&url=/g, '');
             var vob_info = '';
             if ($('summary').length && raw_info.descr.match(/IFO/)) {
                 try{
@@ -23104,7 +23105,7 @@ function auto_feed() {
                                 var p = new Promise((resolve, reject)=>{
                                     getDoc(url,null,function(doc){
                                         console.log(doc)
-                                        var source_img_url = $('#embed-code-2', doc).val();
+                                        var source_img_url = $('#embed-code-3', doc).val();
                                         resolve(source_img_url);
                                     });
                                 })
@@ -23123,7 +23124,7 @@ function auto_feed() {
                                 })
                                 Promise.all(imgbb_tasks).then((data)=>{
                                     for (i=0; i<data.length; i++) {
-                                        origin_str = origin_str.replace(imgbb_urls[i], data[i]);
+                                        origin_str = origin_str.replace(`[img]${imgbb_urls[i]}[/img]`, data[i]);
                                     }
                                     $('#release_desc').val(origin_str);
                                     alert("获取成功");
