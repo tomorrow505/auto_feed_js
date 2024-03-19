@@ -986,7 +986,7 @@ const default_site_info = {
     'GTK': {'url': 'https://pt.gtk.pw/', 'enable': 1},
     '象站': {'url': 'https://ptvicomo.net/', 'enable': 1},
     '麒麟': {'url': 'https://www.hdkyl.in/', 'enable': 1},
-    'Agsv': {'url': 'https://www.agsvpt.com/', 'enable': 1},
+    'AGSV': {'url': 'https://www.agsvpt.com/', 'enable': 1},
     'KIMOJI': {'url': 'https://kimoji.club/', 'enable': 1},
     'ECUST': {'url': 'https://public.ecustpt.eu.org/', 'enable': 1},
     'iloli': {'url': 'https://share.ilolicon.com/', 'enable': 1},
@@ -1027,7 +1027,7 @@ if (used_site_info === undefined) {
         if (!used_site_info.hasOwnProperty(key)) {
             used_site_info[key] = default_site_info[key];
             if_new_site_added = true;
-        } else if (default_site_info[key].url != used_site_info[key].url && key != 'Agsv') {
+        } else if (default_site_info[key].url != used_site_info[key].url && key != 'AGSV') {
             used_site_info[key].url = default_site_info[key].url
         }
         if (site_order.indexOf(key) < 0) {
@@ -1087,10 +1087,13 @@ if (site_url.match(/^https?:\/\/backup.landof.tv\/.*/)) {
 }
 
 if (site_url.match(/^https?:\/\/www..agsvpt.com\/.*/)) {
-    used_site_info.Agsv.url = 'https://www.agsvpt.com/';
+    used_site_info.AGSV.url = 'https://www.agsvpt.com/';
     GM_setValue('used_site_info', JSON.stringify(used_site_info));
 } else if (site_url.match(/^https?:\/\/abroad.agsvpt.com\/.*/)) {
-    used_site_info.Agsv.url = 'https://abroad.agsvpt.com/';
+    used_site_info.AGSV.url = 'https://abroad.agsvpt.com/';
+    GM_setValue('used_site_info', JSON.stringify(used_site_info));
+} else if (site_url.match(/^https?:\/\/new.agsvpt.com\/.*/)) {
+    used_site_info.AGSV.url = 'https://new.agsvpt.com/';
     GM_setValue('used_site_info', JSON.stringify(used_site_info));
 }
 
@@ -1731,7 +1734,7 @@ function add_thanks(descr) {
         'PTLSP': /PTLSP|LSP(WEB|DIY|MUSIC)?$/i,
         '象站': /Eleph(WEB|REMUX|Rip|TV|DIY|MUSIC)?$/i,
         'OKPT': /OK(WEB|Web)?$/i,
-        'Agsv': /AGSV(PT|E|WEB|REMUX|Rip|TV|DIY|MUS)?$/i,
+        'AGSV': /AGSV(PT|E|WEB|REMUX|Rip|TV|DIY|MUS)?$/i,
         'TJUPT': /TJUPT$/,
         'FileList': /Play(HD|SD|WEB|TV)?$/i,
         'CrabPt': /XHBWeb$/i,
@@ -5775,7 +5778,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao', 'ECUST', 'iloli',
             'PTChina', 'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT', '悟空', 'CrabPt',
-            'ICC', 'CyanBug', 'SharkPT','2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK', 'HHClub', '象站', '麒麟','Agsv'];
+            'ICC', 'CyanBug', 'SharkPT','2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK', 'HHClub', '象站', '麒麟','AGSV'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
@@ -11531,7 +11534,7 @@ function auto_feed() {
                     raw_info.labels += 100;
                 }
                 break;
-            case 'HHClub': case 'DaJiao': case '象站': case 'Agsv':
+            case 'HHClub': case 'DaJiao': case '象站': case 'AGSV':
                 var tr = $('td:contains(标签)').last().parent();
                 if (tr.find('span:contains("国语")').length) {
                     raw_info.labels += 1;
@@ -13945,7 +13948,7 @@ function auto_feed() {
                 }
             });
         }
-        if (forward_site == 'Agsv') {
+        if (forward_site == 'AGSV') {
             raw_info.descr = raw_info.descr.replace(/\[color=.*?\].*?\[\/color\]/i, '').trim();
         }
         if (['CMCT', 'PTsbao', 'HDPost','HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HaresClub', 'HDTime', 'KIMOJI',
@@ -14606,7 +14609,7 @@ function auto_feed() {
                         check_label(document.getElementsByName('tags[4][]'), '9');
                     }
                     break;
-                case 'Agsv':
+                case 'AGSV':
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '21'); }
@@ -24920,7 +24923,7 @@ function auto_feed() {
             check_team(raw_info, 'team_sel[4]');
         }
 
-        else if (forward_site == 'Agsv') {
+        else if (forward_site == 'AGSV') {
             //类型
             var browsecat = $('#browsecat');
             var specialcat = $('#specialcat');
