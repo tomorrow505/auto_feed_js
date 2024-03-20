@@ -2411,7 +2411,7 @@ String.prototype.get_label = function(){
     if (name.match(/(粤.{0,3}语|粤.{0,3}配|Audio.*cantonese)/i)){
         labels.yy = true;
     }
-    if (name.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i)){
+    if (name.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i) && name.match(/mpls/i)){
         labels.diy = true;
     }
     if (my_string.match(/HDR10\+/)) {
@@ -8076,7 +8076,7 @@ function auto_feed() {
                 });
                 var codemain = descr.getElementsByClassName('codemain');
                 Array.from(codemain).map((e, index)=>{
-                    if (!e.innerHTML.match(/<table>/) && origin_site != 'OurBits') {
+                    if (!e.innerHTML.match(/<table>/) && (origin_site != 'OurBits' || !$(e).find("fieldset").length)) {
                         try{e.innerHTML = '[quote]{mediainfo}[/quote]'.format({'mediainfo': e.innerHTML.trim() });} catch(err){}
                     }
                 });
@@ -10218,7 +10218,7 @@ function auto_feed() {
                     if (origin_site == 'U2') {
                         raw_info.small_descr = $(tds[i]).parent().find('td:last').text();
                     } else if (origin_site != 'FileList') {
-                        raw_info.small_descr = tds[i].parentNode.lastChild.textContent;
+                        raw_info.small_descr += tds[i].parentNode.lastChild.textContent;
                     }
                 }
             }
@@ -10355,10 +10355,14 @@ function auto_feed() {
                         raw_info.name += ' ' + (format+raw_info.descr).match(/FLAC|AAC|AC3|DTS|LPCM/i)[0];
                     }
                     raw_info.name += team.trim() ? '-'+ team.replace(/&amp;/, '&'): '';
-                    var region = tds[i+1].innerHTML.match(/动漫国别:<\/b>(.*?)<br>/i)[1];
-                    if (region == '日漫') { raw_info.source_sel = '日本'}
-                    if (region == '美漫') { raw_info.source_sel = '欧美'}
-                    if (region == '国产') { raw_info.source_sel = '大陆'}
+                    try {
+                        var region = tds[i+1].innerHTML.match(/动漫国别:<\/b>(.*?)<br>/i)[1];
+                        if (region == '日漫') { raw_info.source_sel = '日本'}
+                        if (region == '美漫') { raw_info.source_sel = '欧美'}
+                        if (region == '国产') { raw_info.source_sel = '大陆'}
+                    } catch (err) {}
+                    var c_name = tds[i+1].innerHTML.match(/中文名:<\/b>(.*?)(&nbsp|<br>)/i)[1];
+                    raw_info.small_descr += c_name + ' | ';
                 }
                 raw_info.torrentName = $('#bookmark0').parent().find('a:first').text();
             }
@@ -10426,13 +10430,16 @@ function auto_feed() {
                     var authors = ['lolihouse', 'jsum','Raws', 'KoushinRip', 'ANK','VCB-Studio', 'VCB','LittlePox', 'LittleBakas','ANE','Reinforce', 'SweetDreamDay','Moozzi2','mawen1250']
                     authors.forEach((item)=>{
                         if (author.match(item)) {
-                            alert(item)
                             raw_info.name += `-${author}@U2`;
                         }
                     });
                 }
                 raw_info.descr = '[quote]转自U2, 对原作者表示感谢[/quote]\n\n' + raw_info.descr;
             }
+            try {
+                var uploader = $('td:contains("发布人")').next().text().replace(/\(.*\)/, '').trim();
+                raw_info.name = raw_info.name.replace('Anonymous', uploader);
+            } catch (err) {}
 
             raw_info.small_descr += ' ' + raw_info.animate_info.match(/\[.*?\]/g)[0].replace(/\[|\]/g, '');
             raw_info.type = '动漫';
@@ -11606,7 +11613,9 @@ function auto_feed() {
             raw_info.medium_sel = 'WEB-DL';
         }
 
-        raw_info.name = deal_with_title(raw_info.name);
+        if (origin_site != 'U2') {
+            raw_info.name = deal_with_title(raw_info.name);
+        }
 
         raw_info.small_descr = deal_with_subtitle(raw_info.small_descr);
 
