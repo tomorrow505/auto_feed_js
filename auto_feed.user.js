@@ -14675,15 +14675,18 @@ function auto_feed() {
                     if (raw_info.type == '学习'){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     break;
                 case 'iloli':
-                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    var diy_info = raw_info.name + $('textarea[name="technical_info"]').val() + raw_info.descr;
+                    if (raw_info.descr.match(/mpls/i) && diy_info.match(/diy/i)){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     else {
-                        if (raw_info.descr.match(/mpls/i) || (raw_info.medium_sel == 'DVD' && !raw_info.name.match(/DVDRip/i))) {
+                        if ((raw_info.descr.match(/mpls/i) && raw_info.medium_sel != 'Remux' && raw_info.medium_sel != 'Encode' ) || (raw_info.medium_sel == 'DVD' && !raw_info.name.match(/DVDRip/i))) {
                             check_label(document.getElementsByName('tags[4][]'), '9');
                         }
                     }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
-                    if (labels.hdr10||labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '14');}
+                    if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '13');}
                     if (raw_info.descr.match(/Dolby.*?Atmos/) || $('textarea[name="technical_info"]').val().match(/Dolby.*?Atmos/)) {
                         check_label(document.getElementsByName('tags[4][]'), '16');
                     }
@@ -25211,10 +25214,8 @@ function auto_feed() {
                 var index = medium_dict[raw_info.medium_sel];
                 medium_box.val(index);
             }
-            if (raw_info.name.match(/MiniBD/i)) {
-                medium_box.val(4);
-            } else if (raw_info.name.match(/DVDRip/i)) {
-                medium_box.val(6);
+            else if (raw_info.name.match(/DVDRip/i)) {
+                medium_box.val(7);
             }
 
             var codec_box = $('select[name="codec_sel[4]"]');
@@ -25228,7 +25229,7 @@ function auto_feed() {
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             var audiocodec_dict = {
                 'DTS-HD': 3, 'DTS-HDMA:X 7.1': 23, 'DTS-HDMA': 10, 'TrueHD': 9, 'DTS-HDHR': 10,'MP3': 21,
-                'DTS': 3, 'AC3': 13, 'AAC': 6, 'Flac': 1, 'APE': 2, 'LPCM': 15, 'WAV': 9, '': 14
+                'DTS': 3, 'AC3': 13, 'AAC': 6, 'Flac': 1, 'LPCM': 15, '': 14
             };
             audiocodec_box.val(14);
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)) {
