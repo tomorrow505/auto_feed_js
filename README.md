@@ -36,7 +36,7 @@ PT站一键转载脚本，不定时修复bug提交到GitHub，一般周末统一
 
 |                   Alipay                    |                     WeChat                     |
 | :-----------------------------------------: | :--------------------------------------------: |
-| <img src="https://tomorrow505.xyz/img/ali_pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://tomorrow505.xyz/img/wechat_pay.png" width = "160" height = "160" alt="微信" align=center /> |
+| <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/ali_pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/wechat_pay.png" width = "160" height = "160" alt="微信" align=center /> |
 
  
 
