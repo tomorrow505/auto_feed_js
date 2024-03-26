@@ -1162,7 +1162,6 @@ const setting_host_list = {
     'Panda': 'https://pandapt.net/usercp.php?action=personal',
     '红叶': 'https://leaves.red/usercp.php?action=personal',
     'CyanBug': 'https://cyanbug.net/usercp.php?action=personal',
-    'MTeam': 'https://kp.m-team.cc/usercp.php?action=personal',
     'UBits': 'https://ubits.club/usercp.php?action=personal'
 };
 
@@ -2418,7 +2417,7 @@ String.prototype.get_label = function(){
     if (name.match(/(粤.{0,3}语|粤.{0,3}配|Audio.*cantonese)/i)){
         labels.yy = true;
     }
-    if (name.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i) && name.match(/mpls/i)){
+    if (name.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i) && my_string.match(/mpls/i)){
         labels.diy = true;
     }
     if (my_string.match(/HDR10\+/)) {
@@ -3683,7 +3682,7 @@ function rebuild_href(raw_info) {
     jump_str = dictToString(raw_info);
     tag_aa = forward_r.getElementsByClassName('forward_a');
     for (i = 0; i < tag_aa.length; i++) {
-        if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
+        if (['常用站点', 'PTgen', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
             tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
         }
     }
@@ -3789,12 +3788,11 @@ function fill_torrent(forward_site, container, name) {
             }
             input.dispatchEvent(i_evt);
         }
-        setTimeout(function(){
+        $('#torrent-input').wait(function(){
             document.getElementById('torrent-input').files = container.files;
-            // document.getElementById('torrent-input').dispatchEvent(evt);
             setValue(document.getElementById('torrent-input'), "torrent")
             $('button:contains("選擇種子")').next().next().text(name);
-        }, 1500);
+        }, 3000, 20);
     } else if (forward_site == 'ZHUQUE') {
         $('#form_item_torrent').wait(function(){
             $('input[id=form_item_torrent]')[0].files = container.files;
@@ -3891,7 +3889,7 @@ function reBuildHref(raw_info, forward_r) {
     jump_str = dictToString(raw_info);
     tag_aa = forward_r.getElementsByClassName('forward_a');
     for (i = 0; i < tag_aa.length; i++) {
-        if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
+        if (['常用站点', 'PTgen', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
             tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
         }
     }
@@ -5715,7 +5713,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#signin').append(`<b>&nbsp;&nbsp;&nbsp;</b><a href="#", target="_blank" id="begin_sign"><font color="red"><b>→开始签到←</b></font></a>`);
         $('#signin').append(`<br><div id="ksortable"></div>`);
 
-        var unsupported_sites = ['digitalcore', 'HD-Only', 'WT-Sakura', 'HOU', 'OMG', 'TorrentLeech'];
+        var unsupported_sites = ['digitalcore', 'HD-Only', 'WT-Sakura', 'HOU', 'OMG', 'TorrentLeech', 'MTeam'];
 
         for (index=0; index < site_order.length; index++) {
             var key = site_order[index];
@@ -6125,7 +6123,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                 });
             }
 
-            var np_sites = ['MTeam', 'CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', '1PTBA', 'HDSky', 'ITZMX',
+            var np_sites = ['CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'BeiTai', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', '1PTBA', 'HDSky', 'ITZMX',
                             'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'Oshen', 'HITPT', 'ITZMX', 'OurBits', '红叶'];
             log_in(np_sites, '#mainmenu');
 
@@ -6133,7 +6131,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             log_in(['HDRoute'], '#nav');
             log_in(['BYR'], '#pagemenu');
             log_in(['TJUPT'], '#info_block');
-
             log_in(['ANT'], '#nav_home');
             log_in(['NBL'], '#mainnav');
             log_in(['PigGo'], '#info_block');
@@ -7636,7 +7633,7 @@ function get_douban_info(raw_info) {
                 GM_setClipboard(data);
                 tag_aa = forward_r.getElementsByClassName('forward_a');
                 for (i = 0; i < tag_aa.length; i++) {
-                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
+                    if (['常用站点', 'PTgen', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
                         tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
                     }
                 }
@@ -8545,7 +8542,7 @@ function auto_feed() {
                             jump_str = dictToString(raw_info);
                             tag_aa = forward_r.getElementsByClassName('forward_a');
                             for (i = 0; i < tag_aa.length; i++) {
-                                if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
+                                if (['常用站点', 'PTgen', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
                                     tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
                                 }
                             }
@@ -9487,7 +9484,7 @@ function auto_feed() {
                 jump_str = dictToString(raw_info);
                 tag_aa = forward_r.getElementsByClassName('forward_a');
                 for (i = 0; i < tag_aa.length; i++) {
-                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
+                    if (['常用站点', 'PTgen', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
                         tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
                     }
                 }
@@ -9992,7 +9989,6 @@ function auto_feed() {
             tbody = d_table;
             raw_info.name = $('h2').find('span:first').text();
             raw_info.torrent_url = site_url;
-            console.log(raw_info);
         }
 
         //-------------------------------------根据table获取其他信息——包含插入节点（混合）-------------------------------------------
@@ -10410,14 +10406,11 @@ function auto_feed() {
             }
 
             if (tds[i].textContent == '簡介' && origin_site == 'MTeam') {
-                var descr_td = tds[i+1];
-                raw_info.descr = walkDOM(descr_td);
-                raw_info.descr = raw_info.descr.replace(/\n(\[\/.*?\])/g, '$1');
+                raw_info.descr = walkDOM(tds[i+1]);
             }
         }
 
         if (origin_site == 'U2'){
-            //jsum组压制的一些处理
             raw_info.torrentName = $('a:contains(".torrent")').text();
             raw_info.descr = raw_info.descr.replace('SPEC', '[quote]\r\nSPEC');
             raw_info.descr = raw_info.descr.replace(/\[quote\]\n(感|Thank|OP From|OP&ED)/, function(data){
@@ -10511,25 +10504,34 @@ function auto_feed() {
 
         if (origin_site == 'MTeam') {
             insert_row = o_insert_row;
-            if ($('th:contains("MediaInfo")').length) {
-                var mediainfo = $('div:contains("完整 MediaInfo")').parent().next().text();
-                console.log(mediainfo)
-            //     if ($('.spoiler-content').length) {
-            //         mediainfo = $('.spoiler-content').text();
-            //     }
-
-            //     raw_info.descr += `\n  \n[quote]${mediainfo.trim()}[/quote]\n  \n`;
-            //     try{
-            //         var intro = raw_info.descr.indexOf('◎简　　介');
-            //         var pictures = raw_info.descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
-            //         pictures.forEach(item=>{
-            //             if (raw_info.descr.indexOf(item) > 300) {
-            //                 raw_info.descr = raw_info.descr.replace(item, '');
-            //                 raw_info.descr += item + '\n';
-            //             }
-            //         });
-            //     } catch(err) {}
-            }
+            var torrent_id = site_url.match(/detail\/(\d+)/)[1];
+            postData('https://kp.m-team.cc/api/torrent/detail', encodeURI(`id=${torrent_id}`), function(data) {
+                data = JSON.parse(data);
+                data = data.data;
+                raw_info.descr = data.descr.trim();
+                raw_info.descr = raw_info.descr.replace(/!\[\]\(.*?.(jpg|png)\)/, function(data){
+                    return `[img]${data.match(/\((.*?)\)/)[1]}[/img]`;
+                })
+                if (data.mediainfo) {
+                    var picture_info = '';
+                    try{
+                        var intro = raw_info.descr.indexOf('◎简　　介');
+                        var pictures = raw_info.descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?\n?/g);
+                        pictures.forEach(item=>{
+                            if (raw_info.descr.indexOf(item) > 300) {
+                                raw_info.descr = raw_info.descr.replace(item, '');
+                                picture_info += item + '\n';
+                            }
+                        });
+                        raw_info.descr = raw_info.descr.trim() + `\n  \n[quote]\n${decodeURIComponent(data.mediainfo).trim()}\n[/quote]\n  \n` + picture_info;
+                    } catch(err) {}
+                }
+                raw_info.descr = raw_info.descr.replace(/https:\/\/kp.m-team.cc.*?url=/ig, '');
+                raw_info.descr = raw_info.descr.replace(/^\[quote\]\[b\]\[color=Blue\]转自.*?，感谢原制作者发布。\[\/color\]\[\/b\]\[\/quote\]/, '');
+                raw_info.descr = add_thanks(raw_info.descr);
+                rebuild_href(raw_info);
+                console.log(raw_info.descr);
+            });
         }
 
         //------------------------------------国外站点简介单独处理，最后辅以豆瓣按钮----------------------------------------------
@@ -11555,10 +11557,6 @@ function auto_feed() {
             raw_info.descr = raw_info.descr.replace(/https:\/\/pterclub.com\/link.php\?sign=.*?&target=/ig, '');
         }
 
-        if (origin_site == 'MTeam'){
-            raw_info.descr = raw_info.descr.replace(/https:\/\/kp.m-team.cc.*?url=/ig, '');
-        }
-
         if (origin_site == 'BYR') {
             raw_info.descr = raw_info.descr.replace(/\n+\t+\n/ig, '\n').replace('Powered by BYRBT Info Clone', '');
             raw_info.descr = raw_info.descr.replace(/\t+|\t\n/ig, '');
@@ -11765,6 +11763,7 @@ function auto_feed() {
 
         console.log(raw_info.torrent_name);
         console.log(raw_info.torrent_url);
+
         //获取跳转的字符串
         var jump_str = dictToString(raw_info);
 
@@ -12007,15 +12006,6 @@ function auto_feed() {
         wiki.target = '_blank';
         wiki.style.color = 'red';
         forward_r.appendChild(wiki);
-
-        forward_r.innerHTML = forward_r.innerHTML + ' | ';
-        var feedback = document.createElement('a');
-        feedback.innerHTML = 'BUG反馈';
-        feedback.id = 'bugfeedback';
-        feedback.href = 'https://greasyfork.org/zh-CN/scripts/424132-auto-feed/feedback';
-        feedback.target = '_blank';
-        feedback.style.color = 'DarkOrange';
-        forward_r.appendChild(feedback);
 
         forward_r.innerHTML = forward_r.innerHTML + ' | ';
         var get_img = document.createElement('a');
@@ -12856,7 +12846,7 @@ function auto_feed() {
 
                                 tag_aa = forward_r.getElementsByClassName('forward_a');
                                 for (i = 0; i < tag_aa.length; i++) {
-                                    if (['常用站点', 'PTgen', 'BUG反馈', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
+                                    if (['常用站点', 'PTgen', '简化MI', '脚本设置', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
                                         tag_aa[i].href = decodeURI(tag_aa[i]).split(seperator)[0] + seperator + encodeURI(jump_str);
                                     }
                                 }
@@ -12963,12 +12953,6 @@ function auto_feed() {
                 set_jump_href(raw_info, 1);
             }
         })
-        $('#bugfeedback')[0].addEventListener('click', function(e){
-            if (!confirm('有问题可以加qq群: 867736374或者TG群(见GitHub)交流，请先查看项目wiki，确定有bug再反馈，反馈时请提供链接截图等详尽说明。确定反馈吗？')) {
-                e.preventDefault();
-                return;
-            }
-        }, false);
 
         if ($('#transfer_ptp').length) {
             $('#transfer_ptp')[0].addEventListener('click', function(e){
@@ -14745,13 +14729,15 @@ function auto_feed() {
                 case 'iloli':
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     else {
-                        if (raw_info.descr.match(/mpls/i) || (raw_info.medium_sel == 'DVD' && !raw_info.name.match(/DVDRip/i))) {
+                        if ((raw_info.descr.match(/mpls/i) && raw_info.medium_sel != 'Remux' && raw_info.medium_sel != 'Encode' ) || (raw_info.medium_sel == 'DVD' && !raw_info.name.match(/DVDRip/i))) {
                             check_label(document.getElementsByName('tags[4][]'), '9');
                         }
                     }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
-                    if (labels.hdr10||labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '14');}
+                    if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '13');}
                     if (raw_info.descr.match(/Dolby.*?Atmos/) || $('textarea[name="technical_info"]').val().match(/Dolby.*?Atmos/)) {
                         check_label(document.getElementsByName('tags[4][]'), '16');
                     }
@@ -14876,15 +14862,12 @@ function auto_feed() {
         }
 
         else if (forward_site == 'MTeam'){
-            console.log(raw_info);
             addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, null);
             var i_evt = new Event("change", { bubbles: true, cancelable: false });
-            // hack React15
             i_evt.simulated = true;
             function setValue(input, value) {
                 let lastValue = input.value;
                 input.value = value;
-                // hack React16 内部定义了descriptor拦截value，此处重置状态
                 let tracker = input._valueTracker;
                 if (tracker) {
                     tracker.setValue(lastValue);
@@ -14924,7 +14907,7 @@ function auto_feed() {
                     break;
                 case '纪录': case '学习':
                     type_code = '紀錄教育';
-                case '动漫': type_code = 'H-動畫'; break;
+                case '动漫': type_code = '動畫'; break;
                 case '音乐':
                     if(raw_info.name.match(/(flac|ape)/i)){
                         type_code = 'Music(無損)';
@@ -14935,7 +14918,7 @@ function auto_feed() {
                 case 'MV': type_code = '演唱'; break;
                 case '体育': type_code = '運動'; break;
                 case '软件': type_code = '軟體'; break;
-                case '游戏': type_code = 'H-遊戲'; break;
+                case '游戏': type_code = 'PC遊戲'; break;
                 case '书籍': type_code = '紀錄教育';
             }
             var source_code = 'Other';
@@ -14986,9 +14969,6 @@ function auto_feed() {
             function trigger_select(tid, value, time, order) {
                 var clickEvent = document.createEvent ('MouseEvents');
                 clickEvent.initEvent ('mousedown', true, true);
-                if (time === undefined) {
-                    time = 1000;
-                }
                 document.getElementById(tid).dispatchEvent(clickEvent);
                 setTimeout(function(){
                     if (value !== 'Other') {
@@ -14999,10 +14979,14 @@ function auto_feed() {
                         $(`div.ant-select-item-option-content:contains("${value}"):eq(${order})`).click();
                     }
                 }, time);
+                if (tid == 'category') {
+                    $('#category').parent().parent().parent().after(`<font color="red"> 当前资源类别为${type_code}，但是选项动态加载，可能没有勾选上，下滑自动勾选。</font>`);
+                }
             }
 
             setTimeout(function() {
-                trigger_select('category', type_code, 1000, 0);
+                console.log(type_code)
+                trigger_select('category', type_code, 3000, 0);
                 setValue(document.getElementById('name'), raw_info.name);
                 setValue(document.getElementById('smallDescr'), raw_info.small_descr);
                 setValue(document.getElementById('imdb'), raw_info.url);
@@ -15013,17 +14997,16 @@ function auto_feed() {
                 if (labels.zz){ document.getElementsByClassName('ant-checkbox-input')[2].click();}
                 if (labels.diy){ document.getElementsByClassName('ant-checkbox-input')[0].click(); }
 
-                trigger_select('source', source_code, 800, 0);
-                trigger_select('standard', raw_info.standard_sel, 900, 0);
-                trigger_select('videoCodec', videoCodec, 1000, 0);
-                trigger_select('audioCodec', audioCodec, 1100, 1);
-                trigger_select('medium', medium, 1200, 0);
-                trigger_select('processing', region, 1300, 0);
+                trigger_select('source', source_code, 100, 0);
+                trigger_select('standard', raw_info.standard_sel, 100, 0);
+                trigger_select('videoCodec', videoCodec, 100, 0);
+                trigger_select('audioCodec', audioCodec, 200, 1);
+                trigger_select('medium', medium, 200, 0);
+                trigger_select('processing', region, 200, 0);
 
-                if (raw_info.descr.match(/General/) && !raw_info.descr.match(/mpls/i)) {
+                if ((raw_info.descr.match(/General/) || raw_info.full_mediainfo) && !raw_info.descr.match(/mpls/i)) {
                     try{
                         var infos = get_mediainfo_picture_from_descr(raw_info.descr);
-                        // setTimeout(function(){
                         try{
                             var container = document.getElementById('mediainfo');
                             if (raw_info.full_mediainfo){
@@ -15060,7 +15043,7 @@ function auto_feed() {
                             </div>
                             <div class="ant-col ant-form-item-control css-1yx3qv0">
                                 <div class="ant-space-compact css-1yx3qv0 ant-space-compact-block">
-                                    <font size="3" color="red"><b>（简介已经复制到粘贴板，请手动粘贴）</b></font>
+                                    <font size="3" color="red"><b>（此处尚未完善，等待后续处理-->简介已经复制到粘贴板，请手动粘贴）</b></font>
                                 </div>
                             </div>
                         </div>
@@ -25405,8 +25388,7 @@ function auto_feed() {
 
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             var audiocodec_dict = {
-                'DTS-HD': 3, 'DTS-HDMA:X 7.1': 23, 'DTS-HDMA': 10, 'TrueHD': 9, 'DTS-HDHR': 10,'MP3': 21,
-                'DTS': 3, 'AC3': 13, 'AAC': 6, 'Flac': 1, 'APE': 2, 'LPCM': 15, 'WAV': 9, '': 14
+                'DTS-HD': 3, 'DTS-HDMA:X 7.1': 23, 'DTS-HDMA': 10, 'TrueHD': 9, 'DTS-HDHR': 10,'MP3': 21, 'DTS': 3, 'AC3': 13, 'AAC': 6, 'Flac': 1, 'LPCM': 15
             };
             audiocodec_box.val(14);
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)) {
