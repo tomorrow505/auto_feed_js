@@ -10515,8 +10515,12 @@ function auto_feed() {
                 raw_info.descr = data.descr.trim();
                 raw_info.descr = raw_info.descr.replace(/!\[\]\(.*?.(jpg|png)\)/, function(data){
                     return `[img]${data.match(/\((.*?)\)/)[1]}[/img]`;
-                })
+                });
                 if (data.mediainfo) {
+                    var mediainfo = data.mediainfo;
+                    try {
+                        mediainfo = decodeURIComponent(data.mediainfo);
+                    } catch (err) {}
                     var picture_info = '';
                     try{
                         var intro = raw_info.descr.indexOf('◎简　　介');
@@ -10527,8 +10531,10 @@ function auto_feed() {
                                 picture_info += item + '\n';
                             }
                         });
-                        raw_info.descr = raw_info.descr.trim() + `\n  \n[quote]\n${decodeURIComponent(data.mediainfo).trim()}\n[/quote]\n  \n` + picture_info;
-                    } catch(err) {}
+                        raw_info.descr = raw_info.descr.trim() + `\n  \n[quote]\n${mediainfo.trim()}\n[/quote]\n  \n` + picture_info;
+                    } catch(err) {
+                        console.log(err)
+                    }
                 }
                 raw_info.descr = raw_info.descr.replace(/https:\/\/kp.m-team.cc.*?url=/ig, '');
                 raw_info.descr = raw_info.descr.replace(/^\[quote\]\[b\]\[color=Blue\]转自.*?，感谢原制作者发布。\[\/color\]\[\/b\]\[\/quote\]/, '');
