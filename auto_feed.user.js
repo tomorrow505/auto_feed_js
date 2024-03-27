@@ -8129,9 +8129,9 @@ function auto_feed() {
                 });
                 if ((origin_site == 'PTer' || origin_site == 'FRDS' || origin_site == 'Audiences') && descr.getElementsByTagName('table').length){
                     var descr_table = descr.getElementsByTagName('table');
+                    var table_num = descr_table.length;
                     var table_id = 0;
-                    while (true) {
-                        console.log(descr_table.length)
+                    while (table_num >= 0) {
                         descr_table = descr_table[0];
                         if (descr_table.textContent.match(/general/i)){
                             descr_table.parentNode.removeChild(descr_table);
@@ -8139,10 +8139,10 @@ function auto_feed() {
                         }
                         descr_table = descr.getElementsByTagName('table');
                         if (!descr_table.length) {
-                            console.log(0)
                             break;
                         }
                         table_id += 1;
+                        table_num -= 1;
                     }
                 }
             }catch(err){
@@ -13010,7 +13010,7 @@ function auto_feed() {
         if ($('td:contains(你没有发布种子的权限)').length || $('td:contains(请提交候选)').length || $('a[href="?add_offer=1"]').length) {
             if (forward_site == "CMCT") {
                 upload_site = upload_site.replace('upload.php', 'upload.php?offer=1');
-            } else if (forward_site == "HHClub") {
+            } else if (forward_site == "HHClub" || forward_site == 'HUDBT') {
                 upload_site = upload_site.replace('offers.php', 'offers.php?add_offer=1');
             } else {
                 upload_site = upload_site.replace('upload.php', 'offers.php?add_offer=1');
