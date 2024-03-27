@@ -1156,16 +1156,18 @@ var show_search_urls = GM_getValue('show_search_urls') === undefined ? default_s
 //设置依托界面站点列表
 const setting_host_list = {
     'PTer': 'https://pterclub.com/usercp.php?action=personal',
-    'HDDolby': 'https://www.hddolby.com/usercp.php?action=personal',
     'DaJiao': 'https://dajiao.cyou/usercp.php?action=personal',
+    'AGSV': 'https://www.agsvpt.com/usercp.php?action=personal',
     'PThome': 'https://www.pthome.net/usercp.php?action=personal',
     'Panda': 'https://pandapt.net/usercp.php?action=personal',
     '红叶': 'https://leaves.red/usercp.php?action=personal',
     'CyanBug': 'https://cyanbug.net/usercp.php?action=personal',
-    'UBits': 'https://ubits.club/usercp.php?action=personal'
+    'UBits': 'https://ubits.club/usercp.php?action=personal',
+    'QingWa': 'https://new.qingwa.pro/usercp.php?action=personal',
+    'CrabPt': 'https://crabpt.vip/usercp.php?action=personal'
 };
 
-var used_setting_host_list = GM_getValue('setting_host_list') === undefined ? setting_host_list : JSON.parse(GM_getValue('setting_host_list'));
+var used_setting_host_list = setting_host_list;
 
 const default_rehost_img_info = {
     'freeimage': {
