@@ -14996,9 +14996,9 @@ function auto_feed() {
                 }
             }
 
-            setTimeout(function() {
+            $('#category').wait(function() {
                 console.log(type_code)
-                trigger_select('category', type_code, 1000, 0);
+                trigger_select('category', type_code, 100, 0);
                 setValue(document.getElementById('name'), raw_info.name);
                 setValue(document.getElementById('smallDescr'), raw_info.small_descr);
                 setValue(document.getElementById('imdb'), raw_info.url);
@@ -15047,21 +15047,24 @@ function auto_feed() {
                     } catch(Err) {}
                 }
                 GM_setClipboard(raw_info.descr);
-                $('label:contains("簡介")').parent().parent().after(
-                    `<div class="ant-form-item css-1yx3qv0">
-                        <div class="ant-row ant-form-item-row css-1yx3qv0">
-                            <div class="ant-col ant-form-item-label css-1yx3qv0" style="width: 135px;">
-                                <label class="" title="注意"><font color="red"><b>注意</b></font></label>
-                            </div>
-                            <div class="ant-col ant-form-item-control css-1yx3qv0">
-                                <div class="ant-space-compact css-1yx3qv0 ant-space-compact-block">
-                                    <font size="3" color="red"><b>（此处尚未完善，等待后续处理-->简介已经复制到粘贴板，请手动粘贴）</b></font>
-                                </div>
-                            </div>
+                $('label:contains("簡介")').parent().parent().parent().after(
+                    `<div class="ant-form-item css-1rl0vao">
+                      <div class="ant-row ant-form-item-row css-1rl0vao">
+                        <div class="ant-col ant-form-item-label css-1rl0vao" style="width: 135px;">
+                          <label for="name" class="" title="注意"><font color="red"><b>注意</b></font></label>
                         </div>
+                        <div class="ant-col ant-form-item-control css-1rl0vao">
+                          <div class="ant-form-item-control-input">
+                            <div class="ant-form-item-control-input-content">
+                              <font size="3" color="red">
+                                <b>（此处尚未完善，等待后续处理--&gt;简介已经复制到粘贴板，请手动粘贴）</b>
+                              </font>
+                            </div>
+                          </div>
+                      </div>
                     </div>`
                 );
-            }, 2500);
+            }, 10000, 20);
         }
 
         else if (forward_site == 'CMCT'){
