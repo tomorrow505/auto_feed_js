@@ -1469,7 +1469,7 @@ var raw_info = {
     'labels': 0
 };
 
-var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'MTeam'];
+var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'MTeam', 'HHClub'];
 
 Array.prototype.remove = function(val) {
     var index = this.indexOf(val);
@@ -8368,7 +8368,10 @@ function auto_feed() {
             douban_box = tbody.insertRow(0);
             if ($('#mediainfo-raw').length) {
                 raw_info.descr = '[quote]\n' + $('#mediainfo-raw').find('code').text() + '\n[/quote]\n' + raw_info.descr;
-                no_need_douban_button_sites.pop();
+                var index = no_need_douban_button_sites.indexOf('HHClub');
+                if (index > -1) {
+                    no_need_douban_button_sites.splice(index, 1);
+                }
                 search_row = tbody.insertRow(0);
                 douban_button_needed = true;
             }
@@ -15016,7 +15019,7 @@ function auto_feed() {
                 trigger_select('medium', medium, 200, 0);
                 trigger_select('processing', region, 200, 0);
 
-                if ((raw_info.descr.match(/General/) || raw_info.full_mediainfo) && !raw_info.descr.match(/mpls/i)) {
+                if ((raw_info.descr.match(/General[\s\S]*?Video[.\n]{0,5}ID/) || raw_info.full_mediainfo) && !raw_info.descr.match(/mpls/i)) {
                     try{
                         var infos = get_mediainfo_picture_from_descr(raw_info.descr);
                         try{
@@ -15057,7 +15060,7 @@ function auto_feed() {
                           <div class="ant-form-item-control-input">
                             <div class="ant-form-item-control-input-content">
                               <font size="3" color="red">
-                                <b>（此处尚未完善，等待后续处理--&gt;简介已经复制到粘贴板，请手动粘贴）</b>
+                                <b>（此处尚未完善，等待后续处理--&gt;简介已经复制到粘贴板，请手动Ctrl+V粘贴）</b>
                               </font>
                             </div>
                           </div>
