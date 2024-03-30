@@ -3798,7 +3798,7 @@ function fill_torrent(forward_site, container, name) {
             document.getElementById('torrent-input').files = container.files;
             setValue(document.getElementById('torrent-input'), "torrent")
             $('button:contains("選擇種子")').next().next().text(name);
-        }, 3000, 20);
+        }, 30000, 20);
     } else if (forward_site == 'ZHUQUE') {
         $('#form_item_torrent').wait(function(){
             $('input[id=form_item_torrent]')[0].files = container.files;
@@ -14285,6 +14285,7 @@ function auto_feed() {
                     break;
                 case 'UBits':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '11'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (raw_info.standard_sel == '4K') {
@@ -14941,7 +14942,8 @@ function auto_feed() {
                 case 'UHD': case 'Blu-ray': case 'Remux': case 'Encode': source_code = 'Blu-ray'; break;
                 case 'HDTV': source_code = 'HDTV'; break;
                 case 'DVD': source_code = 'DVD'; break;
-                case 'CD': source_code = 'CD';
+                case 'CD': source_code = 'CD'; break;
+                case 'WEB-DL': source_code = 'Web-DL';
             }
             var videoCodec = 'H.264';
             switch (raw_info.codec_sel){
