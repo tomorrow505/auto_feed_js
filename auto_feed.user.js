@@ -107,7 +107,6 @@
 日志：
 
     2022年6月以前的日志请参看："https://github.com/tomorrow505/auto_feed_js/wiki/更新日志"
-
     20220604：修复海豹部分bug，修复piggo部分bug。优化禁转判断后跳转逻辑。
     20220605：新增图片提取功能：https://github.com/tomorrow505/auto_feed_js/wiki/图片处理
     20220606：适配BTN另一个网址：https://backup.landof.tv/
@@ -1156,7 +1155,7 @@ const default_show_search_urls = {
 var show_search_urls = GM_getValue('show_search_urls') === undefined ? default_show_search_urls : JSON.parse(GM_getValue('show_search_urls'));
 
 function set_host_link() {
-    var host_link = prompt(`auto-feed设置页依托NP架构站点控制面板个人设置页\n请在输入框输入托管站点的个人设置链接，步骤如下：
+    var host_link = prompt(`-------------Auto-feed依托NP架构站进行部分功能布局-------------\n请在输入框输入托管站点的个人设置链接，步骤如下：
     1.进入任意NexusPHP架构PT站点主页;
     2.打开控制面板;
     3.选择个人设定;
@@ -1171,7 +1170,7 @@ function set_host_link() {
     }
 }
 
-if (GM_getValue("host_link") === undefined) {
+if (GM_getValue("host_link") === undefined && judge_if_the_site_as_source(site_url) !== undefined) {
     set_host_link();
 } else {
     host_link = GM_getValue("host_link");
@@ -13930,19 +13929,19 @@ function auto_feed() {
                             });
                         }
                         raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
-                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|HDMA|TrueHD|DTS.HD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
+                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|TrueHD|DTS.HD.?MA|DTS.HD.?HR|DTS.HD|DTS|L?PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
                         raw_info.name = raw_info.name.replace(/(WEB-DL)(.*?)(AVC|x264|H264)/i, '$1$2H.264');
                         raw_info.name = raw_info.name.replace(/(WEB-DL)(.*?)(HEVC|x265|H265)/i, '$1$2H.265');
                     }
                     if (['ACM'].indexOf(forward_site) > -1) {
                         raw_info.name = raw_info.name.replace(/DDP/i, 'DD+');
-                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|HDMA|TrueHD|DTS.HD|DTS|PCM|FLAC)[ \.](.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1$3');
+                        raw_info.name = raw_info.name.replace(/(DD\+|DD|AAC|TrueHD|DTS.HD.?MA|DTS.HD.?HR|DTS.HD|DTS|L?PCM|FLAC)[ \.](.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1$3');
                         raw_info.name = raw_info.name.replace(/(WEB-DL|HDTV|SDTV)(.*?)(AVC|x264|H264)/i, '$1$2H.264');
                         raw_info.name = raw_info.name.replace(/(WEB-DL|HDTV|SDTV)(.*?)(x265|H265|H.265)/i, '$1$2HEVC');
                     }
                     if (['BHD'].indexOf(forward_site) > -1) {
                         raw_info.name = raw_info.name.replace(/DD\+/i, 'DDP');
-                        raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|HDMA|TrueHD|DTS.HD|DTS|PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
+                        raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|TrueHD|DTS.HD.?MA|DTS.HD.?HR|DTS.HD|DTS|L?PCM|FLAC)(.*?)(5\.1|2\.0|7\.1|1\.0)/i, '$1 $3');
                     }
                     allinput[i].value = raw_info.name;
                 }
@@ -15750,12 +15749,15 @@ function auto_feed() {
             } else {
                 var type_dict = {'电影': 401, '剧集': 402, '动漫': 409, '综艺': 403, '音乐': 408, '纪录': 406,
                                  '体育': 407, '软件': 411, '学习': 412, '游戏': 410, '书籍': 405, 'MV': 108};
-                if ((raw_info.name.match(/S\d+|E\d+/) || raw_info.descr.match(/集.*?数.*?\d+/)) && raw_info.type == '动漫') {
-                    type_dict['动漫'] = 2;
+                if (raw_info.type == '动漫') {
+                    type_dict['动漫'] = 401;
+                    if (raw_info.name.match(/S\d+|E\d+/) || raw_info.descr.match(/◎集.*?数.*?\d+/)) {
+                        type_dict['动漫'] = 402;
+                    }
                     $('input[name="tags[]"][value="dh"]').attr('checked', true);
                 }
                 if (raw_info.type == '动漫' || raw_info.descr.match(/◎类.*?别.*动画/)) {
-                    $('#qr').parent().append('<font color="red" style="margin-left:5px"><b>疑似动画，确认是否剧集并勾选标签。</b></font>')
+                    $('#qr').parent().append('<font color="red" style="margin-left:5px"><b> 疑似动画，确认是否剧集并勾选标签。</b></font>')
                 }
             }
             browsecat.val(409);
@@ -19482,28 +19484,29 @@ function auto_feed() {
                 case '体育': browsecat.options[12].selected = true; break;
             }
 
-            var source_box = document.getElementsByName('source_sel[4]')[0];
+            var source_box = $('select[name="source_sel[4]"]');
             if (raw_info.standard_sel == '4K') {
-                source_box.options[2].selected = true;
+                source_box.val(2);
             }
             switch(raw_info.medium_sel){
-                case 'UHD': source_box.options[1].selected = true; break;
-                case 'Blu-ray': source_box.options[2].selected = true; break;
-                case 'DVD':  source_box.options[3].selected = true; break;
-                case 'HDTV': source_box.options[1].selected = true; break;
-                case 'Encode': source_box.options[10].selected = true; break;
-                case 'WEB-DL': source_box.options[9].selected = true;
+                case 'UHD': source_box.val(2); break;
+                case 'Blu-ray': source_box.val(3); break;
+                case 'DVD':  source_box.val(4); break;
+                case 'HDTV': source_box.val(1); break;
+                case 'Encode': source_box.val(10); break;
+                case 'WEB-DL': source_box.val(9); break;
+                case 'Remux': source_box.val(131);
             }
             if (raw_info.name.match(/dvdrip|BDRIP/i)) {
-                source_box.options[10].selected = true;
-            } else if (raw_info.name.match(/tvrip/i)) {
-                source_box.options[5].selected = true;
+                source_box.val(10);
+            } else if (raw_info.name.match(/ tv /i)) {
+                source_box.val(5);
             } else if (raw_info.name.match(/ldrip/i)) {
-                source_box.options[7].selected = true;
+                source_box.val(7);
             } else if (raw_info.name.match(/vcd/i)) {
-                source_box.options[6].selected = true;
-            } else if (raw_info.name.match(/vhsrip/i)) {
-                source_box.options[8].selected = true;
+                source_box.val(6);
+            } else if (raw_info.name.match(/vhs/i)) {
+                source_box.val(8);
             }
         }
 
