@@ -8332,6 +8332,14 @@ function auto_feed() {
                     }
                 });
             }
+            function add_douban(tbody) {
+                var index = no_need_douban_button_sites.indexOf('HHClub');
+                if (index > -1) {
+                    no_need_douban_button_sites.splice(index, 1);
+                }
+                search_row = tbody.insertRow(0);
+                douban_button_needed = true;
+            }
             get_next_text('name', '标题');
             get_next_text('small_descr', '副标题');
             var info = $('div:contains(基本信息):last').next().text();
@@ -8339,15 +8347,6 @@ function auto_feed() {
             raw_info.medium_sel = info.medium_sel();
             raw_info.codec_sel = info.codec_sel();
             raw_info.audiocodec_sel = info.audiocodec_sel();
-            try {
-                var div_descr = $('div:contains(其他信息):last').parent().next()[0];
-                raw_info.descr = walkDOM(div_descr.cloneNode(true)).trim();
-            } catch (err) {}
-            try {
-                var screen = $('#screenshot-content')[0];
-                raw_info.descr += '\n' + walkDOM(screen.cloneNode(true));
-            } catch (err) {}
-
             $('div:contains(副标题):last').next().after(`
                 <div class="font-bold leading-6">转载</div>
                 <div class="font-bold leading-6">
@@ -8358,15 +8357,27 @@ function auto_feed() {
             tbody = $('#mytable')[0];
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
-            if ($('#mediainfo-raw').length) {
-                raw_info.descr = '[quote]\n' + $('#mediainfo-raw').find('code').text() + '\n[/quote]\n' + raw_info.descr;
-                var index = no_need_douban_button_sites.indexOf('HHClub');
-                if (index > -1) {
-                    no_need_douban_button_sites.splice(index, 1);
+            try {
+                if ($('div:contains(其他信息):last').length) {
+                    var div_descr = $('div:contains(其他信息):last').parent().next()[0];
+                    raw_info.descr = walkDOM(div_descr.cloneNode(true)).trim();
                 }
-                search_row = tbody.insertRow(0);
-                douban_button_needed = true;
-            }
+                if ($('#mediainfo-raw').length) {
+                    raw_info.descr = raw_info.descr + '[quote]\n' + $('#mediainfo-raw').find('code').text() + '\n[/quote]\n';
+                    console.log(raw_info.descr);
+                }
+                if ($('div.nexus-media-info-raw').length) {
+                    raw_info.descr = raw_info.descr + '[quote]\n' + $('div.nexus-media-info-raw').find('code').text() + '\n[/quote]\n';
+                    console.log(raw_info.descr)
+                }
+                if (!raw_info.descr.match(/◎简.*?介/)) {
+                    add_douban(tbody);
+                }
+            } catch (err) {}
+            try {
+                var screen = $('#screenshot-content')[0];
+                raw_info.descr = '\n' + walkDOM(screen.cloneNode(true));
+            } catch (err) {}
             try {
                 raw_info.url = match_link('imdb', $('#kimdb').html());
             } catch (err) {}
