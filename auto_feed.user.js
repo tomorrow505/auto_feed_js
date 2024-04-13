@@ -25208,8 +25208,8 @@ function auto_feed() {
                 case '日本': source_box.val(34); break;
                 case '韩国': source_box.val(33); break;
                 case '印度': source_box.val(36); break;
-				case '东南亚': case '新加坡': case '马来西亚': case '泰国': source_box.val(35); break;
-				case '': source_box.val(37); break
+		case '东南亚': case '新加坡': case '马来西亚': case '泰国': source_box.val(35); break;
+		case '': source_box.val(37); break
             }
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
@@ -25229,8 +25229,8 @@ function auto_feed() {
                     }
                     break;
                 case 'CD': medium_box.val(15); break;
-				case 'Track': medium_box.val(18); break;
-				case '': medium_box.val(16); break;
+		case 'Track': medium_box.val(18); break;
+		case '': medium_box.val(16); break;
             }
 
             //视频编码
@@ -25241,10 +25241,10 @@ function auto_feed() {
                 case 'H265': case 'X265': codec_box.val(6); break;
                 case 'MPEG-4': case 'XVID': codec_box.val(4); break;
                 case 'VC-1': codec_box.val(2); break;
-				case 'AV1': case 'av01': codec_box.val(10); break;
-				case 'VP9': case 'VP9': codec_box.val(8); break;
-				case 'VP8': case 'VP8': codec_box.val(9); break;
-				case 'H266': case 'X266': codec_box.val(7); break;
+		case 'AV1': case 'av01': codec_box.val(10); break;
+		case 'VP9': case 'VP9': codec_box.val(8); break;
+		case 'VP8': case 'VP8': codec_box.val(9); break;
+		case 'H266': case 'X266': codec_box.val(7); break;
             }
 
             //音频编码
@@ -25258,15 +25258,15 @@ function auto_feed() {
                 case 'DTS-HDHR': audiocodec_box.val(15); break;
                 case 'DTS': audiocodec_box.val(3); break;
                 case 'EAC3': case 'DDP': audiocodec_box.val(19); break;
-				case 'AC3': audiocodec_box.val(9); break;
+		case 'AC3': audiocodec_box.val(9); break;
                 case 'AAC': audiocodec_box.val(6); break;
                 case 'LPCM': audiocodec_box.val(18); break;
                 case 'MP3': audiocodec_box.val(4); break;
                 case 'Flac': audiocodec_box.val(1); break;
                 case 'APE': audiocodec_box.val(2); break;
                 case 'WAV': audiocodec_box.val(11); break;
-				case 'M4A': audiocodec_box.val(12); break;
-				case '': audiocodec_box.val(7); break;
+		case 'M4A': audiocodec_box.val(12); break;
+		case '': audiocodec_box.val(7); break;
             }
 
             //分辨率
