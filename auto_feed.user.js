@@ -1756,7 +1756,7 @@ function add_thanks(descr) {
         '红叶': /(RLWEB|RLeaves|RLTV|-R²)$/i,
         'QingWa': /(FROG|FROGE|FROGWeb)$/i,
     };
-    const thanks_str = "[quote][b][color=Blue]{site}官组作品，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
+    const thanks_str = "[quote][b][color=blue]{site}官组作品，感谢原制作者发布。[/color][/b][/quote]\n\n{descr}";
     for (var key in reg_team_name) {
         if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
             descr = thanks_str.format({'site': key, 'descr': descr});
@@ -2317,7 +2317,7 @@ String.prototype.audiocodec_sel = function() { //音频编码
         result = '';
     }
     if (this.toString().match(/AUDiO CODEC/i) && this.toString().match(/-WiKi/)) {
-        result = this.match(/AUDiO CODEC.*/)[0];
+        result = this.match(/AUDiO CODEC.*/i)[0];
         result = result.audiocodec_sel();
     }
     return result;
@@ -10557,7 +10557,7 @@ function auto_feed() {
                     }
                 }
                 raw_info.descr = raw_info.descr.replace(/https:\/\/kp.m-team.cc.*?url=/ig, '');
-                raw_info.descr = raw_info.descr.replace(/^\[quote\]\[b\]\[color=Blue\]转自.*?，感谢原制作者发布。\[\/color\]\[\/b\]\[\/quote\]/, '');
+                raw_info.descr = raw_info.descr.replace(/^\[quote\]\[b\]\[color=blue\]转自.*?，感谢原制作者发布。\[\/color\]\[\/b\]\[\/quote\]/i, '');
                 raw_info.descr = add_thanks(raw_info.descr);
                 rebuild_href(raw_info);
                 console.log(raw_info.descr);
@@ -15007,7 +15007,7 @@ function auto_feed() {
                     }
                 }, time);
                 if (tid == 'category') {
-                    $('#category').parent().parent().parent().after(`<font color="red"> 当前资源类别为${type_code}，但是选项动态加载，可能没有勾选上，下滑自动勾选。</font>`);
+                    $('#category').parent().parent().parent().after(`<font color="red"> 当前资源类别为${type_code}，但是选项动态加载，如果没有勾选上，下滑手动勾选。</font>`);
                 }
             }
 
@@ -15063,19 +15063,16 @@ function auto_feed() {
                 }
                 GM_setClipboard(raw_info.descr);
                 $('label:contains("簡介")').parent().parent().parent().after(
-                    `<div class="ant-form-item css-1rl0vao">
-                      <div class="ant-row ant-form-item-row css-1rl0vao">
-                        <div class="ant-col ant-form-item-label css-1rl0vao" style="width: 135px;">
-                          <label for="name" class="" title="注意"><font color="red"><b>注意</b></font></label>
+                    `<div class="ant-form-item css-i8jq0z">
+                      <div class="ant-row ant-form-item-row css-i8jq0z">
+                        <div class="ant-col ant-form-item-label css-i8jq0z" style="width: 135px;">
+                          <label class="" title="注意"><font color="red" size="2"><b>注意</b></font></label>
                         </div>
-                        <div class="ant-col ant-form-item-control css-1rl0vao">
-                          <div class="ant-form-item-control-input">
-                            <div class="ant-form-item-control-input-content">
-                              <font size="3" color="red">
-                                <b>（此处尚未完善，等待后续处理--&gt;简介已经复制到粘贴板，请手动Ctrl+V粘贴）</b>
-                              </font>
-                            </div>
-                          </div>
+                        <div class="ant-col ant-form-item-control css-i8jq0z">
+                          <font size="3" color="red">
+                            <b>（此处尚未完善，等待后续处理--&gt;简介已经复制到粘贴板，请手动Ctrl+V粘贴）</b>
+                          </font>
+                        </div>
                       </div>
                     </div>`
                 );
@@ -15346,8 +15343,8 @@ function auto_feed() {
                 }, 200);
 
                 var note = '';
-                if (raw_info.descr.match(/Blue\](.*?，感谢原制作者发布。)/)) {
-                    note += raw_info.descr.match(/Blue\](.*?，感谢原制作者发布。)/)[1];
+                if (raw_info.descr.match(/blue\](.*?，感谢原制作者发布。)/i)) {
+                    note += raw_info.descr.match(/blue\](.*?，感谢原制作者发布。)/i)[1];
                 }
                 if (raw_info.url) {
                     note += `资源IMDB链接：${raw_info.url}`;
@@ -23668,7 +23665,7 @@ function auto_feed() {
                             }
                         }
                         if (raw_info.extra_text) {
-                            raw_info.extra_text = raw_info.extra_text.replace(/color=Blue/, 'color=yellow');
+                            raw_info.extra_text = raw_info.extra_text.replace(/color=blue/i, 'color=yellow');
                             raw_info.extra_text = raw_info.extra_text.replace(/color=blue/, 'color=red');
                             raw_info.extra_text = raw_info.extra_text.replace(/color=royalblue/, 'color=red');
                             raw_info.extra_text = raw_info.extra_text.replace(/\]\n/g, ']');
