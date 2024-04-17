@@ -241,6 +241,19 @@ if (location.href.match(/^.{3,30}userdetail/i) && !site_url.match(/bluebird-hd/)
     return;
 }
 
+// 清除PT吧里边的广告
+if (location.href.match(/^https?:\/\/.*tieba.baidu.com.*/)) {
+    mutation_observer(document, function() {
+        $('div[class*="clearfix"]').wait(function(){
+            $('div[class="clearfix thread_item_box"]').hide();
+            $('div[class="l_post l_post_bright j_l_post clearfix"]').has('span:contains("立即查看")').hide();
+            $('img[data-locate="点击关闭"]').click();
+            $('#aside-ad').hide();
+        });
+    });
+    return;
+}
+
 if (location.href.match(/https:\/\/desitorrents.tv\/torrents/)) {
     $('#torrent-list-table').find('tr:gt(0)').map((index,e)=>{
         $(e).find('td:eq(2)').find('a.torrent-listings-name').after(`<a href="${$(e).find('a.torrent-listings-name').attr('href')}" target="_blank"><font color=green>跳转</font></a>`)
