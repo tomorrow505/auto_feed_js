@@ -89,7 +89,6 @@
 // @require      https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js
 // @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
-// @require      https://update.greasyfork.org/scripts/492714/1361588/MutationObserver-polyfill.js
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
 // @version      2.0.6.5
@@ -173,8 +172,9 @@ jQuery.fn.wait = function (func, times, interval) {
     return this;
 }
 
-function MutationObserver(target, func) {
-    const observer = new window.MutationObserver(mutationList =>  
+function mutation_observer(target, func) {
+    const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+    const observer = new MutationObserver(mutationList =>  
         mutationList.filter(m => m.type === 'childList').forEach(m => {
             m.addedNodes.forEach(func());
         }
@@ -248,7 +248,7 @@ if (location.href.match(/https:\/\/desitorrents.tv\/torrents/)) {
 }
 
 if (location.href.match(/^https:\/\/zhuque.in\//)) {
-    MutationObserver(document, function() {
+    mutation_observer(document, function() {
         if ($('div.ant-message-notice:contains("欢迎回来")').length && $('div.ant-message-notice:contains("欢迎回来")').is(":visible")) {
             $('div.ant-message-notice:contains("欢迎回来")').hide();
         }
@@ -27076,14 +27076,14 @@ function auto_feed() {
 
 if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/info\/\d+/)) {
     var executed = false;
-    MutationObserver(document, function() {
+    mutation_observer(document, function() {
         if ($('a[href*=download]').length && !executed) {
             setTimeout(auto_feed, sleep_time);
             executed = true;
         }
     })
 } else if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/list\/\d+/)) {
-    MutationObserver(document, function() {
+    mutation_observer(document, function() {
         if ($('div.markdown').length) {
             setTimeout(function(){
                 if (!$('#mytable').length) {
@@ -27095,7 +27095,7 @@ if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/in
     });
 } else if (origin_site == 'MTeam' && site_url.match(/^https?:\/\/kp.m-team.cc\/detail\/\d+/)) {
     var executed = false;
-    MutationObserver(document, function() {
+    mutation_observer(document, function() {
         if ($('h2').length  && !executed) {
             setTimeout(auto_feed, sleep_time);
             executed = true;
