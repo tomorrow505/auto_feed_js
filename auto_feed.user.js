@@ -8100,6 +8100,12 @@ function auto_feed() {
                     descr = $('#kdescr').next()[0];
                 }
             }
+            if (origin_site == 'QingWa') {
+                if($('#kimdb').length) {
+                    raw_info.url = match_link('imdb', $('#kimdb').html());
+                }
+            }
+
 
             if (origin_site == 'PThome' || origin_site == 'Audiences' || origin_site == 'OurBits') {
                 try{
