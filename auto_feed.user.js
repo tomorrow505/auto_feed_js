@@ -14126,9 +14126,9 @@ function auto_feed() {
                     container.val(infos.mediainfo.replace(/\[\/?(size|font|color).*?\]/g, '').trim());
                 }
                 if ($('input[name="screenshot"]').length) {
-                    $('input[name="screenshot"]').val(infos.pic_info.match(/\[img\].*?\[\/img\]/g).map(i => {
-                        return i.replace(/\[.*?\]/g, '');
-                    }).join(','));
+                    get_full_size_picture_urls(null, infos.pic_info, $('#not'), false, function(img_info) {
+                        $('input[name="screenshot"]').val(img_info.trim().split('\n').join(','));
+                    });
                 }
                 container.css({'height': '600px'});
                 var tmp_descr = raw_info.descr.replace(infos.mediainfo, '');
@@ -15068,17 +15068,15 @@ function auto_feed() {
                 }
                 GM_setClipboard(raw_info.descr);
                 $('label:contains("簡介")').parent().parent().parent().after(
-                    `<div class="ant-form-item css-i8jq0z">
-                      <div class="ant-row ant-form-item-row css-i8jq0z">
-                        <div class="ant-col ant-form-item-label css-i8jq0z" style="width: 135px;">
-                          <label class="" title="注意"><font color="red" size="2"><b>注意</b></font></label>
+                    `<div class="ant-row ant-form-item-row css-1r6ucam">
+                        <div class="ant-col ant-form-item-label css-1r6ucam" style="width: 135px;">
+                            <label title="注意"><font color="red" size="2"><b></b></font></label>
                         </div>
-                        <div class="ant-col ant-form-item-control css-i8jq0z">
-                          <font size="3" color="red">
-                            <b>（此处尚未完善，等待后续处理--&gt;简介已经复制到粘贴板，请手动Ctrl+V粘贴）</b>
-                          </font>
+                        <div class="ant-col ant-form-item-control css-1r6ucam">
+                            <font size="3" color="red">
+                                <b>注意：此处尚未完善，等待后续处理--&gt;简介已经复制到粘贴板，请手动Ctrl+V粘贴</b>
+                            </font>
                         </div>
-                      </div>
                     </div>`
                 );
             }, 10000, 20);
@@ -19996,8 +19994,15 @@ function auto_feed() {
             if (site_url.match(/add_offer/)) {
                 contentEditor.setHtml(descr_html.trim());
             } else {
-            editor.setHtml(descr_html.trim());
-        }
+                editor.setHtml(descr_html.trim());
+            }
+            try {
+                if (raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i)){
+                    var cover = raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i)[1];
+                    $('input[name="cover"]').val(cover);
+                    $('input[name="cover"]').after(`<div><img src=${cover} id="cover" style="max-width:120px;" /><span>海报预览，默认显示第一张图片为海报，如果不是请自行更换。</span></div>`);
+                }
+            } catch (err) {}
         }
 
         else if (forward_site == '麒麟') {
