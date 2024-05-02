@@ -91,7 +91,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.6.6
+// @version      2.0.6.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -3973,13 +3973,14 @@ function check_team(raw_info, s_name, forward_site) {
         return;
     }
     $(`select[name="${s_name}"]>option`).map(function(index,e){
-        if (raw_info.name.match(e.innerText)) {
-            if ((raw_info.name.match(/LCHD/) && e.innerText == 'CHD') || (raw_info.name.match(/PandaMoon/) && e.innerText == 'Panda') || e.innerText == 'DIY' || e.innerText == 'REMUX') {
+        var name = raw_info.split(/(19}20)\d{2}/).pop();
+        if (name.match(e.innerText)) {
+            if ((name.match(/LCHD/) && e.innerText == 'CHD') || (name.match(/PandaMoon/) && e.innerText == 'Panda') || e.innerText == 'DIY' || e.innerText == 'REMUX') {
                 console.log('小组名貌似会产生误判');
                 return;
-            } else if (raw_info.name.match(/HDSpace/i) && e.innerText.match(/HDS/i)) {
+            } else if (name.match(/HDSpace/i) && e.innerText.match(/HDS/i)) {
                 return;
-            } else if (raw_info.name.match(/HDClub/i) && e.innerText.match(/HDC/i)) {
+            } else if (name.match(/HDClub/i) && e.innerText.match(/HDC/i)) {
                 return;
             } else {
                 $(`select[name="${s_name}"]>option:eq(${index})`).attr('selected', true);
@@ -5878,7 +5879,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'UBits', 'DaJiao', 'ECUST', 'iloli', 'PTChina',
             'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', '3Wmg', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT', '悟空', 'CrabPt', 'QingWa', 'ICC',
-            'CyanBug', 'SharkPT','2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK', 'HHClub', '象岛', '麒麟','AGSV'];
+            'CyanBug', 'SharkPT','2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影','PTLSP', 'GTK', 'HHClub', '象岛', '麒麟','AGSV', 'Oshen'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
@@ -6171,7 +6172,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             }
 
             var np_sites = ['CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', '1PTBA', 'HDSky', 'ITZMX',
-                            'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'Oshen', 'HITPT', 'ITZMX', 'OurBits', '红叶'];
+                            'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'HITPT', 'ITZMX', 'OurBits', '红叶'];
             log_in(np_sites, '#mainmenu');
 
             log_in(['PuTao'], '#userbar');
@@ -14132,7 +14133,7 @@ function auto_feed() {
                 }
                 container.css({'height': '600px'});
                 var tmp_descr = raw_info.descr.replace(infos.mediainfo, '');
-                tmp_descr = tmp_descr.replace(/\[quote\].*?官组作品.*?\[\/quote\]/g, '').replace(/\[quote\].*?\[\/quote\]/g, function(data) {
+                tmp_descr = tmp_descr.replace(/\[quote\].*?官组作品.*?\[\/quote\]/g, '').replace(/\[quote\][.\n]*?\[\/quote\]/g, function(data) {
                     if (!data.replace(/\[.*?\]/g, '').trim()) {
                         return '';
                     } else {
@@ -14406,6 +14407,7 @@ function auto_feed() {
                     if (raw_info.name.match(/HLG/)) { $('#tags-button-13').click();}
                     if (labels.complete) { $('#tags-button-17').click(); }
                     if (raw_info.small_descr.match(/特效字幕/)) { $('#tags-button-14').click(); }
+                    $('#tags-button-18').click();
                     break;
                 case 'HaresClub':
                     if (labels.gy){
@@ -14729,6 +14731,7 @@ function auto_feed() {
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '18'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '8'); }
                     if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (raw_info.standard_sel == '4K') { check_label(document.getElementsByName('tags[4][]'), '11'); }
@@ -20034,13 +20037,7 @@ function auto_feed() {
                     }
                     break;
                 case 'DVD': medium_box.val(27); break;
-                case 'Remux':
-                    if (raw_info.standard_sel == '4K') {
-                        medium_box.val(23);
-                    } else {
-                        medium_box.val(30);
-                    }
-                    break;
+                case 'Remux': medium_box.val(30); break;
                 case 'HDTV': medium_box.val(28); break;
                 case 'Encode': medium_box.val(29); break;
                 case 'WEB-DL': medium_box.val(31); break;
