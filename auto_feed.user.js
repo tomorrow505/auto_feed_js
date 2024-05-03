@@ -3973,7 +3973,7 @@ function check_team(raw_info, s_name, forward_site) {
         return;
     }
     $(`select[name="${s_name}"]>option`).map(function(index,e){
-        var name = raw_info.split(/(19}20)\d{2}/).pop();
+        var name = raw_info.name.split(/(19}20)\d{2}/).pop();
         if (name.match(e.innerText)) {
             if ((name.match(/LCHD/) && e.innerText == 'CHD') || (name.match(/PandaMoon/) && e.innerText == 'Panda') || e.innerText == 'DIY' || e.innerText == 'REMUX') {
                 console.log('小组名貌似会产生误判');
@@ -17976,7 +17976,9 @@ function auto_feed() {
                 case 'HDTV': medium_box.val(6); break;
                 case 'WEB-DL': medium_box.val(5); break;
                 case 'Encode':
-                    if (raw_info.standard_sel == '1080p' || raw_info.standard_sel == '1080i') {
+                    if (raw_info.standard_sel == '4K') {
+                        medium_box.val(20);
+                    } else if (raw_info.standard_sel == '1080p' || raw_info.standard_sel == '1080i') {
                         medium_box.val(24);
                     } else if (raw_info.standard_sel == '720p') {
                         medium_box.val(25);
