@@ -12148,9 +12148,12 @@ function auto_feed() {
                     var descr_node = descr_box[0].getElementsByTagName('artical')[0];
                     descr_node = descr_node.cloneNode(true);
                     raw_info.descr = walk_cmct(descr_node).trim().replace(/        ◎/, '◎');
+                    if (raw_info.extra_text) {
+                        raw_info.descr = raw_info.descr.replace(raw_info.extra_text, '');
+                    }
                 } catch (err){}
                 raw_info.descr = '[img]' + img_address + '[/img]\n\n' + raw_info.descr + '\n\n';
-
+                if (raw_info.extra_text) { raw_info.descr = '[quote]\n' + raw_info.extra_text + '\n[/quote]\n\n' + raw_info.descr; }
                 try{
                     var $html = $('td').filter('.douban_info').html();
                     if ($html.match(/https:\/\/www.imdb.com\/title\/tt\d+/)){
@@ -12161,7 +12164,6 @@ function auto_feed() {
                         add_search_urls(container, imdbid, imdbno, search_name, 0);
                     }
                 } catch(err) {}
-
                 //mediainfo——短
                 try{
                     var mediainfo = document.getElementsByClassName("codemain")[0];
@@ -14085,6 +14087,9 @@ function auto_feed() {
                         raw_info.descr.match(/\[quote\][\s\S]*?\[\/quote\]/g).map((e)=> {
                             if (e.match(/General|Disc Title|Disc Info|Disc Label|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率/i)) {
                                 var ee = e.replace('[quote]', '[Mediainfo]').replace('[/quote]', '[/Mediainfo]');
+                                if (raw_info.full_mediainfo) {
+                                    ee = `[Mediainfo]${raw_info.full_mediainfo}[/Mediainfo]`;
+                                }
                                 raw_info.descr = raw_info.descr.replace(e, ee);
                             }
                         });
