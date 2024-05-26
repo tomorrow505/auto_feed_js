@@ -15483,8 +15483,53 @@ function auto_feed() {
                 const cover_img = infos.cover_img? infos.cover_img.replace('[img]','').replace('[/img]','') : infos.pic_info?.split('[/img]')?.at(0).replace('[img]', '').trim()
                 instance?.context?.setFieldsValue({ 'picture': cover_img });
 
-				
-				// 匿名
+                function trigger_select(tid, value, time, order) {
+                    if (time === undefined) {
+                        time = 1000;
+                    }
+                    $(`#${tid}`)[0].dispatchEvent(new MouseEvent("mousedown", {
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+                    setTimeout(function(){
+                        if (value !== 'Other') {
+                            $(`div.ant-select-item-option[title="${value}"]`).wait(function(){
+                                console.log(value, $(`div.ant-select-item-option-content:contains("${value}")`))
+                                if (value == 'Blu-ray') {
+                                    $(`div.ant-select-item-option-content:contains("${value}"):eq(2)`).click();
+                                } else if (value == 'UHD Blu-ray') {
+                                    $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
+                                } else {
+                                    $(`div.ant-select-item-option-content:contains("${value}")`).click();
+                                }
+                            });
+                        } else {
+                            $(`div.ant-select-item-option-content:contains("${value}"):eq(${order-1})`).click();
+                        }
+                    }, time);
+                }
+
+                // 类别
+                var type_dict = {'电影': '电影', 
+                                '剧集': '剧集',
+                                '动漫': '动漫',
+                                '综艺': '综艺',
+                                '音乐': '音乐',
+                                '纪录': '纪录片',
+                                '体育': '体育',
+                                '软件': '软件',
+                                '学习': '教育书籍',
+                                '': '未分类',
+                                'MV': 'MV',
+                                '书籍': '书籍'};
+                if (type_dict.hasOwnProperty(raw_info.type)){
+                    var category = type_dict[raw_info.type];
+                    trigger_select('categoryId', category, 0, 0);
+                }
+
+
+                
+                // 匿名
                 if (if_uplver) {
                     $('input[class="ant-radio-input"][value="y"]').click();
                 }
