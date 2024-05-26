@@ -3930,14 +3930,11 @@ function fill_torrent(forward_site, container, name) {
             $('#form_item_title')[0].dispatchEvent(evt);
         });
     } 
-    // else if (forward_site == 'YemaPT') {
-    //     $('#fileList').wait(function(){
-    //         $('input[id=fileList]')[0].files = container.files;
-    //         $('#fileList')[0].dispatchEvent(evt);
-    //         $('#showName').val(raw_info.name);
-    //         $('#showName')[0].dispatchEvent(evt);
-    //     });
-    // }
+    else if (forward_site == 'YemaPT') {
+        $('#fileList').wait(function(){
+            ant_form_instance?.context?.setFieldsValue({ 'fileList': [...container.files].map(f =>{ f.originFileObj = f; return f}) }); //files要转为数组，并且添加originFileObj属性为自身
+        });
+    }
     else {
         $('input[name=file]')[0].files = container.files;
         if (forward_site == 'HHClub') {
@@ -15527,6 +15524,10 @@ function auto_feed() {
                     trigger_select('categoryId', category, 0, 0);
                 }
 
+                // 文件
+                setTimeout(function(){
+                    addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, null);
+                }, 200);
 
                 
                 // 匿名
