@@ -140,7 +140,7 @@
     20230413：修复部分bug，去掉一些关闭了的站。
     20230511：适配转入 RS (西电睿思)。
     20230708：修复部分bug。适配RouSi(by shmt86)。
-	20240526：适配新架构站点YemaPT(by lorentz)。
+    20240526：适配新架构站点YemaPT(by lorentz)。
 */
 
 var site_url = decodeURI(location.href);
@@ -15529,6 +15529,21 @@ function auto_feed() {
                     addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, null);
                 }, 200);
 
+                function bbcode2markdown(text) {
+                    text = text.replace(/\[size=\d\]/ig, '').replace(/\[\/size\]/ig, '')
+                    text = text.replace(/\[font=.+?\]/ig, '').replace(/\[\/font\]/ig, '')
+                    text = text.replace(/\[color=.+?\]/ig, '').replace(/\[\/color\]/ig, '')
+                    text = text.replace(/\[img\](.*?)\[\/img\]/ig, '![_]($1)')
+                    text = text.replace(/\[b\]\s*/ig, '**').replace(/\s*\[\/b\]/ig, '**')
+                    text = text.replace(/\[i\]\s*/ig, '*').replace(/\s*\[\/i\]/ig, '*')
+                    text = text.replace(/\[url=([^\]]*?)\](.*?)\[\/url\]/ig, '[$2]($1)')
+                    //text = text.replace(/\[quote\](.*?)\[\/quote\]/isg, (m, n) => '> '+ n.split('\n').join('\\\n')+'\n\n')
+                    text = text.replace(/\[quote\](.*?)\[\/quote\]/isg, (m, n) => '> '+ n.split('\n').join('\n> ')+'\n\n')
+                    return text
+                }
+
+                // 描述
+                instance?.context?.setFieldsValue({ 'longDesc': bbcode2markdown(raw_info.descr) });
                 
                 // 匿名
                 if (if_uplver) {
