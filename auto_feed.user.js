@@ -25,7 +25,6 @@
 // @match        https://desitorrents.tv/torrents*
 // @match        https://www.imdb.com/title/tt*
 // @match        https://hdf.world/*
-// @match        https://www.yemapt.org/*
 // @match        https://kp.m-team.cc/detail/*
 // @match        https://kp.m-team.cc/upload*
 // @match        https://blutopia.cc/torrents/create*
@@ -64,6 +63,7 @@
 // @match        http*://avistaz.to/torrent/*
 // @match        http*://cinemaz.to/torrent/*
 // @match        https://zhuque.in/torrent/*
+// @match        https://www.yemapt.org/*
 // @match        https://beyond-hd.me/download_check/*
 // @match        http*://passthepopcorn.me/torrents.php?id*
 // @match        http*://*php?id=*&torrentid=*
@@ -140,6 +140,7 @@
     20230413：修复部分bug，去掉一些关闭了的站。
     20230511：适配转入 RS (西电睿思)。
     20230708：修复部分bug。适配RouSi(by shmt86)。
+	20240526：适配新架构站点YemaPT(by lorentz)。
 */
 
 var site_url = decodeURI(location.href);
@@ -1025,6 +1026,7 @@ const default_site_info = {
     'SharkPT': {'url': 'https://sharkpt.net/', 'enable': 1},
     '2xFree': {'url': 'https://pt.2xfree.org/', 'enable': 1},
     'ZHUQUE': {'url': 'https://zhuque.in/', 'enable': 1},
+    'YemaPT': {'url': 'https://www.yemapt.org/', 'enable': 1},
     '海棠': {'url': 'https://www.htpt.cc/', 'enable': 1},
     '杏林': {'url': 'https://xingtan.one/', 'enable': 1},
     'SRVFI': {'url': 'https://srvfi.top/', 'enable': 1},
@@ -1048,7 +1050,6 @@ const default_site_info = {
     'QingWa': {'url': 'https://qingwapt.com/', 'enable': 1},
     'FNP': {'url': 'https://fearnopeer.com/', 'enable': 1},
     'OnlyEncodes': {'url': 'https://onlyencodes.cc/', 'enable': 1},
-    'YemaPT': {'url': 'https://www.yemapt.org/', 'enable': 1},
 };
 
 var chd_use_backup_url = GM_getValue('chd_use_backup_url') === undefined ? 0: GM_getValue('chd_use_backup_url');
@@ -8083,6 +8084,9 @@ if (site_url.match(/https:\/\/redacted.ch\/upload.php#separator#/)) {
 }
 
 if (origin_site == 'BYR') {
+    delete Array.prototype.remove;
+}
+else if (origin_site == 'YemaPT') {
     delete Array.prototype.remove;
 }
 
@@ -27163,8 +27167,6 @@ if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/in
             executed = true;
         }
     });
-} else if (origin_site == 'YemaPT' && site_url.match(/^https:\/\/www.yemapt.org\/#\/torrent\/add/)) {
-    setTimeout(auto_feed, sleep_time);
 } else {
     setTimeout(auto_feed, sleep_time);
 }
