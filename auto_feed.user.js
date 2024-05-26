@@ -184,6 +184,39 @@ function mutation_observer(target, func) {
     observer.observe(target,{childList: true, subtree: true});
 }
 
+//---------------------------- ant-design-filler -----------------------------------
+// 遍历元素属性，查找 React FiberNode
+function getReactFiberNode(element) {
+	for (let key in element) {
+		if (key.startsWith("__reactFiber")) {
+			return element[key];
+		}
+	}
+	return null;
+}
+
+// 递归遍历 FiberNode，查找 React 组件实例对象
+function getReactComponentInstance(fiberNode) {
+	if (fiberNode?.stateNode && fiberNode?.stateNode.hasOwnProperty("state")) {
+		return fiberNode?.stateNode;
+	}
+
+	let child = fiberNode?.child;
+	while (child) {
+		instance = getReactComponentInstance(child);
+		if (instance) {
+			return instance;
+		}
+		child = child.sibling;
+	}
+
+	return null;
+}
+
+var ant_form_instance = null;
+//---------------
+
+
 var hdb_color = 'black';
 
 if (site_url.match(/^https?:\/\/hdbits.org\/details.php\?id=.*/)) {
@@ -3429,8 +3462,7 @@ function set_jump_href(raw_info, mode) {
                     forward_url = used_site_info[key].url + 'torrent/upload';
                 } else if (key == 'YemaPT') {
                     forward_url = used_site_info[key].url + '#/torrent/add?';
-                }
-                else if (key == 'MTeam') {
+                } else if (key == 'MTeam') {
                     forward_url = used_site_info[key].url + 'upload';
                 } else if (key == 'KIMOJI' || key == 'HDPost' || key == 'Aither' || key == 'FNP' || key == 'OnlyEncodes') {
                     var type_dict = {'电影': 1, '剧集': 2, '动漫': 2, '综艺': 2, '纪录': 2, '音乐': 3, '体育': 2, 'MV': 3};
@@ -15431,7 +15463,28 @@ function auto_feed() {
         }
 
         else if (forward_site == 'YemaPT') {
-            // alert(1)
+            delete Array.prototype.remove; //站点前端框架会对 array 添加名为 "remove" key，冲突，故删除
+            $('#shortDesc').wait(function(){
+
+
+                // 找到form
+                const ant_form = document.querySelector('form.ant-form')
+                // 找到fiberNode
+                const __reactFiber = getReactFiberNode(ant_form);
+                // 通过fiberNode找到组件实例
+                const instance = getReactComponentInstance(__reactFiber);
+
+                if (instance) ant_form_instance = instance //global use
+
+                instance?.context?.setFieldsValue({ 'showName': raw_info.name });
+                instance?.context?.setFieldsValue({ 'shortDesc': raw_info.small_descr });
+
+				
+				// 匿名
+                if (if_uplver) {
+                    $('input[class="ant-radio-input"][value="y"]').click();
+                }
+            }, 1000/*次*/, 200/*毫秒/次*/); //https://www.cnblogs.com/52cik/p/jquery-wait.html
         }
 
         else if (forward_site == 'TTG'){
