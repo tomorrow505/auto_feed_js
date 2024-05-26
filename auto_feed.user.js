@@ -2847,6 +2847,7 @@ function get_mediainfo_picture_from_descr(descr){
     try {
         for (i=0; i<img_urls.length; i++){
             if (descr.indexOf(img_urls[i])<10 || descr.indexOf(img_urls[i]) < index_of_info){
+                info.cover_img = img_urls[i];
             } else{
                 descr = descr.replace(img_urls[i], '');
                 img_info += img_urls[i].match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/)[0];
@@ -15478,6 +15479,9 @@ function auto_feed() {
 
                 instance?.context?.setFieldsValue({ 'showName': raw_info.name });
                 instance?.context?.setFieldsValue({ 'shortDesc': raw_info.small_descr });
+                const infos = get_mediainfo_picture_from_descr(raw_info.descr)
+                const cover_img = infos.cover_img? infos.cover_img.replace('[img]','').replace('[/img]','') : infos.pic_info?.split('[/img]')?.at(0).replace('[img]', '').trim()
+                instance?.context?.setFieldsValue({ 'picture': cover_img });
 
 				
 				// 匿名
