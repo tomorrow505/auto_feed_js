@@ -15048,10 +15048,25 @@ function auto_feed() {
                 case 'H265': case 'X265': videoCodec = 'H.265';
             }
             var audioCodec = 'Other';
-            var audiocodec_dict = {'Flac': 'FLAC', 'APE': 'APE', 'DTS': 'DTS', 'MP3': 'MP3', 'AAC': 'AAC' };
-            if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
-                var index = audiocodec_dict[raw_info.audiocodec_sel];
-                audioCodec = index;
+            switch (raw_info.audiocodec_sel){
+                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS-HDHR': 
+                    audioCodec = 'DTS-HD MA';
+                    break;
+                case 'TrueHD': audioCodec = 'TrueHD'; break;
+                case 'Atmos': 
+                    audioCodec = 'TrueHD Atmos';
+                    if (raw_info.name.match(/DDP|DD\+/)) {
+                        audioCodec = 'E-AC3 Atoms(DDP Atoms)';
+                    }
+                    break;
+                case 'AC3':
+                    audioCodec = 'AC3(DD)';
+                    if (raw_info.name.match(/DDP|DD\+/)) {
+                        audioCodec = 'E-AC3(DDP)';
+                    }
+                    break;
+                case 'LPCM': case 'DTS': case 'AAC': case 'Flac': case 'APE': case 'WAV': 
+                    audioCodec = raw_info.audiocodec_sel.toUpperCase();
             }
             var medium = 'Encode';
             switch(raw_info.medium_sel){
@@ -15081,7 +15096,11 @@ function auto_feed() {
                 clickEvent.initEvent ('mousedown', true, true);
                 document.getElementById(tid).dispatchEvent(clickEvent);
                 setTimeout(function(){
-                    if (value !== 'Other') {
+                    if (value == 'DTS') {
+                        $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
+                    } else if (value == 'TrueHD') {
+                        $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
+                    } else if (value !== 'Other') {
                         $(`div.ant-select-item-option-content:contains("${value}")`).wait(function(){
                             $(`div.ant-select-item-option-content:contains("${value}")`).click();
                         });
@@ -15089,9 +15108,6 @@ function auto_feed() {
                         $(`div.ant-select-item-option-content:contains("${value}"):eq(${order})`).click();
                     }
                 }, time);
-                if (tid == 'category' && !$('.notice').length) {
-                    $('#category').parent().parent().parent().after(`<font color="red" class="notice"> 当前资源类别为${type_code}，但是选项动态加载，如果没有勾选上，下滑手动勾选。</font>`);
-                }
             }
 
             $('#category').wait(function() {
