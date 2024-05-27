@@ -25,7 +25,6 @@
 // @match        https://desitorrents.tv/torrents*
 // @match        https://www.imdb.com/title/tt*
 // @match        https://hdf.world/*
-// @match        https://www.yemapt.org/*
 // @match        https://kp.m-team.cc/detail/*
 // @match        https://kp.m-team.cc/upload*
 // @match        https://blutopia.cc/torrents/create*
@@ -64,6 +63,7 @@
 // @match        http*://avistaz.to/torrent/*
 // @match        http*://cinemaz.to/torrent/*
 // @match        https://zhuque.in/torrent/*
+// @match        https://www.yemapt.org/*
 // @match        https://beyond-hd.me/download_check/*
 // @match        http*://passthepopcorn.me/torrents.php?id*
 // @match        http*://*php?id=*&torrentid=*
@@ -140,6 +140,7 @@
     20230413：修复部分bug，去掉一些关闭了的站。
     20230511：适配转入 RS (西电睿思)。
     20230708：修复部分bug。适配RouSi(by shmt86)。
+    20240526：适配新架构站点YemaPT(by lorentz)。
 */
 
 var site_url = decodeURI(location.href);
@@ -182,6 +183,39 @@ function mutation_observer(target, func) {
     ));
     observer.observe(target,{childList: true, subtree: true});
 }
+
+//---------------------------- ant-design-filler -----------------------------------
+// 遍历元素属性，查找 React FiberNode
+function getReactFiberNode(element) {
+	for (let key in element) {
+		if (key.startsWith("__reactFiber")) {
+			return element[key];
+		}
+	}
+	return null;
+}
+
+// 递归遍历 FiberNode，查找 React 组件实例对象
+function getReactComponentInstance(fiberNode) {
+	if (fiberNode?.stateNode && fiberNode?.stateNode.hasOwnProperty("state")) {
+		return fiberNode?.stateNode;
+	}
+
+	let child = fiberNode?.child;
+	while (child) {
+		instance = getReactComponentInstance(child);
+		if (instance) {
+			return instance;
+		}
+		child = child.sibling;
+	}
+
+	return null;
+}
+
+var ant_form_instance = null;
+//---------------
+
 
 var hdb_color = 'black';
 
@@ -1025,6 +1059,7 @@ const default_site_info = {
     'SharkPT': {'url': 'https://sharkpt.net/', 'enable': 1},
     '2xFree': {'url': 'https://pt.2xfree.org/', 'enable': 1},
     'ZHUQUE': {'url': 'https://zhuque.in/', 'enable': 1},
+    'YemaPT': {'url': 'https://www.yemapt.org/', 'enable': 1},
     '海棠': {'url': 'https://www.htpt.cc/', 'enable': 1},
     '杏林': {'url': 'https://xingtan.one/', 'enable': 1},
     'SRVFI': {'url': 'https://srvfi.top/', 'enable': 1},
@@ -1048,7 +1083,6 @@ const default_site_info = {
     'QingWa': {'url': 'https://qingwapt.com/', 'enable': 1},
     'FNP': {'url': 'https://fearnopeer.com/', 'enable': 1},
     'OnlyEncodes': {'url': 'https://onlyencodes.cc/', 'enable': 1},
-    'YemaPT': {'url': 'https://www.yemapt.org/', 'enable': 1},
 };
 
 var chd_use_backup_url = GM_getValue('chd_use_backup_url') === undefined ? 0: GM_getValue('chd_use_backup_url');
@@ -2813,6 +2847,7 @@ function get_mediainfo_picture_from_descr(descr){
     try {
         for (i=0; i<img_urls.length; i++){
             if (descr.indexOf(img_urls[i])<10 || descr.indexOf(img_urls[i]) < index_of_info){
+                info.cover_img = img_urls[i];
             } else{
                 descr = descr.replace(img_urls[i], '');
                 img_info += img_urls[i].match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/)[0];
@@ -3428,8 +3463,7 @@ function set_jump_href(raw_info, mode) {
                     forward_url = used_site_info[key].url + 'torrent/upload';
                 } else if (key == 'YemaPT') {
                     forward_url = used_site_info[key].url + '#/torrent/add?';
-                }
-                else if (key == 'MTeam') {
+                } else if (key == 'MTeam') {
                     forward_url = used_site_info[key].url + 'upload';
                 } else if (key == 'KIMOJI' || key == 'HDPost' || key == 'Aither' || key == 'FNP' || key == 'OnlyEncodes') {
                     var type_dict = {'电影': 1, '剧集': 2, '动漫': 2, '综艺': 2, '纪录': 2, '音乐': 3, '体育': 2, 'MV': 3};
@@ -3896,14 +3930,11 @@ function fill_torrent(forward_site, container, name) {
             $('#form_item_title')[0].dispatchEvent(evt);
         });
     } 
-    // else if (forward_site == 'YemaPT') {
-    //     $('#fileList').wait(function(){
-    //         $('input[id=fileList]')[0].files = container.files;
-    //         $('#fileList')[0].dispatchEvent(evt);
-    //         $('#showName').val(raw_info.name);
-    //         $('#showName')[0].dispatchEvent(evt);
-    //     });
-    // }
+    else if (forward_site == 'YemaPT') {
+        $('#fileList').wait(function(){
+            ant_form_instance?.context?.setFieldsValue({ 'fileList': [...container.files].map(f =>{ f.originFileObj = f; return f}) }); //files要转为数组，并且添加originFileObj属性为自身
+        });
+    }
     else {
         $('input[name=file]')[0].files = container.files;
         if (forward_site == 'HHClub') {
@@ -8083,6 +8114,9 @@ if (site_url.match(/https:\/\/redacted.ch\/upload.php#separator#/)) {
 }
 
 if (origin_site == 'BYR') {
+    delete Array.prototype.remove;
+}
+else if (origin_site == 'YemaPT') {
     delete Array.prototype.remove;
 }
 
@@ -15427,7 +15461,95 @@ function auto_feed() {
         }
 
         else if (forward_site == 'YemaPT') {
-            // alert(1)
+            delete Array.prototype.remove; //站点前端框架会对 array 添加名为 "remove" key，冲突，故删除
+            $('#shortDesc').wait(function(){
+
+
+                // 找到form
+                const ant_form = document.querySelector('form.ant-form')
+                // 找到fiberNode
+                const __reactFiber = getReactFiberNode(ant_form);
+                // 通过fiberNode找到组件实例
+                const instance = getReactComponentInstance(__reactFiber);
+
+                if (instance) ant_form_instance = instance //global use
+
+                instance?.context?.setFieldsValue({ 'showName': raw_info.name });
+                instance?.context?.setFieldsValue({ 'shortDesc': raw_info.small_descr });
+                const infos = get_mediainfo_picture_from_descr(raw_info.descr)
+                const cover_img = infos.cover_img? infos.cover_img.replace('[img]','').replace('[/img]','') : infos.pic_info?.split('[/img]')?.at(0).replace('[img]', '').trim()
+                instance?.context?.setFieldsValue({ 'picture': cover_img });
+
+                function trigger_select(tid, value, time, order) {
+                    if (time === undefined) {
+                        time = 1000;
+                    }
+                    $(`#${tid}`)[0].dispatchEvent(new MouseEvent("mousedown", {
+                        bubbles: true,
+                        cancelable: true,
+                    }));
+                    setTimeout(function(){
+                        if (value !== 'Other') {
+                            $(`div.ant-select-item-option[title="${value}"]`).wait(function(){
+                                console.log(value, $(`div.ant-select-item-option-content:contains("${value}")`))
+                                if (value == 'Blu-ray') {
+                                    $(`div.ant-select-item-option-content:contains("${value}"):eq(2)`).click();
+                                } else if (value == 'UHD Blu-ray') {
+                                    $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
+                                } else {
+                                    $(`div.ant-select-item-option-content:contains("${value}")`).click();
+                                }
+                            });
+                        } else {
+                            $(`div.ant-select-item-option-content:contains("${value}"):eq(${order-1})`).click();
+                        }
+                    }, time);
+                }
+
+                // 类别
+                var type_dict = {'电影': '电影', 
+                                '剧集': '剧集',
+                                '动漫': '动漫',
+                                '综艺': '综艺',
+                                '音乐': '音乐',
+                                '纪录': '纪录片',
+                                '体育': '体育',
+                                '软件': '软件',
+                                '学习': '教育书籍',
+                                '': '未分类',
+                                'MV': 'MV',
+                                '书籍': '书籍'};
+                if (type_dict.hasOwnProperty(raw_info.type)){
+                    var category = type_dict[raw_info.type];
+                    trigger_select('categoryId', category, 0, 0);
+                }
+
+                // 文件
+                setTimeout(function(){
+                    addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, null);
+                }, 200);
+
+                function bbcode2markdown(text) {
+                    text = text.replace(/\[size=\d\]/ig, '').replace(/\[\/size\]/ig, '')
+                    text = text.replace(/\[font=.+?\]/ig, '').replace(/\[\/font\]/ig, '')
+                    text = text.replace(/\[color=.+?\]/ig, '').replace(/\[\/color\]/ig, '')
+                    text = text.replace(/\[img\](.*?)\[\/img\]/ig, '![_]($1)')
+                    text = text.replace(/\[b\]\s*/ig, '**').replace(/\s*\[\/b\]/ig, '**')
+                    text = text.replace(/\[i\]\s*/ig, '*').replace(/\s*\[\/i\]/ig, '*')
+                    text = text.replace(/\[url=([^\]]*?)\](.*?)\[\/url\]/ig, '[$2]($1)')
+                    //text = text.replace(/\[quote\](.*?)\[\/quote\]/isg, (m, n) => '> '+ n.split('\n').join('\\\n')+'\n\n')
+                    text = text.replace(/\[quote\](.*?)\[\/quote\]/isg, (m, n) => '> '+ n.split('\n').join('\n> ')+'\n\n')
+                    return text
+                }
+
+                // 描述
+                instance?.context?.setFieldsValue({ 'longDesc': bbcode2markdown(raw_info.descr) });
+                
+                // 匿名
+                if (if_uplver) {
+                    $('input[class="ant-radio-input"][value="y"]').click();
+                }
+            }, 1000/*次*/, 200/*毫秒/次*/); //https://www.cnblogs.com/52cik/p/jquery-wait.html
         }
 
         else if (forward_site == 'TTG'){
@@ -27163,8 +27285,6 @@ if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/in
             executed = true;
         }
     });
-} else if (origin_site == 'YemaPT' && site_url.match(/^https:\/\/www.yemapt.org\/#\/torrent\/add/)) {
-    setTimeout(auto_feed, sleep_time);
 } else {
     setTimeout(auto_feed, sleep_time);
 }
