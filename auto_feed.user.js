@@ -92,7 +92,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.6.8
+// @version      2.0.6.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -3929,8 +3929,7 @@ function fill_torrent(forward_site, container, name) {
             $('#form_item_title').val(raw_info.name);
             $('#form_item_title')[0].dispatchEvent(evt);
         });
-    } 
-    else if (forward_site == 'YemaPT') {
+    } else if (forward_site == 'YemaPT') {
         $('#fileList').wait(function(){
             ant_form_instance?.context?.setFieldsValue({ 'fileList': [...container.files].map(f =>{ f.originFileObj = f; return f}) }); //files要转为数组，并且添加originFileObj属性为自身
         });
@@ -12645,7 +12644,6 @@ function auto_feed() {
         }
 
         $('.forward_a').click(function(e){
-            //站点资源明确禁转的规则优先
             if (search_mode){
                 if (origin_site == 'FRDS' || raw_info.name.match(/frds/i)) {
                     if (['CMCT', 'OurBits', 'HDChina', 'HDSky'].indexOf(e.target.id) > -1) {
@@ -12684,12 +12682,6 @@ function auto_feed() {
                 if (['PTP', 'SC', 'TVV', 'avz', 'PHD', 'CNZ', 'HDCity', 'BTN', 'ANT', 'GPW', 'KG'].indexOf(this.id) > -1) {
                     e.preventDefault();
                     check_exist_tid(this.id);
-                }
-
-                if (this.id == 'YemaPT') {
-                    e.preventDefault();
-                    var href = this.href.replace(separator, '');
-                    window.open(href, target="_blank");
                 }
             }
         });
@@ -13075,9 +13067,6 @@ function auto_feed() {
     *                                       part 5 发布页数据逻辑处理                                                  *
     ******************************************************************************************************************/
     else if (judge_if_the_site_as_source() == 0) {
-        if (site_url.match(/https:\/\/www.yemapt.org\/#\/torrent\/add\?/)) {
-            separator = 'add?';
-        }
         var upload_site = site_url.split(separator)[0]; //转发的站点
         var forward_site = find_origin_site(upload_site);
         var transfer_mode = 0; // 0表示直接转，1表示候选
