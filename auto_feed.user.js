@@ -2841,8 +2841,8 @@ function get_mediainfo_picture_from_descr(descr){
     var mediainfo = '';
     var img_urls = descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/ig);
     var index_of_info = 0;
-    if (descr.match(/◎译.{2,10}名|◎片.{2,10}名/)) {
-        index_of_info = descr.match(/◎译.{2,10}名|◎片.{2,10}名/).index;
+    if (descr.match(/◎译.{2,10}名|◎片.{2,10}名|片.{2,10}名/)) {
+        index_of_info = descr.match(/◎译.{2,10}名|◎片.{2,10}名|片.{2,10}名/).index;
     }
     try {
         for (i=0; i<img_urls.length; i++){
