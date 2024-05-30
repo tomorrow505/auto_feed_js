@@ -2841,8 +2841,8 @@ function get_mediainfo_picture_from_descr(descr){
     var mediainfo = '';
     var img_urls = descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/ig);
     var index_of_info = 0;
-    if (descr.match(/◎译.{2,10}名|◎片.{2,10}名/)) {
-        index_of_info = descr.match(/◎译.{2,10}名|◎片.{2,10}名/).index;
+    if (descr.match(/◎译.{2,10}名|◎片.{2,10}名|片.{2,10}名/)) {
+        index_of_info = descr.match(/◎译.{2,10}名|◎片.{2,10}名|片.{2,10}名/).index;
     }
     try {
         for (i=0; i<img_urls.length; i++){
@@ -21411,9 +21411,10 @@ function auto_feed() {
                     })
                 } else if (forward_site == 'ACM' || forward_site == 'JPTV'){
                     pic_info = deal_img_350(infos.pic_info);
+                } else {
+                    pic_info = infos.pic_info;
                 }
                 if (forward_site != 'Tik') {
-                    pic_info = infos.pic_info;
                     $('#upload-form-description').val(pic_info);
                     $('#bbcode-description').val(pic_info);
                     try { $('#upload-form-description')[0].dispatchEvent(event); } catch (err) {}
