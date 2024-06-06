@@ -6682,6 +6682,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#dealimg').append(`<input type="button" id="change" value="字符串替换" style="margin-bottom:5px;margin-left:5px">`);
         $('#dealimg').append(`<input type="text" style="width: 50px; text-align:center; margin-left: 5px" id="img_source" />--<input type="text" style="width: 50px; text-align:center; margin-right: 5px" id="img_dest" /><br>`);
         $('#dealimg').append(`<input type="button" id="350px" value="350px缩略" style="margin-bottom:5px;margin-right:5px">`);
+        $('#dealimg').append(`<input type="button" id="del_img_tag" value="链接提取" style="margin-bottom:5px;margin-right:5px">`);
         $('#dealimg').append(`<input type="button" id="enter2space" value="换行->空格" style="margin-bottom:5px;margin-right:5px">`);
         $('#dealimg').append(`<input type="button" id="get_encode" value="图片提取" style="margin-bottom:5px;margin-right:5px">`);
         $('#dealimg').append(`从第<input type="text" style="width: 30px; text-align:center; margin-left: 5px; margin-right:5px" id="start" />张开始每隔<input type="text" style="width: 30px; text-align:center; margin-left: 5px; margin-right:5px" id="step" />张获取其中第<input type="text" style="width: 30px; text-align:center; margin-left: 5px;margin-right:5px" id="number" />张。<br>`);
@@ -6713,6 +6714,12 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                 $('#imgs_to_show').show();
             }
         });
+
+        $('#del_img_tag').click((e)=>{
+            var origin_str = $('#picture').val();
+            origin_str = origin_str.replace(/\[\/?img\]/g, '');
+            $('#result').val(origin_str);
+        })
 
         $('#getsource').click((e)=>{
             var origin_str = $('#picture').val();
@@ -9192,7 +9199,7 @@ function auto_feed() {
             $('.table-responsive:eq(2)').find('a').has('img').map((index,e)=>{
                 raw_info.descr += `[url=${$(e).attr("href")}][img]${$(e).find("img").attr("src")}[/img][/url]`
             });
-            raw_info.torrent_url = $('.torrent-buttons').find('a[href*="torrents/download"]').attr('href');
+            raw_info.torrent_url = $('.button-block').find('a[href*="torrents/download"]').attr('href');
         }
 
         if (origin_site == 'BLU') {
@@ -10327,7 +10334,7 @@ function auto_feed() {
                 }
             }
 
-            if (['副标题','副標題','副标题', 'Small Description'].indexOf(tds[i].textContent) > -1) {
+            if (['副标题','副標題','副标题', 'Small Description'].indexOf(tds[i].textContent) > -1 && !raw_info.small_descr) {
                 if (origin_site == 'HUDBT') {
                     raw_info.small_descr = tds[i].nextSibling.textContent;
                 } else {
@@ -11747,7 +11754,7 @@ function auto_feed() {
         }
 
         if (raw_info.type == '动漫') {
-            if (['MTeam', 'PTer', 'PThome', 'HDHome', 'HDDolby'].indexOf(origin_site) > -1) {
+            if (['PTer', 'PThome', 'HDHome', 'HDDolby'].indexOf(origin_site) > -1) {
                 var bookmark = document.getElementById('bookmark0');
                 while (bookmark.previousElementSibling) {
                     bookmark = bookmark.previousElementSibling;
