@@ -3074,8 +3074,8 @@ function fill_raw_info(raw_info, forward_site){
         raw_info.descr = raw_info.descr.replace(/\[quote\]\n/g, '[quote]')
     }
     try {
-        if (raw_info.descr.match(/\[quote\].*?官组作品.*?\[\/quote\]/g).length >= 2) {
-            raw_info.descr = raw_info.descr.split(/\[quote\].*?官组作品.*?\[\/quote\]/g).pop();
+        if (raw_info.descr.match(/\[quote\].*?官组作品.*?\n?\[\/quote\]/g).length >= 2) {
+            raw_info.descr = raw_info.descr.split(/\[quote\].*?官组作品.*?\n?\[\/quote\]/g).pop();
             raw_info.descr = add_thanks(raw_info.descr);
         }
     } catch(err) {}
@@ -15061,20 +15061,22 @@ function auto_feed() {
             function trigger_select(tid, value, time, order) {
                 var clickEvent = document.createEvent ('MouseEvents');
                 clickEvent.initEvent ('mousedown', true, true);
-                document.getElementById(tid).dispatchEvent(clickEvent);
-                setTimeout(function(){
-                    if (value == 'DTS') {
-                        $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
-                    } else if (value == 'TrueHD') {
-                        $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
-                    } else if (value !== 'Other') {
-                        $(`div.ant-select-item-option-content:contains("${value}")`).wait(function(){
-                            $(`div.ant-select-item-option-content:contains("${value}")`).click();
-                        });
-                    } else {
-                        $(`div.ant-select-item-option-content:contains("${value}"):eq(${order})`).click();
-                    }
-                }, time);
+                $(`#${tid}`).wait(function() {
+                    document.getElementById(tid).dispatchEvent(clickEvent);
+                    setTimeout(function(){
+                        if (value == 'DTS') {
+                            $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
+                        } else if (value == 'TrueHD') {
+                            $(`div.ant-select-item-option-content:contains("${value}"):eq(0)`).click();
+                        } else if (value !== 'Other') {
+                            $(`div.ant-select-item-option-content:contains("${value}")`).wait(function(){
+                                $(`div.ant-select-item-option-content:contains("${value}")`).click();
+                            });
+                        } else {
+                            $(`div.ant-select-item-option-content:contains("${value}"):eq(${order})`).click();
+                        }
+                    }, time);
+                });
             }
 
             $('#category').wait(function() {
@@ -15135,13 +15137,14 @@ function auto_feed() {
                     } catch(Err) {}
                 }
                 GM_setClipboard(raw_info.descr);
+                var m_css = $('#name_extra').parent().parent().parent().attr('class').match(/css-[^ ]*/)[0];
                 $('label:contains("簡介")').parent().parent().parent().after(
-                    `<div class="ant-form-item css-gxchp0 ant-form-item-has-success">
-                      <div class="ant-row ant-form-item-row css-gxchp0">
-                        <div class="ant-col ant-form-item-label css-gxchp0" style="width: 135px;">
+                    `<div class="ant-form-item ${m_css} ant-form-item-has-success">
+                      <div class="ant-row ant-form-item-row ${m_css}">
+                        <div class="ant-col ant-form-item-label ${m_css}" style="width: 135px;">
                           <label for="noticing" class="" title="注意"><font size="2" color="red"><b>注意</b></font></label>
                         </div>
-                        <div class="ant-col ant-form-item-control css-1r6ucam">
+                        <div class="ant-col ant-form-item-control ${m_css}">
                             <div class="ant-form-item-control-input">
                               <div class="ant-form-item-control-input-content">
                                 <font size="3" color="red">
@@ -15548,7 +15551,6 @@ function auto_feed() {
                 if (raw_info.url) {
                     try{
                         const imdbid = raw_info.url.match(/title\/tt(\d+)/)[1];
-                        alert(imdbid)
                         instance?.context?.setFieldsValue({ 'imdb': imdbid });
                     } catch (err) {}
                 }
