@@ -178,7 +178,9 @@ function mutation_observer(target, func) {
     const MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
     const observer = new MutationObserver(mutationList =>  
         mutationList.filter(m => m.type === 'childList').forEach(m => {
-            m.addedNodes.forEach(func());
+            try{
+                m.addedNodes.forEach(func());
+            } catch (Err) {}
         }
     ));
     observer.observe(target,{childList: true, subtree: true});
@@ -3952,22 +3954,6 @@ function addTorrent(url, name, forward_site, forward_announce) {
             let container = new DataTransfer();
             container.items.add(files);
             fill_torrent(forward_site, container, name);
-        });
-    } else if (url.match(/https:\/\/kp.m-team.cc\/detail\/\d+/)) {
-        var torrent_id = url.match(/detail\/(\d+)/)[1];
-        postData('https://kp.m-team.cc/api/torrent/genDlToken', encodeURI(`id=${torrent_id}`), function(data) {
-            data = JSON.parse(data);
-            url = data.data;
-            getBlob(url, forward_announce, forward_site, "application/x-bittorrent", function(data){
-                const blob = data.data;
-                if (data.name) {
-                    name = data.name + '.torrent';
-                }
-                const files = new window.File([blob], name, { type: blob.type });
-                let container = new DataTransfer();
-                container.items.add(files);
-                fill_torrent(forward_site, container, name);
-            });
         });
     } else {
         getBlob(url, forward_announce, forward_site, "application/x-bittorrent", function(data){
@@ -10585,18 +10571,40 @@ function auto_feed() {
         if (origin_site == 'MTeam') {
             insert_row = o_insert_row;
             var torrent_id = site_url.match(/detail\/(\d+)/)[1];
-            postData('https://kp.m-team.cc/api/torrent/detail', encodeURI(`id=${torrent_id}`), function(data) {
-                data = JSON.parse(data);
-                data = data.data;
-                raw_info.descr = data.descr.trim();
-                raw_info.descr = raw_info.descr.replace(/!\[\]\(.*?.(jpg|png)\)/, function(data){
-                    return `[img]${data.match(/\((.*?)\)/)[1]}[/img]`;
+            function build_fetch(api) {
+                const formdata = new FormData();
+                formdata.append("id", torrent_id);
+                new_fetch = fetch(`https://api.m-team.io/${api}`, {
+                    method: 'POST',
+                    headers: { "authorization": localStorage.getItem("auth") },
+                    body: formdata
                 });
-                if (data.mediainfo) {
-                    console.log(data)
-                    var mediainfo = data.mediainfo;
+                return new_fetch;
+            }
+            // https://github.com/lfkid/fuzzy-enigma/blob/master/ECMAScript/使Promise.all()不会rejected从而并行处理多个fetch.md
+            const apis = ['api/torrent/detail', 'api/torrent/genDlToken'];
+            const getDataFromAPIs = async() => {  
+                const results = await Promise.all(
+                    apis.map(async api => {
+                        try {  
+                            const response = await build_fetch(api);  
+                            const responseJson = await response.json();  
+                            if (!response.ok) {  
+                              throw new Error(`${response.statusText}`);  
+                            }
+                            return responseJson.data;  
+                        } catch (error) {  
+                            return error;  
+                        }
+                    })
+                );
+                raw_info.torrent_url = results[1];
+                var detail = results[0];
+                raw_info.name = detail.name;
+                if (detail.mediainfo) {
+                    var mediainfo = detail.mediainfo;
                     try {
-                        mediainfo = decodeURIComponent(data.mediainfo);
+                        mediainfo = decodeURIComponent(detail.mediainfo);
                     } catch (err) {}
                     var picture_info = '';
                     try{
@@ -10617,8 +10625,8 @@ function auto_feed() {
                 raw_info.descr = raw_info.descr.replace(/^\[quote\]\[b\]\[color=blue\]转自.*?，感谢原制作者发布。\[\/color\]\[\/b\]\[\/quote\]/i, '');
                 raw_info.descr = add_thanks(raw_info.descr);
                 rebuild_href(raw_info);
-                console.log(raw_info.descr);
-            });
+            };
+            getDataFromAPIs();
         }
 
         //------------------------------------国外站点简介单独处理，最后辅以豆瓣按钮----------------------------------------------
@@ -21512,7 +21520,6 @@ function auto_feed() {
                         text_infos = [...new Set(text_infos)];
                         descr = descr.format({'subtitles': text_infos.join(' / ')});
                     } catch (err) {console.log(err)}
-
                 } else {
                     var medium_sel = '';
                     var size = parseFloat(get_size_from_descr(raw_info.descr));
@@ -21542,6 +21549,8 @@ function auto_feed() {
                         torrent_name += ' MPEG-2';
                     } else if (raw_info.codec_sel == 'VC-1') {
                         torrent_name += ' VC-1';
+                    } else if (raw_info.codec_sel == 'H265') {
+                        torrent_name += ' HEVC';
                     } else {
                         torrent_name += ' AVC';
                     }
