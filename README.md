@@ -46,5 +46,9 @@ PT站一键转载脚本，不定时修复bug提交到GitHub，一般周末统一
 | :-----------------------------------------: | :--------------------------------------------: |
 | <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/ali_pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/wechat_pay.png" width = "160" height = "160" alt="微信" align=center /> |
 
- 
+ ## 贡献者
+
+<a href="https://github.com/eryajf/learn-github/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=tomorrow505/auto_feed_js" />
+</a>
 
