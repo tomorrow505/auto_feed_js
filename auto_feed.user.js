@@ -3892,6 +3892,9 @@ function getBlob(url, forward_announce, forward_site, filetype, callback) {
         onload: (xhr) => {
             var r = xhr.responseText;
             build_blob_from_torrent(r, forward_announce, forward_site, filetype, callback);
+        },
+        onerror: function(res) {
+            console.log(res)
         }
     });
 }
@@ -12287,7 +12290,7 @@ function auto_feed() {
             if_exclusive = true;
         } else if (origin_site == 'PigGo' && $('span:contains("禁转")').length) {
             if_exclusive = true;
-        } else if (origin_site == 'HHClub' && $('span:contains("禁转")').length) {
+        } else if (origin_site == 'HHClub' && $('span:contains("禁转")').is(':visible')) {
             if_exclusive = true;
         } else if (origin_site == 'TJUPT' && ( $('#tag').find('.tag-exclusive').length)) {
             if_exclusive = true;
