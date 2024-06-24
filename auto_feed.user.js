@@ -14661,7 +14661,8 @@ function auto_feed() {
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '51'); }
-                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (raw_info.name.match(/E\d{2}/)) { check_label(document.getElementsByName('tags[4][]'), '50'); }
+                    if (raw_info.name.match(/HDR|HDR10|HDR10+/) || raw_info.small_descr.match(/HDR|HDR10|HDR10+/)) { check_label(document.getElementsByName('tags[4][]'), '7'); }
                     if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '8');}
                     if (raw_info.small_descr.match(/特效字幕/)) { check_label(document.getElementsByName('tags[4][]'), '12'); }
                     if (raw_info.descr.match(/mpls/i) || $('textarea[name="technical_info"]').val().match(/mpls/i)) {
@@ -19470,8 +19471,8 @@ function auto_feed() {
         else if (forward_site == 'OKPT') {
             //类型
             var browsecat = $('#browsecat')
-            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
-                             '体育': 407, '软件': 409, '学习': 409, '': 409, '游戏': 409, 'MV': 406};
+            var type_dict = {'剧集': 402, '电影': 401, '动漫': 405, '记录': 404, '综艺': 403, '体育': 407,
+                             '漫画': 436, '电子书': 434, '有声书': 432, '游戏': 413, '软件': 431, 'MV': 406};
             //如果当前类型在上述字典中
             browsecat.val(409)
             if (type_dict.hasOwnProperty(raw_info.type)){
@@ -19503,18 +19504,34 @@ function auto_feed() {
             //编码
             var codec_box = $('select[name="codec_sel[4]"]');
             codec_box.val(14);
-            switch (raw_info.codec_sel){
-                case 'H265': codec_box.val(11); break;
-                case 'H264': codec_box.val(2); break;
-                case 'X265': codec_box.val(11); break;
-                case 'VP9': codec_box.val(9); break;
-                case 'X264': codec_box.val(2); break;
-            }
+            switch (raw_info.codec_sel.toUpperCase()) {
+                case 'HEVC':
+                case 'H265':
+                case 'H.265':
+                case 'X265':
+                    codec_box.val(11);
+                    break;
+                case 'AVC':
+                case 'H264':
+                case 'H.264':
+                case 'X264':
+                    codec_box.val(2);
+                    break;
+                case 'VP9':
+                    codec_box.val(9);
+                    break;
+                case 'AV1':
+                    codec_box.val(7);
+                    break;
+                default:
+                    console.log('No match found for:', raw_info.codec_sel);
+}
+
             if (raw_info.name.match(/H.?266/)) { codec_box.val(10); }
 
             //分辨率
             var standard_box = $('select[name="standard_sel[4]"]');
-            var standard_dict = {'8K': 1, '4K': 2, '1080p': 3, '1080i': 3, '720p': 4, 'SD': 5, '': 5};
+            var standard_dict = {'8k': 1, '4K': 2, '2160p': 2, '1080p': 3, '1080i': 3, '720p': 4, 'Other': 10, '': 10};
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
@@ -19525,7 +19542,7 @@ function auto_feed() {
             console.log(raw_info.audiocodec_sel)
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HD': audiocodec_box.val(7); break;
-                case 'DTS-HDMA:X 7.1': audiocodec_box.val(12); break;
+                case 'DTS-HDMA:X 7.1': audiocodec_box.val(22); break;
                 case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(7); break;
                 case 'TrueHD': audiocodec_box.val(19); break;
                 case 'Atmos':
@@ -19540,26 +19557,68 @@ function auto_feed() {
                 case 'AC3': audiocodec_box.val(15); break;
                 case 'AAC': audiocodec_box.val(6); break;
                 case 'Flac': audiocodec_box.val(1); break;
-                case 'APE': audiocodec_box.val(2); break;
+                case 'APE': audiocodec_box.val(5); break;
                 case 'LPCM': audiocodec_box.val(16); break;
-                case 'WAV': audiocodec_box.val(7);
+                case 'WAV': audiocodec_box.val(20); break;
+                case 'MP3': audiocodec_box.val(4); break;
+                case 'MPEG': audiocodec_box.val(14);
             }
 
             $('select[name="team_sel[4]"]').val(14);
             var team = raw_info.name.split('-').pop().trim();
             var team2 = raw_info.name.split('@').pop().trim();
-            if (/^PTer/.test(team)) {
+            if (/^PTer/.test(team) || /^PTer/.test(team2)) {
                 $('select[name="team_sel[4]"]').val(21);
-            } else if (/^CHD/.test(team)) {
-                $('select[name="team_sel[4]"]').val(17);
-            } else if (/^Our/.test(team) || (/^Our/.test(team2))) {
-                $('select[name="team_sel[4]"]').val(2);
-            } else if (/^RL/.test(team) || team.startsWith("R²"))  {
-                $('select[name="team_sel[4]"]').val(23);
-            } else if (team.startsWith("beAst"))  {
-                $('select[name="team_sel[4]"]').val(1);
-            } else if (team.startsWith("CMCT"))  {
+            } else if (team.startsWith("Audies") || team2.startsWith("Audies") || team.startsWith("ADE") || team2.startsWith("ADE") || team.startsWith("ADWeb") || team2.startsWith("ADWeb")) {
+                $('select[name="team_sel[4]"]').val(13);
+            } else if (team.startsWith("BTSCHOOL") || team2.startsWith("BTSCHOOL") || team.startsWith("BtsHD") || team2.startsWith("BtsHD") || team.startsWith("BtsTV") || team2.startsWith("BtsTV") || team.startsWith("BtsPAD") || team2.startsWith("BtsPAD")) {
+                $('select[name="team_sel[4]"]').val(18);
+            } else if (team.startsWith("CMCT") || team2.startsWith("CMCT")) {
                 $('select[name="team_sel[4]"]').val(16);
+            } else if (/^CHD/.test(team) || /^CHD/.test(team2)) {
+                $('select[name="team_sel[4]"]').val(17);
+            } else if (team.startsWith("DJWEB") || team2.startsWith("DJWEB")) {
+                $('select[name="team_sel[4]"]').val(19);
+            } else if (team.startsWith("FRDS") || team2.startsWith("FRDS")) {
+                $('select[name="team_sel[4]"]').val(20);
+            } else if (team.startsWith("HHWEB") || team2.startsWith("HHWEB")) {
+                $('select[name="team_sel[4]"]').val(4);
+            } else if (team.startsWith("HDArea") || team2.startsWith("HDArea") || team.startsWith("HDATV") || team2.startsWith("HDATV") || team.startsWith("HDAPad") || team2.startsWith("HDAPad")) {
+                $('select[name="team_sel[4]"]').val(25);
+            } else if (team.startsWith("HDChina") || team2.startsWith("HDChina") || team.startsWith("HDCTV") || team2.startsWith("HDCTV")) {
+                $('select[name="team_sel[4]"]').val(8);
+            } else if (team.startsWith("Dream") || team2.startsWith("Dream") || team.startsWith("QHstudIo") || team2.startsWith("QHstudIo") || team.startsWith("DBTV") || team2.startsWith("DBTV") || team.startsWith("CornerMV") || team2.startsWith("CornerMV")) {
+                $('select[name="team_sel[4]"]').val(9);
+            } else if (team.startsWith("HDH") || team2.startsWith("HDH") || team.startsWith("HDHome") || team2.startsWith("HDHome") || team.startsWith("HDHWEB") || team2.startsWith("HDHWEB")) {
+                $('select[name="team_sel[4]"]').val(6);
+            } else if (team.startsWith("HDSky") || team2.startsWith("HDSky") || team.startsWith("HDSWEB") || team2.startsWith("HDSWEB") || team.startsWith("HDS") || team2.startsWith("HDS")) {
+                $('select[name="team_sel[4]"]').val(10);
+            } else if (team.startsWith("beAst") || team2.startsWith("beAst")) {
+                $('select[name="team_sel[4]"]').val(1);
+            } else if (team.startsWith("LeagueWEB") || team2.startsWith("LeagueWEB") || team.startsWith("LeagueNF") || team2.startsWith("LeagueNF") || team.startsWith("LHD") || team2.startsWith("LHD")) {
+                $('select[name="team_sel[4]"]').val(11);
+            } else if (team.startsWith("BMDru") || team2.startsWith("BMDru") || team.startsWith("MTeam") || team2.startsWith("MTeam")) {
+                $('select[name="team_sel[4]"]').val(12);
+            } else if (team.startsWith("OurBits") || team2.startsWith("OurBits") || team.startsWith("PbK") || team2.startsWith("PbK") || team.startsWith("OurTV") || team2.startsWith("OurTV") || team.startsWith("iLoveTV") || team2.startsWith("iLoveTV") || team.startsWith("Ao") || team2.startsWith("Ao") || team.startsWith("MGs") || team2.startsWith("MGs") || team.startsWith("OurPad") || team2.startsWith("OurPad") || team.startsWith("HosT") || team2.startsWith("HosT") || team.startsWith("iLoveHD") || team2.startsWith("iLoveHD")) {
+                $('select[name="team_sel[4]"]').val(2);
+            } else if (team.startsWith("PANDA") || team2.startsWith("PANDA") || team.startsWith("AilMR") || team2.startsWith("AilMR") || team.startsWith("AilME") || team2.startsWith("AilME") || team.startsWith("AilMEPad") || team2.startsWith("AilMEPad") || team.startsWith("AilMWeb") || team2.startsWith("AilMWeb") || team.startsWith("AilMTV") || team2.startsWith("AilMTV") || team.startsWith("AilMUpscale") || team2.startsWith("AilMUpscale")) {
+                $('select[name="team_sel[4]"]').val(5);
+            } else if (team.startsWith("PTHweb") || team2.startsWith("PTHweb") || team.startsWith("PTH") || team2.startsWith("PTH") || team.startsWith("PTHome") || team2.startsWith("PTHome") || team.startsWith("PTHWEB") || team2.startsWith("PTHWEB") || team.startsWith("PTHtv") || team2.startsWith("PTHtv")) {
+                $('select[name="team_sel[4]"]').val(6);
+            } else if (team.startsWith("RLeaves") || team2.startsWith("RLeaves") || team.startsWith("R²") || team2.startsWith("R²") || team.startsWith("RLWeb") || team2.startsWith("RLWeb") || team.startsWith("RLTV") || team2.startsWith("RLTV") || team.startsWith("RL") || team2.startsWith("RL") || team.startsWith("RL4B") || team2.startsWith("RL4B")) {
+                $('select[name="team_sel[4]"]').val(23);
+            } else if (team.startsWith("RousiWeb") || team2.startsWith("RousiWeb")) {
+                $('select[name="team_sel[4]"]').val(24);
+            } else if (team.startsWith("TTG") || team2.startsWith("TTG") || team.startsWith("WiKi") || team2.startsWith("WiKi") || team.startsWith("ARiN") || team2.startsWith("ARiN") || team.startsWith("NGB") || team2.startsWith("NGB") || team.startsWith("DOA") || team2.startsWith("DOA")) {
+                $('select[name="team_sel[4]"]').val(26);
+            } else if (team.startsWith("UBits") || team2.startsWith("UBits")) {
+                $('select[name="team_sel[4]"]').val(27);
+            } else if (team.startsWith("YingWEB") || team2.startsWith("YingWEB")) {
+                $('select[name="team_sel[4]"]').val(28);
+            } else if (team.startsWith("Zm") || team2.startsWith("Zm") || team.startsWith("ZmWeb") || team2.startsWith("ZmWeb") || team.startsWith("ZmPT") || team2.startsWith("ZmPT")) {
+                $('select[name="team_sel[4]"]').val(29);
+            } else if (team.startsWith("SharkWEB") || team2.startsWith("SharkWEB") || team.startsWith("SharkTV") || team2.startsWith("SharkTV") || team.startsWith("SharkMV") || team2.startsWith("SharkMV")) {
+                $('select[name="team_sel[4]"]').val(30);
             } else {
                 if ($('select[name="team_sel[4]"]').find(`option:contains(${team})`).length) {
                     $('select[name="team_sel[4]"]').find(`option:contains(${team})`).attr('selected', true);
@@ -19567,7 +19626,7 @@ function auto_feed() {
             }
 
             var team_box = $('select[name="processing_sel[4]"]');
-            var team_dict = {'欧美': 6, '大陆': 8, '香港': 7, '台湾': 7, '日本': 5, '韩国': 4};
+            var team_dict = {'欧美': 6, '大陆': 8, '香港': 7, '澳门': 7, '台湾': 7, '日本': 5, '韩国': 4, '印度': 17, '东南亚': 18};
             team_box.val(3);
             if (team_dict.hasOwnProperty(raw_info.source_sel)){
                 var index = team_dict[raw_info.source_sel];
