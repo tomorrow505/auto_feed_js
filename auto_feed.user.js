@@ -5803,7 +5803,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#signin').append(`<b>&nbsp;&nbsp;&nbsp;</b><a href="#", target="_blank" id="begin_sign"><font color="red"><b>→开始签到←</b></font></a>`);
         $('#signin').append(`<br><div id="ksortable"></div>`);
 
-        var unsupported_sites = ['digitalcore', 'HD-Only', 'WT-Sakura', 'HOU', 'OMG', 'TorrentLeech', 'MTeam'];
+        var unsupported_sites = ['digitalcore', 'HD-Only', 'HOU', 'OMG', 'TorrentLeech', 'MTeam'];
 
         for (index=0; index < site_order.length; index++) {
             var key = site_order[index];
@@ -9190,7 +9190,7 @@ function auto_feed() {
                 });
             }
             raw_info.descr = '[quote]' + $('.torrent-mediainfo-dump').find('pre').text().trim() + '\n[/quote]\n\n';
-            $('.table-responsive:eq(2)').find('a').has('img').map((index,e)=>{
+            $('.torrent-description').find('a').has('img').map((index,e)=>{
                 raw_info.descr += `[url=${$(e).attr("href")}][img]${$(e).find("img").attr("src")}[/img][/url]`
             });
             raw_info.torrent_url = $('.button-block').find('a[href*="torrents/download"]').attr('href');
