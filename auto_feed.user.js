@@ -22,7 +22,7 @@
 // @match        https://house-of-usenet.com/threads/*
 // @match        https://omgwtfnzbs.org/details*
 // @match        https://speedapp.io/browse/*
-// @match        https://desitorrents.tv/torrents*
+// @match        https://torrent.desi/torrents*
 // @match        https://www.imdb.com/title/tt*
 // @match        https://hdf.world/*
 // @match        https://kp.m-team.cc/detail/*
@@ -296,12 +296,6 @@ if (site_url.match(/^https?:\/\/.*tieba.baidu.com.*/)) {
         });
     });
     return;
-}
-
-if (site_url.match(/https:\/\/desitorrents.tv\/torrents/)) {
-    $('#torrent-list-table').find('tr:gt(0)').map((index,e)=>{
-        $(e).find('td:eq(2)').find('a.torrent-listings-name').after(`<a href="${$(e).find('a.torrent-listings-name').attr('href')}" target="_blank"><font color=green>跳转</font></a>`)
-    });
 }
 
 if (site_url.match(/^https:\/\/zhuque.in\//)) {
@@ -1374,7 +1368,7 @@ const o_site_info = {
     'TVV': 'http://tv-vault.me/',
     'SugoiMusic': 'https://sugoimusic.me/',
     'Monika': 'https://monikadesign.uk/',
-    'DTR': 'https://desitorrents.tv/',
+    'DTR': 'https://torrent.desi/',
     'HONE': 'https://hawke.uno/',
     'ZHUQUE': 'https://zhuque.in/',
     'YemaPT': 'https://www.yemapt.org/',
@@ -1935,7 +1929,7 @@ function walkDOM(n) {
         } else if (n.nodeName == '#text' && site_url.match(/npupt/)) {
             n.data = n.data.replace(/^ +| +$/g, '');
         } else if (n.nodeName == 'BR') {
-            if (site_url.match(/u2.dmhy.org|ourbits.club|hd-space.org|totheglory.im|blutopia.cc|desitorrents.tv|hudbt|fearnopeer.com|darkland.top|onlyencodes.cc|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com|kp.m-team.cc/i)) {
+            if (site_url.match(/u2.dmhy.org|ourbits.club|hd-space.org|totheglory.im|blutopia.cc|torrent.desi|hudbt|fearnopeer.com|darkland.top|onlyencodes.cc|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com|kp.m-team.cc/i)) {
                 n.innerHTML = '\r\n';
             }
         } else if (n.nodeName == 'LEGEND') {
@@ -2142,7 +2136,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/hdcity.city\/upload/)){
         return 2;
     }
-    if (site_url.match(/^https:\/\/(www.)?(pt.hdpost.top|darkland.top|kimoji.club|asiancinema.me|hd-olimpo.club|jptv.club|fearnopeer.com|onlyencodes.cc|blutopia.cc|aither.cc|desitorrents.tv|monikadesign.uk|hawke.uno|cinematik.net)\/torrents\/\d+$/)){
+    if (site_url.match(/^https:\/\/(www.)?(pt.hdpost.top|darkland.top|kimoji.club|asiancinema.me|hd-olimpo.club|jptv.club|fearnopeer.com|onlyencodes.cc|blutopia.cc|aither.cc|torrent.desi|monikadesign.uk|hawke.uno|cinematik.net)\/torrents\/\d+$/)){
         return 1;
     }
     if (site_url.match(/^https:\/\/(www.)?torrentseeds.org\/torrents\/\d+/)){
@@ -6987,7 +6981,7 @@ function simplifyMI(mediainfo_text, site){
     try{ var video_info = mediainfo_text.match(/(video[\s\S]*?)audio/i)[0].trim(); } catch (err) { video_info = mediainfo_text.match(/(video[\s\S]*?)Forced/i)[0].trim();}
     video_info = get_video_info(video_info);
     simplifiedMI += video_info;
-    try { var audio_info = mediainfo_text.match(/(audio[\s\S]*?)(text)/i)[0].trim(); } catch (err) { audio_info = mediainfo_text.match(/(audio[\s\S]*?)(Forced)/i)[0].trim(); }
+    try { var audio_info = mediainfo_text.match(/(audio[\s\S]*?)(text)/i)[0].trim(); } catch (err) { audio_info = mediainfo_text.match(/(audio[\s\S]*?)(Forced|Alternate group)/i)[0].trim(); }
     var audio_infos = audio_info.split(/audio.*?\nid.*/i).filter(audio => audio.length > 30);
     for (i=0; i < audio_infos.length; i++){
         audio_info = get_audio_info(audio_infos[i]);
@@ -9084,16 +9078,24 @@ function auto_feed() {
         }
 
         if (['ACM', 'HDOli', 'JPTV', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
-            var iii = document.getElementsByTagName('h4')[0].parentNode.parentNode;
-            var div_box = iii.getElementsByClassName('table-responsive')[0];
-            if (origin_site == 'DTR' || origin_site == 'Monika') {
+            var iii, div_box, imdb_box;
+            if (origin_site == 'DTR') {
+                iii = document.getElementsByClassName('torrent-general')[0];
                 div_box = iii.getElementsByClassName('table-responsive')[1];
-                if (origin_site != 'DTR') {
-                    $('h4').first().click();
-                }
+                imdb_box = document.getElementsByClassName('movie__details')[0];
+            }
+            else if (origin_site == 'Monika'){
+                iii = document.getElementsByTagName('h4')[0].parentNode.parentNode;
+                div_box = iii.getElementsByClassName('table-responsive')[1];
+                imdb_box = document.getElementsByClassName('movie-details')[0];
+                $('h4').first().click();
+            }
+            else {
+                iii = document.getElementsByTagName('h4')[0].parentNode.parentNode;
+                div_box = iii.getElementsByClassName('table-responsive')[0];
+                imdb_box = document.getElementsByClassName('movie-details')[0];
             }
             tbody = div_box.getElementsByTagName('table')[0];
-            var imdb_box = document.getElementsByClassName('movie-details')[0];
             raw_info.url = match_link('imdb', imdb_box.parentNode.innerHTML);
             if (!raw_info.url) {
                 var tmdb_url = match_link('tmdb', imdb_box.parentNode.innerHTML);
