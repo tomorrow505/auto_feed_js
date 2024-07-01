@@ -57,7 +57,7 @@
 // @match        https://uhdbits.org/torrents.php*
 // @match        https://blutopia.cc/torrents/create/*
 // @match        https://pt.hdpost.top/upload/*
-// @match        https://asiancinema.me/upload/*
+// @match        https://eiga.moi/upload/*
 // @match        http*://totheglory.im/t/*
 // @match        http*://privatehd.to/torrent/*
 // @match        http*://avistaz.to/torrent/*
@@ -785,7 +785,7 @@ if (site_url.match(/^https:\/\/hdf\.world\/torrents\.php/i) && !site_url.match(/
     return;
 }
 //处理blutopia和hdpost跳转检索，因为其使用ajax异步检索
-if (site_url.match(/(blutopia.cc|pt.hdpost.top|darkland.top|asiancinema.me|hd-olimpo.club|aither.cc|cinematik.net)\/torrents\?imdb(id)?=.*/)){
+if (site_url.match(/(blutopia.cc|pt.hdpost.top|darkland.top|eiga.moi|hd-olimpo.club|aither.cc|cinematik.net)\/torrents\?imdb(id)?=.*/)){
     if (site_url.match(/blutopia.cc/i)) {
         $('div.form-group:contains(IMDb)').find('input').val(site_url.split('=')[1].split('&')[0]);
         $('button.btn-primary:contains(Advanced)').click();
@@ -825,7 +825,7 @@ if (site_url.match(/^https:\/\/passthepopcorn.me\/torrents.php\?id=\d+&torrentid
     var tid = site_url.match(/torrentid=(\d+)/)[1];
     window.open($(`a[href*="action=download&id=${tid}"]`).attr('href'), '_blank');
 }
-if (site_url.match(/^https:\/\/(blutopia.cc|pt.hdpost.top|darkland.top|asiancinema.me|hd-olimpo.club)\/torrents\/download_check/)) {
+if (site_url.match(/^https:\/\/(blutopia.cc|pt.hdpost.top|darkland.top|eiga.moi|hd-olimpo.club)\/torrents\/download_check/)) {
     window.open($('a[href*="torrents/download"]').has('i').attr('href'), '_blank');
     return;
 }
@@ -964,7 +964,7 @@ var ptp_name_location = GM_getValue('ptp_name_location') === undefined ? 1 : GM_
 const default_site_info = {
     '1PTBA': {'url': 'https://1ptba.com/', 'enable': 1},
     '52PT': {'url': 'https://52pt.site/', 'enable': 1},
-    'ACM': {'url': 'https://asiancinema.me/', 'enable': 1},
+    'ACM': {'url': 'https://eiga.moi/', 'enable': 1},
     'ANT': {'url': 'https://anthelion.me/', 'enable': 1},
     'avz': {'url': 'https://avistaz.to/', 'enable': 1},
     'Audiences': {'url': 'https://audiences.me/', 'enable': 1},
@@ -1217,7 +1217,7 @@ const default_search_list = [
     `<a href="http://zmk.pw/search?q={search_name}" target="_blank">ZMK</a>`,
     `<a href="https://mediaarea.net/MediaInfoOnline" target="_blank">MediaiInfo</a>`,
     `<a href="https://assrt.net/sub/?searchword={search_name}" target="_blank">SSW</a>`,
-    `<a href="https://asiancinema.me/torrents?imdb={imdbno}#page/1" target="_blank">ACM</a>`,
+    `<a href="https://eiga.moi/torrents?imdb={imdbno}#page/1" target="_blank">ACM</a>`,
     `<a href="https://jptv.club/torrents?imdb={imdbno}" target="_blank">JPTV</a>`
 ];
 
@@ -1342,7 +1342,7 @@ const o_site_info = {
     'iTS': 'https://shadowthein.net/',
     'HDRoute': 'http://hdroute.org/',
     'HDSpace': 'https://hd-space.org/',
-    'ACM': 'https://asiancinema.me/',
+    'ACM': 'https://eiga.moi/',
     'HDOli': 'https://hd-olimpo.club/',
     'Tik': 'https://cinematik.net/',
     'CNZ': 'https://cinemaz.to/',
@@ -1929,7 +1929,7 @@ function walkDOM(n) {
         } else if (n.nodeName == '#text' && site_url.match(/npupt/)) {
             n.data = n.data.replace(/^ +| +$/g, '');
         } else if (n.nodeName == 'BR') {
-            if (site_url.match(/u2.dmhy.org|ourbits.club|hd-space.org|totheglory.im|blutopia.cc|torrent.desi|hudbt|fearnopeer.com|darkland.top|onlyencodes.cc|cinemageddon|hdpost.top|asiancinema.me|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com|kp.m-team.cc/i)) {
+            if (site_url.match(/u2.dmhy.org|ourbits.club|hd-space.org|totheglory.im|blutopia.cc|torrent.desi|hudbt|fearnopeer.com|darkland.top|onlyencodes.cc|cinemageddon|hdpost.top|eiga.moi|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com|kp.m-team.cc/i)) {
                 n.innerHTML = '\r\n';
             }
         } else if (n.nodeName == 'LEGEND') {
@@ -2136,7 +2136,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/hdcity.city\/upload/)){
         return 2;
     }
-    if (site_url.match(/^https:\/\/(www.)?(pt.hdpost.top|darkland.top|kimoji.club|asiancinema.me|hd-olimpo.club|jptv.club|fearnopeer.com|onlyencodes.cc|blutopia.cc|aither.cc|torrent.desi|monikadesign.uk|hawke.uno|cinematik.net)\/torrents\/\d+$/)){
+    if (site_url.match(/^https:\/\/(www.)?(pt.hdpost.top|darkland.top|kimoji.club|eiga.moi|hd-olimpo.club|jptv.club|fearnopeer.com|onlyencodes.cc|blutopia.cc|aither.cc|torrent.desi|monikadesign.uk|hawke.uno|cinematik.net)\/torrents\/\d+$/)){
         return 1;
     }
     if (site_url.match(/^https:\/\/(www.)?torrentseeds.org\/torrents\/\d+/)){
@@ -3827,7 +3827,7 @@ function build_blob_from_torrent(r, forward_announce, forward_site, filetype, ca
             alert("频率太快，600秒后再来！");
             return;
         }
-        if (r.match(/8:announce\d+:.*(please.passthepopcorn.me|blutopia.cc|beyond-hd.me|asiancinema.me|jptv.club|hd-olimpo.club|secret-cinema.pw|monikadesign.uk)/)) {
+        if (r.match(/8:announce\d+:.*(please.passthepopcorn.me|blutopia.cc|beyond-hd.me|eiga.moi|jptv.club|hd-olimpo.club|secret-cinema.pw|monikadesign.uk)/)) {
             if (r.match(/4:name\d+:/)) {
                 var length = parseInt(r.match(/4:name(\d+):/)[1]);
                 var index = parseInt(r.search('4:name'));
