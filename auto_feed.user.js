@@ -92,7 +92,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.7.0
+// @version      2.0.7.1
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -2512,7 +2512,7 @@ String.prototype.get_label = function(){
     if (my_string.match(/([简繁].{0,12}字幕|[简繁中].{0,3}字|简中|DIY.{1,5}字|内封.{0,3}[繁中字])|(Text.*?[\s\S]*?Chinese|Text.*?[\s\S]*?Mandarin|subtitles.*chs|subtitles.*mandarin|subtitle.*chinese|Presentation Graphics.*?Chinese)/i)){
         labels.zz = true;
     }
-    if (my_string.match(/(英.{0,12}字幕|英.{0,3}字|内封.{0,3}英.{0,3}字)|(Text.*?[\s\S]*?English|subtitles.*eng|subtitle.*english)/i)){
+    if (my_string.match(/(英.{0,12}字幕|英.{0,3}字|内封.{0,3}英.{0,3}字)|(Text.*?[\s\S]*?English|subtitles.*eng|subtitle.*english|Graphics.*?English)/i)){
         labels.yz = true;
     }
 
@@ -7728,7 +7728,6 @@ function get_douban_info(raw_info) {
                 GM_setClipboard(data);
                 rebuild_href(raw_info);
             } else if (site_url.match(/pter.*upload.php|piggo.*upload.php|^https?:\/\/\d+.\d+.\d+.\d+.*5678/)) {
-                console.log(site_url.match(/pter.*upload.php|piggo.*upload.php|\d+.\d+.\d+.\d+.*5678/)[0])
                 $('#descr').val(data + '\n\n' + $('#descr').val());
                 $('.get_descr[value=正在获取]').val("获取成功");
                 if (!$('input[name=small_descr]').val()) {
@@ -10648,7 +10647,7 @@ function auto_feed() {
             var torrent_box = document.getElementById("torrent_" + torrent_id);
             var subtitle_box = $(torrent_box).find('#subtitle_manager');
             subtitle_box.find('img').map((idnex, e)=>{
-                if ($(e).attr('title') != "No Subtitles"){
+                if ($(e).attr('title') != "No Subtitles" && !$(e).parent().is("a")){
                     raw_info.subtitles.push($(e).attr('title'));
                 }
             });
@@ -13971,18 +13970,18 @@ function auto_feed() {
                     label = /7\.1/; label_str = '7.1';
                 }
                 if (!name.match(label)) {
-                    name = name.replace(/(DDP|AAC|FLAC|DTS|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|AC3)/i, `$1 ${label_str}`);
+                    name = name.replace(/(DDP|AAC|FLAC|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|DTS|AC3)/i, `$1 ${label_str}`);
                 }
                 return name;
             }
             try{
-                var channels = (raw_info.descr + raw_info.full_mediainfo).match(/Channel.*?(\d) channels/)[1];
+                var channels = (raw_info.descr + raw_info.full_mediainfo).match(/Channel.*?(\d) channel/)[1];
                 raw_info.name = re_build_name(channels, raw_info.name);
             } catch(err) {
                 if (raw_info.descr.match(/(AUDIO.*CODEC.*?|音频.*?)(2\.0|1\.0|5\.1|7\.1)/i)) {
                     channels = raw_info.descr.match(/(AUDIO.*CODEC.*?|音频.*?)(2\.0|1\.0|5\.1|7\.1)/i)[2];
                     if (!raw_info.name.includes(channels)) {
-                        raw_info.name = raw_info.name.replace(/(DDP|AAC|FLAC|DTS|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|AC3)/i, `$1 ${channels}`);
+                        raw_info.name = raw_info.name.replace(/(DDP|AAC|FLAC|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|DTS|AC3)/i, `$1 ${channels}`);
                     }
                 } else if (raw_info.descr.match(/\d channels/i)) {
                     channels = raw_info.descr.match(/(\d) channels/i)[1];
@@ -14776,6 +14775,9 @@ function auto_feed() {
                     if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '13');}
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '11');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '10');}
+                    if (raw_info.descr.match(/Dolby.*?Atmos/) || $('textarea[name="technical_info"]').val().match(/Dolby.*?Atmos/)) {
+                        check_label(document.getElementsByName('tags[4][]'), '17');
+                    }
                     break;
                 case '麒麟':
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
@@ -14790,7 +14792,7 @@ function auto_feed() {
                     }
                     if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (raw_info.standard_sel == '4K') { check_label(document.getElementsByName('tags[4][]'), '11'); }
-                    if (raw_info.descr.match(/mpls/i)) {
+                    if (raw_info.descr.match(/mpls/i) || $('textarea[name="technical_info"]').val().match(/mpls/i)) {
                         check_label(document.getElementsByName('tags[4][]'), '9');
                     }
                     break;
@@ -19574,7 +19576,7 @@ function auto_feed() {
 
             var team_box = $('select[name="processing_sel[4]"]');
             var team_dict = {'欧美': 6, '大陆': 8, '香港': 7, '台湾': 7, '日本': 5, '韩国': 4, '澳门': '7', };
-            const southeast_asia = ['菲律宾', '印度尼西亚', '马来西亚', '新加坡', '泰国', '老挝', '缅甸', '越南', '文莱', '柬埔寨', '不丹']
+            const southeast_asia = ['菲律宾', '印度尼西亚', '马来西亚', '新加坡', '泰国', '老挝', '缅甸', '越南', '文莱', '柬埔寨', '不丹'];
             team_box.val(3);
             if (team_dict.hasOwnProperty(raw_info.source_sel)){
                 var index = team_dict[raw_info.source_sel];
@@ -19878,24 +19880,14 @@ function auto_feed() {
             if (raw_info.name.match(/MiniBD/i)) {
                 medium_box.val(4);
             }
-            var codec_box = $('select[name="codec_sel[5]"]');
-            if (forward_site == 'ZMPT') {
-                var codec_box = $('select[name="codec_sel[4]"]');
-                codec_box.val(5)
-                switch (raw_info.codec_sel){
-                    case 'H265': case 'X265': codec_box.val(6); break;
-                    case 'H264': case 'X264': codec_box.val(1); break;
-                    case 'VC-1': codec_box.val(5); break;
-                    case 'MPEG-2': case 'MPEG-4': codec_box.val(4); break;
-                    case 'XVID': codec_box.val(5);
-                }
-            } else {
+            if (forward_site == '红叶') {
+                var codec_box = $('select[name="codec_sel[5]"]');
                 codec_box.val(5);
                 switch (raw_info.codec_sel){
                     case 'H265': case 'X265': codec_box.val(10); break;
                     case 'H264': case 'X264': codec_box.val(1); break;
                     case 'VC-1': codec_box.val(2); break;
-                    case 'MPEG-2': case 'MPEG-4': codec_box.val(4); break;
+                    case 'MPEG-4': codec_box.val(4); break;
                     case 'XVID': codec_box.val(3);
                 }
             }
@@ -20192,7 +20184,7 @@ function auto_feed() {
             //分辨率
             var standard_box = $('select[name="standard_sel[4]"]');
             var standard_dict = {
-                '4K': 6, '1080p': 1, '1080i': 2, '720p': 3, 'SD': 4
+                '4K': 6, '1080p': 1, '1080i': 1, '720p': 3, 'SD': 4
             };
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
@@ -21013,7 +21005,7 @@ function auto_feed() {
                     if (region.match('美国')) {
                         processing_box.val(4);
                     } else {
-                        processing_box.val(8);
+                        processing_box.val(5);
                     }
                 }
             }
@@ -25403,7 +25395,10 @@ function auto_feed() {
                 case '日本': source_box.val(34); break;
                 case '韩国': source_box.val(33); break;
                 case '印度': source_box.val(36); break;
-                case '东南亚': case '新加坡': case '马来西亚': case '泰国': source_box.val(35); break;
+            }
+            const southeast_asia = ['菲律宾', '印度尼西亚', '马来西亚', '新加坡', '泰国', '老挝', '缅甸', '越南', '文莱', '柬埔寨', '不丹'];
+            if (southeast_asia.indexOf(raw_info.source_sel) > -1) {
+                source_box.val(35);
             }
             //媒介
             var medium_box = $('select[name="medium_sel[4]"]');
@@ -25431,7 +25426,7 @@ function auto_feed() {
             switch (raw_info.codec_sel){
                 case 'H264': case 'X264': codec_box.val(1); break;
                 case 'H265': case 'X265': codec_box.val(6); break;
-                case 'MPEG-4': case 'MPEG-2': case 'XVID': codec_box.val(4); break;
+                case 'MPEG-4': case 'XVID': codec_box.val(4); break;
                 case 'VC-1': codec_box.val(2); break;
                 case 'AV1': codec_box.val(10); break;
                 case 'VP9': codec_box.val(8); break;
@@ -25442,7 +25437,12 @@ function auto_feed() {
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             audiocodec_box.val(7);
             switch (raw_info.audiocodec_sel){
-                case 'Atmos': audiocodec_box.val(13); break;
+                case 'Atmos':
+                    audiocodec_box.val(19);
+                    if (raw_info.name.match(/TrueHD/)) {
+                        audiocodec_box.val(16);
+                    } 
+                    break;
                 case 'TrueHD': audiocodec_box.val(16); break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(14); break;
                 case 'DTS-HDMA': audiocodec_box.val(15); break;
