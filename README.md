@@ -35,7 +35,7 @@
 
 不按说明反馈将增加复现时间，短时间复现不了的我将不会修复。
 
-### 💵关于打赏
+## 💵关于打赏
 
 开发不易，从19年开发，21年开源维护至今。如果你喜欢这个脚本，请捐赠我作为更新维护的动力吧。
 
@@ -43,7 +43,7 @@
 | :-----------------------------------------: | :--------------------------------------------: |
 | <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/ali_pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/wechat_pay.png" width = "160" height = "160" alt="微信" align=center /> |
 
- ### 💻贡献者
+ ## 💻贡献者
 
 <a href="https://github.com/eryajf/learn-github/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=tomorrow505/auto_feed_js" />
