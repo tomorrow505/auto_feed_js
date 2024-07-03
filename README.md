@@ -49,3 +49,7 @@
   <img src="https://contrib.rocks/image?repo=tomorrow505/auto_feed_js" />
 </a>
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=tomorrow505/auto_feed_js&type=Date)](https://star-history.com/#tomorrow505/auto_feed_js&Date)
+
