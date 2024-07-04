@@ -8137,7 +8137,7 @@ function auto_feed() {
         if ((judge_if_the_site_in_domestic(site_url) && origin_site != 'HHClub') || opencd_mode) {
             if (origin_site == 'TTG' || origin_site == 'PuTao' || origin_site == 'OpenCD' || origin_site == 'HDArea') {
                 title = document.getElementsByTagName("h1")[0];
-                if ($(title).text().match(/上传成功|编辑成功/)) {
+                if ($(title).text().match(/上传成功|编辑成功|发布成功/)) {
                     title = document.getElementsByTagName("h1")[1];
                 }
             } else if (origin_site == 'HUDBT'){
@@ -11761,7 +11761,15 @@ function auto_feed() {
         }
 
         if (origin_site  == 'HDArea'){
-            raw_info.descr = raw_info.descr.slice(0, raw_info.descr.search(/\[quote\]\[color=red\]\[size=2\]\[font=Tahoma\] 本站列出的文件并没有保存在本站的服务器上/));
+            let searchIndex = raw_info.descr.search(/\[quote\]\[color=red\]\[size=2\]\[font=Tahoma\] 本站列出的文件并没有保存在本站的服务器上/);
+            if (searchIndex !== -1) {
+                raw_info.descr = raw_info.descr.slice(0, searchIndex);
+            }
+
+            let needRemovedStr = '\n HDARAEA详情页 \n\n';
+            if (raw_info.descr.startsWith(needRemovedStr)) {
+                raw_info.descr = raw_info.descr.slice(needRemovedStr.length);
+            }
         }
 
         if (origin_site == 'CMCT' || origin_site == 'NanYang' || origin_site == 'CHDBits') {
