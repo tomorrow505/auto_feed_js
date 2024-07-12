@@ -3074,6 +3074,9 @@ function fill_raw_info(raw_info, forward_site){
             raw_info.codec_sel = 'MPEG-2';
         }
     }
+    if (raw_info.descr.match(/Writing library.*(x264|x265)/)) {
+        raw_info.codec_sel = raw_info.descr.match(/Writing library.*(x264|x265)/)[1].toUpperCase();
+    }
 
     if (raw_info.name.match(/dvdrip/i)) {
         raw_info.medium_sel = 'DVD';
@@ -5928,7 +5931,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'DaJiao', 'ECUST', 'iloli', 'PTChina',
             'HDVideo', 'HDAtmos', 'HDZone', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'HDMaYi', 'HDPt', 'ZMPT', 'OKPT', '悟空', 'CrabPt', 'QingWa', 'ICC', 'ToSky',
-            'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', '影', 'GTK', 'HHClub', '象岛', '麒麟','AGSV', 'Oshen', 'PTFans'];
+            'CyanBug', '2xFree', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', 'GTK', 'HHClub', '象岛', '麒麟','AGSV', 'Oshen', 'PTFans'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
@@ -6242,6 +6245,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             log_in(['FileList'], '#navigation');
             log_in(['bib'], '#header_nav');
             log_in(['IN'], '#nav');
+            log_in(['影'], '#nav_menu');
 
             log_in(['HDPost', 'BLU', 'HDOli', 'Monika', 'KIMOJI', 'Tik', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand'], 'nav[class="top-nav"]');
             log_in(['DTR', 'ZHUQUE'], 'nav[class="container mx-auto"]');
@@ -8259,6 +8263,9 @@ function auto_feed() {
                 poster = $('img[alt="Cover"]').attr('src');
                 raw_info.descr = `[img]${poster}[/img]${raw_info.descr}`;
                 mediainfo = $('#full_info>pre').text();
+                if (!mediainfo) {
+                    mediainfo = $('#simple_info').text();
+                }
                 raw_info.descr += `\n\n[quote]${mediainfo}[/quote]\n\n`;
                 screens = $('img[alt="Screen"]').map((index,e)=>{
                     raw_info.descr += `[img]${$(e).attr('src')}[/img]\n`;
@@ -14243,6 +14250,18 @@ function auto_feed() {
                 var _index = raw_info.descr.indexOf("◎");
                 if (raw_info.descr.indexOf(poster[0]) < 200 || (_index > 0 && raw_info.descr.indexOf(poster[0]) < _index) ) {
                     $('input[name="tr_cover_url"]').val(poster[1]);
+                    $('input[name="tr_cover_url"]').css("width", "93%");
+                    $('input[name="tr_cover_url"]').after(`<button style="margin-left:5px" id="preview">预览</button><img class="my_poster" src="${poster[1]}" style="max-width: 150px; display:none; margin-top:2px;">`);
+                    $('#preview').click((e) => {
+                        e.preventDefault();
+                        if ($('.my_poster').is(":visible")) {
+                            $('.my_poster').hide();
+                            $('#preview').text("预览");
+                        } else {
+                            $('.my_poster').show();
+                            $('#preview').text("隐藏");
+                        }
+                    })
                 }
                 container = $('textarea[name="tr_nfo"]');
             }
@@ -14272,13 +14291,7 @@ function auto_feed() {
                 container.css({'height': '600px'});
                 var tmp_descr = raw_info.descr.replace(infos.mediainfo, '');
                 if (forward_site == '影') {
-                    tmp_descr = tmp_descr.replace(/(\[url=.*\])?\[img\].*?\[\/img\](\[\/url\])?/g, function(data) {
-                        if (tmp_descr.indexOf(data) > 200 && (_index && _index < tmp_descr.indexOf(data))) {
-                            return '';
-                        } else {
-                            return data;
-                        }
-                    });
+                    tmp_descr = tmp_descr.replace(/(\[url=.*\])?\[img\].*?\[\/img\](\[\/url\])?/g, '');
                     $('textarea[name="descr"]').css({'height': '400px'});
                 }
                 tmp_descr = tmp_descr.replace(/\[quote\].*?官组作品.*?\[\/quote\]/g, '').replace(/\[quote\][.\n]*?\[\/quote\]/g, function(data) {
