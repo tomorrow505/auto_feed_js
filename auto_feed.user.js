@@ -2394,7 +2394,7 @@ String.prototype.audiocodec_sel = function() { //音频编码
         result = 'LPCM';
     } else if (result.match(/([ \.]DD|AC3|AC-3|Dolby Digital)/i)) {
         result = 'AC3';
-    } else if (result.match(/(Atmos)/i)) {
+    } else if (result.match(/(Atmos)/i) && result.match(/True.?HD/)) {
         result = 'Atmos';
     } else if (result.match(/(AAC)/i)) {
         result = 'AAC';
@@ -12712,6 +12712,7 @@ function auto_feed() {
         }
 
         $('.forward_a').click(function(e){
+            
             if (search_mode){
                 if (origin_site == 'FRDS' || raw_info.name.match(/frds/i)) {
                     if (['CMCT', 'OurBits', 'HDChina', 'HDSky'].indexOf(e.target.id) > -1) {
@@ -12732,9 +12733,54 @@ function auto_feed() {
                         e.preventDefault();
                         return;
                     }
-                }else if (this.id == 'OurBits' && (raw_info.medium_sel == 'Remux' || raw_info.name.medium_sel() == 'Remux')) {
+                } else if (this.id == 'OurBits' && (raw_info.medium_sel == 'Remux' || raw_info.name.medium_sel() == 'Remux')) {
                     e.preventDefault();
                     alert('该站禁止Remux资源转发！');
+                    return;
+                }
+                if (this.id == "影") {
+                    var info = [];
+                    if (raw_info.name.match(/remux/i) || (raw_info.name + raw_info.descr).get_label().diy || raw_info.medium_sel == 'Remux') {
+                        info.push("禁止发布 DIY 和 Remux 资源。");
+                    } else if (raw_info.medium_sel == 'Encode' && !raw_info.name.match(/WEB/)) {
+                        if (!raw_info.name.match(/-CMCT/i) && !raw_info.name.match(/-WiKi/i)) {
+                            info.push('压制资源仅接受这些小组的作品：WiKi / CMCT。这些小组的作品可以共存，不会视为重复。接受的小组，将来会逐步增加。');
+                        }
+                    }
+                    if (raw_info.standard_sel == '720p') {
+                        info.push("禁止发布分辨率 720p 的资源！");
+                    } else if (raw_info.standard_sel == '1080p' || raw_info.standard_sel == '1080i') {
+                        if (raw_info.medium_sel == 'Encode') {
+                            if (['DTS-HD HR', 'DTS-HD MA', 'LPCM', 'TrueHD', 'Atmos'].indexOf(raw_info.audiocodec_sel) >= 0) {
+                                info.push("1080p压制：禁止发布带有次世代音轨(DTS-HD HR / DTS-HD MA / LPCM / TrueHD / TrueHD Atmos)的资源");
+                            }
+                        }
+                    } else if (raw_info.standard_sel == '4K') {
+                        if (raw_info.medium_sel == 'Encode') {
+                            if (['DTS-HD HR', 'DTS-HD MA', 'LPCM', 'TrueHD', 'Atmos'].indexOf(raw_info.audiocodec_sel) < 0) {
+                                info.push('2016p压制：必须带有主语言的次世代音轨，除非压制来源的原盘没有。');
+                            }
+                        }
+                    }
+                    if (!(raw_info.name + raw_info.descr + raw_info.small_descr).get_label().zz) {
+                        info.push('压制资源必须带有中文字幕，视频内嵌和外挂都可以。外挂的字幕，必须在3天内上传，否则种子会被删除。');
+                    }
+                    if (raw_info.name.match(/E\d+/)) {
+                        info.push('禁止普通会员发布分集资源，只有驻站组和官方组才能发布组内分集资源。');
+                    }
+                    if (['游戏', '软件'].indexOf(raw_info.type) >= 0) {
+                        info.push('禁止发布电子书/软件等非视频资源。');
+                    }
+                    if (!raw_info.dburl && !raw_info.url) {
+                        info.push('发布的资源，必须有豆瓣链接或者IMDB链接。此规则以后会调整，目前严格执行。');
+                    } 
+                    if (info) {
+                        if (!confirm(`转发该资源可能违反站点以下规则:\n${info.join('\n')}\n具体细节请查看站点规则页面。\n是否仍继续发布？`)) {
+                            e.preventDefault();
+                            return;
+                        }
+                    }
+                    e.preventDefault();
                     return;
                 }
                 //判断是否禁止转载，如果确认之后也可以转载
@@ -14258,6 +14304,7 @@ function auto_feed() {
                             $('.my_poster').hide();
                             $('#preview').text("预览");
                         } else {
+                            $('.my_poster').attr('src', $('input[name="tr_cover_url"]').val());
                             $('.my_poster').show();
                             $('#preview').text("隐藏");
                         }
