@@ -12780,8 +12780,6 @@ function auto_feed() {
                             return;
                         }
                     }
-                    e.preventDefault();
-                    return;
                 }
                 //判断是否禁止转载，如果确认之后也可以转载
                 if (if_exclusive) {
