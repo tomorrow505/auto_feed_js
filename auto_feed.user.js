@@ -15164,8 +15164,8 @@ function auto_feed() {
                         }
                     }
                     break;
-                case '纪录': case '学习':
-                    type_code = '紀錄教育';
+                case '纪录': type_code = '紀錄'; break;
+                case '学习': type_code = '教育(書面)'; break;
                 case '动漫': type_code = '動畫'; break;
                 case '音乐':
                     if(raw_info.name.match(/(flac|ape)/i)){
@@ -15178,7 +15178,7 @@ function auto_feed() {
                 case '体育': type_code = '運動'; break;
                 case '软件': type_code = '軟體'; break;
                 case '游戏': type_code = 'PC遊戲'; break;
-                case '书籍': type_code = '紀錄教育';
+                case '书籍': type_code = 'Misc(其他)';
             }
             var source_code = 'Other';
             switch(raw_info.medium_sel){
