@@ -93,7 +93,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.7.1
+// @version      2.0.7.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1649,15 +1649,14 @@ function add_search_urls(container, imdbid, imdbno, search_name, mode) {
     var brs = '</br></br>';
     var font_color = 'red';
     var font_size = '';
-
     if (mode == 1) {
         div_style = '';  font_color = 'green'; text = ''; brs = '</br>';
-        if (site_url.match(/^https:\/\/www.imdb.com\/title\/tt\d+\/$/)) {
-            font_size = 'size = 2px';
+        if (site_url.match(/^https:\/\/www.imdb.com\/title\/tt\d+\//)) {
+            font_size = 'size=2px';
         }
     } else if (mode == 2) {
         div_style = ''; brs = '</br>';
-        font_size = 'size = 2px';
+        font_size = 'size=2px';
     } else if (mode == 3) {
         div_style = ''; font_color = 'green'; text = ''; brs = '';
     }
@@ -2249,7 +2248,7 @@ function judge_if_the_site_in_domestic() {
 function deal_with_title(title){
     title = title.replace(/\./g, ' ').replace(/torrent$/g, '').trim() + ' ';
     if (title.match(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)[^\d]/)) {
-        title = title.replace(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)[^\d]/, function(data){
+        title = title.replace(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1)[^\d]/g, function(data){
             return data.slice(0,2) + '.'+ data.slice(3,data.length);
         }).trim();
     }
@@ -3973,7 +3972,7 @@ function addTorrent(url, name, forward_site, forward_announce) {
         getBlob(url, forward_announce, forward_site, "application/x-bittorrent", function(data){
             const blob = data.data;
             if (data.name) {
-                name = data.name + '.torrent';
+                name = data.name.replace(/|™/g, "").trim().replace(/ /g, '.') + '.torrent';
             }
             const files = new window.File([blob], name, { type: blob.type });
             let container = new DataTransfer();
@@ -7986,13 +7985,15 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
 }
 
 if (site_url.match(/^https:\/\/www.imdb.com\/title\/tt\d+/) && if_imdb_jump) {
-    var imdbid = site_url.match(/tt\d+/i)[0];
-    var imdbno = imdbid.substring(2);
-    var search_name = $('title').text().trim().split(/ \(\d+\) - /)[0];
-    search_name = search_name.replace(/season/i, '');
-    var $container = $('h1[data-testid*=pageTitle]');
-    add_search_urls($container, imdbid, imdbno, search_name, 1);
-    $('.search_urls').find('a').css('color', 'yellow');
+    setTimeout(function() {
+        var imdbid = site_url.match(/tt\d+/i)[0];
+        var imdbno = imdbid.substring(2);
+        var search_name = $('title').text().trim().split(/ \(\d+\) - /)[0];
+        search_name = search_name.replace(/season/i, '');
+        var $container = $('h1[data-testid*=pageTitle]');
+        add_search_urls($container, imdbid, imdbno, search_name, 1);
+        $('.search_urls').find('a').css('color', 'yellow');
+    }, 2000);
     return;
 }
 
@@ -12774,7 +12775,7 @@ function auto_feed() {
                     if (!raw_info.dburl && !raw_info.url) {
                         info.push('发布的资源，必须有豆瓣链接或者IMDB链接。此规则以后会调整，目前严格执行。');
                     } 
-                    if (info) {
+                    if (info.length) {
                         if (!confirm(`转发该资源可能违反站点以下规则:\n${info.join('\n')}\n具体细节请查看站点规则页面。\n是否仍继续发布？`)) {
                             e.preventDefault();
                             return;
@@ -14243,6 +14244,17 @@ function auto_feed() {
                     raw_info.descr = raw_info.descr.replace(/^\[.*?\/img\]/, '').trim();
                 }
                 if (forward_site == 'PTer') {
+                    if (raw_info.full_mediainfo) {
+                        if (raw_info.full_mediainfo.match(/mpls/i)) {
+                            try {
+                                raw_info.full_mediainfo = raw_info.full_mediainfo.match(/QUICK SUMMARY:([\s\S]*)/)[1].trim();
+                            } catch (err) {}
+                        }
+                        try {
+                            var info = get_mediainfo_picture_from_descr(raw_info.descr);
+                            raw_info.descr = raw_info.descr.replace(info.mediainfo, raw_info.full_mediainfo);
+                        } catch (err) {}
+                    }
                     try{
                         raw_info.descr.match(/\[quote\][\s\S]*?\[\/quote\]/g).map((e)=> {
                             if (e.match(/General.{0,2}\n?(Unique|Complete name)/)) {
@@ -21208,7 +21220,7 @@ function auto_feed() {
             switch (raw_info.audiocodec_sel){
                 case 'DTS-HD': audiocodec_box.val(4); break;
                 case 'DTS-HDMA:X 7.1': audiocodec_box.val(9); break;
-                case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(10); break;
+                case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(20); break;
                 case 'TrueHD': audiocodec_box.val(2); break;
                 case 'DTS': audiocodec_box.val(6); break;
                 case 'AC3':
