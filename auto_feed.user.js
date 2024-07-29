@@ -7985,15 +7985,17 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
 }
 
 if (site_url.match(/^https:\/\/www.imdb.com\/title\/tt\d+/) && if_imdb_jump) {
-    setTimeout(function() {
-        var imdbid = site_url.match(/tt\d+/i)[0];
-        var imdbno = imdbid.substring(2);
-        var search_name = $('title').text().trim().split(/ \(\d+\) - /)[0];
-        search_name = search_name.replace(/season/i, '');
-        var $container = $('h1[data-testid*=pageTitle]');
-        add_search_urls($container, imdbid, imdbno, search_name, 1);
-        $('.search_urls').find('a').css('color', 'yellow');
-    }, 2000);
+    mutation_observer(document, function(){
+        if (!$('.search_urls').length) {
+            var imdbid = site_url.match(/tt\d+/i)[0];
+            var imdbno = imdbid.substring(2);
+            var search_name = $('title').text().trim().split(/ \(\d+\) - /)[0];
+            search_name = search_name.replace(/season/i, '');
+            var $container = $('h1[data-testid*=pageTitle]');
+            add_search_urls($container, imdbid, imdbno, search_name, 1);
+            $('.search_urls').find('a').css('color', 'yellow');
+        }
+    });
     return;
 }
 
@@ -12712,6 +12714,45 @@ function auto_feed() {
             }
         }
 
+        function if_ying_allowed() {
+            var info = [];
+            if (raw_info.name.match(/remux/i) || (raw_info.name + raw_info.descr).get_label().diy || raw_info.medium_sel == 'Remux') {
+                info.push("禁止发布 DIY 和 Remux 资源。");
+            } else if (raw_info.medium_sel == 'Encode' && !raw_info.name.match(/WEB/)) {
+                if (!raw_info.name.match(/-CMCT/i) && !raw_info.name.match(/-WiKi/i)) {
+                    info.push('压制资源仅接受这些小组的作品：WiKi / CMCT。这些小组的作品可以共存，不会视为重复。接受的小组，将来会逐步增加。');
+                }
+            }
+            if (raw_info.standard_sel == '720p') {
+                info.push("禁止发布分辨率 720p 的资源！");
+            } else if (raw_info.standard_sel == '1080p' || raw_info.standard_sel == '1080i') {
+                if (raw_info.medium_sel == 'Encode') {
+                    if (['DTS-HD HR', 'DTS-HD MA', 'LPCM', 'TrueHD', 'Atmos'].indexOf(raw_info.audiocodec_sel) >= 0) {
+                        info.push("1080p压制：禁止发布带有次世代音轨(DTS-HD HR / DTS-HD MA / LPCM / TrueHD / TrueHD Atmos)的资源");
+                    }
+                }
+            } else if (raw_info.standard_sel == '4K') {
+                if (raw_info.medium_sel == 'Encode') {
+                    if (['DTS-HD HR', 'DTS-HD MA', 'LPCM', 'TrueHD', 'Atmos'].indexOf(raw_info.audiocodec_sel) < 0) {
+                        info.push('2016p压制：必须带有主语言的次世代音轨，除非压制来源的原盘没有。');
+                    }
+                }
+            }
+            if (!(raw_info.name + raw_info.descr + raw_info.small_descr).get_label().zz) {
+                info.push('压制资源必须带有中文字幕，视频内嵌和外挂都可以。外挂的字幕，必须在3天内上传，否则种子会被删除。');
+            }
+            if (raw_info.name.match(/E\d+/)) {
+                info.push('禁止普通会员发布分集资源，只有驻站组和官方组才能发布组内分集资源。');
+            }
+            if (['游戏', '软件'].indexOf(raw_info.type) >= 0) {
+                info.push('禁止发布电子书/软件等非视频资源。');
+            }
+            if (!raw_info.dburl && !raw_info.url) {
+                info.push('发布的资源，必须有豆瓣链接或者IMDB链接。此规则以后会调整，目前严格执行。');
+            } 
+            return info;
+        }
+
         $('.forward_a').click(function(e){
             
             if (search_mode){
@@ -12739,42 +12780,8 @@ function auto_feed() {
                     alert('该站禁止Remux资源转发！');
                     return;
                 }
-                if (this.id == "影") {
-                    var info = [];
-                    if (raw_info.name.match(/remux/i) || (raw_info.name + raw_info.descr).get_label().diy || raw_info.medium_sel == 'Remux') {
-                        info.push("禁止发布 DIY 和 Remux 资源。");
-                    } else if (raw_info.medium_sel == 'Encode' && !raw_info.name.match(/WEB/)) {
-                        if (!raw_info.name.match(/-CMCT/i) && !raw_info.name.match(/-WiKi/i)) {
-                            info.push('压制资源仅接受这些小组的作品：WiKi / CMCT。这些小组的作品可以共存，不会视为重复。接受的小组，将来会逐步增加。');
-                        }
-                    }
-                    if (raw_info.standard_sel == '720p') {
-                        info.push("禁止发布分辨率 720p 的资源！");
-                    } else if (raw_info.standard_sel == '1080p' || raw_info.standard_sel == '1080i') {
-                        if (raw_info.medium_sel == 'Encode') {
-                            if (['DTS-HD HR', 'DTS-HD MA', 'LPCM', 'TrueHD', 'Atmos'].indexOf(raw_info.audiocodec_sel) >= 0) {
-                                info.push("1080p压制：禁止发布带有次世代音轨(DTS-HD HR / DTS-HD MA / LPCM / TrueHD / TrueHD Atmos)的资源");
-                            }
-                        }
-                    } else if (raw_info.standard_sel == '4K') {
-                        if (raw_info.medium_sel == 'Encode') {
-                            if (['DTS-HD HR', 'DTS-HD MA', 'LPCM', 'TrueHD', 'Atmos'].indexOf(raw_info.audiocodec_sel) < 0) {
-                                info.push('2016p压制：必须带有主语言的次世代音轨，除非压制来源的原盘没有。');
-                            }
-                        }
-                    }
-                    if (!(raw_info.name + raw_info.descr + raw_info.small_descr).get_label().zz) {
-                        info.push('压制资源必须带有中文字幕，视频内嵌和外挂都可以。外挂的字幕，必须在3天内上传，否则种子会被删除。');
-                    }
-                    if (raw_info.name.match(/E\d+/)) {
-                        info.push('禁止普通会员发布分集资源，只有驻站组和官方组才能发布组内分集资源。');
-                    }
-                    if (['游戏', '软件'].indexOf(raw_info.type) >= 0) {
-                        info.push('禁止发布电子书/软件等非视频资源。');
-                    }
-                    if (!raw_info.dburl && !raw_info.url) {
-                        info.push('发布的资源，必须有豆瓣链接或者IMDB链接。此规则以后会调整，目前严格执行。');
-                    } 
+                if (this.id == "影" && ['CMCT', 'TTG', 'UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) < 0) {
+                    info = if_ying_allowed();
                     if (info.length) {
                         if (!confirm(`转发该资源可能违反站点以下规则:\n${info.join('\n')}\n具体细节请查看站点规则页面。\n是否仍继续发布？`)) {
                             e.preventDefault();
@@ -12798,6 +12805,45 @@ function auto_feed() {
                 }
             }
         });
+
+        function re_forward (_id, _href, raw_info) {
+            jump_str = dictToString(raw_info);
+            if (_id != 'common_link'){
+                _href = decodeURI(_href).split(separator)[0] + separator + encodeURI(jump_str);
+                if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'SC', 'avz', 'PHD', 'CNZ', 'TVV'].indexOf(_id) < 0){
+                    if (_id == "影") {
+                        alert(1)
+                        info = if_ying_allowed();
+                        if (info.length) {
+                            if (!confirm(`转发该资源可能违反站点以下规则:\n${info.join('\n')}\n具体细节请查看站点规则页面。\n是否仍继续发布？`)) {
+                                e.preventDefault();
+                                return;
+                            }
+                        }
+                    } else {
+                        window.open(_href, '_blank');
+                    }
+                }
+            } else {
+                var key;
+                for (key in used_common_sites){
+                    if (origin_site != used_common_sites[key] && typeof(used_common_sites[key]) == "string"){
+                        var site_href = document.getElementById(used_common_sites[key]).href;
+                        site_href = decodeURI(site_href).split(separator)[0] + separator + encodeURI(jump_str);
+                        if (used_common_sites[key] == "影") {
+                            info = if_ying_allowed();
+                            if (info.length) {
+                                if (confirm(`转发该资源可能违反站点以下规则:\n${info.join('\n')}\n具体细节请查看站点规则页面。\n是否仍继续发布？`)) {
+                                    window.open(site_href, '_blank');
+                                }
+                            }
+                        } else {
+                            window.open(site_href, '_blank');
+                        }
+                    }
+                }
+            }
+        } 
 
         if (['UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) > -1) {
             $('.forward_a').click(function(e){
@@ -12846,23 +12892,9 @@ function auto_feed() {
                     }
                 }
 
-                jump_str = dictToString(raw_info);
-                if (this.id != 'common_link'){
-                    this.href = decodeURI(this.href).split(separator)[0] + separator + encodeURI(jump_str);
-                    if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'SC', 'avz', 'PHD', 'CNZ', 'TVV'].indexOf(this.id) < 0){
-                        window.open(this.href, '_blank');
-                    }
-                } else{
-                    var key;
-                    for (key in used_common_sites){
-                        if (origin_site != used_common_sites[key]){
-                            var site_href = document.getElementById(used_common_sites[key]).href;
-                            site_href = decodeURI(site_href).split(separator)[0] + separator + encodeURI(jump_str);
-                            window.open(site_href, '_blank');
-                        }
-                    }
-                }
-
+                var _id = this.id;
+                var _href = this.href;
+                re_forward(_id, _href, raw_info);
             });
         } else if (origin_site == 'CMCT' && cmct_mode == 2) {
             $('.forward_a').click(function(e){
@@ -12874,22 +12906,9 @@ function auto_feed() {
                     window.open(this.href, '_blank');
                     return;
                 }
-                jump_str = dictToString(raw_info);
-                if (this.id != 'common_link'){
-                    this.href = decodeURI(this.href).split(separator)[0] + separator + encodeURI(jump_str);
-                    if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'SC', 'avz', 'PHD', 'CNZ', 'TVV', 'ANT', 'NBL'].indexOf(this.id) < 0){
-                        window.open(this.href, '_blank');
-                    }
-                } else{
-                    var key;
-                    for (key in used_common_sites){
-                        if (origin_site != used_common_sites[key]){
-                            var site_href = document.getElementById(used_common_sites[key]).href;
-                            site_href = decodeURI(site_href).split(separator)[0] + separator + encodeURI(jump_str);
-                            window.open(site_href, '_blank');
-                        }
-                    }
-                }
+                var _id = this.id;
+                var _href = this.href;
+                re_forward(_id, _href, raw_info);
             });
         } else if (origin_site == 'TTG') {
             $('.forward_a').click(function(e){
@@ -12930,22 +12949,9 @@ function auto_feed() {
                     raw_info.descr += $('#textarea').val();
                 }
 
-                jump_str = dictToString(raw_info);
-                if (this.id != 'common_link'){
-                    this.href = decodeURI(this.href).split(separator)[0] + separator + encodeURI(jump_str);
-                    if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'SC', 'avz', 'PHD', 'CNZ', 'TVV', 'ANT', 'NBL'].indexOf(this.id) < 0){
-                        window.open(this.href, '_blank');
-                    }
-                } else{
-                    var key;
-                    for (key in used_common_sites){
-                        if (origin_site != used_common_sites[key]){
-                            var site_href = document.getElementById(used_common_sites[key]).href;
-                            site_href = decodeURI(site_href).split(separator)[0] + separator + encodeURI(jump_str);
-                            window.open(site_href, '_blank');
-                        }
-                    }
-                }
+                var _id = this.id;
+                var _href = this.href;
+                re_forward(_id, _href, raw_info);
             });
         }
 
@@ -14266,13 +14272,16 @@ function auto_feed() {
                             }
                         });
                     } catch(err) {}
-                } else if (forward_site == 'Audiences') {
+                } else if (forward_site == 'Audiences' || forward_site == 'TJUPT') {
                     try{
                         raw_info.descr.match(/\[quote\][\s\S]*?\[\/quote\]/g).map((e)=> {
                             if (e.match(/General|Disc Title|Disc Info|Disc Label|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率/i)) {
                                 var ee = e.replace('[quote]', '[Mediainfo]').replace('[/quote]', '[/Mediainfo]');
                                 if (raw_info.full_mediainfo) {
                                     ee = `[Mediainfo]${raw_info.full_mediainfo}[/Mediainfo]`;
+                                }
+                                if (forward_site == 'TJUPT') {
+                                    ee = ee.replace('[Mediainfo]', '[mediainfo]').replace('[/Mediainfo]', '[/mediainfo]');
                                 }
                                 raw_info.descr = raw_info.descr.replace(e, ee);
                             }
