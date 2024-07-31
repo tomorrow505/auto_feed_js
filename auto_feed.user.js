@@ -8219,7 +8219,12 @@ function auto_feed() {
             }
 
             if (origin_site == '影') {
-                descr = $('td:contains(简介):last').next()[0];
+                var d_text = $('td:contains(简介):last').text();
+                if (d_text == "简介") {
+                    descr = $('td:contains(简介):last').next()[0];
+                } else {
+                    descr = $('td:contains(简介):last')[0];
+                }
             }
 
             //获取最外层table
@@ -10338,6 +10343,8 @@ function auto_feed() {
                                 if (douban_button_needed) {
                                     douban_box = table.insertRow(i / 2 - 1);
                                 }
+                            } else if (origin_site == '影'){
+                                insert_row = table.insertRow(9);
                             } else if (origin_site == 'OpenCD'){
                                 insert_row = table.insertRow(6);
                                 douban_box = table.insertRow(6);
@@ -12812,7 +12819,6 @@ function auto_feed() {
                 _href = decodeURI(_href).split(separator)[0] + separator + encodeURI(jump_str);
                 if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'SC', 'avz', 'PHD', 'CNZ', 'TVV'].indexOf(_id) < 0){
                     if (_id == "影") {
-                        alert(1)
                         info = if_ying_allowed();
                         if (info.length) {
                             if (!confirm(`转发该资源可能违反站点以下规则:\n${info.join('\n')}\n具体细节请查看站点规则页面。\n是否仍继续发布？`)) {
@@ -16776,7 +16782,6 @@ function auto_feed() {
                             medium_box.options[1].selected = true;
                         }
                 }
-
             } catch (err) {
                 alert(err);
             }
