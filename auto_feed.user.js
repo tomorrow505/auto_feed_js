@@ -93,7 +93,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.7.2
+// @version      2.0.7.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -14450,6 +14450,17 @@ function auto_feed() {
                     if (labels.zz){ document.getElementsByName('cnsub')[0].checked=true; }
                     if (labels.diy){ document.getElementsByName('diy')[0].checked=true; }
                     break;
+                case 'CMCT':
+                    if (labels.zz){ document.getElementById('subtitlezh').checked=true; }
+                    if (!labels.diy && raw_info.descr.match(/mpls/i)){ document.getElementById('untouched').checked=true; }
+                    if (labels.hdr10) {document.getElementById('hdr10').checked=true; }
+                    if (labels.hdr10plus) { document.getElementById('hdr10plus').checked=true; }
+                    if (raw_info.descr.match(/HDR Vivid/)) { document.getElementById('hdrvivid').checked=true; }
+                    if (raw_info.small_descr.match(/特效字幕/)) { document.getElementById('subtitlesp').checked=true; }
+                    if (labels.db) { document.getElementById('dovi').checked=true; }
+                    if (raw_info.name.match(/(\.| )3D(\.| )/)) { document.getElementById('3d').checked=true; }
+                    if (raw_info.name.match(/HLG/)) { document.getElementById('hlg').checked=true; }
+                    break;
                 case 'OurBits':
                     if (labels.gy){ document.getElementById('tagGY').checked=true; }
                     if (labels.yy){ document.getElementById('tagGY').checked=true; }
@@ -15366,14 +15377,23 @@ function auto_feed() {
 
         else if (forward_site == 'CMCT'){
             var browsecat = $('#browsecat');
-            var type_dict = {'电影': 501, '剧集': 502, '动漫': 504, '综艺': 505, '音乐': 508, '纪录': 503,
+            var type_dict = {'电影': 501, '剧集': 502, '综艺': 505, '音乐': 508, '纪录': 503,
                              '体育': 506, '软件': 509, '学习': 509, '': 509, 'MV': 507, '书籍': 509};
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
 
-            if (raw_info.type == '剧集') {
+            if (raw_info.type == '动漫') {
+                $('#animation').attr('checked', true);
+                if (raw_info.name.match(/S\d+|E\d+/i)) {
+                    browsecat.val(502);
+                } else {
+                    browsecat.val(501);
+                }
+            }
+
+            if (raw_info.type == '剧集' || raw_info.type == '动漫') {
                 if (raw_info.name.match(/S\d+[^E]/i)) {
                     $('input[name="pack"]').attr('checked', true);
                 }
@@ -15460,7 +15480,9 @@ function auto_feed() {
             cmctdescr = raw_info.descr.slice(0,raw_info.descr.search(/\[quote\]/));
             cmctdescr = cmctdescr.replace(/\[img\]htt.*[\s\S]*?img\]/i, '');
 
-            if (raw_info.mediainfo_cmct){
+            if (raw_info.full_mediainfo) {
+                descr_box[1].value = raw_info.full_mediainfo.trim();
+            } else if (raw_info.mediainfo_cmct){
                 descr_box[1].value = raw_info.mediainfo_cmct.trim();
             } else {
                 descr_box[1].value = cmctinfos.trim();
