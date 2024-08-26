@@ -2449,7 +2449,7 @@ String.prototype.standard_sel = function() {
 //获取类型
 String.prototype.get_type = function() {
     var result = this.toString();
-    if (result.match(/(Movie|电影|UHD原盘|films|電影)/i)) {
+    if (result.match(/(Movie|电影|UHD原盘|films|電影|剧场)/i)) {
         result = '电影';
     } else if (result.match(/(Animation|动漫|動畫|动画|Anime|Cartoons)/i)) {
         result = '动漫';
