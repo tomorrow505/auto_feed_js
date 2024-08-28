@@ -2387,7 +2387,7 @@ String.prototype.audiocodec_sel = function() { //音频编码
         result = 'DTS-HDHR';
     } else if (result.match(/(DTS-HD)/i)) {
         result = 'DTS-HD';
-    } else if (result.match(/(DTS-X)/i)) {
+    } else if (result.match(/(DTS.?X)/i)) {
         result = 'DTS-X';
     } else if (result.match(/(LPCM)/i)) {
         result = 'LPCM';
@@ -12825,6 +12825,8 @@ function auto_feed() {
                                 e.preventDefault();
                                 return;
                             }
+                        } else {
+                            window.open(_href, '_blank');
                         }
                     } else {
                         window.open(_href, '_blank');
@@ -12842,6 +12844,8 @@ function auto_feed() {
                                 if (confirm(`转发该资源可能违反站点以下规则:\n${info.join('\n')}\n具体细节请查看站点规则页面。\n是否仍继续发布？`)) {
                                     window.open(site_href, '_blank');
                                 }
+                            } else {
+                                window.open(_href, '_blank');
                             }
                         } else {
                             window.open(site_href, '_blank');
@@ -13213,7 +13217,7 @@ function auto_feed() {
         }
 
         raw_info = stringToDict(site_url.split(separator)[1]); //将弄回来的字符串转成字典
-        console.log(raw_info)
+        console.log(raw_info);
         raw_info.descr = raw_info.descr.replace(/ /g, ' ');
         raw_info.full_mediainfo = raw_info.full_mediainfo.replace(/ /g, ' ');
         if (raw_info.origin_site == 'OurBits') {
@@ -14551,7 +14555,11 @@ function auto_feed() {
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '11'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
-                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.diy){
+                        check_label(document.getElementsByName('tags[4][]'), '4');
+                    } else if (raw_info.descr.match(/mpls/)) {
+                        check_label(document.getElementsByName('tags[4][]'), '17');
+                    }
                     if (raw_info.standard_sel == '4K') {
                         if (labels.hdr10 || labels.hdr10plus) {
                             if (labels.hdr10) {
@@ -14563,9 +14571,16 @@ function auto_feed() {
                         } else {
                             if (raw_info.descr.match(/HDR10/)) {
                                 check_label(document.getElementsByName('tags[4][]'), '9');
+                            } else {
+                                check_label(document.getElementsByName('tags[4][]'), '7');
                             }
                         }
                     }
+                    if (raw_info.small_descr.match(/特效字幕/)) { check_label(document.getElementsByName('tags[4][]'), '12'); }
+                    if (raw_info.audiocodec_sel == 'DTS-X') {
+                        check_label(document.getElementsByName('tags[4][]'), '16');
+                    }
+                    if (raw_info.descr.match(/Dolby.{0,15}Atmos/)) { check_label(document.getElementsByName('tags[4][]'), '15'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '8'); }
                     break;
                 case 'WT-Sakura':
