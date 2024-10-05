@@ -93,7 +93,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.7.5
+// @version      2.0.7.6
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8471,7 +8471,11 @@ function auto_feed() {
 
         if (origin_site == 'PTLGS') {
             tbody = $('#torrent-info-root>tbody')[0];
-            raw_info.dburl = match_link('douban', $('div.douban-info').html());
+            if ($('div.douban-info').length) {
+                raw_info.dburl = match_link('douban', $('div.douban-info').html());
+            } else {
+                raw_info.dburl = match_link('douban', $('#kdescr').html());
+            }
             douban_button_needed = true;
             $('#ktorrentscreenshots').find('img').map((index,e)=> {
                 if ($(e)[0].parentNode.href){
@@ -14423,6 +14427,11 @@ function auto_feed() {
                 raw_info.descr = add_thanks(raw_info.descr);
                 if (forward_site != 'PTLGS') {
                     $('textarea[name="descr"]').val(raw_info.descr.trim().replace(/\n\n+/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\['));
+                } else {
+                    try{
+                        var extra_info = raw_info.descr.match(/^\[quote\]\[b\]\[color=blue\].*?官组作品，感谢原制作者发布。\[\/color\]\[\/b\]\[\/quote\]/)[0];
+                        $('textarea[name="descr"]').val(extra_info);
+                    } catch (err) {}
                 }
             } catch(Err) {
                 if (raw_info.full_mediainfo){
@@ -21825,7 +21834,6 @@ function auto_feed() {
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
-            // get_full_size_picture_urls(null, infos.pic_info, $('#textarea-screenshots'), false);
             document.getElementById('browsecat').dispatchEvent(evt);
             var medium_box = $('select[name^="medium_sel"]');
             medium_box.val(12);
