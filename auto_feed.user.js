@@ -93,7 +93,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.7.6
+// @version      2.0.7.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -2724,8 +2724,9 @@ function get_full_size_picture_urls(raw_info, imgs, container, need_img_label, c
     }
     var img_info = '';
     try {
+        var _index = raw_info.descr.indexOf("◎");
         for (i=0; i<img_urls.length; i++){
-            if (raw_info && raw_info.descr.indexOf(img_urls[i])<80){
+            if (raw_info && raw_info.descr.indexOf(img_urls[i]) < 80 || (_index > 0 && raw_info.descr.indexOf(img_urls[i]) < _index)){
             } else{
                 if (raw_info) {
                     raw_info.descr = raw_info.descr.replace(img_urls[i], '');
@@ -13217,21 +13218,23 @@ function auto_feed() {
         if (upload_site.match(/offers?.php/)) {
             transfer_mode = 1;
         }
-        if ($('td:contains(你没有发布种子的权限)').length || $('td:contains(请提交候选)').length || $('a[href="?add_offer=1"]').length || $('h1:contains("候选区")').length) {
+
+        raw_info = stringToDict(site_url.split(separator)[1]); //将弄回来的字符串转成字典
+        if ($('td:contains(你没有发布种子的权限)').length || $('p:contains("对不起你暂没有发布种子的权限")').length || $('td:contains(请提交候选)').length || $('a[href="?add_offer=1"]').length || $('h1:contains("候选区")').length) {
             if (forward_site == "CMCT") {
                 upload_site = upload_site.replace('upload.php', 'upload.php?offer=1');
             } else if (forward_site == "HHClub" || forward_site == 'HUDBT') {
                 upload_site = upload_site.replace('offers.php', 'offers.php?add_offer=1');
             } else if (forward_site == "TTG") {
                 upload_site = upload_site.replace('viewoffers.php', 'offer.php');
+            } else if (forward_site == "HaresClub") {
+                upload_site = upload_site.replace('upload.php', 'offers.php?action=add');
             } else {
                 upload_site = upload_site.replace('upload.php', 'offers.php?add_offer=1');
             }
-            location.href = encodeURI(upload_site + separator + site_url.split(separator)[1]);
+            location.href = upload_site + separator + encodeURI(dictToString(raw_info));
             return;
         }
-
-        raw_info = stringToDict(site_url.split(separator)[1]); //将弄回来的字符串转成字典
         console.log(raw_info);
         raw_info.descr = raw_info.descr.replace(/ /g, ' ');
         raw_info.full_mediainfo = raw_info.full_mediainfo.replace(/ /g, ' ');
@@ -14192,7 +14195,7 @@ function auto_feed() {
                 }
             }
 
-            if (['url', 'pt_gen[imdb][link]', 'imdb', 'imdb_url'].indexOf(allinput[i].name) > -1 && allinput[i].type == 'text') { //填充imdb信息
+            if (['url', 'pt_gen[imdb][link]', 'imdb', 'imdb_url'].indexOf(allinput[i].name) > -1 && (allinput[i].type == 'text' || allinput[i].type == 'url')) { //填充imdb信息
                 if (forward_site == 'OurBits' && raw_info.url == ''){
                     if (raw_info.dburl){
                         raw_info.url = raw_info.dburl;
@@ -14409,6 +14412,9 @@ function auto_feed() {
                 }
                 raw_info.descr = tmp_descr;
                 raw_info.descr = add_thanks(raw_info.descr);
+                if (forward_site == 'NJTUPT') {
+                    $('textarea[name="body"]').val(raw_info.descr.trim().replace(/\n\n+/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\['));
+                }
                 if (forward_site != 'PTLGS') {
                     $('textarea[name="descr"]').val(raw_info.descr.trim().replace(/\n\n+/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\['));
                 } else {
@@ -18539,57 +18545,48 @@ function auto_feed() {
             }
             $('select[name="type"]').parent().find('input.layui-unselect').val($('select[name="type"] option:selected').text());
 
-            //媒介
-            var medium_box = document.getElementsByName('medium_sel')[0];
+            // 媒介
+            var medium_box = $('select[name="mediumOption"]');
             switch(raw_info.medium_sel){
-                case 'UHD': medium_box.options[1].selected = true; break;
-                case 'Blu-ray': medium_box.options[2].selected = true; break;
-                case 'Remux': medium_box.options[3].selected = true; break;
-                case 'Encode': medium_box.options[4].selected = true; break;
-                case 'WEB-DL': medium_box.options[5].selected = true; break;
+                case 'UHD': medium_box.val(1); break;
+                case 'Blu-ray': medium_box.val(2); break;
+                case 'Remux': medium_box.val(3); break
+                case 'Encode': medium_box.val(4); break
+                case 'WEB-DL': medium_box.val(5); break
                 case 'HDTV':
-                    medium_box.options[7].selected = true;
+                    medium_box.val(7);
                     if (raw_info.standard_sel == '4K') {
-                        medium_box.options[6].selected = true;
+                        medium_box.val(6);
                     }
                     break;
             }
-            $('select[name="medium_sel"]').parent().find('input.layui-unselect').val($('select[name="medium_sel"] option:selected').text());
+            $('select[name="mediumOption"]').parent().find('input.layui-unselect').val($('select[name="mediumOption"] option:selected').text());
 
             //视频编码
-            var codec_box = document.getElementsByName('codec_sel')[0];
+            var codec_box = $('select[name="codecOption"]');
             switch (raw_info.codec_sel){
-                case 'H264': codec_box.options[2].selected = true; break;
-                case 'X264': codec_box.options[4].selected = true; break;
-                case 'H265': codec_box.options[1].selected = true; break;
-                case 'X265': codec_box.options[3].selected = true; break;
-                case 'VC-1': codec_box.options[5].selected = true; break;
-                case 'MPEG-4': codec_box.options[6].selected = true; break;
-                case 'MPEG-2': codec_box.options[7].selected = true; break;
-                case 'XVID': codec_box.options[8].selected = true; break;
-                default: codec_box.options[9].selected = true;
+                case 'H264': codec_box.val(1); break;
+                case 'X264': codec_box.val(8); break;
+                case 'H265': codec_box.val(6); break;
+                case 'X265': codec_box.val(7); break;
+                case 'VC-1': codec_box.val(2); break;
+                case 'MPEG-4': codec_box.val(9); break;
+                case 'MPEG-2': codec_box.val(4); break;
+                case 'XVID': codec_box.val(3); break;
+                default: codec_box.val(5);
             }
-            $('select[name="codec_sel"]').parent().find('input.layui-unselect').val($('select[name="codec_sel"] option:selected').text());
+            $('select[name="codecOption"]').parent().find('input.layui-unselect').val($('select[name="codecOption"] option:selected').text());
 
-            //音频编码
-            var audiocodec_box = document.getElementsByName('audiocodec_sel')[0];
-            var audiocodec_dict = { 'TrueHD': 13, 'Atmos': 14, 'DTS': 4, 'DTS-HD': 11, 'DTS-HDMA': 11, 'DTS-HDMA:X 7.1': 12, 'DTS-HDHR': 10,
-                                    'AC3': 1, 'EAC3': 1, 'LPCM': 9, 'Flac': 6, 'WAV': 8, 'AAC': 2, 'APE': 5, '': 16 };
+            // 音频编码
+            var audiocodec_box = $('select[name="AudioCodecOption"]');
+            var audiocodec_dict = { 'TrueHD': 9, 'Atmos': 8, 'DTS': 3, 'DTS-HD': 11, 'DTS-HDMA': 11, 'DTS-HDMA:X 7.1': 10, 'DTS-HDHR': 12,
+                                    'AC3': 13, 'EAC3': 13, 'LPCM': 14, 'Flac': 1, 'WAV': 15, 'AAC': 6, 'APE': 2, '': 7, 'MP3': 4};
             if (audiocodec_dict.hasOwnProperty(raw_info.audiocodec_sel)){
                 var index = audiocodec_dict[raw_info.audiocodec_sel];
-                audiocodec_box.options[index].selected = true;
+                audiocodec_box.val(index);
             }
-            $('select[name="audiocodec_sel"]').parent().find('input.layui-unselect').val($('select[name="audiocodec_sel"] option:selected').text());
+            $('select[name="AudioCodecOption"]').parent().find('input.layui-unselect').val($('select[name="AudioCodecOption"] option:selected').text());
 
-            try {
-                var poster = raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i);
-                if (raw_info.descr.indexOf(poster[0]) < 80) {
-                    $('input[name="url_poster"]').val(poster[1]);
-                    raw_info.descr = raw_info.descr.replace(poster[0], '').trim();
-                }
-            } catch(err) {
-                console.log(err);
-            }
             try {
                 raw_info.descr = raw_info.descr.replace(infos.mediainfo, '');
             } catch(err) {}
@@ -18597,30 +18594,36 @@ function auto_feed() {
             get_full_size_picture_urls(raw_info, null, $('textarea[name="screenshots"]'), false);
             raw_info.descr = raw_info.descr.replace(/\[(b|color|url|img|size|font).*?\][\s\S]{0,30}\[\/(b|color|url|img|size|font)\]/g, '');
             raw_info.descr = raw_info.descr.replace(/\[quote\][\s\S]{0,10}\[\/quote\]/, '')
-            $('textarea[name="descr"]').val(raw_info.descr.trim().replace(/\n{2,20}/g, '\n\n'));
+            $('textarea.layui-textarea:eq(0)').val(raw_info.descr.trim().replace(/\n{2,20}/g, '\n\n'));
 
             //分辨率
-            var standard_box = document.getElementsByName('standard_sel')[0];
-            var standard_dict = {'4K': 2, '1080p': 3, '1080i': 4, '720p': 5, '8K': 1, '144Op': 6 };
+            var standard_box = $('select[name="standardOption"]');
+            var standard_dict = {'4K': 6, '1080p': 1, '1080i': 2, '720p': 3, '8K': 5, '144Op': 7};
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
-                standard_box.options[index].selected = true;
+                standard_box.val(index);
             }
-            $('select[name="standard_sel"]').parent().find('input.layui-unselect').val($('select[name="standard_sel"] option:selected').text());
+            $('select[name="standardOption"]').parent().find('input.layui-unselect').val($('select[name="standardOption"] option:selected').text());
 
             //地区
-            var team_box = document.getElementsByName('processing_sel')[0];
-            var team_dict = {'欧美': 4, '大陆': 1, '香港': 2, '台湾': 3, '日本': 5, '韩国': 5,
-                             '印度': 6, '': 7 };
+            var team_box = $('select[name="processingOption"]');
+            var team_dict = {'欧美': 4, '大陆': 1, '香港': 2, '台湾': 3, '日本': 7, '韩国': 7,
+                             '印度': 9, '': 10};
             if (team_dict.hasOwnProperty(raw_info.source_sel)) {
                 var index = team_dict[raw_info.source_sel];
-                team_box.options[index].selected = true;
+                team_box.val(index);
             }
-            $('select[name="processing_sel"]').parent().find('input.layui-unselect').val($('select[name="processing_sel"] option:selected').text());
+            $('select[name="processingOption"]').parent().find('input.layui-unselect').val($('select[name="processingOption"] option:selected').text());
 
-            $('select[name="team_sel"]').val('15');
-            check_team(raw_info, 'team_sel');
-            $('select[name="team_sel"]').parent().find('input.layui-unselect').val($('select[name="team_sel"] option:selected').text());
+            $('select[name="teamOption"]').val('15');
+            check_team(raw_info, 'teamOption');
+            $('select[name="teamOption"]').parent().find('input.layui-unselect').val($('select[name="teamOption"] option:selected').text());
+
+            var poster = raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i);
+            var _index = raw_info.descr.indexOf("◎");
+            if (raw_info.descr.indexOf(poster[0]) < 200 || (_index > 0 && raw_info.descr.indexOf(poster[0]) < _index) ) {
+                $('input[name="poster"]').val(poster[1]);
+            }
 
             if (if_uplver) {
                 $('span:contains("不要在发布者项目中显示我的用户名")').parent().addClass('layui-form-checked');
