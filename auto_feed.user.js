@@ -77,6 +77,9 @@
 // @match        https://*.douban.com/subject/*
 // @match        https://filelist.io/browse.php*
 // @match        http*://www.torrentleech.org/torrent/*
+// @match        http*://www.torrentleech.me/torrent/*
+// @match        http*://www.torrentleech.cc/torrent/*
+// @match        http*://www.tlgetin.cc/torrent/*
 // @match        http*://*/torrents/*
 // @match        https://*/torrents?imdb*
 // @match        https://broadcasthe.net/friends.php
@@ -919,6 +922,7 @@ if (site_url.match(/^https:\/\/nebulance.io\/torrents.php\?id=\d+#separator#/)) 
 //提供可用的获取豆瓣信息两个api，从0-1选择。主要应用于外站，另一个是自动爬取豆瓣页面
 const apis = ['https://api.iyuu.cn/App.Movie.Ptgen', 'https://ptgen.tju.pt/infogen'];
 var api_chosen = GM_getValue('api_chosen') === undefined ? 3: GM_getValue('api_chosen');
+var tldomain = GM_getValue('tldomain') === undefined ? 0: GM_getValue('tldomain');
 var imdb2db_chosen = GM_getValue('imdb2db_chosen') === undefined ? 0: GM_getValue('imdb2db_chosen');
 
 //用来转存海报使用的ptpimg的key,打开首页即可获取
@@ -1237,6 +1241,8 @@ var used_signin_sites = GM_getValue('used_signin_sites') === undefined ? default
 //欧美国家列表，可以酌情添加
 const us_ue = ['阿尔巴尼亚|安道尔|奥地利|俄罗斯|比利时|波黑|保加利亚|克罗地亚|塞浦路斯|捷克|丹麦|爱沙尼亚|法罗群岛[丹]|冰岛|芬兰|法国|德国|希腊|匈牙利|爱尔兰|意大利|拉脱维亚|列支敦士登|立陶宛|卢森堡|马其顿|马耳他|摩尔多瓦|摩纳哥|荷兰|挪威|波兰|葡萄牙|罗马尼亚|俄罗斯|圣马力诺|塞黑|斯洛伐克|斯洛文尼亚|西班牙|瑞典|瑞士|乌克兰|英国|梵蒂冈|美国|加拿大|澳大利亚|新西兰|西德|苏联'];
 
+const us_ue_english = ['Albania|Andorra|Austria|Russia|Belgium|Bosnia and Herzegovina|Bulgaria|Croatia|Cyprus|Czechia|Denmark|Estonia|Faroe Islands (Denmark)|Iceland|Finland|France|Germany|Greece|Hungary|Ireland|Italy|Latvia|Liechtenstein|Lithuania|Luxembourg|North Macedonia|Malta|Moldova|Monaco|Netherlands|Norway|Poland|Portugal|Romania|Russia|San Marino|Serbia|Slovakia|Slovenia|Spain|Sweden|Switzerland|Ukraine|United Kingdom|Vatican City|United States|Canada|Australia|New Zealand|West Germany|Soviet Union'];
+
 //是否在PTP/HDB/HDT/UHD种子列表显示搜索跳转功能，1表示显示，0表示隐藏
 const default_show_search_urls = {
     'PTP': 1,
@@ -1379,6 +1385,16 @@ const o_site_info = {
     'MTeam': 'https://kp.m-team.cc/',
     'ReelFliX': 'https://reelflix.xyz/'
 };
+
+if (tldomain == 0) {
+    o_site_info.TorrentLeech = 'https://www.torrentleech.org/';
+} else if (tldomain == 1) {
+    o_site_info.TorrentLeech = 'https://www.torrentleech.me/';
+} else if (tldomain == 2) {
+    o_site_info.TorrentLeech = 'https://www.torrentleech.cc/';
+} else if (tldomain == 3) {
+    o_site_info.TorrentLeech = 'https://www.tlgetin.cc/';
+}
 
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
 const site_img_info = {
@@ -1812,7 +1828,7 @@ function find_origin_site(url){
 
 //这部分是属于官种名称匹配，用于声明感谢，可自定义匹配正则以及感谢bbcode
 const reg_team_name = {
-    'MTeam': /-(.*mteam|mpad|tnp|BMDru)/i,
+    'MTeam': /-(.*mteam|mpad|tnp|BMDru|MWEB)/i,
     'CMCT': /-(CMCT|cmctv)/i,
     'HDSky': /-(hds|.*@HDSky)/i,
     'CHDBits': /-(CHD|.*@CHDBits)/i,
@@ -1851,7 +1867,9 @@ const reg_team_name = {
     '红叶': /(RLWEB|RLeaves|RLTV|-R²)$/i,
     'QingWa': /(FROG|FROGE|FROGWeb)$/i,
     'ZMPT': /ZmWeb|ZmPT/i,
-    'LemonHD': /(LeagueNF|-LHD|LeagueWEB)$/i,
+    'LemonHD': /(-LHD|League(WEB|CD|NF|HD|TV|MV))$/i,
+    'ptsbao': /-(FFans|sBao|FHDMV|OPS)/i,
+    '麒麟': /-HDK(WEB|TV|MV|Game|DIY|ylin)/i,
 };
 
 function add_thanks(descr) {
@@ -2227,7 +2245,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^http(s*):\/\/(redacted.ch|lztr.me|dicmusic.com|orpheus.network)\/torrents.php\?id=\d+&torrentid=\d+/i)) {
         return 1;
     }
-    if (site_url.match(/^http(s*):\/\/www\.torrentleech\.org\/torrent\/*/i)) {
+    if (site_url.match(/^http(s*):\/\/www\.(torrentleech|tlgetin)\..*?\/torrent\/*/i)) {
         return 1;
     }
     if (site_url.match(/^http(s*):\/\/xthor.tk\/details.php/i)) {
@@ -2643,6 +2661,15 @@ function get_source_sel_from_descr(descr){
         } else {
             region = region;
         }
+    } else {
+        reg_region = descr.match(/Country: (.*)/);
+        if (reg_region) {
+            region = reg_region[1].trim();
+            reg_region = RegExp(us_ue_english, 'i');
+            if (region.match(reg_region)) {
+                region = '欧美'
+            }
+        }
     }
     return region;
 }
@@ -2741,27 +2768,30 @@ function get_full_size_picture_urls(raw_info, imgs, container, need_img_label, c
         }
         for (i=0; i<img_urls.length; i++){
             if (raw_info && raw_info.descr.indexOf(img_urls[i]) < 80 || (_index > 0 && raw_info.descr.indexOf(img_urls[i]) < _index)){
-            } else{
-                if (raw_info) {
-                    raw_info.descr = raw_info.descr.replace(img_urls[i], '');
-                }
-                var item = img_urls[i].match(/\[img\](.*?)\[\/img\]/)[1];
-                if (item.match(/imgbox/)) {
-                    item = item.replace('thumbs2', 'images2').replace('t.png', 'o.png');
-                } else if (item.match(/pixhost/)) {
-                    item = item.replace('//t', '//img').replace('thumbs', 'images');
-                } else if (item.match(/shewang.net|pterclub.com|img4k.net|img.hdhome.org|img.hdchina.org/)) {
-                    item = item.replace(/th.png/, 'png').replace(/md.png/, 'png');
-                } else if (item.match(/beyondhd.co\/(images|cache)/)) {
-                    item = item.replace(/th.png/, 'png').replace(/md.png/, 'png').replace('/t/', '/i/');
-                } else if (item.match(/tu.totheglory.im/)) {
-                    item = item.replace(/_thumb.png/, '.png');
-                }
-                if (need_img_label) {
-                    img_info += '\n' + `[img]${item}[/img]`;
-                } else {
-                    img_info += '\n' + item;
-                }
+                continue;
+            }
+            if (raw_info) {
+                raw_info.descr = raw_info.descr.replace(img_urls[i], '');
+            }
+            var item = img_urls[i].match(/\[img\](.*?)\[\/img\]/)[1];
+            if (img_urls[i].match(/\[url=(https:\/\/i.ibb.co\/.*?\.png)\]/)) {
+                item = img_urls[i].match(/\[url=(https:\/\/i.ibb.co\/.*?\.png)\]/)[1];
+            }
+            if (item.match(/imgbox/)) {
+                item = item.replace('thumbs2', 'images2').replace('t.png', 'o.png');
+            } else if (item.match(/pixhost/)) {
+                item = item.replace('//t', '//img').replace('thumbs', 'images');
+            } else if (item.match(/shewang.net|pterclub.com|img4k.net|img.hdhome.org|img.hdchina.org/)) {
+                item = item.replace(/th.png/, 'png').replace(/md.png/, 'png');
+            } else if (item.match(/beyondhd.co\/(images|cache)/)) {
+                item = item.replace(/th.png/, 'png').replace(/md.png/, 'png').replace('/t/', '/i/');
+            } else if (item.match(/tu.totheglory.im/)) {
+                item = item.replace(/_thumb.png/, '.png');
+            }
+            if (need_img_label) {
+                img_info += '\n' + `[img]${item}[/img]`;
+            } else {
+                img_info += '\n' + item;
             }
         }
         container.val(img_info.trim());
@@ -3641,7 +3671,6 @@ function getDoc(url, meta, callback) {
 
 function page_parser(responseText) {
     responseText = responseText.replace(/s+src=/ig, ' data-src=');
-    responseText = responseText.replace(/<script[^>]*?>[\S\s]*?<\/script>/ig, '');
     return (new DOMParser()).parseFromString(responseText, 'text/html');
 }
 
@@ -6384,6 +6413,16 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#setting').append(`<br><br>`);
 
         //**************************************************** 4 ***************************************************************************
+        $('#setting').append(`<b>选择TorrentLeech的默认域名：</b>`);
+        $('#setting').append(`<input type="radio" name="tldomain" value="0">torrentleech.org`);
+        $('#setting').append(`<input type="radio" name="tldomain" value="1">torrentleech.me`);
+        $('#setting').append(`<input type="radio" name="tldomain" value="2">torrentleech.cc`);
+        $('#setting').append(`<input type="radio" name="tldomain" value="3">tlgetin.cc`);
+        $(`input:radio[name="tldomain"][value="${tldomain}"]`).prop('checked', true);
+        $('#setting').append(`<br><br>`);
+
+
+        //**************************************************** 4 ***************************************************************************
         $('#setting').append(`<b>快速搜索站点设置(每个一行,可自行添加)
             <a href="https://gitee.com/tomorrow505/auto-feed-helper/raw/master/temple_search_urls" target=_blank>
             <font color="red">范例</font></a></b></br>`);
@@ -6491,6 +6530,8 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
             GM_setValue('api_chosen', $('input[name="ptgen"]:checked').val());
 
+            GM_setValue('tldomain', $('input[name="tldomain"]:checked').val());
+
             for (key in show_search_urls) {
                 if ($(`input[show=${key}]`).prop('checked')){
                     show_search_urls[key] = 1;
@@ -6582,10 +6623,10 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                         async function formatDescr() {
                             var descr = kg_intro_base_content.split('Screenshots here')[0].trim();
                             var doc = await getimdbpage(raw_info.url);
+                            const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
                             var country = Array.from($('li.ipc-metadata-list__item:contains("Countr")', doc).find('a')).map(function(e){
                                 return $(e).text();
                             });
-                            var country_selected = false;
                             country = country.map(function(e){
                                 if (e == 'United States') e = 'USA';
                                 if (e == 'United Kingdom') e = 'UK';
@@ -6593,18 +6634,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                             }).join(', ');
                             var index = descr.search('Date Published');
                             descr = descr.substring(0,index) + `Country: ${country}\n` + descr.substring(index);
-                            var poster_url = 'https://www.imdb.com/' + $('a[href*=tt_ov_i]', doc).first().attr('href');
-                            if ($('a[href*=tt_ov_i]', doc).length == 0) {
-                                poster_url = 'https://www.imdb.com/' + $('div[class*=ipc-poster] > div > a', doc).last().attr('href');
-                            }
-
-                            var poster = await getPoster(poster_url);
-                            descr = descr.format({'poster': poster});
+                            descr = descr.format({'poster': imdb_json.image});
                             descr = descr.format({'title': $('h1:eq(0)', doc).text().trim()});
-                            descr = descr.format({'genres': Array.from($('div[data-testid*=genres]', doc).find('a')).map(function(e){
-                                return $(e).text();
-                            }).join(', ').replace(/, Read all/g, '')});
-
+                            descr = descr.format({'genres': imdb_json.genre.join(', ')});
                             descr = descr.format({'date': $('li.ipc-metadata-list__item:contains("Release date")', doc).find('div').find('li').text()});
                             descr = descr.format({'score': $('div[data-testid*=aggregate-rating__score]:eq(0)', doc).text()});
                             descr = descr.format({'imdb_url': raw_info.url});
@@ -6612,23 +6644,13 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                                 return $(e).text();
                             }).join(', ');
                             descr = descr.format({'director': director});
-
                             var creators = await getFullCredits(raw_info.url);
                             descr = descr.format({'creator': creators});
-
                             var actors = Array.from($('div.title-cast__grid', doc).find('a[data-testid="title-cast-item__actor"]:lt(8)')).map(function(e){
                                 return $(e).text();
                             }).join(', ');
                             descr = descr.format({'cast': actors});
-
-                            var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
-                            if (imdb_descr.match(/Read all/)){
-                                var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
-                                imdb_descr = await getFullDescr(full_descr_url);
-                            } else if (imdb_descr.match(/Add a Plot/)) {
-                                imdb_descr =  `No data from IMDB: ${raw_info.url}`;
-                            }
-                            descr = descr.format({'en_descr': imdb_descr});
+                            descr = descr.format({'en_descr': imdb_json.description});
                             $('#go_ptgen').prop('value', '获取成功');
                             $('textarea[name=douban_info]').val(descr);
                         }
@@ -11669,7 +11691,7 @@ function auto_feed() {
             raw_info.descr = raw_info.descr + '\n\n' + img_info;
             raw_info.descr = raw_info.descr.replace(/\[color=.*?\]|\[\/color\]/ig, '');
             raw_info.descr = raw_info.descr.replace(/\n\n+/ig, '\n\n');
-            raw_info.torrent_url = 'https://www.torrentleech.org' + $('#detailsDownloadButton').attr('href');
+            raw_info.torrent_url = o_site_info.TorrentLeech + $('#detailsDownloadButton').attr('href');
         }
 
         //----------------------------------------------对国内站点获取的信息进行一些修复-------------------------------------------------------
@@ -12471,6 +12493,9 @@ function auto_feed() {
         }
         if (raw_info.name.match(/HDVWEB$|HDVMV$/i)) {
             $('#HDDolby').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至HDDolby');
+        }
+        if (raw_info.name.match(/HDH(ome|TV|PAD|WEB)$|-HDH$/i)) {
+            $('#PThome').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至PThome');
         }
 
         function check_exist_tid(site) {
@@ -14410,7 +14435,7 @@ function auto_feed() {
                     tmp_descr = tmp_descr.replace(/(\[url=.*\])?\[img\].*?\[\/img\](\[\/url\])?/g, '');
                     $('textarea[name="descr"]').css({'height': '400px'});
                 }
-                tmp_descr = tmp_descr.replace(/\[quote\].*?官组作品.*?\[\/quote\]/g, '').replace(/\[quote\][.\n]*?\[\/quote\]/g, function(data) {
+                tmp_descr = tmp_descr.replace(/\[quote\].*?官组作品.*?\[\/quote\]/g, '').replace(/\[quote\][\s\S]*?\[\/quote\]/g, function(data) {
                     if (!data.replace(/\[.*?\]/g, '').trim()) {
                         return '';
                     } else {
@@ -22579,14 +22604,8 @@ function auto_feed() {
                     descr = descr.format({"imdbid": imdbid});
                     async function formatDescr () {
                         var doc = await getimdbpage(raw_info.url);
-                        var poster_url = 'https://www.imdb.com/' + $('a[href*=tt_ov_i]', doc).first().attr('href');
-                        if ($('a[href*=tt_ov_i]', doc).length == 0) {
-                            poster_url = 'https://www.imdb.com/' + $('div[class*=ipc-poster] > div > a', doc).last().attr('href');
-                        }
-
-                        var poster = await getPoster(poster_url);
-                        descr = descr.format({'poster': poster});
-
+                        const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
+                        descr = descr.format({'poster': imdb_json.image});
                         descr = descr.format({'aspect_ratio': $('li.ipc-metadata-list__item:contains("Aspect ratio")', doc).text().replace('Aspect ratio', '').trim()});
                         descr = descr.format({'country': Array.from($('li.ipc-metadata-list__item:contains("Countr")', doc).find('a')).map(function(e){
                             return $(e).text();
@@ -22596,15 +22615,7 @@ function auto_feed() {
                             runtime = parseInt(runtime[1]) * 60 + parseInt(runtime[2])
                             descr = descr.format({'runtime': runtime});
                         } catch (err) {}
-                        var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
-                        if (imdb_descr.match(/Read All/i)){
-                            var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
-                            console.log(full_descr_url)
-                            imdb_descr = await getFullDescr(full_descr_url);
-                        } else if (imdb_descr.match(/Add a Plot/)) {
-                            imdb_descr =  `No data from IMDB: ${raw_info.url}`;
-                        }
-                        descr = descr.format({'en_descr': imdb_descr});
+                        descr = descr.format({'en_descr': imdb_json.description});
                         $('#bbcode-description').val(descr);
                         $('#bbcode-description').css('height', '400px');
                         $('#bbcode-description')[0].dispatchEvent(event);
@@ -26615,6 +26626,7 @@ function auto_feed() {
                     $('input[name=title]').val( $('input[name=title]').val() + ' [+commentary]');
                 }
                 var doc = await getimdbpage(raw_info.url);
+                const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
                 var country = Array.from($('li.ipc-metadata-list__item:contains("Countr")', doc).find('a')).map(function(e){
                     return $(e).text();
                 });
@@ -26629,17 +26641,9 @@ function auto_feed() {
                         }
                     }
                 });
-                var poster_url = 'https://www.imdb.com/' + $('a[href*=tt_ov_i]', doc).first().attr('href');
-                if ($('a[href*=tt_ov_i]', doc).length == 0) {
-                    poster_url = 'https://www.imdb.com/' + $('div[class*=ipc-poster] > div > a', doc).last().attr('href');
-                }
-
-                var poster = await getPoster(poster_url);
-                descr = descr.format({'poster': poster});
+                descr = descr.format({'poster': imdb_json.image});
                 descr = descr.format({'title': $('h1:eq(0)', doc).text().trim()});
-                descr = descr.format({'genres': Array.from($('div[data-testid*=genres]', doc).find('a')).map(function(e){
-                    return $(e).text();
-                }).join(', ').replace(/, Read all/g, '')});
+                descr = descr.format({'genres': imdb_json.genre.join(', ')});
                 descr = descr.format({'date': $('li.ipc-metadata-list__item:contains("Release date")', doc).find('div').find('li').text()});
                 descr = descr.format({'score': $('div[data-testid*=aggregate-rating__score]:eq(0)', doc).text()});
                 descr = descr.format({'imdb_url': raw_info.url});
@@ -26655,14 +26659,7 @@ function auto_feed() {
                     return $(e).text();
                 }).join(', ');
                 descr = descr.format({'cast': actors});
-                var imdb_descr = $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).text().trim();
-                if (imdb_descr.match(/Read all/)){
-                    var full_descr_url = 'https://www.imdb.com/title/' + raw_info.url.match(/tt\d+/)[0] + '/' + $('span[data-testid="plot-xs_to_m"]:eq(0)', doc).find('a').attr('href');
-                    imdb_descr = await getFullDescr(full_descr_url);
-                } else if (imdb_descr.match(/Add a Plot/)) {
-                    imdb_descr =  `No data from IMDB: ${raw_info.url}`;
-                }
-                descr = descr.format({'en_descr': imdb_descr});
+                descr = descr.format({'en_descr': imdb_json.description});
 
                 try{
                     var infos = get_mediainfo_picture_from_descr(raw_info.descr);
@@ -26676,9 +26673,7 @@ function auto_feed() {
                 }).join(', ');
                 $('input[name=lang]').val(language);
 
-                var genre = Array.from($('div[data-testid*=genres]', doc).find('a')).map(function(e){
-                    return $(e).text().trim();
-                });
+                var genre = imdb_json.genre;
                 var filled = {
                     'main': -1,
                     'sub': -1
