@@ -11,6 +11,7 @@
 // @match        https://nzbs.in/*
 // @match        http*://*/detail*.php*
 // @match        http*://*/upload*php*
+// @match        https://club.hares.top/view.php*
 // @match        https://pixhost.to*
 // @match        https://*/upload/*
 // @match        https://*.open.cd/plugin_upload.php*
@@ -96,7 +97,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.8.0
+// @version      2.0.8.1
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1379,7 +1380,8 @@ const o_site_info = {
     'YemaPT': 'https://www.yemapt.org/',
     'SpeedApp': 'https://speedapp.io/',
     'MTeam': 'https://kp.m-team.cc/',
-    'ReelFliX': 'https://reelflix.xyz/'
+    'ReelFliX': 'https://reelflix.xyz/',
+    'HaresClub': 'https://club.hares.top/'
 };
 
 if (tldomain == 0) {
@@ -1587,7 +1589,7 @@ var raw_info = {
     'labels': 0
 };
 
-var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'MTeam', 'HHClub'];
+var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'MTeam', 'HHClub', 'HaresClub'];
 
 Array.prototype.remove = function(val) {
     var index = this.indexOf(val);
@@ -1947,7 +1949,7 @@ function walkDOM(n) {
         } else if (n.nodeName == '#text' && site_url.match(/npupt/)) {
             n.data = n.data.replace(/^ +| +$/g, '');
         } else if (n.nodeName == 'BR') {
-            if (site_url.match(/u2.dmhy.org|ourbits.club|hd-space.org|totheglory.im|blutopia.cc|star-space.net|torrent.desi|hudbt|fearnopeer.com|darkland.top|onlyencodes.cc|cinemageddon|hdpost.top|eiga.moi|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com|kp.m-team.cc/i)) {
+            if (site_url.match(/u2.dmhy.org|ourbits.club|hd-space.org|totheglory.im|blutopia.cc|star-space.net|torrent.desi|hudbt|fearnopeer.com|darkland.top|onlyencodes.cc|cinemageddon|hdpost.top|eiga.moi|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com|kp.m-team.cc|hares.top/i)) {
                 n.innerHTML = '\r\n';
             }
         } else if (n.nodeName == 'LEGEND') {
@@ -2133,6 +2135,9 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https?:\/\/\d+.\d+.\d+.\d+:5678/)) {
         return 7;
     }
+    if (site_url.match(/^https:\/\/club.hares.top\/view.php\?id=\d+/i)) {
+        return 1;
+    }
     if (site_url.match(/^https?:\/\/.*\/.*(upload|create|offer|viewoffers).*?(php)?#separator#/i)) {
         return 0;
     }
@@ -2144,9 +2149,6 @@ function judge_if_the_site_as_source() {
     }
     if (site_url.match(/^https?:\/\/(avistaz|privatehd|cinemaz).to\/upload\/torrent\/\d+/i)) {
         return 6;
-    }
-    if (site_url.match(/^https?:\/\/www.hd.ai\/Torrents.upload/i)) {
-        return 0;
     }
     if (site_url.match(/^https:\/\/hd-space\.org\/index.php\?page=upload/)){
         return 0;
@@ -3858,6 +3860,9 @@ function getData(imdb_url, callback) {
                 } catch(e) {raw_data.image = 'null'}
 
                 raw_data.id = douban_url.match(/subject\/(\d+)/)[1];
+                $('#input_box').wait(function() {
+                    $('#input_box').val(douban_url);
+                });
                 try { raw_data.year = parseInt($('#content>h1>span.year', html).text().slice(1, -1)); } catch(e) {raw_data.year = ''}
                 try { raw_data.aka = $('#info span.pl:contains("又名")', html)[0].nextSibling.textContent.trim(); } catch(e) {raw_data.aka = 'null'}
                 try { raw_data.average = parseFloat($('#interest_sectl', html).find('[property="v:average"]').text()); } catch(e) {raw_data.average = ''}
@@ -8297,7 +8302,7 @@ function auto_feed() {
         raw_info.origin_site = origin_site;
         raw_info.origin_url = site_url.replace('/', '***');
 
-        var title, small_descr,descr, tbody, frds_nfo;
+        var title, small_descr, descr, tbody, frds_nfo;
         var cmct_mode = 1;
         var torrent_id = "";//gz架构站点种子id
         var douban_button_needed = false;
@@ -8334,7 +8339,7 @@ function auto_feed() {
             if (origin_site == 'TTG') {
                 descr = document.getElementById("kt_d");
             } else {
-                descr = document.getElementById("kdescr"); //kdescr
+                descr = document.getElementById("kdescr");
                 if (!descr && origin_site == 'CMCT') {
                     descr = document.getElementById("kposter");
                     cmct_mode = 2;
@@ -8355,10 +8360,6 @@ function auto_feed() {
                     raw_info.type = '游戏';
                     try{ raw_info.small_descr = document.getElementsByTagName('h1')[1].textContent; } catch(err) {}
                 }
-                if (origin_site == 'HaresClub') {
-                    descr = $('#kdescr').next()[0];
-                }
-
                 if (!descr && origin_site == 'PTLGS') {
                     var tr = document.createElement('tr');
                     tr.innerHTML='<td>其它信息</td><td><div id="kdescr"></div></td>'
@@ -8571,9 +8572,6 @@ function auto_feed() {
                 raw_info.torrent_url = $('#download_link').val();
             } else if (origin_site == '影') {
                 raw_info.torrent_url = 'https://star-space.net/' + $('a[href*="download.php"]:last').attr('href');
-            } else if (origin_site == 'HaresClub') {
-                raw_info.torrent_name = $('td:contains(".torrent")').text();
-                raw_info.torrent_url = used_site_info[origin_site].url + $('a[href*="download.php"]').attr('href');
             } else if (origin_site == 'U2') {
                 raw_info.torrent_name = $('a[href*="download.php"]:first').text();
                 raw_info.torrent_url = o_site_info[origin_site] + $('a[href^="download.php"]:eq(1)').attr('href');
@@ -10298,6 +10296,53 @@ function auto_feed() {
             raw_info.torrent_url = site_url;
         }
 
+        if (origin_site == 'HaresClub') {
+            raw_info.name = $('td:contains("种子名称"):last').next().text();
+            raw_info.small_descr = $('td:contains("种子标题"):last').next().text();
+            function getPoster(_id, sep) {
+                try {
+                    poster = $(`#${_id}`).find('img').attr('lay-src').split(sep).pop();
+                } catch (Err) {
+                    poster = '';
+                }
+                return poster;
+            }
+            poster = getPoster('kpt-gen-douban', 'cache=');
+            if (poster == '') {
+                poster = getPoster('kpt-gen-imdb', 'url=');
+            }
+
+            descr = $('div:contains("种子简介"):last').next()[0];
+            descr = walkDOM(descr.cloneNode(true)).split('本站提供')[0].trim();
+            descr = descr.replace(/\n\n/g, '\n');
+
+            mediainfo = $('#fullInfo').text().trim();
+            raw_info.descr = `${descr}\n\n[quote]\n${mediainfo}\n[/quote]\n\n`;
+
+            var pictures = raw_info.descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
+            if (pictures) {
+                pictures.forEach(item=>{
+                    raw_info.descr = raw_info.descr.replace(item, '');
+                    raw_info.descr += item;
+                });
+            }
+
+            $('#layui-cap-img').find('img').each((index, e) => {
+                raw_info.descr += `[img]${$(e).attr('layer-src').trim()}[/img]`;
+            })
+
+            if (raw_info.descr.match(/◎/) && poster != '') {
+                raw_info.descr = raw_info.descr.replace(/◎/, function(data) {
+                    return `[img]${poster}[/img]\n\n${data}`;
+                })
+            } else if (poster != '') {
+                raw_info.descr = `[img]${poster}[/img]\n\n${descr}`;
+            }
+            tbody = $('#table')[0];
+            insert_row = tbody.insertRow(2);
+            raw_info.torrent_url = `https://club.hares.top/download.php?${site_url.match(/id=\d+/)[0]}`;
+        }
+
         //-------------------------------------根据table获取其他信息——包含插入节点（混合）-------------------------------------------
         var tds = tbody.getElementsByTagName("td");
         if (origin_site == 'HUDBT'){
@@ -10631,7 +10676,7 @@ function auto_feed() {
             }
 
             //主要是类型、medium_sel、地区等等信息
-            if (['基本信息', '详细信息', '类型', '基本資訊', '標籤列表：', '媒介：', 'Basic Info', '分类 / 制作组'].indexOf(tds[i].textContent) >-1) {
+            if (['基本信息', '详细信息', '类型', '基本資訊', '標籤列表：', '媒介：', 'Basic Info', '分类 / 制作组', '种子信息'].indexOf(tds[i].textContent) >-1) {
                 if (i + 1 < tds.length) {
                     if (origin_site == 'HUDBT') {
                         info_text = tds[i].nextSibling.textContent;
@@ -10876,7 +10921,6 @@ function auto_feed() {
             };
             getDataFromAPIs();
         }
-
         //------------------------------------国外站点简介单独处理，最后辅以豆瓣按钮----------------------------------------------
 
         if (origin_site == 'PTP') {
@@ -12031,59 +12075,8 @@ function auto_feed() {
         }
 
         raw_info.small_descr = deal_with_subtitle(raw_info.small_descr);
-
-        if (origin_site == 'HaresClub') {
-            raw_info.descr = raw_info.descr.replace(/简介/, '');
-            var mediainfo_hares = $('#kfmedia').clone();
-            mediainfo_hares.find('br').each((index,e)=>{
-                $(e).replaceWith(`\n`);
-            });
-            raw_info.small_descr = $('h3').text();
-            mediainfo_hares = `\n\n[quote]${mediainfo_hares.text()}[/quote]`;
-            var insert_point = raw_info.descr.length;
-            var first_picture = raw_info.descr.match(/(◎主.*演|◎简.*介|◎演.*员)[\s\S]*?(\[url=.*?\].*?\[\/url\]|\[img\].*?\[\/img\])/);
-            if (first_picture) {
-                var introduction = first_picture[0].split(/\[url.*?\[img|\[img/)[0];
-                insert_point = raw_info.descr.search(introduction) + introduction.length;
-            }
-            raw_info.descr = raw_info.descr.slice(0, insert_point) + mediainfo_hares + '\n\n' + raw_info.descr.slice(insert_point);
-            raw_info.descr = raw_info.descr.replace(/img\]\n\n\[img/g, 'img]\n[img');
-            $('#layer-photos-demo').find('img').map((index,e)=>{
-                try{
-                    var img1 = $(e).attr('src');
-                    var img2 = $(e).attr('lay-src');
-                    var img = img1? img1: img2;
-                    if (img.match(/=/)) {
-                        raw_info.descr += '\n' + '[img]' + img.split('=')[1].split('&')[0] + '[/img]';
-                    } else {
-                        raw_info.descr += '\n' + '[img]' + img + '[/img]';
-                    }
-                } catch (err) {}
-            });
-        }
-
         raw_info.descr = add_thanks(raw_info.descr);
         raw_info.descr = raw_info.descr.replace(/\[quote\].*?转自.*?感谢.*?\[\/quote\]/, '');
-
-        if (origin_site == 'HaresClub') {
-            console.log($('div[class="layui-col-md2 layui-col-sm2 layui-col-xs2"]:first').html())
-            var img1 = $('div[class="layui-col-md2 layui-col-sm2 layui-col-xs2"]:first').find('img').attr('lay-src');
-            var img2 = $('div[class="layui-col-md2 layui-col-sm2 layui-col-xs2"]:first').find('img').attr('src');
-            var img = img1 ? img1: img2;
-            if (img.match(/douban/)) {
-                img = img.replace(/img\d/, 'img9').replace('s_ratio', 'l_ratio');
-            }
-            if (img.match(/=/)) {
-                img = img.split('=')[1].split('&')[0];
-            }
-
-            var insert_point = raw_info.descr.search('◎');
-            if (insert_point) {
-                raw_info.descr = raw_info.descr.slice(0, insert_point) + `[img]${img}[/img]\n` + raw_info.descr.slice(insert_point);
-            } else {
-                raw_info.descr = `[img]${img}[/img]\n${raw_info.descr}`;
-            }
-        }
 
         if (origin_site == 'Audiences') {
             if ($('span[class="tags tdh"]').length) {
@@ -13326,10 +13319,6 @@ function auto_feed() {
                 descr = descr.cloneNode(true);
                 raw_info.descr = '';
                 raw_info.descr = walkDOM(descr);
-            } else if (origin_site == 'HaresClub') {
-                descr = $('#kdescr').next()[0];
-                descr = descr.cloneNode(true);
-                raw_info.descr = walkDOM(descr).replace(/^简介./, '');
             }
             GM_setValue("descr", raw_info.descr);
         });
