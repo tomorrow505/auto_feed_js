@@ -10325,6 +10325,7 @@ function auto_feed() {
             descr = descr.replace(/\n\n/g, '\n');
 
             mediainfo = $('#fullInfo').text().trim();
+            raw_info.full_mediainfo = mediainfo;
             raw_info.descr = `${descr}\n\n[quote]\n${mediainfo}\n[/quote]\n\n`;
 
             var pictures = raw_info.descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
@@ -10344,7 +10345,7 @@ function auto_feed() {
                     return `[img]${poster}[/img]\n\n${data}`;
                 })
             } else if (poster != '') {
-                raw_info.descr = `[img]${poster}[/img]\n\n${descr}`;
+                raw_info.descr = `[img]${poster}[/img]\n\n${raw_info.descr}`;
             }
             tbody = $('#table')[0];
             insert_row = tbody.insertRow(2);
