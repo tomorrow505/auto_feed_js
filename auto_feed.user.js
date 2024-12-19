@@ -10311,6 +10311,14 @@ function auto_feed() {
             if (poster == '') {
                 poster = getPoster('kpt-gen-imdb', 'url=');
             }
+            if (poster == '') {
+                try {
+                    poster = $('#poster').attr('src').split('url=').pop().split('&w=')[0];
+                } catch (err) {
+                    poster = '';
+                }
+            }
+            console.log(poster);
 
             descr = $('div:contains("种子简介"):last').next()[0];
             descr = walkDOM(descr.cloneNode(true)).split('本站提供')[0].trim();
