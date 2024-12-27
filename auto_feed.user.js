@@ -97,7 +97,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.8.1
+// @version      2.0.8.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -14670,13 +14670,12 @@ function auto_feed() {
                     if (raw_info.name.match(/HLG/)) { document.getElementById('hlg').checked=true; }
                     break;
                 case 'OurBits':
-                    if (labels.gy){ document.getElementById('tagGY').checked=true; }
-                    if (labels.yy){ document.getElementById('tagGY').checked=true; }
-                    if (labels.zz){ document.getElementById('tagZZ').checked=true; }
-                    if (labels.diy){ document.getElementById('tagDIY').checked=true; }
-                    if (labels.hdr10) { document.getElementById('tagHDR10').checked=true; }
-                    if (labels.hdr10plus) { document.getElementById('tagHDR10P').checked=true; }
-                    if (labels.db) { document.getElementById('tagDB').checked=true; }
+                    if (labels.gy){ document.getElementById('tag_gy').checked=true; }
+                    if (labels.zz){ document.getElementById('tag_zz').checked=true; }
+                    if (labels.diy){ document.getElementById('tag_diy').checked=true; }
+                    if (labels.hdr10) { document.getElementById('tag_hdr').checked=true; }
+                    if (labels.hdr10plus) { document.getElementById('tag_hdrp').checked=true; }
+                    if (labels.db) { document.getElementById('tag_db').checked=true; }
                     break;
                 case 'HaiDan':
                     if (labels.diy){ $('input[name="tag_list[]"][value=4]').attr('checked', true); }
@@ -16089,9 +16088,10 @@ function auto_feed() {
 
                 instance?.context?.setFieldsValue({ 'showName': raw_info.name });
                 instance?.context?.setFieldsValue({ 'shortDesc': raw_info.small_descr });
-                const infos = get_mediainfo_picture_from_descr(raw_info.descr)
-                const cover_img = infos.cover_img? infos.cover_img.replace('[img]','').replace('[/img]','') : infos.pic_info?.split('[/img]')?.at(0).replace('[img]', '').trim()
-                instance?.context?.setFieldsValue({ 'picture': cover_img });
+                try {
+                    const cover_img = raw_info.descr?.split('[/img]')?.at(0).split('[img]')?.at(1).trim();
+                    instance?.context?.setFieldsValue({ 'picture': cover_img });
+                } catch (err) {}
 
                 function trigger_select(tid, value, time, order) {
                     if (time === undefined) {
