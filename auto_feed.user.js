@@ -96,7 +96,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.8.2
+// @version      2.0.8.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -10781,12 +10781,14 @@ function auto_feed() {
             insert_row = o_insert_row;
             var torrent_id = site_url.match(/detail\/(\d+)/)[1];
             function build_fetch(api) {
-                const formdata = new FormData();
-                formdata.append("id", torrent_id);
                 new_fetch = fetch(`https://api.m-team.io/${api}`, {
                     method: 'POST',
-                    headers: { "authorization": localStorage.getItem("auth") },
-                    body: formdata
+                    headers: {
+                        "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                        "ts": Math.floor(Date.now() / 1000),
+                        "authorization": localStorage.getItem("auth") || ""
+                    },
+                    body: new URLSearchParams({"id": torrent_id}).toString()
                 });
                 return new_fetch;
             }
@@ -10811,6 +10813,8 @@ function auto_feed() {
                 console.log(raw_info.torrent_url);
                 var detail = results[0];
                 raw_info.name = detail.name;
+                raw_info.torrent_name = raw_info.name.replace(/ /g, '.').replace(/\*/g, '') + '.torrent';
+                raw_info.torrent_name = raw_info.torrent_name.replace(/\.\.+/g, '.');
                 if (detail.mediainfo) {
                     var mediainfo = detail.mediainfo;
                     try {
