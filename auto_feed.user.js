@@ -1389,6 +1389,14 @@ if (tldomain == 0) {
     o_site_info.TorrentLeech = 'https://www.tlgetin.cc/';
 }
 
+if (site_url.match(/^https:\/\/hhan.club\/.*/)) {
+    o_site_info.HHClub = 'https://hhan.club/';
+    GM_setValue('o_site_info', JSON.stringify(o_site_info));
+} else if (site_url.match(/^https:\/\/hhanclub.top\/.*/)) {
+    o_site_info.HHClub = 'https://hhanclub.top/';
+    GM_setValue('o_site_info', JSON.stringify(o_site_info));
+}
+
 //部分站点加载图标会有问题，可以将图标下载下来上传到公网图床提供网址即可
 const site_img_info = {
     'HDHome': 'https://img.pterclub.com/images/2020/04/21/hdhfavicon.png',
@@ -1918,7 +1926,7 @@ function walkDOM(n) {
                     n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
                 }
             }
-            if (site_url.match(/hhanclub.top/)) {
+            if (site_url.match(/hhanclub.top|hhan.club/)) {
                 n.innerHTML = n.innerHTML + '\n';
             }
         } else if (n.nodeName == 'FIELDSET' || n.nodeName == 'BLOCKQUOTE') {
