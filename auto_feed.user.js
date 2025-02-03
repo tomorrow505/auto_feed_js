@@ -4,6 +4,7 @@
 // @thanks       感谢宝大、86大佬、贝壳等大佬提供邀请码;感谢宝大、86大佬提供友情赞助;感谢86大佬、手大、kmeng、黑白、甘蔗等大佬赠予PTP积分.
 // @contributor  daoshuailx/hollips/kmeng/wyyqyl/shmt86/sauterne
 // @description  PT一键转种脚本
+// @connect *
 // @match        https://blutopia.cc/torrents?imdb=tt*
 // @namespace    https://greasyfork.org/zh-CN/scripts/424132-auto-feed
 // @updateURL    https://greasyfork.org/zh-CN/scripts/424132-auto-feed
