@@ -12532,8 +12532,9 @@ function auto_feed() {
         if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$|UBits$|HHWEB$|-beAst$|-beAstTV$/i)) {
             $('#PTT').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至PTT');
         }
-        if (raw_info.name.match(/Dream$|DBTV$|QHstudIo$/i)) {
+        if (raw_info.name.match(/Dream$|DBTV$|QHstudIo$|CornerMV$/i)) {
             $('#HDVideo').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至HDVideo');
+            $('#OpenCD').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至OpenCD');
         }
         if (raw_info.name.match(/HDVWEB$|HDVMV$/i)) {
             $('#HDDolby').attr('disabled', true).css("pointer-events","none").css("color","grey").text(' 禁转至HDDolby');
