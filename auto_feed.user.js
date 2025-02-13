@@ -97,7 +97,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.8.3
+// @version      2.0.8.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8575,6 +8575,8 @@ function auto_feed() {
                     raw_info.torrent_url = used_site_info[origin_site].url + $('td:contains(下载直链)').next().find('a').attr('href');
                 } else if ($('td:contains(下载链接)').length) {
                     raw_info.torrent_url = used_site_info[origin_site].url + $('td:contains(下载链接)').next().find('a').attr('href');
+                } else if ($('td:contains(下載鏈接)').length) {
+                    raw_info.torrent_url = used_site_info[origin_site].url + $('td:contains(下載鏈接)').next().find('a').attr('href');
                 } else if ($('a[href*="download.php"]:contains(下载种子)').length) {
                     raw_info.torrent_url = used_site_info[origin_site].url + $('a[href*="download.php"]:contains(下载种子)').attr('href');
                 } else {
@@ -12016,6 +12018,10 @@ function auto_feed() {
 
         raw_info.descr = raw_info.descr.replace(/\n\n+/g, '\n\n').replace('https://dbimg.audiences.me/?', '').replace('https://imgproxy.pterclub.com/douban/?t=', '');
 
+        if ($('td:contains(下載鏈接)').length) {
+            raw_info.torrent_url = used_site_info[origin_site].url + $('td:contains(下載鏈接)').next().find('a').attr('href');
+        } 
+
         console.log(raw_info.torrent_name);
         console.log(raw_info.torrent_url);
 
@@ -12390,7 +12396,10 @@ function auto_feed() {
                     }
                 } catch (err){}
                 raw_info.descr = '[img]' + img_address + '[/img]\n\n' + raw_info.descr + '\n\n';
-                if (raw_info.extra_text) { raw_info.descr = '[quote]\n' + raw_info.extra_text + '\n[/quote]\n\n' + raw_info.descr; }
+                if (raw_info.extra_text) {
+                    raw_info.extra_text = raw_info.extra_text.includes('[quote]') ? raw_info.extra_text: '[quote]\n' + raw_info.extra_text + '\n[/quote]\n';
+                    raw_info.descr = raw_info.extra_text + '\n' + raw_info.descr;
+                }
                 try{
                     var $html = $('td').filter('.douban_info').html();
                     if ($html.match(/https:\/\/www.imdb.com\/title\/tt\d+/)){
