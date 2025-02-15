@@ -12532,6 +12532,8 @@ function auto_feed() {
             }
         } else if (origin_site == 'HDB' && $('div.torrent-title>span.exclusive').length) {
             if_exclusive = true;
+        } else if (origin_site == 'CMCT' && $('span:contains("禁转")').length) {
+            if_exclusive = true;
         }
 
         if ((raw_info.name + raw_info.descr + raw_info.small_descr).replace(/\[.*?\]/g, '').match(/(拒绝转发|不允许转发|严禁转发|谢绝.*?转载|禁转|禁止转载|禁转|謝絕.*?轉載|exclusive|严禁转载)/i)) {
