@@ -97,7 +97,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.8.4
+// @version      2.0.8.5
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -11910,30 +11910,6 @@ function auto_feed() {
                     }
                 } catch (err) {}
                 break;
-            case 'HDDolby': case 'PThome': case 'HDHome': case 'Audiences':
-                var tr = $('td:contains(标签)').last().parent();
-                if (tr.find('span.tgy').length) {
-                    raw_info.labels = 1;
-                }
-                if (tr.find('span.tyy').length) {
-                    raw_info.labels += 10;
-                }
-                if (tr.find('span.tzz').length) {
-                    raw_info.labels += 100;
-                }
-                break;
-            case 'HHClub': case '象岛': case 'AGSV':
-                var tr = $('td:contains(标签)').last().parent();
-                if (tr.find('span:contains("国语")').length) {
-                    raw_info.labels += 1;
-                }
-                if (tr.find('span:contains("粤语")').length) {
-                    raw_info.labels += 10;
-                }
-                if (tr.find('span:contains("中字")').length) {
-                    raw_info.labels += 100;
-                }
-                break;
             case 'OurBits':
                 var ob_link = raw_info.origin_url.replace('***', '/');
                 var search_url = `https://ourbits.club/torrents.php?search=${raw_info.small_descr}&search_area=0&search_mode=0`;
@@ -11952,6 +11928,37 @@ function auto_feed() {
                     rebuild_href(raw_info);
                 });
                 break;
+            case 'LemonHD':
+                var tr = $('div.tags_block');
+                if (tr.find('span.tag_gy').length) {
+                    raw_info.labels = 1;
+                }
+                if (tr.find('span.tag_yy').length) {
+                    raw_info.labels += 10;
+                }
+                if (tr.find('span.tag_zz').length) {
+                    raw_info.labels += 100;
+                }
+                break;
+            default:
+                try {
+                    var tr = $('td:contains(标签)').last().parent();
+                    if (origin_site == 'CMCT') {
+                        tr = $('td:contains(标签)').first().parent();
+                    }
+                    if (origin_site == 'HHClub') {
+                        tr = $('div:contains(标签)').last().next();
+                    }
+                    if (tr.find('span:contains("国语")').length) {
+                        raw_info.labels += 1;
+                    }
+                    if (tr.find('span:contains("粤语")').length || tr.find('span:contains("粤配")').length) {
+                        raw_info.labels += 10;
+                    }
+                    if (tr.find('span:contains("中字")').length) {
+                        raw_info.labels += 100;
+                    }
+                } catch (err) {}
         }
 
         if (origin_site  == 'HDArea'){
@@ -14961,7 +14968,7 @@ function auto_feed() {
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '9');}
                     if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '10');}
-                    if (raw_info.type == '动漫' || raw_info.descr.match(/◎类.*?别.*?动画/)) {
+                    if (raw_info.small_descr.match(/特效字幕/)) {
                         check_label(document.getElementsByName('tags[4][]'), '12');
                     }
                     break;
