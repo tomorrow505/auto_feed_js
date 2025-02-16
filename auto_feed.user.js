@@ -8565,27 +8565,26 @@ function auto_feed() {
             } else {
                 raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
                 if ($('a[href*="download.php"]:contains(下载地址)').length) {
-                    raw_info.torrent_url = used_site_info[origin_site].url + $('a[href*="download.php"]:contains(下载地址)').attr('href');
+                    raw_info.torrent_url = $('a[href*="download.php"]:contains(下载地址)').attr('href');
                 } else if ($('td:contains(种子链接)').length) {
-                    raw_info.torrent_url = used_site_info[origin_site].url + $('td:contains(种子链接)').next().find('a').attr('href');
-                    if ($('td:contains(种子链接)').next().find('a').attr('href').includes('http')) {
-                        raw_info.torrent_url = $('td:contains(种子链接)').next().find('a').attr('href');
-                    }
+                    raw_info.torrent_url = $('td:contains(种子链接)').next().find('a').attr('href');
                 } else if ($('td:contains(下载直链)').length) {
-                    raw_info.torrent_url = used_site_info[origin_site].url + $('td:contains(下载直链)').next().find('a').attr('href');
+                    raw_info.torrent_url = $('td:contains(下载直链)').next().find('a').attr('href');
                 } else if ($('td:contains(下载链接)').length) {
-                    raw_info.torrent_url = used_site_info[origin_site].url + $('td:contains(下载链接)').next().find('a').attr('href');
+                    raw_info.torrent_url = $('td:contains(下载链接)').next().find('a').attr('href');
                 } else if ($('td:contains(下載鏈接)').length) {
-                    raw_info.torrent_url = used_site_info[origin_site].url + $('td:contains(下載鏈接)').next().find('a').attr('href');
+                    raw_info.torrent_url = $('td:contains(下載鏈接)').next().find('a').attr('href');
                 } else if ($('a[href*="download.php"]:contains(下载种子)').length) {
-                    raw_info.torrent_url = used_site_info[origin_site].url + $('a[href*="download.php"]:contains(下载种子)').attr('href');
+                    raw_info.torrent_url = $('a[href*="download.php"]:contains(下载种子)').attr('href');
                 } else {
-                    raw_info.torrent_url = used_site_info[origin_site].url + $('a[href*="download.php"]:contains(torrent)').attr('href');
+                    raw_info.torrent_url = $('a[href*="download.php"]:contains(torrent)').attr('href');
+                }
+                if (!raw_info.torrent_url.includes('http')) {
+                    raw_info.torrent_url = used_site_info[origin_site].url + raw_info.torrent_url;
                 }
                 if (origin_site == 'HDArea') {
                     raw_info.torrent_url = $('td:contains("passkey"):last').text().split("链接")[0];
                 }
-
             }
         }
 
