@@ -1188,6 +1188,12 @@ if (site_url.match(/^https?:\/\/www.agsvpt.com\/.*/)) {
 } else if (site_url.match(/^https?:\/\/new.agsvpt.com\/.*/)) {
     used_site_info.AGSV.url = 'https://new.agsvpt.com/';
     GM_setValue('used_site_info', JSON.stringify(used_site_info));
+} else if (site_url.match(/^https?:\/\/pt.agsvpt.cn\/.*/)) {
+    used_site_info.AGSV.url = 'https://pt.agsvpt.cn/';
+    GM_setValue('used_site_info', JSON.stringify(used_site_info));
+} else if (site_url.match(/^https?:\/\/new.agsvpt.cn\/.*/)) {
+    used_site_info.AGSV.url = 'https://new.agsvpt.cn/';
+    GM_setValue('used_site_info', JSON.stringify(used_site_info));
 }
 
 //支持快速搜索的默认站点列表，可自行添加，举例：imdbid表示tt123456, imdbno表示123456，search_name表示the big bang thoery
