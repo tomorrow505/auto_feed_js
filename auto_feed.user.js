@@ -1083,7 +1083,7 @@ const default_site_info = {
     'LemonHD': {'url': 'https://lemonhd.club/', 'enable': 1},
     'ReelFliX': {'url': 'https://reelflix.xyz/', 'enable': 1},
     'HDClone': {'url': 'https://pt.hdclone.org/', 'enable': 1},
-    '唐门': {'url': 'https://tmpt.top/', 'enable': 1}}
+    '唐门': {'url': 'https://tmpt.top/', 'enable': 1}
 };
 
 var chd_use_backup_url = GM_getValue('chd_use_backup_url') === undefined ? 0: GM_getValue('chd_use_backup_url');
