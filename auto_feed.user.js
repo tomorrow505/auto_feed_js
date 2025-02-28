@@ -148,7 +148,13 @@
     20240526：适配新架构站点YemaPT(by lorentz)。
 */
 
-var site_url = decodeURI(location.href);
+function decodeSiteURL() {
+    var url = new URL(location.href);
+    url.hash = decodeURIComponent(url.hash);
+    return decodeURI(url.toString())
+}
+
+var site_url = decodeSiteURL();
 const TIMEOUT = 6000;
 const N = "\n";
 var evt = document.createEvent("HTMLEvents");
