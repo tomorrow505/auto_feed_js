@@ -1090,7 +1090,8 @@ const default_site_info = {
     'LemonHD': {'url': 'https://lemonhd.club/', 'enable': 1},
     'ReelFliX': {'url': 'https://reelflix.xyz/', 'enable': 1},
     'HDClone': {'url': 'https://pt.hdclone.org/', 'enable': 1},
-    '唐门': {'url': 'https://tmpt.top/', 'enable': 1}
+    '唐门': {'url': 'https://tmpt.top/', 'enable': 1},
+    '星陨阁': { 'url': 'https://xingyunge.top/', 'enable': 1 },
 };
 
 var chd_use_backup_url = GM_getValue('chd_use_backup_url') === undefined ? 0: GM_getValue('chd_use_backup_url');
@@ -6107,7 +6108,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
             'HDVideo', 'HDAtmos', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'HDPt', 'ZMPT', 'OKPT', '悟空', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA',
-            'CyanBug', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', 'GTK', 'HHClub', '象岛', '麒麟','AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', 'ptlover', '唐门'];
+            'CyanBug', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', 'GTK', 'HHClub', '象岛', '麒麟','AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', 'ptlover', '唐门', '星陨阁'];
 
             attendance_sites.forEach((e)=>{
                 if (used_signin_sites.indexOf(e) > -1) {
@@ -14583,6 +14584,34 @@ function auto_feed() {
         console.log(labels);
         try {
             switch (forward_site){
+                case '星陨阁':
+                    if (labels.gy) { check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yy) { check_label(document.getElementsByName('tags[4][]'), '12'); }
+                    if (labels.zz) { check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy) { check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '8'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.complete) {
+                        check_label(document.getElementsByName('tags[4][]'), '11');
+                    }
+                    if(raw_info.type == '剧集'){
+                        const regex = /第(\d{1,2})(?:-(\d{1,2}))?集/;
+                        const regexTitle = /S(\d{2})E(\d{2})(?:-(E(\d{2})))?/;
+                        const regexAll = /全(\d{1,4})集/;
+                        if(regexAll.test(raw_info.small_descr)){
+                            check_label(document.getElementsByName('tags[4][]'), '11');
+                        } else if(regexTitle.test(raw_info.name) || regex.test(raw_info.small_descr)){
+                            check_label(document.getElementsByName('tags[4][]'), '10');
+                            document.querySelector('input[name="tags[4][]"][value="11"]').checked = false;
+                        }
+
+                    }
+                    if (labels.yz) { check_label(document.getElementsByName('tags[4][]'), '15'); }
+                    if (raw_info.small_descr.match(/特效字幕/)) {
+                        check_label(document.getElementsByName('tags[4][]'), '18');
+                    }
+                    break;
                 case '唐门':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '10'); }
@@ -14592,6 +14621,17 @@ function auto_feed() {
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.complete) { check_label(document.getElementsByName('tags[4][]'), '14');}
+                    if(raw_info.type == '剧集'){
+                        const regex = /第(\d{1,2})(?:-(\d{1,2}))?集/;
+                        const regexTitle = /S(\d{2})E(\d{2})(?:-(E(\d{2})))?/;
+                        const regexAll = /全(\d{1,4})集/;
+                        if(regexAll.test(raw_info.small_descr)){
+                            check_label(document.getElementsByName('tags[4][]'), '14');
+                        } else if(regexTitle.test(raw_info.name) || regex.test(raw_info.small_descr)){
+                            check_label(document.getElementsByName('tags[4][]'), '13');
+                            document.querySelector('input[name="tags[4][]"][value="14"]').checked = false;
+                        }
+                    }
                     if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '12'); }
                     if (raw_info.standard_sel.match('4K')){ check_label(document.getElementsByName('tags[4][]'), '7'); }
                     break;
@@ -19922,6 +19962,88 @@ function auto_feed() {
                 browsecat.val(index);
             }
             disableother('browsecat','specialcat');
+        }
+
+        else if (forward_site == '星陨阁') {
+            var browsecat = $('#browsecat')
+            var type_dict = {
+                '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+                '体育': 407, '软件': 418, '学习': 40914, '': 409, '游戏': 409, 'MV': 406
+            };
+            browsecat.val(409)
+            if (type_dict.hasOwnProperty(raw_info.type)) {
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            //媒介
+            var medium_box = $('select[name="medium_sel[4]"]');
+            medium_box.val(10);
+            console.log('medium_box',medium_box)
+            switch (raw_info.medium_sel) {
+                case 'UHD': medium_box.val(2); break;
+                case 'Blu-ray': medium_box.val(1); break;
+                case 'Remux': medium_box.val(3); break;
+                case 'Encode': medium_box.val(7); break;
+                case 'WEB-DL': medium_box.val(4); break;
+                case 'HDTV': medium_box.val(5); break;
+                case 'DVD': medium_box.val(6); break;
+                case 'CD': medium_box.val(8); break;
+                case 'Track': medium_box.val(9); break;
+            }
+            if (raw_info.name.match(/dvdrip/i)) {
+                medium_box.val(6);
+            }
+            if (raw_info.name.match(/MiniBD/i)) {
+                medium_box.val(4);
+            }
+            var codec_box = $('select[name="codec_sel[4]"]');
+            codec_box.val(6);
+            switch (raw_info.codec_sel) {
+                case 'H265': case 'X265': codec_box.val(2); break;
+                case 'H264': case 'X264': codec_box.val(1); break;
+                case 'VC-1': codec_box.val(3); break;
+                case 'MPEG-2': codec_box.val(4); break;
+                case 'MPEG-4': codec_box.val(4); break;
+                case 'AV1': codec_box.val(5); break;
+            }
+            //音频编码
+            var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
+            audiocodec_box.val(16);
+            switch (raw_info.audiocodec_sel) {
+                case 'DTS-HD': audiocodec_box.val(7); break;
+                case 'DTS-HDMA:X 7.1': audiocodec_box.val(7); break;
+                case 'DTS-HDMA': audiocodec_box.val(6); break;
+                case 'TrueHD': audiocodec_box.val(8); break;
+                case 'AC3':
+                    audiocodec_box.val(10);
+                    if (raw_info.name.match(/DDP|DD\+/)) {
+                        audiocodec_box.val(11);
+                    }
+                    break;
+                case 'AAC': audiocodec_box.val(14); break;
+                case 'Flac': audiocodec_box.val(1); break;
+                case 'APE': audiocodec_box.val(2); break;
+                case 'WAV': audiocodec_box.val(3); break;
+                case 'DTS': audiocodec_box.val(5); break;
+                case 'Atmos': audiocodec_box.val(12); break;
+                case 'MP3': audiocodec_box.val(4); break;
+                case 'LPCM': audiocodec_box.val(9); break;
+                case 'M4A': audiocodec_box.val(4); break;
+                case 'MP3': audiocodec_box.val(2); break;
+                case 'ALAC': audiocodec_box.val(1); break;
+                case 'APE': audiocodec_box.val(13); break;
+
+            }
+            var standard_box = $('select[name="standard_sel[4]"]');
+            var standard_dict = { '8K': 5, '4K': 4, '1080p': 3, '1080i': 3, '720p': 2, 'SD': 6, '': 6 };
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)) {
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.val(index);
+            }
+            //制作组
+            $('select[name="team_sel[4]"]').val(5);
+            check_team(raw_info, 'team_sel[4]');
+
         }
         
         else if (forward_site == '唐门') {
