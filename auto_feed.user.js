@@ -14307,7 +14307,7 @@ function auto_feed() {
                 }
             }
 
-            if (['url', 'pt_gen[imdb][link]', 'imdb', 'imdb_url'].indexOf(allinput[i].name) > -1 && (allinput[i].type == 'text' || allinput[i].type == 'url')) { //填充imdb信息
+            if (['url', 'pt_gen[imdb][link]', 'imdb', 'imdb_url', 'imdb_id'].indexOf(allinput[i].name) > -1 && (allinput[i].type == 'text' || allinput[i].type == 'url')) { //填充imdb信息
                 if (forward_site == 'OurBits' && raw_info.url == ''){
                     if (raw_info.dburl){
                         raw_info.url = raw_info.dburl;
@@ -15203,6 +15203,10 @@ function auto_feed() {
                         check_label(document.getElementsByName('tags[4][]'), '10');
                     }
                     break;
+                case 'PTT':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[]'), 'gy'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[]'), 'yy'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[]'), 'zz'); }
                 case 'NJTUPT':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
@@ -18526,7 +18530,7 @@ function auto_feed() {
             clear.value = " 清空附加信息 ";
             clear.id = 'clear';
             document.getElementById('qr').parentNode.insertBefore(clear, document.getElementById('qr'));
-            $('#clear').css({'color': 'white', 'background' :'url(https://springsunday.net/styles/Maya/images/btn_submit_bg.gif) repeat left top', 'border': '1px black'});
+            $('#clear').css({'color': 'white', 'background-color' :'red', 'border': '1px black'});
 
             $('#clear').click(function(){
                 descr_box[2].value = '';
