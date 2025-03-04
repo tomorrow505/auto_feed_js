@@ -15277,6 +15277,9 @@ function auto_feed() {
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '8'); }
                     if (raw_info.medium_sel == 'Remux') { check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    if (raw_info.small_descr.match(/特效字幕/)) {
+                        check_label(document.getElementsByName('tags[4][]'), '18');
+                    }
                     break;
                 case '财神':
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
@@ -23048,7 +23051,7 @@ function auto_feed() {
             //类型
             var browsecat = $('#browsecat')
             var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
-                             '体育': 407, 'MV': 406};
+                             '体育': 407, 'MV': 406, '学习': 414, '软件': 418, '游戏': 409};
             browsecat.val(409);
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
@@ -23069,6 +23072,9 @@ function auto_feed() {
             }
             if (raw_info.name.match(/dvdrip/i)) {
                 medium_box.val(7);
+            }
+            if (raw_info.name.match(/MiniBD/i)) {
+                medium_box.val(4);
             }
             var codec_box = $('select[name="codec_sel[4]"]');
             codec_box.val(5);
@@ -23101,12 +23107,8 @@ function auto_feed() {
                 case 'MP3': audiocodec_box.val(2); break;
                 case 'WAV': audiocodec_box.val(3); break;
                 case 'LPCM': audiocodec_box.val(9); break;
-                case 'Atmos':
-                    audiocodec_box.val(12);
-                    if (raw_info.name.match(/DD[\+P]/i)) {
-                        audiocodec_box.val(11);
-                    }
-                    break;
+                case 'Atmos': audiocodec_box.val(12); break;
+                case 'M4A': audiocodec_box.val(4); break;
             }
             var standard_box = $('select[name="standard_sel[4]"]');
             var standard_dict = {'8K': 5, '4K': 4, '1080p': 3, '1080i': 3, '720p': 2, 'SD': 6, '': 6};
