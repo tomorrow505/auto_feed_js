@@ -97,7 +97,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.8.6
+// @version      2.0.8.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1234,6 +1234,7 @@ const default_search_list = [
     `<a href="https://cinemaz.to/torrents?in=1&search={search_name}" target="_blank">CNZ</a>`,
     `<a href="https://xthor.tk/browse.php?sch={search_name}" target="_blank">xTHOR</a>`,
     `<a href="https://cinematik.net/torrents?imdbId={imdbid}#page/1" target="_blank">Tik</a>`,
+    `<a href="https://nzbs.in/search?query=imdb:{imdbid}" target="_blank">IN</a>`,
     `<a href="https://search.douban.com/movie/subject_search?search_text={imdbid}" target="_blank">Douban</a>`,
     `<a href="https://uhdbits.org/torrents.php?searchstr={imdbid}" target="_blank">UHD</a>`,
     `<a href="http://zmk.pw/search?q={search_name}" target="_blank">ZMK</a>`,
@@ -15256,6 +15257,7 @@ function auto_feed() {
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '0'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '15'); } 
                     if (labels.diy){
                         check_label(document.getElementsByName('tags[4][]'), '4');
                     } else if ((raw_info.descr + $('textarea[name="technical_info"]').val()).match(/mpls/i)) {
