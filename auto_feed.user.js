@@ -3498,20 +3498,20 @@ function init_remote_server_button() {
             background-color: #333;
             border: 1px solid #ccc;
         }
-        
+
         #sidebar ul {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
         #sidebar li {
             list-style: none;
             padding: 0;
             margin: 0;
             width: 100%;
         }
-        
+
         #sidebar li a {
             display: flex;
             justify-content: center;
@@ -3520,11 +3520,11 @@ function init_remote_server_button() {
             text-decoration: none;
             color: #fff;
         }
-        
+
         #sidebar li a:hover {
             background-color: #555;
         }
-        
+
         #sidebar .submenu {
             display: none;
             position: absolute;
@@ -3534,18 +3534,18 @@ function init_remote_server_button() {
             background-color: #444;
             border: 1px solid #ccc;
         }
-        
+
         #sidebar li:hover .submenu {
             display: block;
         }
-        
+
         #sidebar .submenu li a {
             display: flex;
             justify-content: center;
             align-items: center;
             color: #eee;
         }
-        
+
         #sidebar .submenu li a:hover {
             background-color: #666;
         }
@@ -3554,7 +3554,7 @@ function init_remote_server_button() {
         <div id="sidebar">
             <ul id="sidebar_ul">
             </ul>
-        </div> 
+        </div>
     `);
     var qb = remote_server.qbittorrent;
     for (let server in qb) {
@@ -12050,7 +12050,7 @@ function auto_feed() {
 
         if ($('td:contains(下載鏈接)').length) {
             raw_info.torrent_url = used_site_info[origin_site].url + $('td:contains(下載鏈接)').next().find('a').attr('href');
-        } 
+        }
 
         console.log(raw_info.torrent_name);
         console.log(raw_info.torrent_url);
@@ -15117,9 +15117,8 @@ function auto_feed() {
                     }
                     break;
                 case 'PTFans':
-                    if (labels.diy){
-                        check_label(document.getElementsByName('tags[4][]'), '4');
-                    } else if (raw_info.descr.match(/mpls/i)) {
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (raw_info.descr.match(/mpls/i) || $('textarea[name="technical_info"]').val().match(/mpls/i)) {
                         check_label(document.getElementsByName('tags[4][]'), '8');
                     }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
@@ -15223,6 +15222,7 @@ function auto_feed() {
                 case 'CDFile':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     break;
                 case 'HDBAO':
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
@@ -15256,14 +15256,14 @@ function auto_feed() {
                 case '星陨阁':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '15'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
-                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '15'); } 
                     if (labels.diy){
                         check_label(document.getElementsByName('tags[4][]'), '4');
                     } else if ((raw_info.descr + $('textarea[name="technical_info"]').val()).match(/mpls/i)) {
                         check_label(document.getElementsByName('tags[4][]'), '0');
                     }
-                    if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '11'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '8'); }
@@ -20080,7 +20080,7 @@ function auto_feed() {
                 case 'FLAC': audiocodec_box.val(22); break;
             }
             var standard_box = $('select[name="standard_sel[4]"]');
-            var standard_dict = { '8K': 9, '4K': 8, '1080p': 7, '720p': 6, 'SD': 5, 'Other': 10 };
+            var standard_dict = { '8K': 9, '4K': 8, '1080p': 7, '1080i': 7, '720p': 6, '720i': 6, 'SD': 5, 'Other': 10 };
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
@@ -23149,7 +23149,7 @@ function auto_feed() {
                 case 'Atmos': audiocodec_box.val(8); break;
             }
             var standard_box = $('select[name="standard_sel[4]"]');
-            var standard_dict = {'8K': 0, '4K': 0, '1080p': 1, '1080i': 1, '720p': 3,'720i': 3, 'SD': 4, '': 4};
+            var standard_dict = {'8K': 0, '4K': 0, '1080p': 1, '1080i': 2, '720p': 3,'720i': 3, 'SD': 4, '': 4};
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
