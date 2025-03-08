@@ -288,6 +288,10 @@ if (site_url.match(/^https:\/\/www.yemapt.org/) && !site_url.match(/add\?/)) {
     return;
 }
 
+if (site_url.match(/nzbs.in/) && !site_url.match(/releases\/.{36}/)) {
+    return;
+}
+
 // 清除PT吧里边的广告
 if (site_url.match(/^https?:\/\/.*tieba.baidu.com.*/)) {
     mutation_observer(document, function() {
@@ -2196,7 +2200,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/digitalcore.club\/torrent\/\d+/)){
         return 1;
     }
-    if (site_url.match(/^https:\/\/nzbs.in\/.*|^https:\/\/house-of-usenet.*|https:\/\/omgwtfnzbs.org.*/)){
+    if (site_url.match(/^https:\/\/nzbs.in\/releases\/.{36}|^https:\/\/house-of-usenet.*|https:\/\/omgwtfnzbs.org.*/)){
         return 1;
     }
     if (site_url.match(/^https:\/\/nebulance.io\/torrents.php\?id=\d+/i)) {
@@ -3406,7 +3410,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
             textarea.style.width = '530px';
         }
     } else {
-        if (['BHD', 'BLU', 'Tik','HDPost', 'ACM', 'HDOli', 'JPTV', 'Monika', 'DTR', 'HONE', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX'].indexOf(site) > -1){
+        if (['BHD', 'BLU', 'Tik','HDPost', 'ACM', 'HDOli', 'JPTV', 'Monika', 'DTR', 'HONE', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX', 'IN'].indexOf(site) > -1){
             $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"border": "1px solid #0D8ED9", "color": "#FFFFFF", "backgroundColor": "#292929"});
             if (site == 'HONE') {
                 $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"width": "80px"})
@@ -3416,7 +3420,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         }
         if (site == 'BHD') {
             textarea.style.width = '550px';
-        } else if (site == 'BLU' || site == 'Tik', 'Aither') {
+        } else if (site == 'BLU' || site == 'Tik' || site == 'Aither') {
             textarea.style.width = '585px';
         }
     }
@@ -9051,23 +9055,13 @@ function auto_feed() {
         }
 
         if (origin_site == 'IN') {
-            if ($('#nzb-details').length) {
-                $('#nzb-details').append(`
-                    <div style="padding-right:15%; padding-bottom: 15px">
-                        <table id="mytable">
-                        </table>
-                    </div>
-                `);
-                raw_info.url = match_link('imdb', $('#nzb-details').html());
-            } else if ($('#movie-details').length){
-                $(`
-                    <div style="padding-right:15%; padding-bottom: 15px">
-                        <table id="mytable">
-                        </table>
-                    </div>
-                `).insertBefore($('.filters'));
-                raw_info.url = match_link('imdb', $('#content').html());
-            }
+            $('h1').after(`
+                <div style="padding-right:15%; padding-bottom: 15px">
+                    <table id="mytable">
+                    </table>
+                </div>
+            `);
+            raw_info.url = match_link('imdb', $('body').html());
             tbody = $('#mytable')[0];
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
