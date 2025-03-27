@@ -8590,6 +8590,8 @@ function auto_feed() {
             } else if (origin_site == 'ZMPT') {
                 raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
                 raw_info.torrent_url = $('#content').text().trim();
+            } else if (origin_site == 'HDArea') {
+                raw_info.torrent_url = $('td:contains("passkey"):last').text().split("链接")[0];
             } else {
                 raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
                 if ($('a[href*="download.php"]:contains(下载地址)').length) {
@@ -8610,9 +8612,7 @@ function auto_feed() {
                 if (!raw_info.torrent_url.includes('http')) {
                     raw_info.torrent_url = used_site_info[origin_site].url + raw_info.torrent_url;
                 }
-                if (origin_site == 'HDArea') {
-                    raw_info.torrent_url = $('td:contains("passkey"):last').text().split("链接")[0];
-                }
+                
             }
         }
 
