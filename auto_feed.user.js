@@ -97,7 +97,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.8.8
+// @version      2.0.8.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8119,6 +8119,7 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
                 }
                 var name = `${ch_name} ${en_name} ${year} `.replace(/ +/g, ' ').replace(/ /g, '.').replace(/:\./, '.').replace('-.', '-').replace('..', '.').replace('.-', '-');
                 $('#info').append(`<br><span class="pl">影视名称:</span> ${name}<br>`);
+                add_search_urls($container, imdbid, imdbno, en_name, 2);
             });
         } catch (err) {
             var en_name = null;
@@ -14201,7 +14202,7 @@ function auto_feed() {
                 raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|HDMA|TrueHD|DTS.HD|DTS|PCM|FLAC)[ \.](.*?)(\d.\d)/i, '$1 $2 $3 Atmos').replace(/ +/g, ' ');
             }
         }
-        if (forward_site == 'PTer' || forward_site == 'Dragon') {
+        if (forward_site == 'PTer' || forward_site == 'Dragon' || forward_site == 'QingWa') {
             function re_build_name(channels, name) {
                 var label = ''; label_str = '';
                 if (channels == '1') {
@@ -14232,7 +14233,7 @@ function auto_feed() {
                     raw_info.name = re_build_name(channels, raw_info.name);
                 }
             }
-            if (raw_info.name.match(/WEB-DL/)) {
+            if (raw_info.name.match(/WEB-DL/i)) {
                 raw_info.name = raw_info.name.replace(/HEVC/, 'H.265').replace(/AVC/, 'H.264');
             }
         }
@@ -15651,21 +15652,6 @@ function auto_feed() {
                 case 'LPCM': case 'DTS': case 'AAC': case 'Flac': case 'APE': case 'WAV':
                     audioCodec = raw_info.audiocodec_sel.toUpperCase();
             }
-            var medium = 'Encode';
-            switch(raw_info.medium_sel){
-                case 'UHD': case 'Blu-ray': medium = 'Bluray'; break;
-                case 'DVD':
-                    medium = 'DVDR';
-                    if (raw_info.name.match(/HD.?DVD/i)) {
-                        medium = 'HD DVD';
-                    }
-                    break;
-                case 'Remux': medium = 'Remux'; break;
-                case 'HDTV': medium = 'HDTV'; break;
-                case 'WEB-DL': medium = 'Web-DL'; break;
-                case 'CD': medium = 'CD';
-            }
-
             function trigger_select(tid, value, time, order) {
                 var clickEvent = document.createEvent ('MouseEvents');
                 clickEvent.initEvent ('mousedown', true, true);
@@ -15696,9 +15682,9 @@ function auto_feed() {
                 setValue(document.getElementById('douban'), raw_info.dburl);
 
                 setTimeout(function() {
-                    if (labels.gy || labels.yy){ document.getElementsByClassName('ant-checkbox-input')[1].click(); }
+                    if (labels.gy || labels.yy){ document.getElementsByClassName('ant-checkbox-input')[2].click(); }
                     if (labels.zz){
-                        var node_class = document.getElementsByClassName('ant-checkbox-input')[2].parentNode.classList;
+                        var node_class = document.getElementsByClassName('ant-checkbox-input')[1].parentNode.classList;
                         var clicked = false;
                         node_class.forEach(function(className) {
                             if (className == 'ant-checkbox-checked') {
@@ -15706,10 +15692,10 @@ function auto_feed() {
                             }
                         });
                         if (!clicked) {
-                            document.getElementsByClassName('ant-checkbox-input')[2].click();
+                            document.getElementsByClassName('ant-checkbox-input')[1].click();
                         }
                     }
-                    if (labels.diy){ document.getElementsByClassName('ant-checkbox-input')[0].click(); }
+                    if (labels.hdr10 || labels.hdr10plus){ document.getElementsByClassName('ant-checkbox-input')[0].click(); }
                 }, 2000);
 
                 trigger_select('source', source_code, 100, 0);
@@ -15722,7 +15708,6 @@ function auto_feed() {
                     var region = reg_region[2].trim();
                     $('span:contains("請選擇國家/地區")').parent().parent().parent().parent().after(`当前资源的来源国家/地区为：${region}`);
                 }
-
 
                 if ((raw_info.descr.match(/General[\s\S]*?Video[.\n]{0,5}ID/) || raw_info.full_mediainfo) && !raw_info.descr.match(/mpls/i)) {
                     try{
