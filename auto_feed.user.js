@@ -9326,6 +9326,10 @@ function auto_feed() {
                 imdb_box = document.getElementsByClassName('movie-details')[0];
                 $('h4').first().click();
             }
+	    else if (origin_site == 'ACM'){
+                div_box = document.getElementsByClassName('shoutbox')[0];
+                imdb_box = document.getElementsByClassName('movie-details')[0];
+            }
             else {
                 iii = document.getElementsByTagName('h4')[0].parentNode.parentNode;
                 div_box = iii.getElementsByClassName('table-responsive')[0];
