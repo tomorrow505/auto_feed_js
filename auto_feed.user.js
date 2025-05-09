@@ -97,7 +97,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.8.9
+// @version      2.0.9.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -2286,7 +2286,7 @@ function deal_with_title(title){
         }).trim();
     }
     title = title.replace(/H ?(26[45])/i, "H.$1").replace(/x265[.-]10bit/i, 'x265 10bit');
-    title = title.replace(/\s+\[2?x?(免费|free)\].*$|\(限时.*\)|\(限時.*\)|\(已审\)/ig, '').replace(/\[.*?\]/ig, '').replace(/剩余时间.*/i, '');
+    title = title.replace(/\s+\[2?x?(免费|free)\].*$|\(限时.*\)|\(限時.*\)|\(已审|通过\)/ig, '').replace(/\[.*?\]/ig, '').replace(/剩余时间.*/i, '');
     title = title.replace(/\(|\)/ig, '').replace(/ - /g, function(data, index) {
         try {
             let y_index = title.match(/(19|20)\d+/).index;
@@ -22808,6 +22808,33 @@ function auto_feed() {
             }
             $('select[name="team_sel[4]"]').val(5);
             check_team(raw_info, 'team_sel[4]');
+            
+            var source_box = $('select[name="source_sel[4]"]');
+            switch (raw_info.source_sel){
+                case '大陆': source_box.val(1); break;
+                case '香港': source_box.val(2); break;
+                case '台湾': source_box.val(3); break;
+                case '日本': source_box.val(5); break;
+                case '韩国': source_box.val(6); break;
+                case '欧美': source_box.val(4); break;
+                case '印度': source_box.val(7); break;
+                default:
+                    try {
+                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                        if (reg_region) {
+                            region = reg_region[2].split('/')[0].trim();
+                            region = region.split(':').pop().trim();
+                            $('select[name="source_sel[4]"]>option').map(function(index,e){
+                                if (region.match(e.innerText.split('/')[1])) {
+                                    $(`select[name="source_sel[4]"]>option:eq(${index})`).attr('selected', true);
+                                }
+                            });
+                        }
+                    } catch (err) {}
+            }
+            if (source_box.val() == 0) {
+                source_box.val(11);
+            }
         }
 
         else if (forward_site == 'Panda') {
