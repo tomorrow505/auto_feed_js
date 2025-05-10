@@ -304,6 +304,9 @@ if (site_url.match(/^https?:\/\/.*tieba.baidu.com.*/)) {
         $('div[id*="mediago-tb"]').wait(function(){
             $('div[id*="mediago-tb"]').hide();
         });
+        $('div[id*="ylh-ad-container"]').wait(function(){
+            $('div[id*="ylh-ad-container"]').hide();
+        });
     });
     return;
 }
@@ -1072,7 +1075,7 @@ const default_site_info = {
     'ECUST': {'url': 'https://pt.ecust.pp.ua/', 'enable': 1},
     'iloli': {'url': 'https://share.ilolicon.com/', 'enable': 1},
     'CrabPt': {'url': 'https://crabpt.vip/', 'enable': 1},
-    'QingWa': {'url': 'https://qingwapt.com/', 'enable': 1},
+    'QingWa': {'url': 'https://qingwapt.org/', 'enable': 1},
     'FNP': {'url': 'https://fearnopeer.com/', 'enable': 1},
     'OnlyEncodes': {'url': 'https://onlyencodes.cc/', 'enable': 1},
     'PTFans': {'url': 'https://ptfans.cc/', 'enable': 1},
@@ -5584,39 +5587,35 @@ if (site_url.match(/^https:\/\/hdf.world\/.*/)) {
             dom.html(d_html);
         }
 
-        replace_text($('td:contains(.Torrent)'), '.Torrent', 'Torrent File');
+        replace_text($('td:contains(Votre .Torrent)'), 'Votre .Torrent', 'Torrent File');
         replace_text($('td:contains(Catégorie)'), 'Catégorie', 'Category');
-        replace_text($('td:contains(AlloCiné URL)'), 'AlloCiné URL', 'AlloCine URL');
-        replace_text($(`p:contains(Coller l'URL)`), `Coller l'URL`, 'Copy URL');
-        replace_text($(`p:contains(pour le film)`), `pour le film`, 'for movies');
+        replace_text($(`p:contains(Collez l'URL)`), `Collez l'URL`, 'Copy URL');
+        replace_text($(`p:contains(pour le média)`), ` pour le média`, 'for the media');
         setTimeout(function(){$('#btnAllocineFetch').text("Send");}, 1000);
-        replace_text($(`p:contains(Cliquez sur envoyer pour valider votre lien)`), `Cliquez sur envoyer pour valider votre lien`, '点击Send以验证您的链接');
-        replace_text($('td:contains(Acteur(s))'), 'Acteur(s)', 'Actor(s)');
+        replace_text($(`p:contains(Cliquez sur Envoyer pour valider votre lien)`), `Cliquez sur Envoyer pour valider votre lien`, '点击Send以验证您的链接');
         replace_text($('td:contains(Titre)'), 'Titre', 'Title');
-        replace_text($(`p:contains(Ne pas modifier)`), `Ne pas modifier le titre mis à disposition par Allociné`, '请勿修改Allocine站点提供的标题');
+        replace_text($(`p:contains(Ne pas modifier le titre mis à disposition par TheMovieDB)`), `Ne pas modifier le titre mis à disposition par TheMovieDB`, 'Do not modify the title provided by TheMovieDB');
         replace_text($('td:contains(Année)').first(), 'Année', 'Year');
-        replace_text($(`td:contains(Année de réalisation ou de sortie en salles, et non l'année de sortie sur support ou de réédition.)`).last(),`Année de réalisation ou de sortie en salles, et non l'année de sortie sur support ou de réédition.`, '影院上映的年份，而不是重制或重发行的年份。');
-        replace_text($(`td:contains(Restriction d'age)`).last(), `Restriction d'age`, '限制年龄');
-        replace_text($(`p:contains(automatiquement remplis avec)`), `automatiquement remplis avec le lien Allociné`, '由Allocine链接自动填充');
-        replace_text($(`label:contains(Cochez s'il s'agit)`), `Cochez s'il s'agit d'une release issue de la scène, si vous n'en êtes pas sûr ne pas cocher la case.`, '是否Scene?');
-        replace_text($(`td:contains(Encodage)`).last(), `Encodage`, 'Encode');
+        replace_text($(`p:contains(Si le lien TMDB n'est pas disponible, remplissez tous les champs requis manuellement.)`), `Si le lien TMDB n'est pas disponible, remplissez tous les champs requis manuellement.`, '如果没有TMDB链接，请手动填写所需的所有字段。');
+        replace_text($(`td:contains(Restriction d'âge)`).last(), `Restriction d'âge`, '限制年龄');
+        replace_text($(`label:contains(Cocher s'il s'agit)`), `Cocher s'il s'agit d'une release issue de la scene. Si vous n'en êtes pas sûr, ne cochez pas la case.`, '是否Scene?');
         replace_text($(`td:contains(Résolution)`).last(), `Résolution`, 'Resolution');
         replace_text($(`td:contains(Type de fichier)`).last(), `Type de fichier`, 'Type of File');
-        replace_text($(`td:contains(URL de l'affiche (Obligatoire))`).last(), `URL de l'affiche (Obligatoire)`, '海报(强制性的)');
-        $('input[value=Previsualiser]').val('Preview');
-        replace_text($(`p:contains(Contient des informations de)`), `Contient des informations de base telles que l'histoire du film.`, '包含基本信息，例如电影的历史。');
-        replace_text($(`p:contains(Contient des informations)`), `Contient des informations d'encodage. (Respectez le travail des releasers en respectant le tag.)`, '包含编码信息。（尊重发布标签的作品。）');
-        replace_text($(`span:contains(VFF)`).last(), `(Doublage Français (France))`, '(French Dubbing (France))');
-        replace_text($(`span:contains(VFQ)`).last(), `(Doublage Français (Québec)`, '(French Dubbing (Quebec))');
-        replace_text($(`span:contains(Version Originale, non française)`).last(), `(Version Originale, non française)`, '(Original Version, not French)');
-        replace_text($(`span:contains(Version Originale Française(France et Belgique))`).last(), `(Version Originale Française(France et Belgique))`, '(Original French Version (France and Belgium))');
-        replace_text($(`span:contains(Version Originale Québecoise)`).last(), `(Version Originale Québecoise)`, '(Original Quebec version)');
-        replace_text($(`span:contains(Version Française, origine du doublage non précisée)`).last(), `(Version Française, origine du doublage non précisée)`, '(French version, origin of dubbing not specified)');
-        replace_text($(`span:contains(Version Française Internationale = 1 seul doublage français existant)`).last(), `(Version Française Internationale = 1 seul doublage français existant)`, '(French International Version = only 1 existing French dubbing)');
-        replace_text($(`span:contains(Cochez cette case si la release dispose des sous-titres français complets)`).last(), `Cochez cette case si la release dispose des sous-titres français complets`, 'Check this box if the release has full French subtitles');
-        replace_text($(`span:contains(Ne cochez que s'il y a la VO+VF+ d'autres langues sinon ne cochez que VO+VF*)`).last(), `Ne cochez que s'il y a la VO+VF+ d'autres langues sinon ne cochez que VO+VF*`, 'Only check if there is the VO+VF+ of other languages ​​otherwise only check VO+VF*</br>(Check which VF version is included in addition to multi(vff,vfq)');
-        replace_text($(`span:contains((Cochez quelle version VF est incluse en plus de multi(vff,vfq))`), `(Cochez quelle version VF est incluse en plus de multi(vff,vfq)`, '');
-        replace_text($(`span:contains(Cochez Sous-titres pour)`), `Cochez Sous-titres pour les parties texte du film si elles sont en français et rien si elles sont dans une autres langue`, 'Check Subtitles for the text parts of the film if they are in French and nothing if they are in another language');
+        replace_text($(`td:contains(URL de l'affiche)`).last(), `URL de l'affiche`, 'Poster URL');
+        replace_text($(`p:contains(automatiquement rempli)`), `automatiquement rempli`, '自动填充');
+        $('input[value=Prévisualiser]').val('Preview');
+        replace_text($(`p:contains(Si vous êtes un re-posteur, respectez le travail des releasers en mettant la bonne source et le tag.)`), `Si vous êtes un re-posteur, respectez le travail des releasers en mettant la bonne source et le tag.`, 'If you are a reposter, respect the work of the releasers by putting the correct source and tag.');
+        replace_text($(`span:contains(VFF (Doublage Français (France)))`).last(), `VFF (Doublage Français (France))`, 'VFF (French Dubbing (France))');
+        replace_text($(`span:contains(VFQ (Doublage Français (Québec)))`).last(), `VFQ (Doublage Français (Québec))`, 'VFQ (French Dubbing (Quebec))');
+        replace_text($(`span:contains(VO (Version Originale, non française))`).last(), `VO (Version Originale, non française)`, 'VO (Original Version, not French)');
+        replace_text($(`span:contains(VOF (Version Originale Française (France et Belgique)))`).last(), `(Version Originale Française (France et Belgique))`, '(Original French Version (France and Belgium))');
+        replace_text($(`span:contains(VOQ (Version Originale Québecoise)`).last(), `(Version Originale Québecoise)`, '(Original Quebec version)');
+        replace_text($(`span:contains(VF? (Version Française, origine du doublage inconnue))`).last(), `(Version Française, origine du doublage inconnue)`, '(French version, origin of dubbing not specified)');
+        replace_text($(`span:contains(VFI (Version Française Internationale = 1 seul doublage français existant))`).last(), `(Version Française Internationale = 1 seul doublage français existant)`, '(French International Version = only 1 existing French dubbing)');
+        replace_text($(`span:contains(Sous-titres : Cocher cette case si la release dispose des sous-titres français complets)`).last(), `Sous-titres : Cocher cette case si la release dispose des sous-titres français complets`, 'Source-subtitles: Check this box if the release has full French subtitles');
+        replace_text($(`span:contains(MULTi : Ne cochez que s'il y a la VO + VF + d'autres langues sinon ne cochez que VO + VF(I)/(F)/(Q)`).last(), `MULTi : Ne cochez que s'il y a la VO + VF + d'autres langues sinon ne cochez que VO + VF(I)/(F)/(Q)`, 'MULTi: Only check if there is the VO+VF+ of other languages, otherwise only check VO+VF');
+        replace_text($(`span:contains((Cocher quelle version VF est incluse en plus de multi (VFF, VFQ)`).last(), `(Cocher quelle version VF est incluse en plus de multi (VFF, VFQ)`, '(Check which VF version is included in addition to multi(vff,vfq)');
+        replace_text($(`span:contains(Muet : Cocher Sous-titres pour les parties texte du film si elles sont en français et rien si elles sont dans une autre langue.)`), `Muet : Cocher Sous-titres pour les parties texte du film si elles sont en français et rien si elles sont dans une autre langue.`, 'Muet: Check Subtitles for the text parts of the film if they are in French and nothing if they are in another language');
     } else if (site_url.match(/rules.php/)) {
         getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/hdf_rules.html', null, function(doc){
             if (site_url.match(/rules.php$/)) {
@@ -10845,11 +10844,13 @@ function auto_feed() {
                 raw_info.torrent_url = results[1];
                 console.log(raw_info.torrent_url);
                 var detail = results[0];
+                console.log(detail);
                 raw_info.name = detail.name;
                 raw_info.torrent_name = raw_info.name.replace(/ /g, '.').replace(/\*/g, '') + '.torrent';
                 raw_info.torrent_name = raw_info.torrent_name.replace(/\.\.+/g, '.');
                 if (detail.mediainfo) {
                     var mediainfo = detail.mediainfo;
+                    raw_info.full_mediainfo = mediainfo;
                     try {
                         mediainfo = decodeURIComponent(detail.mediainfo);
                     } catch (err) {}
@@ -15668,16 +15669,18 @@ function auto_feed() {
 
             $('#category').wait(function() {
                 trigger_select('category', type_code, 100, 0);
-                $('#category').parent().parent().parent().parent().after(`<font color="red" class="notice"> 当前资源类别为${type_code}，但是选项动态加载，如果没有勾选上，下滑手动勾选。</font>`);
+                if (!$('#category_tips').length) {
+                    $('#category').parent().parent().parent().parent().after(`<font color="red" id="category_tips"> 当前资源类别为${type_code}，但是选项动态加载，如果没有勾选上，下滑手动勾选。</font>`);
+                }
                 setValue(document.getElementById('name'), raw_info.name);
                 setValue(document.getElementById('smallDescr'), raw_info.small_descr);
                 setValue(document.getElementById('imdb'), raw_info.url);
                 setValue(document.getElementById('douban'), raw_info.dburl);
 
                 setTimeout(function() {
-                    if (labels.gy || labels.yy){ document.getElementsByClassName('ant-checkbox-input')[2].click(); }
+                    if (labels.gy || labels.yy){ document.getElementsByClassName('ant-checkbox-input')[1].click(); }
                     if (labels.zz){
-                        var node_class = document.getElementsByClassName('ant-checkbox-input')[1].parentNode.classList;
+                        var node_class = document.getElementsByClassName('ant-checkbox-input')[0].parentNode.classList;
                         var clicked = false;
                         node_class.forEach(function(className) {
                             if (className == 'ant-checkbox-checked') {
@@ -15685,11 +15688,10 @@ function auto_feed() {
                             }
                         });
                         if (!clicked) {
-                            document.getElementsByClassName('ant-checkbox-input')[1].click();
+                            document.getElementsByClassName('ant-checkbox-input')[0].click();
                         }
                     }
-                    if (labels.hdr10 || labels.hdr10plus){ document.getElementsByClassName('ant-checkbox-input')[0].click(); }
-                }, 2000);
+                }, 3000);
 
                 trigger_select('source', source_code, 100, 0);
                 trigger_select('standard', raw_info.standard_sel, 100, 0);
@@ -15699,37 +15701,37 @@ function auto_feed() {
                 var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
                 if (reg_region) {
                     var region = reg_region[2].trim();
-                    $('span:contains("請選擇國家/地區")').parent().parent().parent().parent().after(`当前资源的来源国家/地区为：${region}`);
+                    if (!$('#region_tips').length) {
+                        $('span:contains("請選擇國家/地區")').first().parent().parent().parent().parent().after(`<p id="region_tips">当前资源的来源国家/地区为：${region}</p>`);
+                    }
                 }
 
-                if ((raw_info.descr.match(/General[\s\S]*?Video[.\n]{0,5}ID/) || raw_info.full_mediainfo) && !raw_info.descr.match(/mpls/i)) {
-                    try{
-                        var infos = get_mediainfo_picture_from_descr(raw_info.descr);
+                var container = document.getElementById('mediainfo');
+                if (raw_info.full_mediainfo){
+                    setValue(container, raw_info.full_mediainfo.trim());
+                } else {
+                    var match_1 = (raw_info.descr.match(/General[\s\S]*?Video[.\n]{0,5}ID/) || raw_info.full_mediainfo) && !raw_info.descr.match(/mpls/i);
+                    var match_2 = raw_info.descr.match(/mpls/i) && raw_info.descr.match(/Disc Label/);
+                    if (match_1 || match_2) {
                         try{
-                            var container = document.getElementById('mediainfo');
-                            if (raw_info.full_mediainfo){
-                                setValue(container, raw_info.full_mediainfo.trim());
-                            } else {
+                            var infos = get_mediainfo_picture_from_descr(raw_info.descr);
+                            try{
                                 setValue(container, infos.mediainfo.trim());
-                            }
-                        } catch(Err) {
-                            if (raw_info.full_mediainfo){
-                                setValue(container, raw_info.full_mediainfo.trim());
-                            } else {
+                            } catch(Err) {
                                 setValue(container, raw_info.descr);
                             }
-                        }
-                        var tmp_descr = raw_info.descr.replace(infos.mediainfo, '');
-                        tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}\[\/quote\]/g, '').replace(/ +\n/g, '\n');
-                        if (raw_info.full_mediainfo) {
-                            tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}(General|Disc)[\s\S]{50,30000}?\[\/quote\]/g, '');
-                        }
-                        if (raw_info.origin_site == 'Audiences') {
-                            tmp_descr = tmp_descr.replace(/\[\/?font.*?\]/g, '');
-                        }
-                        raw_info.descr = tmp_descr.trim().replace(/\n\n+/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\[');
-                        raw_info.descr = add_thanks(raw_info.descr);
-                    } catch(Err) {}
+                            var tmp_descr = raw_info.descr.replace(infos.mediainfo, '');
+                            tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}\[\/quote\]/g, '').replace(/ +\n/g, '\n');
+                            if (raw_info.full_mediainfo) {
+                                tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}(General|Disc)[\s\S]{50,30000}?\[\/quote\]/g, '');
+                            }
+                            if (raw_info.origin_site == 'Audiences') {
+                                tmp_descr = tmp_descr.replace(/\[\/?font.*?\]/g, '');
+                            }
+                            raw_info.descr = tmp_descr.trim().replace(/\n\n+/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\[');
+                            raw_info.descr = add_thanks(raw_info.descr);
+                        } catch(Err) { console.log("mediainfo信息划分失败"); }
+                    }
                 }
                 GM_setClipboard(raw_info.descr);
                 var m_css = $('#name_extra').parent().parent().parent().attr('class').match(/css-[^ ]*/)[0];
@@ -26007,11 +26009,16 @@ function auto_feed() {
                     delay: 300,
                 });
             }
+            var timer_showed = false;
             $('#VFF').parent().mouseover((e)=>{
-                timer = setTimeout(show_data, 300, e.target);
+                if (timer_showed == false) {
+                    timer = setTimeout(show_data, 300, e.target);
+                    timer_showed = true;
+                }
             });
             $('#VFF').parent().mouseout((e)=>{
                 clearTimeout(timer);
+                timer_showed = false;
             });
 
             switch (raw_info.codec_sel){
@@ -26063,6 +26070,21 @@ function auto_feed() {
                 }
             } else if (raw_info.type == '纪录') {
                 $('#categories').val(6);
+            }
+
+            if (raw_info.url && used_tmdb_key) {
+                var imdb_id = raw_info.url.match(/tt\d+/)[0];
+                var search_url = `https://api.themoviedb.org/3/find/${imdb_id}?api_key=${used_tmdb_key}&external_source=imdb_id&include_adult=false&language=zh-CN`;
+                getJson(search_url, null, function(data){
+                    console.log(data);
+                    if (data.movie_results.length) {
+                        $('#allocine_url').val('https://www.themoviedb.org/movie/' + data.movie_results[0].id);
+                    } else if (data.tv_results.length) {
+                        $('#allocine_url').val('https://www.themoviedb.org/tv/' + data.tv_results[0].id);
+                    } else if (data.tv_episode_results.length) {
+                        $('#allocine_url').val('https://www.themoviedb.org/tv/' + data.tv_episode_results[0].show_id);
+                    }
+                });
             }
         }
 
