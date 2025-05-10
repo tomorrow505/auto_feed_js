@@ -1072,7 +1072,7 @@ const default_site_info = {
     'ECUST': {'url': 'https://pt.ecust.pp.ua/', 'enable': 1},
     'iloli': {'url': 'https://share.ilolicon.com/', 'enable': 1},
     'CrabPt': {'url': 'https://crabpt.vip/', 'enable': 1},
-    'QingWa': {'url': 'https://qingwapt.com/', 'enable': 1},
+    'QingWa': {'url': 'https://qingwa.pro/', 'enable': 1},
     'FNP': {'url': 'https://fearnopeer.com/', 'enable': 1},
     'OnlyEncodes': {'url': 'https://onlyencodes.cc/', 'enable': 1},
     'PTFans': {'url': 'https://ptfans.cc/', 'enable': 1},
