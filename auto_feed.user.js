@@ -96,7 +96,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.9.0
+// @version      2.0.9.1
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1000,7 +1000,7 @@ const default_site_info = {
     'HDHome': {'url': 'https://hdhome.org/', 'enable': 1},
     'DarkLand': {'url': 'https://darkland.top/', 'enable': 1},
     'HDRoute': {'url': 'http://hdroute.org/', 'enable': 1},
-    'HDSky': {'url': 'https://hdsky.me/', 'enable': 1},
+    'HDSky': {'url': 'https://hdsky.my/', 'enable': 1},
     'HDSpace': {'url': 'https://hd-space.org/', 'enable': 1},
     'HDT': {'url': 'https://hd-torrents.org/', 'enable': 1},
     'HDTime': {'url': 'https://hdtime.org/', 'enable': 1},
@@ -8617,6 +8617,9 @@ function auto_feed() {
                     raw_info.torrent_url = $('a[href*="download.php"]:contains(torrent)').attr('href');
                 }
                 if (!raw_info.torrent_url.match(/^http/)) {
+                    if (raw_info.torrent_url.match(/^\//)) {
+                        raw_info.torrent_url = raw_info.torrent_url.replace(/^\//, '');
+                    }
                     raw_info.torrent_url = used_site_info[origin_site].url + raw_info.torrent_url;
                 }
                 
@@ -14207,7 +14210,7 @@ function auto_feed() {
                 raw_info.name = raw_info.name.replace(/(DDP|DD|AAC|HDMA|TrueHD|DTS.HD|DTS|PCM|FLAC)[ \.](.*?)(\d.\d)/i, '$1 $2 $3 Atmos').replace(/ +/g, ' ');
             }
         }
-        if (forward_site == 'PTer' || forward_site == 'Dragon' || forward_site == 'QingWa') {
+        if (forward_site == 'PTer' || forward_site == 'Dragon' || forward_site == 'QingWa' || forward_site == 'MTeam') {
             function re_build_name(channels, name) {
                 var label = ''; label_str = '';
                 if (channels == '1') {
@@ -14231,7 +14234,7 @@ function auto_feed() {
                 if (raw_info.descr.match(/(AUDIO.*CODEC.*?|音频.*?)(2\.0|1\.0|5\.1|7\.1)/i)) {
                     channels = raw_info.descr.match(/(AUDIO.*CODEC.*?|音频.*?)(2\.0|1\.0|5\.1|7\.1)/i)[2];
                     if (!raw_info.name.includes(channels)) {
-                        raw_info.name = raw_info.name.replace(/(DDP|AAC|FLAC|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|DTS|AC3)/i, `$1 ${channels}`);
+                        raw_info.name = raw_info.name.replace(/(DDP|AAC|FLAC|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|DTS|AC3|DD)/i, `$1 ${channels}`);
                     }
                 } else if (raw_info.descr.match(/\d channels/i)) {
                     channels = raw_info.descr.match(/(\d) channels/i)[1];
@@ -14241,7 +14244,33 @@ function auto_feed() {
             if (raw_info.name.match(/WEB-DL/i)) {
                 raw_info.name = raw_info.name.replace(/HEVC/, 'H.265').replace(/AVC/, 'H.264');
             }
+            if (forward_site == 'MTeam') {
+                raw_info.name = raw_info.name.replace(/AC3/, 'DD');
+                try{
+                    var audio_number = 1;
+                    if (raw_info.descr.match(/DISC INFO:/)) {
+                        if (raw_info.descr.match(/Audio:[\s\S]{0,20}Codec/i)) {
+                            var audio_info = raw_info.descr.match(/Audio:[\s\S]{0,300}-----------([\s\S]*)/i)[1].split(/subtitles/i)[0].trim();
+                            audio_number = audio_info.split('\n').length;
+                        }
+                    } else {
+                        if (raw_info.descr.match(/Audio:(.*)/i)) {
+                            audio_number = raw_info.descr.match(/Audio:(.*)/ig).length;
+                        } else if (raw_info.descr.match(/Audio #\d/)) {
+                            audio_number = raw_info.descr.match(/Audio #\d/ig).length;
+                        }
+                    }
+                    if (audio_number > 1) {
+                        var audio_str = `${audio_number}Audio`;
+                        if (!raw_info.name.includes(audio_str)) {
+                            raw_info.name = raw_info.name.replace(/(DDP|AAC|FLAC|LPCM|TrueHD|DTS-HD.?MA|DTS:X|DTS-HD.?HR|DTS|DD) ?(\d\.\d)?/i, `$1 $2 ${audio_str}`);
+                        }
+                    }
+                } catch(err) {}
+
+            }
         }
+
         if (raw_info.origin_site == 'BHD' && raw_info.name.match(/-FraMeSToR/)) {
             raw_info.name = raw_info.name.replace(/(BluRay)(.*?)(AVC|VC-1|HEVC)(.*?)(REMUX)/i, '$1 $5 $3 $2').replace(/ +/g, ' ').replace(' -', '-');
         }
@@ -14295,7 +14324,7 @@ function auto_feed() {
                 }
             }
 
-            if (allinput[i].name == 'small_descr' || allinput[i].name == 'small_desc' || allinput[i].name == 'subhead' || allinput[i].name == 'keywords') { //填充副标题
+            if (allinput[i].name == 'small_descr' || allinput[i].name == 'small_desc' || allinput[i].name == 'subhead' || (allinput[i].name == 'keywords' && forward_site == 'DarkLand')) { //填充副标题
                 allinput[i].value = raw_info.small_descr;
                 if (forward_site == 'OpenCD') {
                     allinput[i].value = raw_info.small_descr.replace('- {自抓}', '');
