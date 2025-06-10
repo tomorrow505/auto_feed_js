@@ -26316,6 +26316,12 @@ function auto_feed() {
             // 制作组
             $('select[name="team_sel[4]"]').val(22);
             check_team(raw_info, 'team_sel[4]');
+            var teamSelected = $('select[name="team_sel[4]"]').val();
+            //方舟计划的制作组
+            var ark_team = [30, 31, 29]; 
+            if (ark_team.includes(Number(teamSelected))) {
+                check_label(document.getElementsByName('tags[4][]'), '52');
+            }
         }
 
         else if (forward_site == 'ECUST') {
