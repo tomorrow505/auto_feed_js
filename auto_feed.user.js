@@ -2406,9 +2406,9 @@ String.prototype.audiocodec_sel = function() { //音频编码
     } else if (result.match(/(LPCM)/i)) {
         result = 'LPCM';
     } else if (result.match(/(OPUS)/i)) {
-        result = 'LPCM';
-    } else if (result.match(/([ \.]DD|AC3|AC-3|Dolby Digital)/i)) {
         result = 'OPUS';
+    } else if (result.match(/([ \.]DD|AC3|AC-3|Dolby Digital)/i)) {
+        result = 'AC3';
     } else if (result.match(/(Atmos)/i) && result.match(/True.?HD/)) {
         result = 'Atmos';
     } else if (result.match(/(AAC)/i)) {
@@ -15493,7 +15493,8 @@ function auto_feed() {
                         check_label(document.getElementsByName('tags[4][]'), '7');
                     }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '5'); }
-                    if (labels.gy || labels.yy){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '12'); }
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '13'); }
                     break;
                 case '13City':
@@ -22521,7 +22522,8 @@ function auto_feed() {
             }
             // 分辨率
             var standard_box = $('select[name="standard_sel[4]"]');
-            var standard_dict = {'8K': 6, '4K': 5, '1080p': 1, '1080i': 2, '720p': 3, 'SD': 8, '': 8};
+            var standard_dict = {'8K': 6, '4K': 5, '1080p': 2, '1080i': 2, '720p': 3, 'SD': 8, '': 8};
+            standard_box.val(1);
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
