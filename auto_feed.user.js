@@ -96,7 +96,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.9.2
+// @version      2.0.9.3
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1095,7 +1095,8 @@ const default_site_info = {
     '柠檬不甜': {'url': 'https://lemonhd.net/', 'enable': 1},
     'RailgunPT': {'url': 'https://bilibili.download/', 'enable': 1},
     'MyPT': {'url': 'https://cc.mypt.cc/', 'enable': 1},
-    'LaJiDui': {'url': 'https://pt.lajidui.top/', 'enable': 1}
+    'LaJiDui': {'url': 'https://pt.lajidui.top/', 'enable': 1},
+    'PTSkit': {'url': 'https://www.ptskit.org/', 'enable': 1}
 };
 
 var chd_use_backup_url = GM_getValue('chd_use_backup_url') === undefined ? 0: GM_getValue('chd_use_backup_url');
@@ -2473,13 +2474,15 @@ String.prototype.get_type = function() {
         result = '综艺';
     } else if (result.match(/(Docu|纪录|Documentary)/i)) {
         result = '纪录';
+    } else if (result.match(/(短剧)/i)) {
+        result = '短剧';
     } else if (result.match(/(TV.*Series|影劇|剧|TV-PACK|TV-Episode|TV)/i)) {
         result = '剧集';
     } else if (result.match(/(Music Videos|音乐短片|MV\(演唱\)|MV.演唱会|MV\(音乐视频\)|Music Video|Musics MV|Music-Video|音乐视频|演唱会\/MV|MV\/演唱会|MV)/i)) {
         result = 'MV';
-    }  else if (result.match(/(有声小说|Audio\(有声\))/i)) {
+    } else if (result.match(/(有声小说|Audio\(有声\))/i)) {
         result = '有声小说';
-    }else if (result.match(/(Music|音乐)/i)) {
+    } else if (result.match(/(Music|音乐)/i)) {
         result = '音乐';
     } else if (result.match(/(Sport|体育|運動)/i)) {
         result = '体育';
@@ -3514,8 +3517,193 @@ async function download_to_qb_by_file(host, username, pwd, path, category, skip_
     });
 }
 
+function dialogBox(yesCallback, noCallback){
+    // 显示遮罩和对话框
+    $('.wrap-dialog').removeClass("hide").addClass("show");;
+    // 确定按钮
+    $('#confirm').click(function(){
+        $('.wrap-dialog').addClass("hide");
+        yesCallback();
+    });
+    // 取消按钮
+    $('#cancel').click(function(){
+        $('.wrap-dialog').addClass("hide");
+        noCallback();
+    });
+    // 新增关闭按钮事件绑定
+    $('.close-btn').click(function(){
+        $('.wrap-dialog').addClass("hide");
+    });
+}
+
 function init_remote_server_button() {
     GM_addStyle(`
+        /* 遮罩层样式 */
+        .wrap-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px); /* 毛玻璃效果 */
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .wrap-dialog.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 对话框容器 */
+        .dialog {
+            width: 90%;
+            max-width: 300px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transform: scale(0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .wrap-dialog.show .dialog {
+            transform: scale(1);
+        }
+
+        /* 标题栏样式 */
+        .dialog-header {
+            padding: 6px 8px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .dialog-title {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 5;
+        }
+
+        /* 关闭按钮样式 */
+        .close-btn {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-50%) rotate(90deg);
+        }
+
+        .close-btn::after {
+            content: "×";
+            color: white;
+            font-size: 20px;
+            line-height: 1;
+        }
+
+        /* 内容区域样式 */
+        .dialog-body {
+            padding: 18px;
+            line-height: 1.2;
+            color: #333;
+            font-size: 15px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* 按钮组样式 */
+        .dialog-footer {
+            padding: 12px 25px;/* 进一步缩小内边距 */
+            display: flex;
+            justify-content: center;
+            background: white;
+        }
+
+        /* 通用按钮样式 */
+        .btn {
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 10px;  /* 修改上下内边距 */
+            min-height: 30px;    /* 新增最小高度 */
+            line-height: 1.0;    /* 新增行高控制 */
+        }
+
+        /* 确认按钮 */
+        #confirm {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            color: white;
+            box-shadow: 0 4px 6px rgba(103, 119, 239, 0.2);
+        }
+
+        #confirm:hover {
+            box-shadow: 0 6px 8px rgba(103, 119, 239, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* 取消按钮 */
+        #cancel {
+            background: #e6f0ff;   /* 基础色 */
+            color: #4a90e2;        /* 标题色 */
+            border: 1px solid #c1d7f5;
+            margin-left: 15px;
+            &:hover {
+                background: #d4e6ff;
+                border-color: #99c2ff;
+            }
+        }
+
+
+        /* 按钮点击效果 */
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 隐藏类样式 */
+        .hide {
+            display: none !important;
+        }
+
+        /* 辅助样式 */
+        .ml50 {
+            margin-left: 50px;
+        }
+
         #autoDismissAlert {
             position: fixed; /* Stays in place even if the user scrolls */
             top: 5%;
@@ -3523,7 +3711,7 @@ function init_remote_server_button() {
             transform: translate(-50%, -50%); /* Centers the element perfectly */
             background-color: #4CAF50; /* Green background for success/info */
             color: white;
-            padding: 5px 10px;
+            padding: 0px 12px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
             z-index: 1000; /* Ensures it's on top of most other content */
@@ -3544,11 +3732,32 @@ function init_remote_server_button() {
             border-radius: 8px 8px 8px 8px;
         }
 
+        .sidebar-header {
+            color: #ecf0f1;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px 0;
+            margin-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .download-icon {
+            font-size: 18px;
+            margin-top: 2px;
+        }
+
         #sidebar ul {
             list-style: none;
             padding: 0;
             margin: 0;
             border-radius: 8px 8px 8px 8px;
+            position: relative;
         }
 
         #sidebar li {
@@ -3617,9 +3826,17 @@ function init_remote_server_button() {
             color: #ecf0f1; /* White text on hover for contrast */
         }
     `);
-
     $('body').append(`
         <div id="sidebar">
+            <div class="sidebar-header">
+                <span>QB推送</span>
+                <div class="download-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0,0,256,256">
+                        <g transform=""><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="none" stroke-linecap="butt" stroke-linejoin="none" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path transform="scale(5.12,5.12)" d="M50,32c0,4.96484 -4.03516,9 -9,9h-30c-6.06641,0 -11,-4.93359 -11,-11c0,-4.97266 3.32422,-9.30469 8.01563,-10.59375c0.30859,-6.34375 5.56641,-11.40625 11.98438,-11.40625c4.01953,0 7.79688,2.05469 10.03516,5.40625c0.96875,-0.27344 1.94531,-0.40625 2.96484,-0.40625c5.91016,0 10.75,4.6875 10.98828,10.54297c3.52734,1.19141 6.01172,4.625 6.01172,8.45703z" id="strokeMainSVG" fill="#2c3e50" stroke="#2c3e50" stroke-width="2" stroke-linejoin="round"></path><g transform="scale(5.12,5.12)" fill="#ffffff" stroke="none" stroke-width="1" stroke-linejoin="miter"><path d="M43.98828,23.54297c-0.23828,-5.85547 -5.07812,-10.54297 -10.98828,-10.54297c-1.01953,0 -1.99609,0.13281 -2.96484,0.40625c-2.23828,-3.35156 -6.01562,-5.40625 -10.03516,-5.40625c-6.41797,0 -11.67578,5.0625 -11.98437,11.40625c-4.69141,1.28906 -8.01562,5.62109 -8.01562,10.59375c0,6.06641 4.93359,11 11,11h30c4.96484,0 9,-4.03516 9,-9c0,-3.83203 -2.48437,-7.26562 -6.01172,-8.45703zM25,35.41406l-6.70703,-6.70703l1.41406,-1.41406l4.29297,4.29297v-11.58594h2v11.58594l4.29297,-4.29297l1.41406,1.41406z"></path></g></g></g>
+                    </svg>
+
+                </div>
+            </div>
             <ul id="sidebar_ul">
             </ul>
         </div>
@@ -3627,6 +3844,23 @@ function init_remote_server_button() {
     $('body').append(`
         <div id="autoDismissAlert" style="display:none;">
             <p>种子添加成功~~</p>
+        </div>
+    `);
+    $('body').append(`
+        <div class="wrap-dialog hide">
+            <div class="dialog">
+                <div class="dialog-header">
+                    <span class="dialog-title">是否跳过检验？</span>
+                    <button class="close-btn"></button> <!-- 新增关闭按钮 -->
+                </div>
+                <div class="dialog-body">
+                    <span class="dialog-message">请谨慎选择，如果因为跳检造成做假种或者下载量增加后果自负！！</span>
+                </div>
+                <div class="dialog-footer">
+                    <input type="button" class="btn" id="confirm" value="跳过检验" />
+                    <input type="button" class="btn ml50" id="cancel" value="直接下载" />
+                </div>
+            </div>
         </div>
     `);
     
@@ -3645,11 +3879,14 @@ function init_remote_server_button() {
         username = qb[server].username;
         pwd = qb[server].password;
         tag = $(e.target).text();
-        if (confirm("是否跳过检验？请谨慎选择，如果跳检造成做假种后果自负！！取消表示直接下载，如果不想下载请刷新页面。")) {
-            download_to_qb_by_file(url, username, pwd, path, tag, true);
-        } else {
-            download_to_qb_by_file(url, username, pwd, path, tag, false);
-        }
+        dialogBox(
+            function () {
+                download_to_qb_by_file(url, username, pwd, path, tag, true);
+            },
+            function(){
+                download_to_qb_by_file(url, username, pwd, path, tag, false);
+            }
+        );
     });
 }
 
@@ -4101,7 +4338,7 @@ function rebuild_href(raw_info) {
     jump_str = dictToString(raw_info);
     tag_aa = forward_r.getElementsByClassName('forward_a');
     for (i = 0; i < tag_aa.length; i++) {
-        if (['常用站点', 'PTgen', '简化MI', '脚本设置', '重置托管', '单图转存', '转存PTP', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
+        if (['常用站点', 'PTgen', '简化MI', '脚本设置', '重置托管', '单图转存', '图标刷新', '提取图片'].indexOf(tag_aa[i].textContent) < 0){
             tag_aa[i].href = decodeURI(tag_aa[i]).split(separator)[0] + separator + encodeURI(jump_str);
         }
     }
@@ -12454,13 +12691,22 @@ function auto_feed() {
         rehost_link.target = '_blank';
         forward_r.appendChild(rehost_link);
 
+        // if (used_ptp_img_key != ''){
+        //     forward_r.innerHTML = forward_r.innerHTML + ' | ';
+        //     var transfer_ptp = document.createElement('a');
+        //     transfer_ptp.href = '#';
+        //     transfer_ptp.id = 'transfer_ptp';
+        //     transfer_ptp.innerHTML = '转存PTP';
+        //     forward_r.appendChild(transfer_ptp);
+        // }
+        
         if (used_ptp_img_key != ''){
             forward_r.innerHTML = forward_r.innerHTML + ' | ';
-            var transfer_ptp = document.createElement('a');
-            transfer_ptp.href = '#';
-            transfer_ptp.id = 'transfer_ptp';
-            transfer_ptp.innerHTML = '转存PTP';
-            forward_r.appendChild(transfer_ptp);
+            var refresh_icos = document.createElement('a');
+            refresh_icos.href = '#';
+            refresh_icos.id = 'refresh_icos';
+            refresh_icos.innerHTML = '图标刷新';
+            forward_r.appendChild(refresh_icos);
         }
 
         forward_r.innerHTML = forward_r.innerHTML + ' | ';
@@ -13390,24 +13636,16 @@ function auto_feed() {
             }
         })
 
-        if ($('#transfer_ptp').length) {
-            $('#transfer_ptp')[0].addEventListener('click', function(e){
-                e.preventDefault();
-                var img_url = raw_info.images.join(',');
-                if (!raw_info.images.length) {
-                    img_url=prompt("请输入图片链接,多图用英文逗号隔开","");
-                }
-                if (img_url.match(/https?:\/\/.*?(jpg|png|webp)/)) {
-                    ptp_send_images(img_url.split(','), used_ptp_img_key)
-                    .then(function(new_urls){
-                        new_urls = new_urls.toString().split(',').join('\n');
-                        GM_setClipboard(new_urls);
-                        alert("图片链接已成功复制到粘贴板，直接粘贴即可！！");
-                    }).catch(function(err){
-                        alert(err);
+        if ($('#refresh_icos').length) {
+            $('#refresh_icos')[0].addEventListener('click', function(e){
+                try {
+                    getJson('https://gitee.com/tomorrow505/auto-feed-helper/raw/master/sorted_pt_sites_icos.json', null, function(data) {
+                        GM_setValue('pt_icos', data.data);
+                        location.reload();
                     });
-                } else {
-                    alert('请输入图片地址！！');
+                } catch (err) {
+                    GM_setValue('pt_icos', '{}');
+                    location.reload();
                 }
             }, false);
         }
@@ -15183,6 +15421,12 @@ function auto_feed() {
                         if (raw_info.source_sel == '韩国'){check_label(document.getElementsByName('tags[4][]'), '26');}
                     }
                     break;
+                case 'PTSkit':
+                    if (raw_info.type == '电影') { check_label(document.getElementsByName('tags[4][]'), '23'); }
+                    if (raw_info.type == '动漫') { check_label(document.getElementsByName('tags[4][]'), '44'); }
+                    if (raw_info.type == '短剧') { check_label(document.getElementsByName('tags[4][]'), '22'); }
+                    check_label(document.getElementsByName('tags[4][]'), '10');
+                    break;
                 case 'ECUST':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
@@ -15495,6 +15739,7 @@ function auto_feed() {
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '12'); }
+                    if (labels.en){ check_label(document.getElementsByName('tags[4][]'), '16'); }
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '13'); }
                     break;
                 case '13City':
@@ -20439,8 +20684,7 @@ function auto_feed() {
 
         else if (forward_site == '麒麟') {
             var browsecat = $('#browsecat')
-            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 420, '音乐': 408, '纪录': 404,
-                             '体育': 407, '软件': 411, '学习': 419, '': 409, '游戏': 412, 'MV': 406};
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 420, '音乐': 408, '纪录': 404, '体育': 407, '软件': 411, '学习': 419, '': 409, '游戏': 412, 'MV': 406, '短剧': 421};
             browsecat.val(409)
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
@@ -26427,13 +26671,11 @@ function auto_feed() {
             check_team(raw_info, 'team_sel[4]');
         }
 
-
         else if (forward_site == 'AGSV') {
             //类型
             var browsecat = $('#browsecat');
             var specialcat = $('#specialcat');
-            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,'体育': 407, '音乐': 411,
-                '': 409, '学习': 417, '游戏': 413, '软件': 412, '书籍': 415 };
+            var type_dict = {'电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,'体育': 407, '音乐': 411, '学习': 417, '游戏': 413, '软件': 412, '书籍': 415, '短剧': 419 };
             browsecat.val(409);
             specialcat.attr("disabled",true);
             if (type_dict.hasOwnProperty(raw_info.type)){
@@ -26511,6 +26753,51 @@ function auto_feed() {
                 check_label(document.getElementsByName('tags[4][]'), '52');
             }
         }
+
+        else if (forward_site == 'PTSkit') {
+            var browsecat = $('#browsecat');
+            var type_dict = {'电影': 401, '动漫': 405, '短剧': 404 };
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                var index = type_dict[raw_info.type];
+                browsecat.val(index);
+            }
+            var medium_box = $('select[name="medium_sel[4]"]');
+            medium_box.val(9);
+            switch(raw_info.medium_sel){
+                case 'Blu-ray': case 'UHD': medium_box.val(1); break;
+                case 'DVD':
+                    medium_box.val(6);
+                    if (raw_info.name.match(/HD.?DVD/)) {
+                        medium_box.val(2);
+                    }
+                    break;
+                case 'Remux': medium_box.val(3); break;
+                case 'HDTV': medium_box.val(5); break;
+                case 'Encode': medium_box.val(7); break;
+                case 'CD': medium_box.val(8); break;
+            }
+            if (raw_info.name.match(/minibd/i)) {
+                medium_box.val(4);
+            }
+            var codec_box = $('select[name="codec_sel[4]"]');
+            codec_box.val(5);
+            switch (raw_info.codec_sel){
+                case 'H264': case 'X264': codec_box.val(1); break;
+                case 'VC-1': codec_box.val(2); break;
+                case 'XVID': codec_box.val(3); break;
+                case 'MPEG-2': case 'MPEG-4': codec_box.val(4); break;
+            }
+            var standard_box = $('select[name="standard_sel[4]"]');
+            var standard_dict = {
+                'SD': 4, '720p': 3,'1080i': 2, '1080p': 1, '4K': 5
+            }
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                var index = standard_dict[raw_info.standard_sel];
+                standard_box.val(index);
+            }
+            $('select[name="team_sel[4]"]').val(5);
+            check_team(raw_info, 'team_sel[4]');
+        } 
 
         else if (forward_site == 'ECUST') {
             var browsecat = $('#browsecat');
