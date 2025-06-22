@@ -3757,7 +3757,6 @@ function init_remote_server_button() {
             padding: 0;
             margin: 0;
             border-radius: 8px 8px 8px 8px;
-            position: relative;
         }
 
         #sidebar li {
@@ -3797,7 +3796,6 @@ function init_remote_server_button() {
         #sidebar .submenu {
             display: none;
             position: absolute;
-            top: 0;
             left: -100%;
             width: 70px;
             background-color: #34495e; /* Slightly different shade for submenu */
@@ -3831,7 +3829,7 @@ function init_remote_server_button() {
             <div class="sidebar-header">
                 <span>QB推送</span>
                 <div class="download-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="24" viewBox="0,0,256,256">
+                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="20" viewBox="0,0,256,256">
                         <g transform=""><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="none" stroke-linecap="butt" stroke-linejoin="none" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path transform="scale(5.12,5.12)" d="M50,32c0,4.96484 -4.03516,9 -9,9h-30c-6.06641,0 -11,-4.93359 -11,-11c0,-4.97266 3.32422,-9.30469 8.01563,-10.59375c0.30859,-6.34375 5.56641,-11.40625 11.98438,-11.40625c4.01953,0 7.79688,2.05469 10.03516,5.40625c0.96875,-0.27344 1.94531,-0.40625 2.96484,-0.40625c5.91016,0 10.75,4.6875 10.98828,10.54297c3.52734,1.19141 6.01172,4.625 6.01172,8.45703z" id="strokeMainSVG" fill="#2c3e50" stroke="#2c3e50" stroke-width="2" stroke-linejoin="round"></path><g transform="scale(5.12,5.12)" fill="#ffffff" stroke="none" stroke-width="1" stroke-linejoin="miter"><path d="M43.98828,23.54297c-0.23828,-5.85547 -5.07812,-10.54297 -10.98828,-10.54297c-1.01953,0 -1.99609,0.13281 -2.96484,0.40625c-2.23828,-3.35156 -6.01562,-5.40625 -10.03516,-5.40625c-6.41797,0 -11.67578,5.0625 -11.98437,11.40625c-4.69141,1.28906 -8.01562,5.62109 -8.01562,10.59375c0,6.06641 4.93359,11 11,11h30c4.96484,0 9,-4.03516 9,-9c0,-3.83203 -2.48437,-7.26562 -6.01172,-8.45703zM25,35.41406l-6.70703,-6.70703l1.41406,-1.41406l4.29297,4.29297v-11.58594h2v11.58594l4.29297,-4.29297l1.41406,1.41406z"></path></g></g></g>
                     </svg>
 
@@ -3866,7 +3864,7 @@ function init_remote_server_button() {
     
     var qb = remote_server.qbittorrent;
     for (let server in qb) {
-        $('#sidebar_ul').append(`<li id=${server}><a href="${qb[server].url}" target="_blank" title="${qb[server].url}">${server}</a><ul class="submenu" id="ul_${server}"></ul></li>`);
+        $('#sidebar_ul').append(`<li class="menu-item" id=${server}><a href="${qb[server].url}" target="_blank" title="${qb[server].url}">${server}</a><ul class="submenu" id="ul_${server}"></ul></li>`);
         for (let path in qb[server].path) {
             $(`#ul_${server}`).append(`<li><a href="#" path=${qb[server].path[path]} class="qb_download" title="${qb[server].path[path]}">${path}</a></li>`);
         }
@@ -3887,6 +3885,25 @@ function init_remote_server_button() {
                 download_to_qb_by_file(url, username, pwd, path, tag, false);
             }
         );
+    });
+    const menuItems = document.querySelectorAll('.menu-item');
+    menuItems.forEach(item => {
+        const submenu = item.querySelector('.submenu');
+        if (!submenu) return;
+        item.addEventListener('mouseenter', function(e) {
+            const rect = item.getBoundingClientRect();
+            console.log(rect)
+            const offsetX = rect.width; // 子菜单相对于菜单项的偏移量
+            submenu.style.display = 'block';
+            submenu.style.position = 'fixed';
+            var element = document.getElementById('sidebar');
+            const height = element.offsetHeight;
+            submenu.style.top = `${rect.top - window.innerHeight/2 + height / 2 }px`;
+        });
+ 
+        item.addEventListener('mouseleave', function() {
+            submenu.style.display = 'none';
+        });
     });
 }
 
