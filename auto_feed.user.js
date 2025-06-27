@@ -1861,6 +1861,7 @@ const reg_team_name = {
     'LemonHD': /(-LHD|League(WEB|CD|NF|HD|TV|MV))$/i,
     'ptsbao': /-(FFans|sBao|FHDMV|OPS)/i,
     '麒麟': /-HDK(WEB|TV|MV|Game|DIY|ylin)/i,
+    '13City': /-(13City|.*13City)/i,
 };
 
 function add_thanks(descr) {
