@@ -967,7 +967,7 @@ var ptp_name_location = GM_getValue('ptp_name_location') === undefined ? 1 : GM_
 
 //支持转发的站点列表，可以自行取消注释
 const default_site_info = {
-    '13City': {'url': 'https://13city.online/', 'enable': 1},
+    '13City': {'url': 'https://13city.org/', 'enable': 1},
     '1PTBA': {'url': 'https://1ptba.com/', 'enable': 1},
     '52PT': {'url': 'https://52pt.site/', 'enable': 1},
     'ACM': {'url': 'https://eiga.moi/', 'enable': 1},
@@ -1861,6 +1861,7 @@ const reg_team_name = {
     'LemonHD': /(-LHD|League(WEB|CD|NF|HD|TV|MV))$/i,
     'ptsbao': /-(FFans|sBao|FHDMV|OPS)/i,
     '麒麟': /-HDK(WEB|TV|MV|Game|DIY|ylin)/i,
+    '13City': /-(13City|.*13City)/i,
 };
 
 function add_thanks(descr) {
@@ -22797,7 +22798,7 @@ function auto_feed() {
         else if (forward_site == '13City') {
             //类型
             var browsecat = $('#browsecat');
-            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, 'MV': 406, '有声小说': 409};
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, 'MV': 406, '有声小说': 409, '纪录片': 413};
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
