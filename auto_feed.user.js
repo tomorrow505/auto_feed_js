@@ -22798,7 +22798,7 @@ function auto_feed() {
         else if (forward_site == '13City') {
             //类型
             var browsecat = $('#browsecat');
-            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, 'MV': 406, '有声小说': 409, '纪录片': 413};
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, 'MV': 406, '有声小说': 409, '纪录': 413};
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
