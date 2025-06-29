@@ -52,7 +52,7 @@
 
 |                   Alipay                    |                     WeChat                     |
 | :-----------------------------------------: | :--------------------------------------------: |
-| <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/ali_pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/wechat_pay.png" width = "160" height = "160" alt="微信" align=center /> |
+| <img src="https://i.ibb.co/FkFXNSmx/ali-pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://i.ibb.co/Kz6GkrcN/wechat-pay.png" width = "160" height = "160" alt="微信" align=center /> |
 
  ## 💻贡献者
 
