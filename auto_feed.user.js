@@ -1094,7 +1094,7 @@ const default_site_info = {
     'MyPT': {'url': 'https://cc.mypt.cc/', 'enable': 1},
     'LaJiDui': {'url': 'https://pt.lajidui.top/', 'enable': 1},
     'PTSkit': {'url': 'https://www.ptskit.org/', 'enable': 1},
-    'LongPT': {'url': 'https://www.longpt.org/', 'enable': 1},
+    'LongPT': {'url': 'https://longpt.org/', 'enable': 1},
 };
 
 var chd_use_backup_url = GM_getValue('chd_use_backup_url') === undefined ? 0: GM_getValue('chd_use_backup_url');
@@ -15823,17 +15823,17 @@ function auto_feed() {
                     break;
                 case 'LongPT':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
-                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '15'); }
+                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '9'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){
                         check_label(document.getElementsByName('tags[4][]'), '4');
                     }
-                    if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '11'); }
+                    if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '8'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
-                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '8'); }
+                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '10'); }
                     if (raw_info.small_descr.match(/特效字幕/)) {
-                        check_label(document.getElementsByName('tags[4][]'), '18');
+                        check_label(document.getElementsByName('tags[4][]'), '11');
                     }
                     if (raw_info.type == '剧集' && raw_info.source_sel == '韩国') {
                         check_label(document.getElementsByName('tags[4][]'), '14');
@@ -20385,25 +20385,26 @@ function auto_feed() {
         else if (forward_site == 'LongPT') {
             //类型
             var browsecat = $('#browsecat')
-            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
-                '体育': 407, 'MV': 406};
-            browsecat.val(410);
+            var type_dict = {'电影': 401,'剧集': 402,'综艺': 403,'纪录片': 404,'动画': 405,
+                '音乐视频': 406,'体育': 407,'音频': 408,'其他': 409, '有声书': 410}
+            browsecat.val(409);
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
             //媒介
-            var medium_box = $('select[name="source_sel[4]"]');
+            var medium_box = $('select[name="medium_sel[4]"]');
             medium_box.val(16);
             switch (raw_info.medium_sel){
-                case 'Blu-ray': medium_box.val(7); break;
-                case 'UHD': medium_box.val(8); break;
-                case 'Remux': medium_box.val(9); break;
-                case 'Encode': medium_box.val(10); break;
-                case 'WEB-DL': medium_box.val(11); break;
-                case 'HDTV': medium_box.val(12); break;
-                case 'DVD': medium_box.val(13); break;
-                case 'CD': medium_box.val(14); break;
+                case 'Blu-ray': medium_box.val(1); break;
+                case 'UHD': medium_box.val(2); break;
+                case 'Remux': medium_box.val(3); break;
+                case 'Encode': medium_box.val(7); break;
+                case 'WEB-DL': medium_box.val(4); break;
+                case 'HDTV': medium_box.val(5); break;
+                case 'DVD': medium_box.val(6); break;
+                case 'CD': medium_box.val(8); break;
+                case 'Other': medium_box.val(10); break;
             }
             var codec_box = $('select[name="codec_sel[4]"]');
             codec_box.val(5);
@@ -20412,14 +20413,15 @@ function auto_feed() {
                 case 'H265': case 'X265': codec_box.val(2); break;
                 case 'VC-1': codec_box.val(3); break;
                 case 'MPEG-2': codec_box.val(4); break;
-                case 'AV1': codec_box.val(6); break;
+                case 'AV1': codec_box.val(5); break;
+                case 'Other': codec_box.val(6); break;
             }
             //音频编码
             var audiocodec_box = $('select[name="audiocodec_sel[4]"]');
             audiocodec_box.val(13);
             switch (raw_info.audiocodec_sel){
-                case 'AAC': audiocodec_box.val(9); break;
-                case 'APE': audiocodec_box.val(10); break;
+                case 'AAC': audiocodec_box.val(6); break;
+                case 'APE': audiocodec_box.val(2); break;
                 case 'AC3':
                     audiocodec_box.val(13);
                     if (raw_info.name.match(/DD[P\+]/)) {
@@ -20431,14 +20433,16 @@ function auto_feed() {
                 case 'TrueHD': audiocodec_box.val(15); break;
                 case 'DTS:X': audiocodec_box.val(16); break;
                 case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(17); break;
-                case 'DTS': audiocodec_box.val(18); break;
+                case 'DTS': audiocodec_box.val(3); break;
                 case 'M4A': audiocodec_box.val(19); break;
                 case 'WAV': audiocodec_box.val(20); break;
-                case 'MP3': audiocodec_box.val(21); break;
-                case 'Flac': audiocodec_box.val(22); break;
+                case 'MP3': audiocodec_box.val(4); break;
+                case 'Flac': audiocodec_box.val(1); break;
+                case 'Other': audiocodec_box.val(7); break;
             }
             var standard_box = $('select[name="standard_sel[4]"]');
-            var standard_dict = {'8K': 8, '4320p': 8, '4K': 7, '2160p': 7, '1080p': 6, '1080i': 6, '720p': 5, 'SD': 4, '480p': 4, '': 9};
+            var standard_dict = {'8K': 6, '4320p': 6, '4K': 5, '2160p': 5, '2K': 1, '1440p': 5,
+                '1080p': 2, '1080i': 2, '720p': 3, '480p': 4, '': 7};
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
