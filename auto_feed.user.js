@@ -96,7 +96,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.9.3
+// @version      2.0.9.5
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1047,6 +1047,7 @@ const default_site_info = {
     'HDPt': {'url': 'https://hdpt.xyz/', 'enable': 1},
     'Monika': {'url': 'https://monikadesign.uk/', 'enable': 1},
     'ZMPT': {'url': 'https://zmpt.cc/', 'enable': 1},
+    'ICC': {'url': 'https://www.icc2022.com/', 'enable': 1},
     'CyanBug': {'url': 'https://cyanbug.net/', 'enable': 1},
     'ZHUQUE': {'url': 'https://zhuque.in/', 'enable': 1},
     'YemaPT': {'url': 'https://www.yemapt.org/', 'enable': 1},
@@ -1085,14 +1086,20 @@ const default_site_info = {
     'DevTracker': {'url': 'https://www.devtracker.me/', 'enable': 1},
     '唐门': {'url': 'https://tmpt.top/', 'enable': 1},
     '财神': {'url': 'https://cspt.top/', 'enable': 1},
-    '星陨阁': {'url': 'https://xingyunge.top/', 'enable': 1},
-    '樱花': {'url': 'http://mckk88.top/', 'enable': 1},
+    '星陨阁': {'url': 'https://pt.xingyungept.org/', 'enable': 1},
+    '樱花': {'url': 'http://pt.ying.us.kg/', 'enable': 1},
     '我好闲': {'url': 'http://whax.net/', 'enable': 1},
     '下水道': {'url': 'https://sewerpt.com/', 'enable': 1},
     '柠檬不甜': {'url': 'https://lemonhd.net/', 'enable': 1},
     'RailgunPT': {'url': 'https://bilibili.download/', 'enable': 1},
     'MyPT': {'url': 'https://cc.mypt.cc/', 'enable': 1},
     'LaJiDui': {'url': 'https://pt.lajidui.top/', 'enable': 1},
+    'PTSkit': {'url': 'https://www.ptskit.org/', 'enable': 1},
+    'MARCH': {'url': 'https://duckboobee.org/', 'enable': 1},
+    'NovaHD': {'url': 'https://pt.novahd.top/', 'enable': 1},
+    'LuckPT': {'url': 'https://pt.luckpt.de/', 'enable': 1},
+    'Tokyo': {'url': 'https://www.tokyopt.xyz/', 'enable': 1},
+    'ALing': {'url': 'https://pt.aling.de/', 'enable': 1}
     'PTSkit': {'url': 'https://www.ptskit.org/', 'enable': 1},
     'LongPT': {'url': 'https://longpt.org/', 'enable': 1},
 };
@@ -6494,9 +6501,9 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         $('#begin_sign').click((e)=>{
             e.preventDefault();
             var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice','OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
-                'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'HDPt', 'ZMPT', 'OKPT', '悟空', 'CrabPt', 'QingWa', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
+                'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'HDPt', 'ZMPT', 'OKPT', '悟空', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
                 'CyanBug', '杏林', '海棠', 'Panda', 'KuFei', 'RouSi', 'PTCafe', 'GTK', 'HHClub', '象岛', '麒麟','AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', '唐门', '财神', 'DevTraker',
-                'CDFile','柠檬不甜', 'LongPT'
+                'CDFile','柠檬不甜', 'ALing', 'LongPT'
             ];
 
             attendance_sites.forEach((e)=>{
@@ -6795,10 +6802,10 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         //***********************************************************************************************************************************
 
         $table.append(`<tr style="display:none;"><td width="1%" class="rowhead nowrap" valign="top" align="right">脚本设置</td><td width="99%" class="rowfollow" valign="top" align="left" id="setting"></td></tr>`);
-        $('#setting').append(`<b>使用教程：</b><a href="https://github.com/tomorrow505/auto_feed_js/wiki", target="_blank"><font color="red">→跳转←</font></a>`);
+        $('#setting').append(`<b>使用教程：</b><a href="https://gitee.com/tomorrow505/auto_feed_js/wikis/pages", target="_blank"><font color="red">→跳转←</font></a>`);
         $('#setting').append(`<b>&nbsp;&nbsp;&nbsp;更新地址：</b><a href="https://greasyfork.org/zh-CN/scripts/424132-auto-feed/", target="_blank"><font color="red">→跳转←</font></a>`);
-        $('#setting').append(`<b>&nbsp;&nbsp;&nbsp;TG群聊：</b><a href="https://t.me/+rGUOUYZ3Ey43OWY9/", target="_blank"><font color="red">→跳转←</font></a>`);
-        $('#setting').append(`<b>&nbsp;&nbsp;&nbsp;项目托管：</b><a href="https://github.com/tomorrow505/auto_feed_js/", target="_blank"><font color="red">→GitHub←</font></a>`);
+        $('#setting').append(`<b>&nbsp;&nbsp;&nbsp;项目托管1：</b><a href="https://github.com/tomorrow505/auto_feed_js/", target="_blank"><font color="red">→GitHub←</font></a>`);
+        $('#setting').append(`<b>&nbsp;&nbsp;&nbsp;项目托管2：</b><a href="https://gitee.com/tomorrow505/auto_feed_js/", target="_blank"><font color="red">→Gitee←</font></a>`);
         $('#setting').append(`<br><br>`);
 
         //************************************************** 1 ***************************************************************************
@@ -6947,7 +6954,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         //**************************************************** 4.2 ***************************************************************************
         $('#setting').append(`
-            <div style="margin-bottom=5px"><b>远程服务器配置<目前仅适配qbittorrent，<a href="https://gitee.com/tomorrow505/auto_feed_js/wikis/qb%E6%8E%A8%E9%80%81" target="_blank"><font color="red">->配置方式请点击<-</font></a>></b>
+            <div style="margin-bottom=5px"><b>远程服务器配置<目前仅适配qbittorrent，<a href="https://gitee.com/tomorrow505/auto_feed_js/wikis/4.%E5%85%B6%E4%BB%96%E5%8A%9F%E8%83%BD/qb%E8%BF%9C%E7%A8%8B%E6%8E%A8%E9%80%81" target="_blank"><font color="red">->配置方式请点击<-</font></a>></b>
             <input type="file" id="jsonFileInput" accept=".json">
             <div id="jsonData"></div>
             </div></br>
@@ -8998,7 +9005,6 @@ function auto_feed() {
                 if (origin_site == 'CMCT') {
                     raw_info.torrent_url = raw_info.torrent_url.replace(/&https=1/, '');
                 }
-                
             }
         }
 
@@ -12665,6 +12671,17 @@ function auto_feed() {
         }
 
         forward_r.innerHTML = forward_r.innerHTML + ' <br><br><font color="green">Tools →</font> ';
+
+        var wiki = document.createElement('a');
+        wiki.innerHTML = '教程';
+        wiki.title = 'Github教程。';
+        wiki.id = 'wiki';
+        wiki.href = 'https://gitee.com/tomorrow505/auto_feed_js/wikis/pages';
+        wiki.target = '_blank';
+        wiki.style.color = 'red';
+        forward_r.appendChild(wiki);
+        forward_r.innerHTML = forward_r.innerHTML + ' | ';
+
         var ptgen = document.createElement('a');
         ptgen.innerHTML = 'PTgen';
         ptgen.id = 'ptgen';
@@ -12677,16 +12694,6 @@ function auto_feed() {
         }
         ptgen.target = '_blank';
         forward_r.appendChild(ptgen);
-
-        forward_r.innerHTML = forward_r.innerHTML + ' | ';
-        var wiki = document.createElement('a');
-        wiki.innerHTML = '教程';
-        wiki.title = 'Github教程。';
-        wiki.id = 'wiki';
-        wiki.href = 'https://github.com/tomorrow505/auto_feed_js/wiki';
-        wiki.target = '_blank';
-        wiki.style.color = 'red';
-        forward_r.appendChild(wiki);
 
         forward_r.innerHTML = forward_r.innerHTML + ' | ';
         var get_img = document.createElement('a');
@@ -12745,15 +12752,6 @@ function auto_feed() {
         rehost_link.target = '_blank';
         forward_r.appendChild(rehost_link);
 
-        // if (used_ptp_img_key != ''){
-        //     forward_r.innerHTML = forward_r.innerHTML + ' | ';
-        //     var transfer_ptp = document.createElement('a');
-        //     transfer_ptp.href = '#';
-        //     transfer_ptp.id = 'transfer_ptp';
-        //     transfer_ptp.innerHTML = '转存PTP';
-        //     forward_r.appendChild(transfer_ptp);
-        // }
-        
         if (used_ptp_img_key != ''){
             forward_r.innerHTML = forward_r.innerHTML + ' | ';
             var refresh_icos = document.createElement('a');
@@ -14991,7 +14989,7 @@ function auto_feed() {
         if (raw_info.name.match(/(x|H)(264|265)/i)) {
             labels.diy = false;
         }
-        if ( (raw_info.name.match(/[\. ]S\d+/) && !raw_info.name.match(/S\d+.?E\d+/)) || (raw_info.name.match(/Complete/i) && raw_info.type == '剧集')) {
+        if ( (raw_info.name.match(/[\. ]S\d+/) && !raw_info.name.match(/S\d+.?E\d+/)) || ( (raw_info.name.match(/Complete/i) || raw_info.small_descr.match(/全\d+集/)) && raw_info.type == '剧集')) {
             labels.complete = true;
         } else if (raw_info.type == '剧集' && raw_info.medium_sel == 'Blu-ray') {
             labels.complete = true;
@@ -15294,11 +15292,18 @@ function auto_feed() {
                     if (labels.zz){ $('input[name="tags[4][]"][value="6"]').attr('checked', true); }
                     if (labels.diy){
                         $('input[name="tags[4][]"][value="4"]').attr('checked', true);
-                    } else if ($('textarea[name="technical_info"]').val().match(/mpls/i)) {
+                    } else if (raw_info.descr.match(/mpls/i)) {
                         $('input[name="tags[4][]"][value="10"]').attr('checked', true);
                     }
                     if (labels.hdr10 || labels.hdr10plus) { try { $('input[name="tags[4][]"][value="7"]').attr('checked', true); } catch(err) {}}
                     if (labels.complete) { $('input[name="tags[4][]"][value="12"]').attr('checked', true); }
+                    break;
+                case 'ICC':
+                    if (labels.gy){ $('input[name="tags[4][]"][value="5"]').attr('checked', true); }
+                    if (labels.yy){ $('input[name="tags[4][]"][value="5"]').attr('checked', true); }
+                    if (labels.zz){ $('input[name="tags[4][]"][value="6"]').attr('checked', true); }
+                    if (labels.diy){ $('input[name="tags[4][]"][value="4"]').attr('checked', true); }
+                    if (labels.hdr10 || labels.hdr10plus) { try { $('input[name="tags[4][]"][value="7"]').attr('checked', true); } catch(err) {}}
                     break;
                 case 'CyanBug':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
@@ -15528,7 +15533,7 @@ function auto_feed() {
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
-		    if (labels.complete){
+		            if (labels.complete){
                         check_label(document.getElementsByName('tags[4][]'), '9');
                     } else if (raw_info.name.match(/[\d ]E\d+[ \.]/)) {
                         check_label(document.getElementsByName('tags[4][]'), '8');
@@ -15780,6 +15785,8 @@ function auto_feed() {
                             check_label(document.getElementsByName('tags[4][]'), '9');
                         } else if (raw_info.source_sel == '香港' || raw_info.source_sel == '澳门' || raw_info.source_sel == '台湾') {
                             check_label(document.getElementsByName('tags[4][]'), '8');
+                        } else if (raw_info.source_sel == '欧美'){
+                            check_label(document.getElementsByName('tags[4][]'), '10');
                         }
                     }
                     if (labels.diy){
@@ -15794,6 +15801,7 @@ function auto_feed() {
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '13'); }
                     break;
                 case '13City':
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '13'); }
@@ -15820,6 +15828,57 @@ function auto_feed() {
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '9'); }
                     if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '10'); }
+                    break;
+                                case 'MARCH':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){
+                        check_label(document.getElementsByName('tags[4][]'), '4');
+                    } else if ((raw_info.descr + $('textarea[name="technical_info"]').val()).match(/mpls/i)) {
+                        check_label(document.getElementsByName('tags[4][]'), '0');
+                    }
+                    if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    if (raw_info.name.match(/S\d{1,3}.?E\d{1,5}/) || raw_info.small_descr.match(/第\d{1,5}(.\d{1,5})?集/)){
+                        check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    break;
+                case 'NovaHD':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    break;
+                case 'LuckPT':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    break;
+                case 'Tokyo':
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '12'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '13'); }
+                    if (raw_info.name.match(/S\d{1,3}.?E\d{1,5}/) || raw_info.small_descr.match(/第\d{1,5}(.\d{1,5})?集/)){
+                        check_label(document.getElementsByName('tags[4][]'), '14'); }
+                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
+                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '9'); }
+                    break;
+                case 'ALing':
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
+                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
+                    if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '12'); }
+                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '13'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '14'); }
                     break;
                 case 'LongPT':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
