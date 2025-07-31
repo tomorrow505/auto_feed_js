@@ -7,10 +7,10 @@
 油猴安装地址：https://greasyfork.org/zh-CN/scripts/424132-auto-feed 或 https://gitee.com/tomorrow505/auto_feed_js/raw/master/auto_feed.user.js
 
 如果无法翻墙，请使用Gitee的地址进行安装，并在脚本头部（源代码1~110行左右）添加以下4个库：<br>
-// @require      https://gitee.com/tomorrow505/auto_feed_helper/raw/master/require_libraries/jquery.js <br>
-// @require      https://gitee.com/tomorrow505/auto_feed_helper/raw/master/require_libraries/jquery_ui.js <br>
-// @require      https://gitee.com/tomorrow505/auto_feed_helper/raw/master/require_libraries/imgCheckbox.js <br>
-// @require      https://gitee.com/tomorrow505/auto_feed_helper/raw/master/require_libraries/music-helper.js <br>
+// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/jquery.js <br>
+// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/jquery_ui.js <br>
+// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/imgCheckbox.js <br>
+// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/music-helper.js <br>
  
 ### 👀项目特点
 + 支持一键转载填充相应内容
