@@ -2648,9 +2648,9 @@ function get_small_descr_from_descr(descr, name){
 //根据简介获取来源，也就是地区国家产地之类的——尤其分类是日韩或者港台的，有的站点需要明确一下
 function get_source_sel_from_descr(descr){
     var region = '';
-    var reg_region = descr.match(/◎(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地)([^\r\n]+)/);
+    var reg_region = descr.match(/◎(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地|◎產.{0,5}?地)([^\r\n]+)/);
     if (! reg_region) {
-        reg_region = descr.match(/(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地)([^\r\n]+)/);
+        reg_region = descr.match(/(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地|◎產.{0,5}?地)([^\r\n]+)/);
     }
     if (reg_region) {
         region = reg_region[2].split('/')[0].trim();
@@ -11255,7 +11255,7 @@ function auto_feed() {
                 raw_info.torrent_name = raw_info.name.replace(/ /g, '.').replace(/\*/g, '') + '.torrent';
                 raw_info.torrent_name = raw_info.torrent_name.replace(/\.\.+/g, '.');
                 if (!raw_info.small_descr) { raw_info.small_descr = detail.smallDescr; }
-                if (!raw_info.url) { raw_info.url = detail.imdb; reBuildHref(raw_info, forward_r);}
+                if (!raw_info.url) { raw_info.url = detail.descr.match(/title\/tt\d+/) ? match_link('imdb', detail.descr): detail.imdb; reBuildHref(raw_info, forward_r);}
                 if (!raw_info.db_url) { raw_info.db_url = detail.douban; }
                 if (!raw_info.descr) {
                     raw_info.descr = detail.descr;
@@ -16227,7 +16227,7 @@ function auto_feed() {
                 trigger_select('videoCodec', videoCodec, 100, 0);
                 trigger_select('audioCodec', audioCodec, 200, 1);
 
-                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|產.{0,5}?地)([^\r\n]+)/);
                 if (reg_region) {
                     var region = reg_region[2].trim();
                     if (!$('#region_tips').length) {
@@ -18305,7 +18305,7 @@ function auto_feed() {
                     //地区填写，针对电影
                     if (raw_info.type == '电影' || raw_info.type == '综艺'){
                         district_box = document.getElementById('district');
-                        district = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                        district = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|產.{0,5}?地)([^\r\n]+)/);
                         if (district) {
                             district = district[2];
                             district = district.trim().replace(/ /g, ''); //去除首尾空格
@@ -18328,7 +18328,7 @@ function auto_feed() {
                             case '韩国':
                                 $('#specificcat5').attr('checked','true'); break;
                             case '欧美':
-                                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|產.{0,5}?地)([^\r\n]+)/);
                                 if (reg_region && reg_region[2].trim().match(/^英国/)) {
                                     $('#specificcat6').attr('checked','true');
                                 } else {
@@ -18505,9 +18505,9 @@ function auto_feed() {
                         case '欧美':
                             $('select[name="second_type"]').val('12');
                             $('input[name="movie_country"]').val('欧洲');
-                            origin_descr.match(/(◎产.*地|◎地.*区|◎国.*家).*/g).filter(e=>{
+                            origin_descr.match(/(◎产.*地|◎地.*区|◎国.*家|◎產.{0,5}?地).*/g).filter(e=>{
                                 if (e) {
-                                    var country = e.split(/(◎产.*地|◎地.*区|◎国.*家)/).pop().trim().replace(/ /g, '');
+                                    var country = e.split(/(◎产.*地|◎地.*区|◎国.*家|◎產.{0,5}?地)/).pop().trim().replace(/ /g, '');
                                     if (country.match(/美国|北美/)) {
                                         $('select[name="second_type"]').val('13');
                                         $('input[name="movie_country"]').val('北美');
@@ -18800,7 +18800,7 @@ function auto_feed() {
                         case '韩国': source_box.val(27); break;
                         case '欧美':
                             source_box.val(25);
-                            var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                            var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                             if (reg_region && reg_region[2].trim().match(/^英国/)) {
                                 source_box.val(90);
                             }
@@ -19092,7 +19092,7 @@ function auto_feed() {
                 team_box.val(index);
             }
             if (raw_info.source_sel == '欧美') {
-                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                 if (reg_region) {
                     var region = reg_region[2];
                     if (region.match('美国')) {
@@ -19250,7 +19250,7 @@ function auto_feed() {
                 team_box.val(index);
             }
             if (raw_info.source_sel == '欧美') {
-                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                 if (reg_region) {
                     var region = reg_region[2].trim();
                     if (region.match(/美国/)) {
@@ -20361,7 +20361,7 @@ function auto_feed() {
                     } else if (raw_info.source_sel == '韩国'){
                         browsecat.options[6].selected = true;
                     } else {
-                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                         if (reg_region && reg_region[2].match(/泰国/)) {
                             browsecat.options[4].selected = true;
                         } else {
@@ -20964,7 +20964,7 @@ function auto_feed() {
                 case '韩国': source_box.val(20); break;
                 default:
                     try {
-                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                         if (reg_region) {
                             region = reg_region[2].split('/')[0].trim();
                             region = region.split(':').pop().trim();
@@ -22845,8 +22845,7 @@ function auto_feed() {
         else if (forward_site == 'LongPT') {
             //类型
             var browsecat = $('#browsecat')
-            var type_dict = {'电影': 401,'剧集': 402,'综艺': 403,'纪录片': 404,'动画': 405,
-                '音乐视频': 406,'体育': 407,'音频': 408,'其他': 409, '有声书': 410}
+            var type_dict = {'电影': 401,'剧集': 402,'综艺': 403,'纪录': 404,'动画': 405, 'MV': 406,'体育': 407, '有声书': 410}
             browsecat.val(409);
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
@@ -23365,7 +23364,7 @@ function auto_feed() {
                 case '印度': source_box.val(8); break;
                 default:
                     try {
-                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                         if (reg_region) {
                             region = reg_region[2].split('/')[0].trim();
                             region = region.split(':').pop().trim();
@@ -23470,6 +23469,10 @@ function auto_feed() {
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
+                browsecat.trigger('change');
+                if (index == 402 && labels.complete) {
+                    $('#is_complete').attr('checked', true);
+                }
             }
             var medium_box = $('select[name="medium_sel"]');
             switch(raw_info.medium_sel){
@@ -23724,7 +23727,7 @@ function auto_feed() {
                 case '印度': source_box.val(7); break;
                 default:
                     try {
-                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                         if (reg_region) {
                             region = reg_region[2].split('/')[0].trim();
                             region = region.split(':').pop().trim();
@@ -27625,7 +27628,7 @@ function auto_feed() {
                 case '印度': source_box.val(7); break;
                 default:
                     try {
-                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地)([^\r\n]+)/);
+                        var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                         if (reg_region) {
                             region = reg_region[2].split('/')[0].trim();
                             region = region.split(':').pop().trim();
