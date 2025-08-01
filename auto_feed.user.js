@@ -29,6 +29,8 @@
 // @match        https://hdf.world/*
 // @match        https://kp.m-team.cc/detail/*
 // @match        https://kp.m-team.cc/upload*
+// @match        https://next.m-team.cc/upload*
+// @match        https://next.m-team.cc/detail*
 // @match        https://blutopia.cc/torrents/create*
 // @match        https://secret-cinema.pw/torrents.php?id=*
 // @match        https://filelist.io/*
@@ -10661,39 +10663,16 @@ function auto_feed() {
         }
 
         if (origin_site == 'MTeam') {
-            // 老界面
-            if (!site_url.match(/next.m-team/)) {
-                var o_table = $('div.ant-descriptions-view').find('table')[0];
-                var o_insert_row = o_table.insertRow(4);
-                var d_table = o_table.cloneNode(true);
-                $(d_table).find('div[class="flex justify-between mb-3"]').remove();
-                $(d_table).find('div.ant-image-mask').remove();
-                for (var i = 0; i < d_table.rows.length; i++) {
-                    var row = d_table.rows[i];
-                    for (var j = 0; j < row.cells.length; j++) {
-                    var cell = row.cells[j];
-                    if (cell.tagName === "TH") {
-                        var newCell = document.createElement("td");
-                        newCell.innerHTML = cell.innerHTML;
-                        row.replaceChild(newCell, cell);
-                    }
-                    }
-                }
-                tbody = d_table;
-                raw_info.name = $('h2').find('span:first').text();
-                raw_info.torrent_url = site_url;
-            } else {
-                $('div[class="ant-descriptions-view"]').parent().parent().parent().parent().before(`
-                    <div style="padding-right:55px">
-                        <table id="mytable">
-                        </table>
-                    </div>
-                `);
-                tbody = $('#mytable')[0];
-                insert_row = tbody.insertRow(0);
-                douban_box = tbody.insertRow(0);
-                raw_info.torrent_url = site_url;
-            }
+            $('div[class="ant-descriptions-view"]').parent().parent().parent().parent().before(`
+                <div style="padding-right:55px">
+                    <table id="mytable">
+                    </table>
+                </div>
+            `);
+            tbody = $('#mytable')[0];
+            insert_row = tbody.insertRow(0);
+            douban_box = tbody.insertRow(0);
+            raw_info.torrent_url = site_url;
         }
 
         //-------------------------------------根据table获取其他信息——包含插入节点（混合）-------------------------------------------
@@ -11214,9 +11193,6 @@ function auto_feed() {
         }
 
         if (origin_site == 'MTeam') {
-            if (!site_url.match(/next.m-team/)) {
-                insert_row = o_insert_row;
-            }
             var torrent_id = site_url.match(/detail\/(\d+)/)[1];
             function build_fetch(api) {
                 new_fetch = fetch(`https://api.m-team.io/${api}`, {
@@ -29205,15 +29181,7 @@ if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/in
 
         }
     });
-} else if (origin_site == 'MTeam' && site_url.match(/^https?:\/\/kp.m-team.cc\/detail\/\d+/)) {
-    var executed = false;
-    mutation_observer(document, function() {
-        if ($('h2').length  && !executed) {
-            setTimeout(auto_feed, sleep_time);
-            executed = true;
-        }
-    });
-} else if (origin_site == 'MTeam' && site_url.match(/^https?:\/\/next.m-team.cc\/detail\/\d+/)) {
+} else if (origin_site == 'MTeam') {
     var executed = false;
     mutation_observer(document, function() {
         if ($('div[class="ant-descriptions-view"]').length  && !executed) {
