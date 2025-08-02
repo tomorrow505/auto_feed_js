@@ -29181,7 +29181,7 @@ if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/in
 
         }
     });
-} else if (origin_site == 'MTeam') {
+} else if (origin_site == 'MTeam' && site_url.match(/^https:\/\/(kp|next).m-team.cc\/detail.*/)) {
     var executed = false;
     mutation_observer(document, function() {
         if ($('div[class="ant-descriptions-view"]').length  && !executed) {
