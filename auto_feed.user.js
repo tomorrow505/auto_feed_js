@@ -8562,6 +8562,18 @@ if (site_url.match(/^https:\/\/www.imdb.com\/title\/tt\d+/) && if_imdb_jump) {
     return;
 }
 
+if (/^https:\/\/www\.themoviedb\.org\/(movie|tv)\/\d+(-[a-z0-9-]+)?$/.test(site_url)) {
+    let container = $('.panel').first();
+    if (container.length) {
+        let rawName = $('h2.title').text() || document.title || '';
+        // 只取电影/剧集名，去除年份和后缀
+        let search_name = rawName.replace(/\s*\(\d{4}\).*/, '').trim();
+
+        const imdbSearchLink = `<a href="https://www.imdb.com/find?q=${encodeURIComponent(search_name)}" target="_blank" style="color:red;">在 IMDb 搜索</a>`;
+        container.append(`<div class="search_urls" style="margin-top:10px;">${imdbSearchLink}</div>`);
+    }
+}
+
 if (site_url.match(/^https:\/\/(music|book).douban.com\/subject\/\d+/)) {
     var source_type = '音乐';
     if (site_url.match(/book/)) {
