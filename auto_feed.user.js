@@ -8569,8 +8569,12 @@ if (/^https:\/\/www\.themoviedb\.org\/(movie|tv)\/\d+(-[a-z0-9-]+)?$/.test(site_
         // 只取电影/剧集名，去除年份和后缀
         let search_name = rawName.replace(/\s*\(\d{4}\).*/, '').trim();
 
-        const imdbSearchLink = `<a href="https://www.imdb.com/find?q=${encodeURIComponent(search_name)}" target="_blank" style="color:red;">在 IMDb 搜索</a>`;
-        container.append(`<div class="search_urls" style="margin-top:10px;">${imdbSearchLink}</div>`);
+        const links = `
+  <a href="https://www.imdb.com/find?q=${encodeURIComponent(search_name)}" target="_blank" style="color:red;">在 IMDb 搜索</a> |
+  <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(search_name + ' trailer')}" target="_blank" style="color:red;">YouTube 预告片搜索</a>
+`;
+        container.append(`<div class="search_urls" style="margin-top:10px;">${links}</div>`);
+
     }
 }
 
