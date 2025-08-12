@@ -26,6 +26,8 @@
 // @match        https://speedapp.io/browse/*
 // @match        https://torrent.desi/torrents*
 // @match        https://www.imdb.com/title/tt*
+// @match        https://www.themoviedb.org/movie/*
+// @match        https://www.themoviedb.org/tv/*
 // @match        https://hdf.world/*
 // @match        https://kp.m-team.cc/detail/*
 // @match        https://kp.m-team.cc/upload*
@@ -1408,6 +1410,8 @@ const o_site_info = {
     'SpeedApp': 'https://speedapp.io/',
     'MTeam': used_site_info.MTeam.url,
     'ReelFliX': 'https://reelflix.xyz/',
+    'CBR': 'https://capybarabr.com/',
+    'LST': 'https://lst.gg/',
     'HHClub': 'https://hhanclub.top/',
 };
 
