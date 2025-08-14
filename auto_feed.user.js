@@ -98,7 +98,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.9.5
+// @version      2.0.9.6
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1823,6 +1823,9 @@ function find_origin_site(url){
         if (url.match(reg)){
             return key;
         }
+    }
+    if (url.match(/^https:\/\/.{0,4}?chddiy.xyz\//) || url.match(/^https:\/\/ptchdbits.co\//)) {
+        return 'CHDBits';
     }
     return 'other';
 }
@@ -3668,7 +3671,7 @@ function init_remote_server_button() {
         }
 
         /* 通用按钮样式 */
-        .btn {
+        .qb-btn {
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -3875,8 +3878,8 @@ function init_remote_server_button() {
                     <span class="dialog-message">请谨慎选择，如果因为跳检造成做假种或者下载量增加后果自负！！</span>
                 </div>
                 <div class="dialog-footer">
-                    <input type="button" class="btn" id="confirm" value="跳过检验" />
-                    <input type="button" class="btn ml50" id="cancel" value="直接下载" />
+                    <input type="button" class="qb-btn" id="confirm" value="跳过检验" />
+                    <input type="button" class="qb-btn ml50" id="cancel" value="直接下载" />
                 </div>
             </div>
         </div>
@@ -11094,10 +11097,6 @@ function auto_feed() {
                 }
                 raw_info.torrentName = $('#bookmark0').parent().find('a:first').text();
             }
-
-            if (tds[i].textContent == '簡介' && origin_site == 'MTeam') {
-                raw_info.descr = walkDOM(tds[i+1]);
-            }
         }
 
         if (origin_site == 'U2'){
@@ -11193,6 +11192,8 @@ function auto_feed() {
         }
 
         if (origin_site == 'MTeam') {
+            raw_info.descr = walkDOM($('div.markdown-body')[0])
+            raw_info.descr = raw_info.descr.replace(/預覽/g, '');
             var torrent_id = site_url.match(/detail\/(\d+)/)[1];
             function build_fetch(api) {
                 new_fetch = fetch(`https://api.m-team.io/${api}`, {
@@ -11255,8 +11256,10 @@ function auto_feed() {
                         var pictures = raw_info.descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?\n?/g);
                         pictures.forEach(item=>{
                             if (raw_info.descr.indexOf(item) > 300 || (intro > -1 && raw_info.descr.indexOf(item) > intro)) {
-                                raw_info.descr = raw_info.descr.replace(item, '');
-                                picture_info += item + '\n';
+                                if (!item.match(/doubanio.com/)) {
+                                    raw_info.descr = raw_info.descr.replace(item, '');
+                                    picture_info += item + '\n';
+                                }
                             }
                         });
                         raw_info.descr = raw_info.descr.trim() + `\n  \n[quote]\n${mediainfo.trim()}\n[/quote]\n  \n` + picture_info;
@@ -11265,6 +11268,7 @@ function auto_feed() {
                     }
                 }
                 raw_info.descr = raw_info.descr.replace(/https:\/\/kp.m-team.cc.*?url=/ig, '');
+                raw_info.descr = raw_info.descr.replace(/\n+/g, '\n');
                 raw_info.descr = raw_info.descr.replace(/^\[quote\]\[b\]\[color=blue\]转自.*?，感谢原制作者发布。\[\/color\]\[\/b\]\[\/quote\]/i, '');
                 raw_info.descr = add_thanks(raw_info.descr);
                 rebuild_href(raw_info);
