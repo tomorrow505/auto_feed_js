@@ -98,7 +98,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.9.6
+// @version      2.0.9.7
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -10666,7 +10666,7 @@ function auto_feed() {
         }
 
         if (origin_site == 'MTeam') {
-            $('div[class="ant-descriptions-view"]').parent().parent().parent().parent().before(`
+            $('label:contains(字幕)').parent().parent().before(`
                 <div style="padding-right:55px">
                     <table id="mytable">
                     </table>
@@ -29188,7 +29188,7 @@ if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/in
 } else if (origin_site == 'MTeam' && site_url.match(/^https:\/\/(kp|next).m-team.cc\/detail.*/)) {
     var executed = false;
     mutation_observer(document, function() {
-        if ($('div[class="ant-descriptions-view"]').length  && !executed) {
+        if ($('label:contains(字幕)').length  && !executed) {
             setTimeout(auto_feed, sleep_time);
             executed = true;
         }
