@@ -14608,7 +14608,7 @@ function auto_feed() {
                     label = /7\.1/; label_str = '7.1';
                 }
                 if (!name.match(label)) {
-                    name = name.replace(/(DDP|AAC|FLAC|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|DTS|AC3)/i, `$1 ${label_str}`);
+                    name = name.replace(/(DDP|DD\+|AAC|FLAC|LPCM|TrueHD|DTS-HD.MA|DTS:X|DTS-HD.?HR|DTS|AC3)/i, `$1 ${label_str}`);
                 }
                 return name;
             }
@@ -14648,7 +14648,7 @@ function auto_feed() {
                     if (audio_number > 1) {
                         var audio_str = `${audio_number}Audio`;
                         if (!raw_info.name.includes(audio_str)) {
-                            raw_info.name = raw_info.name.replace(/(DDP|AAC|FLAC|LPCM|TrueHD|DTS-HD.?MA|DTS:X|DTS-HD.?HR|DTS|DD) ?(\d\.\d)?/i, `$1 $2 ${audio_str}`);
+                            raw_info.name = raw_info.name.replace(/(DDP|DD\+|AAC|FLAC|LPCM|TrueHD|DTS-HD.?MA|DTS:X|DTS-HD.?HR|DTS|DD) ?(\d\.\d)?/i, `$1 $2 ${audio_str}`);
                         }
                     }
                 } catch(err) {}
@@ -16187,6 +16187,7 @@ function auto_feed() {
                 setValue(document.getElementById('douban'), raw_info.dburl);
 
                 setTimeout(function() {
+                    setValue(document.getElementById('name'), raw_info.name);
                     if (labels.gy || labels.yy){ document.getElementsByClassName('ant-checkbox-input')[1].click(); }
                     if (labels.zz){
                         var node_class = document.getElementsByClassName('ant-checkbox-input')[0].parentNode.classList;
