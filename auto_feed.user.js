@@ -14631,6 +14631,7 @@ function auto_feed() {
             }
             if (forward_site == 'MTeam') {
                 raw_info.name = raw_info.name.replace(/AC3/, 'DD');
+                raw_info.name = raw_info.name.replace(/DD\+/, 'DDP');
                 try{
                     var audio_number = 1;
                     if (raw_info.descr.match(/DISC INFO:/)) {
@@ -14648,7 +14649,7 @@ function auto_feed() {
                     if (audio_number > 1) {
                         var audio_str = `${audio_number}Audio`;
                         if (!raw_info.name.includes(audio_str)) {
-                            raw_info.name = raw_info.name.replace(/(DDP|DD\+|AAC|FLAC|LPCM|TrueHD|DTS-HD.?MA|DTS:X|DTS-HD.?HR|DTS|DD) ?(\d\.\d)?/i, `$1 $2 ${audio_str}`);
+                            raw_info.name = raw_info.name.replace(/(DDP|AAC|FLAC|LPCM|TrueHD|DTS-HD.?MA|DTS:X|DTS-HD.?HR|DTS|DD) ?(\d\.\d)?/i, `$1 $2 ${audio_str}`);
                         }
                     }
                 } catch(err) {}
