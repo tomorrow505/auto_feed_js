@@ -2173,7 +2173,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/hdcity.city\/upload/)){
         return 2;
     }
-    if (site_url.match(/^https:\/\/(www.)?(darkland.top|eiga.moi|hd-olimpo.club|fearnopeer.com|onlyencodes.cc|blutopia.cc|aither.cc|torrent.desi|monikadesign.uk|hawke.uno|cinematik.net|reelflix.xyz|capybarabr.com|lst.gg)\/torrents\/\d+$/)){
+    if (site_url.match(/^https:\/\/(www.)?(darkland.top|eiga.moi|hd-olimpo.club|fearnopeer.com|onlyencodes.cc|blutopia.cc|aither.cc|torrent.desi|monikadesign.uk|hawke.uno|cinematik.net|reelflix.xyz|capybarabr.com|lst.gg|upload.cx|yu-scene.net)\/torrents\/\d+$/)){
         return 1;
     }
     if (site_url.match(/^https:\/\/(www.)?torrentseeds.org\/torrents\/\d+/)){
@@ -3425,7 +3425,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
             textarea.style.width = '530px';
         }
     } else {
-        if (['BHD', 'BLU', 'Tik', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX', 'IN', 'CBR', 'ULCX', 'YS' 'LST'].indexOf(site) > -1){
+        if (['BHD', 'BLU', 'Tik', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX', 'IN', 'CBR', 'ULCX', 'YS', 'LST'].indexOf(site) > -1){
             $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"border": "1px solid #0D8ED9", "color": "#FFFFFF", "backgroundColor": "#292929"});
             if (site == 'HONE') {
                 $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"width": "80px"})
@@ -9769,7 +9769,7 @@ function auto_feed() {
             }
         }
 
-        if (origin_site == 'FNP' || origin_site == 'OnlyEncodes' || origin_site == 'DarkLand' || origin_site == 'ReelFliX' || origin_site == 'CBR' || origin_site == 'LST' || origin_site == 'HONE' || origin_site == 'BLU') {
+        if (origin_site == 'FNP' || origin_site == 'OnlyEncodes' || origin_site == 'DarkLand' || origin_site == 'ReelFliX' || origin_site == 'CBR' || origin_site == 'LST' || origin_site == 'HONE' || origin_site == 'BLU' || origin_site == 'ULCX' || origin_site == 'YS' || origin_site == 'MTeam') {
             raw_info.url = match_link('imdb', $('section.meta').html());
             raw_info.type = $('.torrent__tags').text().get_type();
             raw_info.name = $('h1.torrent__name').text().trim().match(/([\u4e00-\u9fa5]* )?(.*)/)[2];
@@ -9799,7 +9799,7 @@ function auto_feed() {
             });
             raw_info.descr = raw_info.descr.replace(/https:\/\/wsrv.nl\/\?n=-1&url=/g, '');
             raw_info.torrent_url = $('a[href*="download/"]').attr('href');
-            if (raw_info.url && all_sites_show_douban && (origin_site == 'FNP' || origin_site == 'OnlyEncodes' || origin_site == 'ReelFliX' || origin_site == 'CBR' || origin_site == 'LST' || origin_site == 'DarkLand')) {
+            if (raw_info.url && all_sites_show_douban && (origin_site == 'FNP' || origin_site == 'OnlyEncodes' || origin_site == 'ReelFliX' || origin_site == 'CBR' || origin_site == 'LST' || origin_site == 'DarkLand' || origin_site == 'ULCX' || origin_site == 'YS')) {
                 getData(raw_info.url, function(data){
                     console.log(data);
                     if (data.data) {
@@ -16055,7 +16055,7 @@ function auto_feed() {
             $('#anonymous').prop('checked', if_uplver);
         } else if (forward_site == 'HDSpace') {
             $('input[name="anonymous"]:eq(1)').prop('checked', if_uplver);
-        } else if (forward_site == 'FNP' || forward_site == 'OnlyEncodes' || forward_site == 'ReelFliX' || forward_site == 'CBR' || forward_site == 'LST' || forward_site == 'MTeam' || forward_site == 'MovieFans' || forward_site == 'DMLSD' || forward_site == 'Skyey' || forward_site == 'DingDian' || forward_site == 'FTHD') {
+        } else if (forward_site == 'FNP' || forward_site == 'OnlyEncodes' || forward_site == 'ReelFliX' || forward_site == 'CBR' || forward_site == 'LST' || forward_site == 'ULCX' || forward_site == 'YS' || forward_site == 'MTeam' || forward_site == 'MovieFans' || forward_site == 'DMLSD' || forward_site == 'Skyey' || forward_site == 'DingDian' || forward_site == 'FTHD') {
             $('#anon').prop('checked', if_uplver);
         } else if (['BLU', 'Tik', 'Aither', 'BHD', 'iTS', 'PTP', 'ACM', 'Monika', 'DarkLand'].indexOf(forward_site) < 0){
             setTimeout(()=>{
