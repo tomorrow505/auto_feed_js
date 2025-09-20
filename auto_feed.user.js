@@ -98,7 +98,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.9.7
+// @version      2.0.9.8
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -302,8 +302,8 @@ if (site_url.match(/^https?:\/\/.*tieba.baidu.com.*/)) {
         $('div[id*="mediago-tb"]').wait(function(){
             $('div[id*="mediago-tb"]').hide();
         });
-        $('div[id*="ylh-ad-container"]').wait(function(){
-            $('div[id*="ylh-ad-container"]').hide();
+        $('div[id*="ad-container"]').wait(function(){
+            $('div[id*="ad-container"]').hide();
         });
     });
     return;
@@ -27670,7 +27670,7 @@ function auto_feed() {
             check_team(raw_info, 'team_sel[4]');
         }
 
-            else if (forward_site == 'YHPP') {
+        else if (forward_site == 'YHPP') {
             //类型
             var browsecat = $('#browsecat')
             var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, '体育': 407, 'MV': 406, '游戏': 409, '学习': 409, '软件': 409, '短剧': 402, '': 409};
@@ -27795,7 +27795,7 @@ function auto_feed() {
             check_team(raw_info, 'team_sel[4]');
         }
 
-            else if (forward_site == '好学') {
+        else if (forward_site == '好学') {
             //类型
             var browsecat = $('#browsecat')
             var type_dict = {'电影': 0, '剧集': 0, '动漫': 0, '综艺': 0, '音乐': 0, '纪录': 406, '体育': 0, 'MV': 0, '游戏': 0, '学习': 406, '软件': 0, '短剧': 0, '': 0};
