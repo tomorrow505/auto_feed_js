@@ -98,7 +98,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.0.9.8
+// @version      2.0.9.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -2779,7 +2779,7 @@ function check_descr(descr){
     return flag;
 }
 
-function get_full_size_picture_urls(raw_info, imgs, container, need_img_label, callback) {
+function get_full_size_picture_urls(raw_info, imgs, container, need_img_label, callback, remove_img) {
     var img_urls = null;
     if (raw_info !== null) {
         img_urls = raw_info.descr.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/ig);
@@ -2795,6 +2795,7 @@ function get_full_size_picture_urls(raw_info, imgs, container, need_img_label, c
         }
         for (i=0; i<img_urls.length; i++){
             if (raw_info && raw_info.descr.indexOf(img_urls[i]) < 80 || (_index > 0 && raw_info.descr.indexOf(img_urls[i]) < _index)){
+                img_urls[i] = '';
                 continue;
             }
             if (raw_info) {
@@ -2824,6 +2825,9 @@ function get_full_size_picture_urls(raw_info, imgs, container, need_img_label, c
         container.val(img_info.trim());
         if (callback) {
             callback(img_info);
+        }
+        if (remove_img) {
+            remove_img(img_urls);
         }
     } catch(err) {}
 }
@@ -12010,9 +12014,8 @@ function auto_feed() {
         }
 
         if (origin_site == 'BHD'){
-
             var mediainfo_box = $('div[id*="stats-full"]')[0];
-            var code_box = mediainfo_box.getElementsByTagName('code')[0];
+            var code_box = mediainfo_box.getElementsByClassName('decoda-code')[0];
             var mediainfo = code_box.textContent.trim();
 
             var picture_info = document.getElementsByClassName('decoda-image');
@@ -14880,7 +14883,7 @@ function auto_feed() {
             }
         }
 
-        if ($('textarea[name="technical_info"]').length || forward_site == '影' || forward_site == 'LemonHD') {
+        if ($('textarea[name="technical_info"]').length || forward_site == '影' || forward_site == 'LemonHD' || forward_site == 'HDDolby') {
             for (i=0; i<skip_img.length; i++) {
                 raw_info.descr = raw_info.descr.replace(skip_img[i], '');
             }
@@ -14888,6 +14891,8 @@ function auto_feed() {
             var container = $('textarea[name="technical_info"]');
             if (forward_site == 'LemonHD') {
                 container = $('textarea[name="mediainfo"]');
+            } else if (forward_site == 'HDDolby') {
+                container = $('textarea[name="media_info"]');
             } else if (forward_site == '影' || forward_site == 'PTLGS') {
                 var poster = raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i);
                 var _index = raw_info.descr.indexOf("◎");
@@ -14930,9 +14935,17 @@ function auto_feed() {
                     });
                 }
                 if ($('textarea[name="screenshots"]').length) {
-                    get_full_size_picture_urls(null, infos.pic_info, $('#not'), false, function(img_info) {
-                        $('textarea[name="screenshots"]').val(img_info.trim());
-                    });
+                    if (forward_site == 'HDDolby') {
+                        get_full_size_picture_urls(null, infos.pic_info, $('#not'), false, function(img_info) {
+                            $('textarea[name="screenshots"]').val(img_info.trim());
+                        }, function(data) {
+                            for (i=0; i<data.length;i++) {
+                                if (data[i]) {
+                                    raw_info.descr = raw_info.descr.replace(data[i], '');
+                                }
+                            }
+                        });
+                    }
                 }
                 if ($('textarea[name="screen"]').length) {
                     get_full_size_picture_urls(null, infos.pic_info, $('#not'), false, function(img_info) {
