@@ -4213,9 +4213,11 @@ function getJson(url, meta, callback) {
         method: 'GET',
         url: url,
         onload: function (responseDetail) {
-            if (responseDetail.status === 200) {
+            if (responseDetail.status === 200 && !responseDetail.responseText.includes("<!DOCTYPE html>")) {
                 let response = JSON.parse(responseDetail.responseText);
                 callback(response, responseDetail, meta);
+            } else {
+                callback({}, responseDetail, meta);
             }
         }
     });
@@ -7847,9 +7849,13 @@ async function getAKAtitle(url) {
     return new Promise(resolve => {
         var search_url = 'https://passthepopcorn.me/ajax.php?' + encodeURI(`action=torrent_info&imdb=${url}&fast=1`)
         getJson(search_url, null, function(data){
-            if (data.length) {
-                data = data[0];
-                resolve(data.title);
+            if (!Object.keys(data).length) {
+                resolve('');
+            } else {
+                if (data.length) {
+                    data = data[0];
+                    resolve(data.title);
+                }
             }
         })
     });
