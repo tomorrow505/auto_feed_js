@@ -2581,7 +2581,7 @@ String.prototype.get_label = function(){
     }
     if (name.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i) && my_string.match(/mpls/i)){
         labels.diy = true;
-    } else if (my_string.match(/DISC INFO|mpls/)) {
+    } else if (my_string.match(/DISC INFO/) || my_string.match(/mpls/i)) {
         labels.yp = true;
     }
     if (my_string.match(/HDR10\+/)) {
@@ -15528,9 +15528,7 @@ function auto_feed() {
                     }
                     if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (raw_info.standard_sel == '4K') { check_label(document.getElementsByName('tags[4][]'), '11'); }
-                    if (labels.yp) {
-                        check_label(document.getElementsByName('tags[4][]'), '9');
-                    }
+                    if (labels.yp) { check_label(document.getElementsByName('tags[4][]'), '9'); }
                     break;
                 case 'AGSV':
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
@@ -15784,9 +15782,7 @@ function auto_feed() {
                 case '我好闲':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
-                    if (labels.diy){
-                        check_label(document.getElementsByName('tags[4][]'), '4');
-                    }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (raw_info.standard_sel == '4K') {
                         if (labels.hdr10) {
                             check_label(document.getElementsByName('tags[4][]'), '9');
@@ -15799,8 +15795,7 @@ function auto_feed() {
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '9');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '10'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '11'); }
-                    if (raw_info.name.match(/HLG/)) {
-                        check_label(document.getElementsByName('tags[4][]'), '12');}
+                    if (raw_info.name.match(/HLG/)) { check_label(document.getElementsByName('tags[4][]'), '12');}
                     break;
                 case '下水道':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
@@ -15813,7 +15808,8 @@ function auto_feed() {
                     }
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '12'); }
                     if (raw_info.name.match(/S\d{1,3}.?E\d{1,5}/) || raw_info.small_descr.match(/第\d{1,5}(.\d{1,5})?集/)){
-                        check_label(document.getElementsByName('tags[4][]'), '8'); }
+                        check_label(document.getElementsByName('tags[4][]'), '8');
+                    }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '14'); }
@@ -15826,8 +15822,6 @@ function auto_feed() {
                     } else if (labels.yp) {
                         check_label(document.getElementsByName('tags[4][]'), '9');
                     }
-                    if (raw_info.name.match(/S\d{1,3}.?E\d{1,5}/) || raw_info.small_descr.match(/第\d{1,5}(.\d{1,5})?集/)){
-                        check_label(document.getElementsByName('tags[4][]'), '0'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
                     if (raw_info.standard_sel.match('4K')){ check_label(document.getElementsByName('tags[4][]'), '8'); }
@@ -15895,24 +15889,13 @@ function auto_feed() {
                     break;
                 case 'MARCH':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
-                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '0'); }
-                    if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '0'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
-                    if (labels.diy){
-                        check_label(document.getElementsByName('tags[4][]'), '4');
-                    } else if (labels.yp) {
-                        check_label(document.getElementsByName('tags[4][]'), '0');
-                    }
-                    if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '0'); }
-                    if (raw_info.name.match(/S\d{1,3}.?E\d{1,5}/) || raw_info.small_descr.match(/第\d{1,5}(.\d{1,5})?集/)){
-                        check_label(document.getElementsByName('tags[4][]'), '0'); }
+                    if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
-                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '0'); }
                     break;
                 case 'NovaHD':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
-                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '0'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '11'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
@@ -15949,8 +15932,7 @@ function auto_feed() {
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '13'); }
                     if (raw_info.name.match(/S\d{1,3}.?E\d{1,5}/) || raw_info.small_descr.match(/第\d{1,5}(.\d{1,5})?集/)){
                         check_label(document.getElementsByName('tags[4][]'), '14'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
-                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '9'); }
                     break;
                 case 'ALing':
@@ -15969,8 +15951,7 @@ function auto_feed() {
                         check_label(document.getElementsByName('tags[4][]'), '4');
                     }
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '8'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '7');}
-                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7');}
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '10'); }
                     if (raw_info.small_descr.match(/特效字幕/)) {
                         check_label(document.getElementsByName('tags[4][]'), '11');
@@ -15984,7 +15965,6 @@ function auto_feed() {
                     break;
                 case '藏宝阁':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '8'); }
-                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '0'); }
                     if (labels.yz){ check_label(document.getElementsByName('tags[4][]'), '9'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '7'); }
                     if (labels.diy){
@@ -15995,8 +15975,7 @@ function auto_feed() {
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '3'); }
                     if (raw_info.name.match(/S\d{1,3}.?E\d{1,5}/) || raw_info.small_descr.match(/第\d{1,5}(.\d{1,5})?集/)){
                         check_label(document.getElementsByName('tags[4][]'), '4'); }
-                    if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '13');}
-                    if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '13'); }
+                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '13');}
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '14'); }
                     break;
                 case '未来幻境':
@@ -16013,28 +15992,19 @@ function auto_feed() {
                     break;
                 case 'SBPT':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
-                    if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '0'); }
                     if (labels.diy){
                     	check_label(document.getElementsByName('tags[4][]'), '4');
                     } else if (labels.yp) {
                     	check_label(document.getElementsByName('tags[4][]'), '2');
                     }
-                    if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '0');}
-                    if (labels.db) {check_label(document.getElementsByName('tags[4][]'), '0');}
                     if (labels.complete) {check_label(document.getElementsByName('tags[4][]'), '15');}
-                    if (raw_info.name.match(/DV/)) { check_label(document.getElementsByName('tags[4][]'), '0'); }
                     if (raw_info.name.match(/(\.| )3D(\.| )/)) { check_label(document.getElementsByName('tags[4][]'), '7'); }
-                    if (raw_info.descr.match(/Dolby.*?Atmos/) || $('textarea[name="technical_info"]').val().match(/Dolby.*?Atmos/)) {
-                        check_label(document.getElementsByName('tags[4][]'), '0');
-                    }
                     break;
                 case '慕雪阁':
                     if (labels.complete){ check_label(document.getElementsByName('tags[4][]'), '26'); }
                     if (raw_info.name.match(/S\d{1,3}.?E\d{1,5}/) || raw_info.small_descr.match(/第\d{1,5}(.\d{1,5})?集/)){
                         check_label(document.getElementsByName('tags[4][]'), '12'); }
-                    if (labels.diy){
-                        check_label(document.getElementsByName('tags[4][]'), '0');
-                    } else if (labels.yp) {
+                    if (labels.yp) {
                         check_label(document.getElementsByName('tags[4][]'), '27');
                     }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '25'); }
@@ -16043,7 +16013,6 @@ function auto_feed() {
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
-                    if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '0'); }
                     if (raw_info.standard_sel == '4K') { check_label(document.getElementsByName('tags[4][]'), '15'); }
                     if (raw_info.standard_sel == '8K') { check_label(document.getElementsByName('tags[4][]'), '16'); }
                     if (labels.hdr10 || labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '7'); }
@@ -16637,7 +16606,6 @@ function auto_feed() {
         else if (forward_site == 'ZHUQUE') {
             $('#form_item_subtitle').wait(function(){
                 var i_evt = new Event("input");
-                console.log(raw_info);
 
                 // 标题
                 $('#form_item_title').val(raw_info.name);
