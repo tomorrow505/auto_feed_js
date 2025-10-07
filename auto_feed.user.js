@@ -2832,6 +2832,16 @@ function get_full_size_picture_urls(raw_info, imgs, container, need_img_label, c
     } catch(err) {}
 }
 
+if (site_url.match(/https:\/\/(springsunday.net|www.hddolby.com|ptlgs.org)\/upload.php/)) {
+    $('#url_vimages').after(`<a href="" id="get_full_size" style="color: red" title="点击获取原图,目前支持imgbox，pixhost，pter，ttg，瓷器，img4k">获取原图</a>`);
+    $('textarea[name="screenshots"]').after(`<br><a href="" id="get_full_size" style="color: red" title="点击获取原图,目前支持imgbox，pixhost，pter，ttg，瓷器，img4k">获取原图</a>`);
+    $('#get_full_size').click(function(e) {
+        e.preventDefault();
+        get_full_size_picture_urls(null, $('#url_vimages').val(), $('#url_vimages'), false);
+        get_full_size_picture_urls(null, $('textarea[name="screenshots"]').val(), $('textarea[name="screenshots"]'), false);
+    });
+}
+
 function get_bluray_name_from_descr(descr, name) {
     var temp_title="";
     //分辨率
