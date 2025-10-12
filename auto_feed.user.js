@@ -14623,6 +14623,7 @@ function auto_feed() {
                 fillForm(data);
             }
         }
+        raw_info.name = raw_info.name.replace('待定', '').trim();
 
         var allinput = document.getElementsByTagName("input");
         if (forward_site == 'BLU' || forward_site == 'Audiences' || forward_site == 'Tik' || forward_site == 'Aither') {
@@ -17197,17 +17198,12 @@ function auto_feed() {
                 }
             } else {
                 switch (raw_info.audiocodec_sel){
-                    case 'DTS-HD': case 'DTS-HDMA': case 'DTS-HDHR':
-                        if (raw_info.name.match(/(X|MA).?7[\. ]1/i)) {
-                            audiocodec_box.val(25);
-                        } else {
-                            audiocodec_box.val(19);
-                        }
-                        break;
+                    case 'DTS-HDMA:X 7.1': case 'DTS-X': audiocodec_box.val(25);break;
+                    case 'DTS-HD': case 'DTS-HDMA':audiocodec_box.val(19);break;
                     case 'TrueHD': audiocodec_box.val(20); break;
                     case 'Atmos': audiocodec_box.val(26); break;
                     case 'LPCM': audiocodec_box.val(21); break;
-                    case 'DTS': audiocodec_box.val(3); break;
+                    case 'DTS': case 'DTS-HDHR': audiocodec_box.val(3); break;
                     case 'AC3': audiocodec_box.val(18); break;
                     case 'AAC': audiocodec_box.val(6); break;
                     case 'Flac': audiocodec_box.val(1); break;
