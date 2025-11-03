@@ -2,10 +2,16 @@
 【油猴脚本】PT站一键转载脚本，支持国内外100多个主流站点。不定时修复bug或者更新站点提交到GitHub，一般半个月（月中和月末）统一推送到greasyfork提供安装。
 
 ### 📖使用介绍
-脚本使用教程：[详见项目wiki](https://github.com/tomorrow505/auto_feed_js/wiki)
+脚本使用教程：详见项目 [wiki（GitHub）](https://github.com/tomorrow505/auto_feed_js/wiki)| [wiki（Gitee）](https://gitee.com/tomorrow505/auto_feed_js/wikis/Home)
 
-油猴安装地址：https://greasyfork.org/zh-CN/scripts/424132-auto-feed
+油猴安装地址：https://greasyfork.org/zh-CN/scripts/424132-auto-feed 或 https://gitee.com/tomorrow505/auto_feed_js/raw/master/auto_feed.user.js
 
+如果无法翻墙，请使用Gitee的地址进行安装，并在脚本头部（源代码1~110行左右）添加以下4个库：<br>
+// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/jquery.js <br>
+// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/jquery_ui.js <br>
+// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/imgCheckbox.js <br>
+// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/music-helper.js <br>
+ 
 ### 👀项目特点
 + 支持一键转载填充相应内容
 + 支持外站根据imdb获取豆瓣详情
@@ -20,6 +26,7 @@
 + qq非官方链接自动跳转
 + 支持一键签到适配站点
 + PT吧广告自动隐藏
++ qb远程推送下载
 + ……
 
 ### 📢关于更新
@@ -45,7 +52,7 @@
 
 |                   Alipay                    |                     WeChat                     |
 | :-----------------------------------------: | :--------------------------------------------: |
-| <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/ali_pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://github.com/tomorrow505/tomorrow505.github.io/blob/master/img/wechat_pay.png" width = "160" height = "160" alt="微信" align=center /> |
+| <img src="https://i.ibb.co/FkFXNSmx/ali-pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://i.ibb.co/Kz6GkrcN/wechat-pay.png" width = "160" height = "160" alt="微信" align=center /> |
 
  ## 💻贡献者
 
