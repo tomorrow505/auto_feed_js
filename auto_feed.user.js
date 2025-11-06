@@ -1984,21 +1984,23 @@ function walkDOM(n) {
             } else {
                 raw_info.descr = raw_info.descr + '[img]' + n.src + '[/img]';
             }
-        } else if (n.nodeName=='DIV' && site_url.match(/pthome|audiences/i) && n.className == 'codemain') {
+        } else if (n.nodeName=='DIV' && site_url.match(/pthome|audiences|tjupt/i) && n.className == 'codemain') {
             if (raw_info.name.match(/-ADE|-ADWeb/) && raw_info.descr.match(/General/)) {
                 n.innerHTML = '';
             } else if (n.parentNode.className == 'hide' || site_url.match(/pthome/i)) {
                 if (!n.innerHTML.match(/^\[quote\]/)) {
                     n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
                 }
+            } else if (site_url.match(/tjupt/i)) {
+                    n.innerHTML = '[quote]' + n.innerHTML.trim() + '[/quote]';
             } else {
                 n.innerHTML = '';
             }
         } else if (n.nodeName == 'TD' && n.innerHTML.match(/此处包含部分隐藏内容/)) {
             n.innerHTML = '';
-        } else if (n.nodeName == 'TD' && site_url.match(/tjupt/i) && n.innerHTML.match(/General/)) {
-            n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
-        }
+        } else if (n.nodeName == 'DIV' && site_url.match(/tjupt/i) && n.id == 'formatMediainfo') {
+            n.innerHTML = '';
+        } 
         if (n.hasChildNodes()) {
             walkDOM(n.firstChild);
         } else {
@@ -13429,6 +13431,14 @@ function auto_feed() {
                     }
                     descr = document.getElementById("kdescr");
                     descr = descr.cloneNode(true);
+                    try{
+                        var codetop = descr.getElementsByClassName('codetop');
+                        Array.from(codetop).map((e, index)=>{
+                            try{descr.removeChild(e);} catch(err){e.parentNode.removeChild(e)}
+                        });
+                    }catch(err){
+                        console.log(err);
+                    }
                     raw_info.descr = '';
                     raw_info.descr = walkDOM(descr);
                     raw_info.descr = raw_info.descr.replace(/站外链接 :: /ig, '');
@@ -29692,4 +29702,5 @@ if (origin_site == 'ZHUQUE' && site_url.match(/^https:\/\/zhuque.in\/torrent\/in
     });
 } else {
     setTimeout(auto_feed, sleep_time);
+
 }
