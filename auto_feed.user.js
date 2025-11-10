@@ -8872,6 +8872,24 @@ function auto_feed() {
                 }
             }
 
+            // HDDolby 详情页：按页面结构抓取 MediaInfo 与 截图
+            if (origin_site == 'HDDolby') {
+                try {
+                    var hdd_mi = $('.mediainfo-container .mediainfo-full pre').text().trim();
+                    if (hdd_mi) {
+                        raw_info.descr += `\n  \n[quote]\n${hdd_mi}\n[/quote]\n  \n`;
+                    }
+                } catch (err) {}
+                try {
+                    $('#kscreenshots img').each(function(index, e){
+                        var src = $(e).attr('src');
+                        if (src) {
+                            raw_info.descr += `[img]${src}[/img]\n`;
+                        }
+                    });
+                } catch (err) {}
+            }
+
             if ($('.nexus-media-info-raw').length || $('#kmediainfo').length) {
                 var mediainfo = $('.nexus-media-info-raw').text() ? $('.nexus-media-info-raw').text(): $('#kmediainfo').text();
                 if ($('.spoiler-content').length) {
