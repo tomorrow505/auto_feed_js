@@ -14893,7 +14893,15 @@ function auto_feed() {
             }
         }
 
-        if ($('textarea[name="technical_info"]').length || forward_site == '影' || forward_site == 'LemonHD' || forward_site == 'HDDolby') {
+        if ($('textarea[name="technical_info"]').length || forward_site == '影' || forward_site == 'LemonHD' || forward_site == 'HDDolby' || forward_site == 'MTeam') {
+            var mediainfo_mteam = '';
+            function fill_container_or_mteam_mediainfo(v, container) {
+                if (forward_site == 'MTeam') {
+                    mediainfo_mteam = v.trim();
+                } else {
+                    container.val(v.trim());
+                }
+            }
             for (i=0; i<skip_img.length; i++) {
                 raw_info.descr = raw_info.descr.replace(skip_img[i], '');
             }
@@ -14931,20 +14939,20 @@ function auto_feed() {
                 if (raw_info.multi_mediainfo) {
                     mediainfo = raw_info.multi_mediainfo.match(/\[quote.*?\][\s\S]*?General[\s\S]*?\[\/quote\]/ig);
                     mediainfo = mediainfo.join('\n\n').replace(/\[\/?quote\]/g, '');
-                    container.val(mediainfo.trim());
+                    fill_container_or_mteam_mediainfo(mediainfo, container);
                 } else if (infos.multi_mediainfos) {
-                    container.val(infos.multi_mediainfos);
+                    fill_container_or_mteam_mediainfo(infos.multi_mediainfos, container);
                 } else if (raw_info.full_mediainfo){
-                    container.val(raw_info.full_mediainfo.trim());
+                    fill_container_or_mteam_mediainfo(raw_info.full_mediainfo, container);
                 } else {
-                    container.val(infos.mediainfo.replace(/\[\/?(size|font|color).*?\]/g, '').trim());
+                    fill_container_or_mteam_mediainfo(infos.mediainfo.replace(/\[\/?(size|font|color).*?\]/g, ''), container);
                 }
                 if ($('input[name="screenshot"]').length) {
                     get_full_size_picture_urls(null, infos.pic_info, $('#not'), false, function(img_info) {
                         $('input[name="screenshot"]').val(img_info.trim().split('\n').join(','));
                     });
                 }
-                if ($('textarea[name="screenshots"]').length || forward_site == '财神') {
+                if ($('textarea[name="screenshots"]').length || forward_site == '财神' || forward_site == 'LuckPT') {
                     if (forward_site == 'HDDolby') {
                         get_full_size_picture_urls(null, infos.pic_info, $('#not'), false, function(img_info) {
                             $('textarea[name="screenshots"]').val(img_info.trim());
@@ -14955,7 +14963,7 @@ function auto_feed() {
                                 }
                             }
                         });
-                    } else if (forward_site == '财神') {
+                    } else if (forward_site == '财神' || forward_site == 'LuckPT') {
                         get_full_size_picture_urls(null, infos.pic_info, $('#not'), true, function(img_info) {
                             raw_info.descr += img_info.trim();
                         }, function(data) {
@@ -14989,7 +14997,7 @@ function auto_feed() {
                 if (raw_info.full_mediainfo) {
                     tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}(General|Disc)[\s\S]{50,30000}?\[\/quote\]/g, '');
                 }
-                if (raw_info.origin_site == 'Audiences') {
+                if (raw_info.origin_site == 'Audiences' || raw_info.origin_site == 'HDHome') {
                     tmp_descr = tmp_descr.replace(/\[\/?font.*?\]/g, '');
                 }
                 raw_info.descr = tmp_descr;
@@ -15007,12 +15015,13 @@ function auto_feed() {
                 }
             } catch(Err) {
                 if (raw_info.full_mediainfo){
-                    container.val(raw_info.full_mediainfo);
+                    fill_container_or_mteam_mediainfo(raw_info.full_mediainfo, container);
                 } else {
-                    container.val(raw_info.descr);
+                    fill_container_or_mteam_mediainfo(raw_info.descr, container);
                 }
                 container.css({'height': '600px'});
             }
+            raw_info.descr = raw_info.descr.replace(/\n\n+/g, '\n');
         }
 
         if (forward_site == 'TTG'){
@@ -15898,6 +15907,7 @@ function auto_feed() {
                     break;
                 case 'LuckPT':
                     if (labels.gy){ check_label(document.getElementsByName('tags[4][]'), '5'); }
+                    if (labels.en){ check_label(document.getElementsByName('tags[4][]'), '22'); }
                     if (labels.yy){ check_label(document.getElementsByName('tags[4][]'), '14'); }
                     if (labels.zz){ check_label(document.getElementsByName('tags[4][]'), '6'); }
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
@@ -16335,32 +16345,7 @@ function auto_feed() {
                 }
 
                 var container = document.getElementById('mediainfo');
-                if (raw_info.full_mediainfo){
-                    setValue(container, raw_info.full_mediainfo.trim());
-                } else {
-                    var match_1 = (raw_info.descr.match(/General[\s\S]*?Video[.\n]{0,5}ID/) || raw_info.full_mediainfo) && !raw_info.descr.match(/mpls/i);
-                    var match_2 = raw_info.descr.match(/mpls/i) && raw_info.descr.match(/Disc Label/);
-                    if (match_1 || match_2) {
-                        try{
-                            var infos = get_mediainfo_picture_from_descr(raw_info.descr);
-                            try{
-                                setValue(container, infos.mediainfo.trim());
-                            } catch(Err) {
-                                setValue(container, raw_info.descr);
-                            }
-                            var tmp_descr = raw_info.descr.replace(infos.mediainfo, '');
-                            tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}\[\/quote\]/g, '').replace(/ +\n/g, '\n');
-                            if (raw_info.full_mediainfo) {
-                                tmp_descr = tmp_descr.replace(/\[quote\][\s\S]{0,80}(General|Disc)[\s\S]{50,30000}?\[\/quote\]/g, '');
-                            }
-                            if (raw_info.origin_site == 'Audiences') {
-                                tmp_descr = tmp_descr.replace(/\[\/?font.*?\]/g, '');
-                            }
-                            raw_info.descr = tmp_descr.trim().replace(/\n\n+/g, '\n\n').replace(/\]\n\n\[/g, '\]\n\[');
-                            raw_info.descr = add_thanks(raw_info.descr);
-                        } catch(Err) { console.log("mediainfo信息划分失败"); }
-                    }
-                }
+                setValue(container, mediainfo_mteam);
                 GM_setClipboard(raw_info.descr);
                 var m_css = $('#name_extra').parent().parent().parent().attr('class').match(/css-[^ ]*/)[0];
                 $('label:contains("簡介")').parent().parent().parent().after(
@@ -23622,7 +23607,7 @@ function auto_feed() {
                 var index = type_dict[raw_info.type];
                 browsecat.val(index);
             }
-
+            try {disableother('browsecat','specialcat')} catch(Err) {}
             var codec_box = $('select[name="codec_sel[4]"]');
             codec_box.val(5);
             switch (raw_info.codec_sel){
@@ -27941,6 +27926,7 @@ function auto_feed() {
                 var index = team_dict[raw_info.source_sel];
                 team_box.val(index);
             }
+            const europeanCountries = ["阿尔巴尼亚","安道尔","奥地利","白俄罗斯","比利时","波斯尼亚和黑塞哥维那","保加利亚","克罗地亚","塞浦路斯","捷克","丹麦","爱沙尼亚","芬兰","法国","德国","希腊","匈牙利","冰岛","爱尔兰","意大利","科索沃","拉脱维亚","列支敦士登","立陶宛","卢森堡","马耳他","摩尔多瓦","摩纳哥","黑山","荷兰","北马其顿","挪威","波兰","葡萄牙","罗马尼亚","俄罗斯","圣马力诺","塞尔维亚","斯洛伐克","斯洛文尼亚","西班牙","瑞典","瑞士","乌克兰","英国","梵蒂冈"];
             if (raw_info.source_sel == '欧美') {
                 var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                 if (reg_region) {
@@ -27949,8 +27935,10 @@ function auto_feed() {
                         team_box.val(9);
                     } else if (region.match('英国')) {
                         team_box.val(7);
-                    } else {
+                    } else if (europeanCountries.indexOf(region) > -1){
                         team_box.val(8);
+                    } else {
+                        team_box.val(2);
                     }
                 }
             }
