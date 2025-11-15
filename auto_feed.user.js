@@ -10699,6 +10699,10 @@ function auto_feed() {
             raw_info.torrent_url = site_url;
         }
 
+        if (origin_site == 'NexusHD') {
+            tbody = tbody.parentNode;
+        }
+
         //-------------------------------------根据table获取其他信息——包含插入节点（混合）-------------------------------------------
         var tds = tbody.getElementsByTagName("td");
         if (origin_site == 'HUDBT'){
