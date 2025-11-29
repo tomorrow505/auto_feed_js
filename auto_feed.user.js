@@ -16465,11 +16465,7 @@ function auto_feed() {
                 source_box.val(index);
             }
 
-            var poster = document.getElementsByName('url_poster')[0];
-            if (raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i)){
-                poster.value = raw_info.descr.match(/\[img\](\S*?)\[\/img\]/i)[1].split('=').pop();
-            }
-
+            
             descr_box[0].style.height = '120px';
             descr_box[1].style.height = '500px';
 
