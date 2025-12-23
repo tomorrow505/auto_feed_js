@@ -98,7 +98,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.1.0.3
+// @version      2.1.0.4
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -919,6 +919,8 @@ var imdb2db_chosen = GM_getValue('imdb2db_chosen') === undefined ? 0: GM_getValu
 
 //用来转存海报使用的ptpimg的key,打开首页即可获取
 var used_ptp_img_key = GM_getValue('used_ptp_img_key') === undefined ? '': GM_getValue('used_ptp_img_key');
+
+var used_tl_rss_key = GM_getValue('used_tl_rss_key') === undefined ? '': GM_getValue('used_tl_rss_key');
 
 //用来获取TMDB的key，需要使用请自行申请
 var used_tmdb_key = GM_getValue('used_tmdb_key') === undefined ? '0f79586eb9d92afa2b7266f7928b055c': GM_getValue('used_tmdb_key');
@@ -7193,11 +7195,12 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         //**************************************************** 5 ***************************************************************************
         $('#setting').append(`<div style="margin-bottom=5px"><b>脚本相关API-KEY值设置</b></div></br>`);
         $('#setting').append(`<label><b>TMDB影库对应apikey(<a href="https://www.themoviedb.org/settings/api" target="_blank"><font color="red">登录官网</font></a>自行申请):</b></label><input type="text" name="tmdb_key" style="width: 300px;  margin-left:5px" value=${used_tmdb_key}><br><br>`);
-        $('#setting').append(`<label><b>PTPimg对应的apikeykey(<a href="https://ptpimg.me/" target="_blank"><font color="red">打开首页</font></a>即可获取):</b></label><input type="text" name="ptp_img_key" style="width: 300px; margin-left:5px" value=${used_ptp_img_key}><br><br>`);
+        $('#setting').append(`<label><b>PTPimg对应的apikey(<a href="https://ptpimg.me/" target="_blank"><font color="red">打开首页</font></a>即可获取):</b></label><input type="text" name="ptp_img_key" style="width: 300px; margin-left:5px" value=${used_ptp_img_key}><br><br>`);
         for (key in used_rehost_img_info) {
             if (key == 'catbox') {continue;}
-            $('#setting').append(`<label><b>${key}对应apikeykey(<a href="${used_rehost_img_info[key].url}" target="_blank"><font color="red">登录站点</font></a>或可获取):</b></label><input type="text" name="${key}_key" style="width: 300px; margin-left:5px" value=${used_rehost_img_info[key]['api-key']}><br><br>`);
+            $('#setting').append(`<label><b>${key}对应apikey(<a href="${used_rehost_img_info[key].url}" target="_blank"><font color="red">登录站点</font></a>即可获取):</b></label><input type="text" name="${key}_key" style="width: 300px; margin-left:5px" value=${used_rehost_img_info[key]['api-key']}><br><br>`);
         }
+        $('#setting').append(`<label><b>TorrentLeech的rsskey(<a href="https://wiki.torrentleech.org/doku.php/rss_-_how_to_automatically_download_torrents_with_utorrent" target="_blank"><font color="red">依照教程</font></a>进行设置):</b></label><input type="text" name="tl_rss_key" style="width: 300px; margin-left:5px" value=${used_tl_rss_key}><br><br>`);
         $('label').css({"width": "280px", "text-align": "right", "display": "inline-block"});
 
         //**************************************************** 3.2 *************************************************************************
@@ -7297,6 +7300,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
             //处理ptp-tmdb的key
             GM_setValue('used_ptp_img_key', $(`input[name="ptp_img_key"]`).val());
             GM_setValue('used_tmdb_key', $(`input[name="tmdb_key"]`).val());
+            GM_setValue('used_tl_rss_key', $(`input[name="tl_rss_key"]`).val());
 
             //处理匿名
             if_uplver = $(`input[name="anonymous"]:last`).prop('checked') ? 1: 0;
@@ -12558,7 +12562,12 @@ function auto_feed() {
             raw_info.descr = raw_info.descr + '\n\n' + img_info;
             raw_info.descr = raw_info.descr.replace(/\[color=.*?\]|\[\/color\]/ig, '');
             raw_info.descr = raw_info.descr.replace(/\n\n+/ig, '\n\n');
-            raw_info.torrent_url = o_site_info.TorrentLeech + $('#detailsDownloadButton').attr('href');
+            raw_info.torrent_url = o_site_info.TorrentLeech.slice(0, -1) + $('#detailsDownloadButton').attr('href');
+            if (used_tl_rss_key) {
+                const torrent_name = raw_info.torrent_url.split('/').pop();
+                const torrent_id = raw_info.torrent_url.match(/download\/(\d+)/)[1];
+                raw_info.torrent_url = `https://www.torrentleech.org/rss/download/${torrent_id}/${used_tl_rss_key}/${torrent_name}`;
+            }
         }
 
         //----------------------------------------------对国内站点获取的信息进行一些修复-------------------------------------------------------
