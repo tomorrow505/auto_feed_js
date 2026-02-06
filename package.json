@@ -2,7 +2,7 @@
   "name": "auto-feed-refactor",
   "private": true,
   "author": "tomorrow505, gawain",
-  "version": "3.1.5",
+  "version": "4.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173",

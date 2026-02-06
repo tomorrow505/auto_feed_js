@@ -8,7 +8,9 @@
 ---
 
 ## 快速入口
-- 安装脚本：[GitHub Releases](https://github.com/Gawain12/auto_feed_js/releases/latest) / `auto_feed.user.js` 下载直链：`https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js`
+- 安装脚本：
+  - dev（随 `refactor-dev` 自动更新）：https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
+  - stable（打 tag `v*` 后）：https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js
 - 核心入口：`src/main.ts`
 - 站点适配（PT 语义：Tracker）：`src/trackers/`
 - 通用能力：`src/services/`
@@ -51,7 +53,7 @@
 ---
 
 ## 📅 版本与路线图
-- **Current (v3.1.x)**: 核心框架完成，支持 NexusPHP/Gazelle/Unit3D 主流站点。
+- **Current (v4.x)**: 重构版主线，支持 NexusPHP/Gazelle/Unit3D 主流站点。
 - **Upcoming (P0)**: 深度对齐 PTP/HDB 转发逻辑，补齐种子自动下载链路。
 - **Vision**: 通过配置化引擎实现“零代码”站点扩展。
 

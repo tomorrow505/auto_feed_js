@@ -10,7 +10,9 @@
 
 ## 1. 安装与初始化
 1. **安装环境**: 确保你已安装 [Tampermonkey](https://www.tampermonkey.net/) 插件。
-2. **安装脚本**: 前往 [Releases 页面](https://github.com/Gawain12/auto_feed_js/releases/latest) 安装最新版脚本（附件为 `auto_feed.user.js`）。
+2. **安装脚本**:
+   - dev（随 `refactor-dev` 自动更新）：https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
+   - stable（打 tag `v*` 后）：https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js
 3. **打开面板**: 在任意支持的站点页面，按下快捷键 `Alt + S` 弹出主设置面板。
 4. **配置语言**: 在面板标题栏右侧，选择 **中文** 或 **English**。
 

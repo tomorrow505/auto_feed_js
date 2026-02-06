@@ -17,8 +17,10 @@ export default defineConfig({
                 license: 'GPL-3.0 License',
                 homepageURL: 'https://github.com/Gawain12/auto_feed_js',
                 supportURL: 'https://github.com/Gawain12/auto_feed_js/issues',
-                downloadURL: 'https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js',
-                updateURL: 'https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js',
+                // Refactor branch publishes a rolling dev build as a pre-release tag `dev`.
+                // Stable releases should use tag `v*` which are handled by release.yml.
+                downloadURL: 'https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js',
+                updateURL: 'https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js',
                 icon: 'https://kp.m-team.cc/favicon.ico',
                 'run-at': 'document-end',
                 'inject-into': 'content',
