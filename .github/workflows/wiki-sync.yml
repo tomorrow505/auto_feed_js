@@ -35,7 +35,8 @@ jobs:
           rm -rf /tmp/wiki
           git clone "$WIKI_URL" /tmp/wiki
 
-          rsync -av --delete docs/wiki/ /tmp/wiki/
+          # IMPORTANT: do not delete the wiki repo metadata.
+          rsync -av --delete --exclude='.git/' docs/wiki/ /tmp/wiki/
 
           cd /tmp/wiki
           git config user.name "github-actions[bot]"
@@ -52,4 +53,3 @@ jobs:
         if: steps.wiki_check.outputs.exists != '1'
         run: |
           echo "GitHub Wiki repo does not exist yet. Create the first Wiki page in GitHub UI once, then re-run this workflow."
-
