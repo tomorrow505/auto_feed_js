@@ -7,6 +7,15 @@
 
 ---
 
+## 快速入口
+- 安装脚本：[GitHub Releases](https://github.com/Gawain12/auto_feed_js/releases/latest) / `auto_feed.user.js` 下载直链：`https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js`
+- 核心入口：`src/main.ts`
+- 站点适配（PT 语义：Tracker）：`src/trackers/`
+- 通用能力：`src/services/`
+- 设置面板：`src/ui/`（默认 `Alt+S` 打开）
+
+---
+
 ## 🌟 核心理念
 - **简约而不简单**: 基于 Preact + TypeScript，代码结构清晰，易于维护。
 - **极致美学**: 采用 Apple 风格 UI，支持深色/浅色模式与多语言切换。
@@ -47,4 +56,4 @@
 - **Vision**: 通过配置化引擎实现“零代码”站点扩展。
 
 > [!TIP]
-> 详细的任务进度请参考根目录下的 [todo.md](file:///Users/gawaintan/workSpace/Tools/auto_feed_js/todo.md)。
+> 详细的任务进度请参考根目录下的 [todo.md](../../todo.md)。

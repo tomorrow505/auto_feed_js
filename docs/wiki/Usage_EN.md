@@ -6,7 +6,7 @@ This tutorial will guide you through the core operations of **Auto-Feed Refactor
 
 ## 1. Installation & Setup
 1. **Environment**: Ensure you have [Tampermonkey](https://www.tampermonkey.net/) installed.
-2. **Install Script**: Install the compiled `dist/auto_feed.user.js`.
+2. **Install Script**: Install the latest version from [GitHub Releases](https://github.com/Gawain12/auto_feed_js/releases/latest) (asset: `auto_feed.user.js`).
 3. **Open Panel**: On any supported site, press `Alt + S` to open the main settings panel.
 4. **Language**: Click the language toggle (CN/EN) in the top-right corner of the panel header to switch to English.
 

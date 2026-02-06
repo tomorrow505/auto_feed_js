@@ -10,7 +10,7 @@
 
 ## 1. 安装与初始化
 1. **安装环境**: 确保你已安装 [Tampermonkey](https://www.tampermonkey.net/) 插件。
-2. **加载脚本**: 安装编译后的 `dist/auto_feed.user.js`。
+2. **安装脚本**: 前往 [Releases 页面](https://github.com/Gawain12/auto_feed_js/releases/latest) 安装最新版脚本（附件为 `auto_feed.user.js`）。
 3. **打开面板**: 在任意支持的站点页面，按下快捷键 `Alt + S` 弹出主设置面板。
 4. **配置语言**: 在面板标题栏右侧，选择 **中文** 或 **English**。
 
@@ -51,15 +51,3 @@
 
 > [!TIP]
 > 想要了解更多进阶技巧？请查看 [图像工具集](Image-Tools.md) 或 [远程推送详解](Remote-Download.md)。
-用于从外部数据源补齐简介/副标题等信息（按设置选择 ptgen 与 IMDb->豆瓣方式）。
-
-## 快速搜索
-- 豆瓣/IMDb 页面：标题附近插入“快速搜索”链接条。
-- 站点列表页：部分站点（如 PTP/HDB）在列表行内增加“快速搜索”链接条（可在设置里开关）。
-
-- 转发面板内的“图床”按钮组支持：
-  - `原图`：把描述里的缩略图/防盗链链接尽量转为原图链接
-  - `PTPIMG/PIXHOST/FREEIMAGE/GIFYU`：把图片链接转存到公共图床（需要对应 API Key）
-  - `IMGBOX/HDBits/Hostik`：跳转到对应图床页面，并在图床页提供“一键拉取”把图片文件预填到 file input（不自动点击上传）
-- `图片处理/Image Tools`：打开图片处理大窗口（提取/替换/缩略/链接处理等）
-
