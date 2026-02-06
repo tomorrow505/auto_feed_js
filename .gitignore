@@ -1,1 +1,10 @@
+.DS_Store
+**/.DS_Store
+
 /debug
+_refs/
+REFACTOR_PLAN_OLD.md
+
+auto-feed-refactor/node_modules/
+auto-feed-refactor/.vite/
+auto-feed-refactor/dist/.DS_Store
