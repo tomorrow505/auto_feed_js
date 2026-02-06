@@ -8,6 +8,27 @@ import { GMAdapter } from './GMAdapter';
 import { buildQuickSearchItems, DEFAULT_QUICK_SEARCH_TEMPLATES } from './QuickSearchTemplateService';
 
 export class QuickSearchService {
+    /**
+     * Build a compact "quick search" links row for using inside other UIs (forward popup, etc).
+     * Returns a string of HTML (no container), or empty string if nothing can be built.
+     */
+    static buildQuickSearchHtml(meta: Partial<TorrentMeta>, quickSearchList?: string[], quickSearchPresets?: string[]): string {
+        const makeLink = (name: string, url: string) =>
+            `<a href="${url}" target="_blank" style="display:inline-block; margin-right:3px; margin-bottom:4px; padding:2px 5px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${name}</a>`;
+
+        const list = Array.isArray(quickSearchList) && quickSearchList.length ? quickSearchList : (
+            Array.isArray(quickSearchPresets) && quickSearchPresets.length ? quickSearchPresets : DEFAULT_QUICK_SEARCH_TEMPLATES
+        );
+
+        const items = buildQuickSearchItems(list, meta);
+        if (!items.length) return '';
+
+        const links = items.map((item) => makeLink(item.name, item.url)).join('');
+        return `<div class="autofeed-search-links" style="font-size: 12px;">
+            <span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>${links}
+        </div>`;
+    }
+
     static async tryInject() {
         const url = window.location.href;
         const settings = await SettingsService.load();
@@ -30,7 +51,7 @@ export class QuickSearchService {
             row.append('<span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>');
             const makeLink = (name: string, url: string) =>
                 $(
-                    `<a href="${url}" target="_blank" style="display:inline-block; margin-right:6px; margin-bottom:4px; padding:2px 6px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${name}</a>`
+                    `<a href="${url}" target="_blank" style="display:inline-block; margin-right:3px; margin-bottom:4px; padding:2px 5px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${name}</a>`
                 );
 
             if (Array.isArray(s.quickSearchList)) {

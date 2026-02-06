@@ -1,6 +1,6 @@
-
 import { h, render } from 'preact';
 import { App } from './App';
+import { appleStyles } from './styles';
 
 export function mountUI() {
     // Create host element
@@ -11,13 +11,14 @@ export function mountUI() {
     // Create Shadow DOM
     const shadow = host.attachShadow({ mode: 'open' });
 
+    // Inject Styles
+    const styleEl = document.createElement('style');
+    styleEl.textContent = appleStyles;
+    shadow.appendChild(styleEl);
+
     // Container for the app
     const container = document.createElement('div');
     shadow.appendChild(container); // App container
-
-    // Optional: Inject styles into shadow DOM if needed (e.g. Tailwind or custom CSS)
-    // For now, we are using inline styles in App.tsx for simplicity, 
-    // but typically we would inject <style> tags here.
 
     // Render Preact App
     render(<App />, container);

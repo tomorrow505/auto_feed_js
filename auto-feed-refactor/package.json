@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev-full.js --watch",
-    "dev:loader": "vite",
+    "dev:loader": "vite --port 5173",
     "build": "tsc && vite build && npm run gen-loader",
     "gen-loader": "node scripts/generate-loader.js",
     "preview": "vite preview"

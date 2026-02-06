@@ -98,7 +98,7 @@ export class ListSearchService {
         row.append('<span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>');
         items.forEach((item) => {
             const link = $(
-                `<a href="${item.url}" target="_blank" style="display:inline-block; margin-right:6px; margin-bottom:4px; padding:2px 6px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${item.name}</a>`
+                `<a href="${item.url}" target="_blank" style="display:inline-block; margin-right:3px; margin-bottom:4px; padding:2px 5px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${item.name}</a>`
             );
             row.append(link);
         });

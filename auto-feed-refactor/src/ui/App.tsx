@@ -1,12 +1,17 @@
+
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { SettingsService, AppSettings } from '../services/SettingsService';
 import { DEFAULT_QUICK_SEARCH_TEMPLATES } from '../services/QuickSearchTemplateService';
 import { SiteCatalogService } from '../services/SiteCatalogService';
+import { RemoteServerTestService } from '../services/RemoteServerTestService';
+import { i18n, SupportedLang } from './i18n';
 
 export const App = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('dashboard');
+    const [panelPos, setPanelPos] = useState<{ x: number; y: number } | null>(null);
+    const [drag, setDrag] = useState<{ offsetX: number; offsetY: number } | null>(null);
     const [settings, setSettings] = useState<AppSettings>({
         ptpImgApiKey: '',
         pixhostApiKey: '',
@@ -25,6 +30,8 @@ export const App = () => {
         showQuickSearchOnDouban: true,
         showQuickSearchOnImdb: true,
         enableRemoteSidebar: false,
+        remoteSkipCheckingDefault: false,
+        remoteAskSkipConfirm: false,
         remoteServer: null,
         imdbToDoubanMethod: 0,
         ptgenApi: 3,
@@ -37,11 +44,33 @@ export const App = () => {
             HDB: false,
             HDT: false,
             UHD: false
-        }
+        },
+        uiLanguage: 'zh'
+    });
+
+    const [remoteModalOpen, setRemoteModalOpen] = useState(false);
+    const [remoteForm, setRemoteForm] = useState<{
+        type: 'qb' | 'tr' | 'de';
+        name: string;
+        url: string;
+        username: string;
+        password: string;
+        paths: { label: string; path: string }[];
+        editingKey?: { type: 'qb' | 'tr' | 'de'; name: string };
+    }>({
+        type: 'qb',
+        name: '',
+        url: '',
+        username: '',
+        password: '',
+        paths: [{ label: 'default', path: '' }]
     });
 
     const [quickPreset, setQuickPreset] = useState('');
     const [quickPresetInput, setQuickPresetInput] = useState('');
+
+    const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+    const getPanelSize = () => ({ w: 720, h: 560 }); // Slightly taller for reordered content
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -51,7 +80,6 @@ export const App = () => {
         };
         window.addEventListener('keydown', handleKey);
 
-        // Load settings on mount
         SettingsService.load().then((loaded) => {
             setSettings(loaded);
             if (loaded.quickSearchList && loaded.quickSearchList.length) {
@@ -64,620 +92,595 @@ export const App = () => {
         return () => window.removeEventListener('keydown', handleKey);
     }, []);
 
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setIsOpen(false);
+        };
+        const onMouseDown = (e: MouseEvent) => {
+            const host = document.getElementById('auto-feed-overlay-host');
+            const root = host?.shadowRoot;
+            if (!host || !root) return;
+            const target = e.target as Node | null;
+            const inUI = !!target && (root.contains(target) || host.contains(target));
+            if (!inUI) setIsOpen(false);
+        };
+
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('mousedown', onMouseDown);
+        return () => {
+            document.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('mousedown', onMouseDown);
+        };
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        if (panelPos) return;
+        const { w, h } = getPanelSize();
+        setPanelPos({
+            x: Math.max(20, window.innerWidth - w - 20),
+            y: Math.max(20, Math.floor((window.innerHeight - h) / 2))
+        });
+    }, [isOpen, panelPos]);
+
+    useEffect(() => {
+        if (!drag) return;
+
+        const onMove = (e: MouseEvent) => {
+            e.preventDefault();
+            const { w, h } = getPanelSize();
+            const nextX = clamp(e.clientX - drag.offsetX, 0, Math.max(0, window.innerWidth - w));
+            const nextY = clamp(e.clientY - drag.offsetY, 0, Math.max(0, window.innerHeight - h));
+            setPanelPos({ x: nextX, y: nextY });
+        };
+        const onUp = () => setDrag(null);
+
+        document.addEventListener('mousemove', onMove, true);
+        document.addEventListener('mouseup', onUp, true);
+        return () => {
+            document.removeEventListener('mousemove', onMove, true);
+            document.removeEventListener('mouseup', onUp, true);
+        };
+    }, [drag]);
+
     const handleSaveSettings = async () => {
         await SettingsService.save(settings);
-        alert('Settings Saved!');
+    };
+
+    const setAndPersist = (next: AppSettings) => {
+        setSettings(next);
+        SettingsService.save(next).catch(() => { });
     };
 
     const allSites = SiteCatalogService.getAllSites();
+    const t = i18n[settings.uiLanguage as SupportedLang] || i18n.en;
 
     const getQuickSearchPresetLabel = (line: string) => {
         const anchorText = line.match(/>([^<]+)<\/a>/i)?.[1];
         if (anchorText) return anchorText.trim();
         const pipe = line.split('|');
         if (pipe.length > 1) return pipe[0].trim();
-        if (line.match(/^https?:\/\//i)) {
-            try {
-                return new URL(line).hostname.replace(/^www\./, '');
-            } catch {
-                return line;
-            }
+        try {
+            return new URL(line).hostname.replace(/^www\./, '');
+        } catch {
+            return line;
         }
-        return line;
     };
 
     const quickSearchPresets = Array.from(new Set([
         ...DEFAULT_QUICK_SEARCH_TEMPLATES,
         ...(settings.quickSearchPresets || [])
     ]));
+
     const toggleSite = (name: string) => {
         const set = new Set(settings.enabledSites || []);
-        if (set.has(name)) {
-            set.delete(name);
-        } else {
-            set.add(name);
-        }
+        if (set.has(name)) set.delete(name); else set.add(name);
         setSettings({ ...settings, enabledSites: Array.from(set) });
     };
 
     const toggleFavoriteSite = (name: string) => {
         const set = new Set(settings.favoriteSites || []);
-        if (set.has(name)) {
-            set.delete(name);
-        } else {
-            set.add(name);
-        }
+        if (set.has(name)) set.delete(name); else set.add(name);
         setSettings({ ...settings, favoriteSites: Array.from(set) });
     };
 
-    const selectAllSites = () => {
-        setSettings({ ...settings, enabledSites: SiteCatalogService.getAllSiteNames() });
-    };
+    const selectAllSites = () => setSettings({ ...settings, enabledSites: SiteCatalogService.getAllSiteNames() });
+    const clearAllSites = () => setSettings({ ...settings, enabledSites: [] });
 
-    const clearAllSites = () => {
-        setSettings({ ...settings, enabledSites: [] });
-    };
+    // Components
+    const CheckboxRow = ({ label, checked, onChange, desc }: { label: string, checked: boolean, onChange: () => void, desc?: string }) => (
+        <label className="af-row" style={{ cursor: 'pointer' }}>
+            <div className="af-label">
+                <div>{label}</div>
+                {desc && <div className="af-label-desc">{desc}</div>}
+            </div>
+            <div className="af-toggle">
+                <input type="checkbox" checked={checked} onChange={onChange} />
+                <span className="af-slider"></span>
+            </div>
+        </label>
+    );
+
+    const InputRow = ({ label, value, onInput, placeholder, desc }: { label: string, value: string, onInput: (v: string) => void, placeholder?: string, desc?: string }) => (
+        <div className="af-row">
+            <div className="af-label">
+                <div>{label}</div>
+                {desc && <div className="af-label-desc">{desc}</div>}
+            </div>
+            <input
+                className="af-input"
+                style={{ width: '200px' }}
+                type="text"
+                value={value}
+                onInput={(e) => onInput(e.currentTarget.value)}
+                placeholder={placeholder}
+            />
+        </div>
+    );
 
     if (!isOpen) {
-        // ... (Keep existing trigger)
         return (
             <div
                 style={{
                     position: 'fixed',
-                    bottom: '20px',
-                    right: '20px',
+                    bottom: '24px',
+                    right: '24px',
                     zIndex: 99999,
-                    background: '#2c3e50',
-                    color: 'white',
-                    padding: '10px',
-                    borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.8)',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                    padding: '8px',
+                    borderRadius: '16px',
                     cursor: 'pointer',
-                    width: '50px',
-                    height: '50px',
+                    width: '48px',
+                    height: '48px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-                    fontSize: '24px'
+                    transition: 'transform 0.2s',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    color: '#333'
                 }}
                 onClick={() => setIsOpen(true)}
-                title="Open Auto-Feed Settings (Alt+S)"
+                title="Auto-Feed Settings"
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
             >
-                ⚙️
+                <span style={{ fontSize: '24px' }}>⚙️</span>
             </div>
         );
     }
 
-    return (
-        <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 99999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-        }} onClick={(e) => {
-            // Close on backdrop click
-            if (e.target === e.currentTarget) setIsOpen(false);
-        }}>
-            <div style={{
-                width: '800px',
-                height: '600px',
-                background: 'white',
-                borderRadius: '8px',
-                display: 'flex',
-                flexDirection: 'column',
-                overflow: 'hidden',
-                boxShadow: '0 5px 20px rgba(0,0,0,0.5)'
-            }} onClick={(e) => e.stopPropagation()}>
-                {/* Header */}
-                <div style={{
-                    padding: '15px 20px',
-                    background: '#f8f9fa',
-                    borderBottom: '1px solid #dee2e6',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                }}>
-                    <h2 style={{ margin: 0, fontSize: '18px', color: '#333' }}>Auto-Feed Refactor</h2>
-                    <button
-                        onClick={() => setIsOpen(false)}
-                        style={{
-                            background: 'none',
-                            border: 'none',
-                            fontSize: '20px',
-                            cursor: 'pointer',
-                            color: '#6c757d'
-                        }}
-                    >×</button>
-                </div>
+    const { w: panelW, h: panelH } = getPanelSize();
+    const pos = panelPos || { x: 20, y: 20 };
 
-                {/* Tabs */}
-                <div style={{
-                    display: 'flex',
-                    borderBottom: '1px solid #dee2e6',
-                    background: '#fff'
-                }}>
-                    {['dashboard', 'settings', 'sites', 'logs'].map(tab => (
+    return (
+        <div
+            className="af-panel"
+            style={{
+                position: 'fixed',
+                left: `${pos.x}px`,
+                top: `${pos.y}px`,
+                width: `${panelW}px`,
+                height: `${panelH}px`,
+                zIndex: 99999
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.stopPropagation()}
+            onKeyDown={(e) => e.stopPropagation()}
+        >
+            <div
+                className="af-header"
+                onMouseDown={(e) => {
+                    if ((e.target as HTMLElement).closest('button')) return;
+                    setDrag({ offsetX: e.clientX - pos.x, offsetY: e.clientY - pos.y });
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h2 className="af-title">Auto-Feed Refactor</h2>
+                    <select
+                        className="af-input"
+                        style={{ padding: '2px 8px', fontSize: '12px', height: '26px' }}
+                        value={settings.uiLanguage}
+                        onChange={(e) => setAndPersist({ ...settings, uiLanguage: e.currentTarget.value as any })}
+                    >
+                        <option value="zh">中文</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button type="button" className="af-btn af-btn-primary" onClick={handleSaveSettings}>{t.save}</button>
+                    <button
+                        type="button"
+                        className="af-close-btn"
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setIsOpen(false);
+                        }}
+                    >
+                        ×
+                    </button>
+                </div>
+            </div>
+
+            <div className="af-layout">
+                <div className="af-sidebar">
+                    {[
+                        { id: 'dashboard', label: t.dashboard, icon: '📊' },
+                        { id: 'settings', label: t.settings, icon: '🔧' },
+                        { id: 'sites', label: t.sites, icon: '🌐' },
+                        { id: 'remote', label: t.remote, icon: '📡' }
+                    ].map(item => (
                         <div
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            style={{
-                                padding: '10px 20px',
-                                cursor: 'pointer',
-                                borderBottom: activeTab === tab ? '2px solid #007bff' : '2px solid transparent',
-                                color: activeTab === tab ? '#007bff' : '#495057',
-                                fontWeight: activeTab === tab ? 'bold' : 'normal',
-                                textTransform: 'capitalize'
-                            }}
+                            key={item.id}
+                            className={`af-nav-item ${activeTab === item.id ? 'active' : ''}`}
+                            onClick={() => setActiveTab(item.id)}
                         >
-                            {tab}
+                            {item.icon} {item.label}
                         </div>
                     ))}
                 </div>
 
-                {/* Content */}
-                <div style={{ flex: 1, padding: '20px', overflowY: 'auto', background: '#fff', color: '#333' }}>
+                <div className="af-content">
+                    {/* Dashboard */}
                     {activeTab === 'dashboard' && (
                         <div>
-                            <p>Status: <span style={{ color: 'green', fontWeight: 'bold' }}>Active</span></p>
-                            <p>Current Site: {window.location.hostname}</p>
-                            <p>Tip: Use Alt+S to toggle this menu.</p>
+                            <div className="af-card">
+                                <div className="af-card-header">{t.status}</div>
+                                <div className="af-row">
+                                    <span className="af-label">{t.status}</span>
+                                    <span style={{ color: 'var(--af-success)', fontWeight: '600' }}>{t.active}</span>
+                                </div>
+                                <div className="af-row">
+                                    <span className="af-label">{t.currentHost}</span>
+                                    <span style={{ color: 'var(--af-text-secondary)' }}>{window.location.hostname}</span>
+                                </div>
+                                <div className="af-row">
+                                    <span className="af-label">{t.version}</span>
+                                    <span style={{ color: 'var(--af-text-secondary)' }}>Refactor v1.0</span>
+                                </div>
+                            </div>
+                            <div style={{ textAlign: 'center', color: 'var(--af-text-secondary)', marginTop: '20px', fontSize: '12px' }}>
+                                Press <span style={{ padding: '2px 6px', background: '#eee', borderRadius: '4px' }}>Alt+S</span> to toggle overlay
+                            </div>
                         </div>
                     )}
+
+                    {/* Settings - Reordered as requested */}
                     {activeTab === 'settings' && (
                         <div>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px' }}>CHD 站点域名</label>
-                                <select
-                                    style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                    value={settings.chdBaseUrl}
-                                    onChange={(e) => {
-                                        const value = e.currentTarget.value;
-                                        const normalized = value.endsWith('/') ? value : `${value}/`;
-                                        setSettings({ ...settings, chdBaseUrl: normalized });
-                                    }}
-                                >
-                                    <option value="https://chdbits.co/">chdbits.co (默认)</option>
-                                    <option value="https://ptchdbits.co/">ptchdbits.co</option>
-                                    <option value="https://ptchdbits.org/">ptchdbits.org</option>
-                                    <option value="https://chddiy.xyz/">chddiy.xyz</option>
-                                </select>
-                            </div>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px' }}>PtpImg API Key</label>
-                                <input
-                                    type="text"
-                                    style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                    value={settings.ptpImgApiKey}
-                                    onInput={(e) => setSettings({ ...settings, ptpImgApiKey: e.currentTarget.value })}
-                                />
-                            </div>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px' }}>Pixhost API Key</label>
-                                <input
-                                    type="text"
-                                    style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                    value={settings.pixhostApiKey}
-                                    onInput={(e) => setSettings({ ...settings, pixhostApiKey: e.currentTarget.value })}
-                                />
-                            </div>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px' }}>Freeimage API Key</label>
-                                <input
-                                    type="text"
-                                    style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                    value={settings.freeimageApiKey}
-                                    onInput={(e) => setSettings({ ...settings, freeimageApiKey: e.currentTarget.value })}
-                                />
-                            </div>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px' }}>Gifyu API Key</label>
-                                <input
-                                    type="text"
-                                    style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                    value={settings.gifyuApiKey}
-                                    onInput={(e) => setSettings({ ...settings, gifyuApiKey: e.currentTarget.value })}
-                                />
-                            </div>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px' }}>HDBImg API Key (可选)</label>
-                                <input
-                                    type="text"
-                                    style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                    value={settings.hdbImgApiKey}
-                                    onInput={(e) => setSettings({ ...settings, hdbImgApiKey: e.currentTarget.value })}
-                                />
-                            </div>
-                            <div style={{ marginBottom: '15px' }}>
-                                <label style={{ display: 'block', marginBottom: '5px' }}>HDBImg API Endpoint</label>
-                                <input
-                                    type="text"
-                                    style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                    value={settings.hdbImgEndpoint}
-                                    onInput={(e) => setSettings({ ...settings, hdbImgEndpoint: e.currentTarget.value })}
-                                />
-                                <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                                    默认：https://hdbimg.com/api/1/upload，如接口不同可自行修改
-                                </div>
-                            </div>
-                            <div style={{ marginBottom: '15px', padding: '10px', border: '1px solid #eee', borderRadius: '6px', background: '#fafafa' }}>
-                                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>页面增强功能</div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!settings.ptpShowDouban}
-                                        onChange={() => setSettings({ ...settings, ptpShowDouban: !settings.ptpShowDouban })}
-                                    />
-                                    <span>PTP 中文评分/简介</span>
-                                </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!settings.ptpShowGroupName}
-                                        onChange={() => setSettings({ ...settings, ptpShowGroupName: !settings.ptpShowGroupName })}
-                                    />
-                                    <span>PTP 组名显示</span>
-                                </label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', paddingLeft: '18px' }}>
-                                    <span style={{ color: '#666' }}>组名位置:</span>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <input
-                                            type="radio"
-                                            name="ptp_name_location"
-                                            value="0"
-                                            checked={settings.ptpNameLocation === 0}
-                                            onChange={() => setSettings({ ...settings, ptpNameLocation: 0 })}
-                                        />
-                                        <span>前</span>
-                                    </label>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                        <input
-                                            type="radio"
-                                            name="ptp_name_location"
-                                            value="1"
-                                            checked={settings.ptpNameLocation !== 0}
-                                            onChange={() => setSettings({ ...settings, ptpNameLocation: 1 })}
-                                        />
-                                        <span>后</span>
-                                    </label>
-                                </div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!settings.hdbShowDouban}
-                                        onChange={() => setSettings({ ...settings, hdbShowDouban: !settings.hdbShowDouban })}
-                                    />
-                                    <span>HDB 中文豆瓣信息</span>
-                                </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!settings.hdbHideDouban}
-                                        onChange={() => setSettings({ ...settings, hdbHideDouban: !settings.hdbHideDouban })}
-                                    />
-                                    <span>HDB 豆瓣信息默认折叠</span>
-                                </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '10px' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!settings.showQuickSearchOnDouban}
-                                        onChange={() => setSettings({ ...settings, showQuickSearchOnDouban: !settings.showQuickSearchOnDouban })}
-                                    />
-                                    <span>豆瓣页面快速搜索/工具</span>
-                                </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!settings.showQuickSearchOnImdb}
-                                        onChange={() => setSettings({ ...settings, showQuickSearchOnImdb: !settings.showQuickSearchOnImdb })}
-                                    />
-                                    <span>IMDb 页面快速搜索/工具</span>
-                                </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={!!settings.enableRemoteSidebar}
-                                        onChange={() => setSettings({ ...settings, enableRemoteSidebar: !settings.enableRemoteSidebar })}
-                                    />
-                                    <span>启用远程推送侧边栏</span>
-                                </label>
-                                <div style={{ marginTop: '8px', fontSize: '12px', color: '#666' }}>
-                                    远程推送 JSON 配置：
-                                </div>
-                                <input
-                                    type="file"
-                                    accept=".json,application/json"
-                                    onChange={(e) => {
-                                        const file = e.currentTarget.files?.[0];
-                                        if (!file) return;
-                                        const reader = new FileReader();
-                                        reader.onload = (evt) => {
-                                            try {
-                                                const json = JSON.parse(String(evt.target?.result || '{}'));
-                                                setSettings({ ...settings, remoteServer: json });
-                                                alert('远程服务器配置已加载');
-                                            } catch (err) {
-                                                alert('JSON 解析失败，请检查格式');
-                                            }
-                                        };
-                                        reader.readAsText(file);
-                                    }}
-                                />
-                                {settings.remoteServer && (
-                                    <pre style={{ marginTop: '8px', padding: '8px', background: '#fff', border: '1px solid #ddd', borderRadius: '4px', maxHeight: '150px', overflow: 'auto' }}>
-                                        {JSON.stringify(settings.remoteServer, null, 2)}
-                                    </pre>
-                                )}
-                            </div>
-                            <div style={{ marginBottom: '15px', padding: '10px', border: '1px solid #eee', borderRadius: '6px', background: '#fafafa' }}>
-                                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>外站信息获取</div>
-                                <div style={{ marginBottom: '6px', color: '#666' }}>选择 IMDb 到豆瓣 ID 的获取方式</div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                                    <input
-                                        type="radio"
-                                        name="imdb2douban_method"
-                                        value="0"
-                                        checked={settings.imdbToDoubanMethod === 0}
-                                        onChange={() => setSettings({ ...settings, imdbToDoubanMethod: 0 })}
-                                    />
-                                    <span>豆瓣 API</span>
-                                </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <input
-                                        type="radio"
-                                        name="imdb2douban_method"
-                                        value="1"
-                                        checked={settings.imdbToDoubanMethod === 1}
-                                        onChange={() => setSettings({ ...settings, imdbToDoubanMethod: 1 })}
-                                    />
-                                    <span>豆瓣爬取</span>
-                                </label>
-
-                                <div style={{ marginTop: '10px', marginBottom: '6px', color: '#666' }}>选择 PTGen 的 API 节点</div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                                    <input
-                                        type="radio"
-                                        name="ptgen_api"
-                                        value="0"
-                                        checked={settings.ptgenApi === 0}
-                                        onChange={() => setSettings({ ...settings, ptgenApi: 0 })}
-                                    />
-                                    <span>api.iyuu.cn</span>
-                                </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
-                                    <input
-                                        type="radio"
-                                        name="ptgen_api"
-                                        value="1"
-                                        checked={settings.ptgenApi === 1}
-                                        onChange={() => setSettings({ ...settings, ptgenApi: 1 })}
-                                    />
-                                    <span>ptgen</span>
-                                </label>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                    <input
-                                        type="radio"
-                                        name="ptgen_api"
-                                        value="3"
-                                        checked={settings.ptgenApi === 3}
-                                        onChange={() => setSettings({ ...settings, ptgenApi: 3 })}
-                                    />
-                                    <span>豆瓣页面爬取</span>
-                                </label>
-                            </div>
-                            <div style={{ marginBottom: '15px', padding: '10px', border: '1px solid #eee', borderRadius: '6px', background: '#fafafa' }}>
-                                <div style={{ fontWeight: 'bold', marginBottom: '8px' }}>快速搜索站点设置</div>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                                    <select
-                                        style={{ flex: 1, padding: '6px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                        value={quickPreset}
-                                        onChange={(e) => setQuickPreset(e.currentTarget.value)}
-                                    >
-                                        {quickSearchPresets.map((line) => (
-                                            <option key={line} value={line}>
-                                                {getQuickSearchPresetLabel(line)}
-                                            </option>
+                            {/* 1. Page Features (Most frequent) */}
+                            <div className="af-card">
+                                <div className="af-card-header">{t.pageFeatures}</div>
+                                <CheckboxRow label={t.ptpShowDouban} checked={!!settings.ptpShowDouban} onChange={() => setSettings({ ...settings, ptpShowDouban: !settings.ptpShowDouban })} />
+                                <CheckboxRow label={t.ptpShowGroupName} checked={!!settings.ptpShowGroupName} onChange={() => setSettings({ ...settings, ptpShowGroupName: !settings.ptpShowGroupName })} />
+                                <div className="af-row">
+                                    <span className="af-label">{t.ptpGroupNamePos}</span>
+                                    <div className="af-segmented">
+                                        {[0, 1].map(v => (
+                                            <div
+                                                key={v}
+                                                className={`af-segment-opt ${settings.ptpNameLocation === v ? 'active' : ''}`}
+                                                onClick={() => setSettings({ ...settings, ptpNameLocation: v })}
+                                            >
+                                                {v === 0 ? t.before : t.after}
+                                            </div>
                                         ))}
+                                    </div>
+                                </div>
+                                <CheckboxRow label={t.hdbShowDouban} checked={!!settings.hdbShowDouban} onChange={() => setSettings({ ...settings, hdbShowDouban: !settings.hdbShowDouban })} />
+                                <CheckboxRow label={t.hdbCollapseDouban} checked={!!settings.hdbHideDouban} onChange={() => setSettings({ ...settings, hdbHideDouban: !settings.hdbHideDouban })} />
+                                <CheckboxRow label={t.doubanQuickSearch} checked={!!settings.showQuickSearchOnDouban} onChange={() => setSettings({ ...settings, showQuickSearchOnDouban: !settings.showQuickSearchOnDouban })} />
+                                <CheckboxRow label={t.imdbQuickSearch} checked={!!settings.showQuickSearchOnImdb} onChange={() => setSettings({ ...settings, showQuickSearchOnImdb: !settings.showQuickSearchOnImdb })} />
+                            </div>
+
+                            {/* 2. External Sources */}
+                            <div className="af-card">
+                                <div className="af-card-header">{t.externalSources}</div>
+                                <div className="af-row">
+                                    <span className="af-label">{t.imdbToDoubanMethod}</span>
+                                    <div className="af-segmented">
+                                        {[t.api, t.scrape].map((l, i) => (
+                                            <div className={`af-segment-opt ${settings.imdbToDoubanMethod === i ? 'active' : ''}`} onClick={() => setSettings({ ...settings, imdbToDoubanMethod: i })}>{l}</div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="af-row">
+                                    <span className="af-label">{t.ptgenSource}</span>
+                                    <div className="af-segmented">
+                                        <div className={`af-segment-opt ${settings.ptgenApi === 0 ? 'active' : ''}`} onClick={() => setSettings({ ...settings, ptgenApi: 0 })}>IYUU</div>
+                                        <div className={`af-segment-opt ${settings.ptgenApi === 1 ? 'active' : ''}`} onClick={() => setSettings({ ...settings, ptgenApi: 1 })}>PTGen</div>
+                                        <div className={`af-segment-opt ${settings.ptgenApi === 3 ? 'active' : ''}`} onClick={() => setSettings({ ...settings, ptgenApi: 3 })}>Douban</div>
+                                    </div>
+                                </div>
+                                <div className="af-row">
+                                    <span className="af-label">{t.chdDomain}</span>
+                                    <select
+                                        className="af-input"
+                                        value={settings.chdBaseUrl}
+                                        onChange={(e) => setSettings({ ...settings, chdBaseUrl: e.currentTarget.value.endsWith('/') ? e.currentTarget.value : e.currentTarget.value + '/' })}
+                                    >
+                                        <option value="https://chdbits.co/">chdbits.co</option>
+                                        <option value="https://ptchdbits.co/">ptchdbits.co</option>
+                                        <option value="https://ptchdbits.org/">ptchdbits.org</option>
+                                        <option value="https://chddiy.xyz/">chddiy.xyz</option>
                                     </select>
-                                    <button
-                                        onClick={() => {
+                                </div>
+                            </div>
+
+                            {/* 3. Quick Search Editor */}
+                            <div className="af-card">
+                                <div className="af-card-header">{t.quickSearchEditor}</div>
+                                <div style={{ padding: '12px' }}>
+                                    <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                        <select className="af-input" style={{ flex: 1 }} value={quickPreset} onChange={e => setQuickPreset(e.currentTarget.value)}>
+                                            {quickSearchPresets.map(l => <option key={l} value={l}>{getQuickSearchPresetLabel(l)}</option>)}
+                                        </select>
+                                        <button className="af-btn" onClick={() => {
                                             if (!quickPreset) return;
                                             const set = new Set(settings.quickSearchList || []);
                                             set.add(quickPreset);
                                             setSettings({ ...settings, quickSearchList: Array.from(set) });
-                                        }}
-                                        style={{ padding: '6px 10px', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', background: '#f5f5f5' }}
-                                    >
-                                        新增
-                                    </button>
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                                    <input
-                                        type="text"
-                                        placeholder="自定义模板（支持 <a href=...> 或 Name|URL）"
-                                        style={{ flex: 1, padding: '6px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                        value={quickPresetInput}
-                                        onInput={(e) => setQuickPresetInput(e.currentTarget.value)}
+                                        }}>{t.add}</button>
+                                    </div>
+                                    <textarea
+                                        className="af-input"
+                                        style={{ width: '100%', height: '150px', fontFamily: 'monospace' }}
+                                        value={(settings.quickSearchList || []).join('\n')}
+                                        onInput={e => setSettings({ ...settings, quickSearchList: e.currentTarget.value.split('\n').filter(Boolean) })}
                                     />
-                                    <button
-                                        onClick={() => {
-                                            const value = quickPresetInput.trim();
-                                            if (!value) return;
-                                            const set = new Set(settings.quickSearchPresets || []);
-                                            set.add(value);
-                                            setSettings({ ...settings, quickSearchPresets: Array.from(set) });
-                                            setQuickPresetInput('');
-                                        }}
-                                        style={{ padding: '6px 10px', border: '1px solid #ddd', borderRadius: '4px', cursor: 'pointer', background: '#f5f5f5' }}
-                                    >
-                                        加入下拉框
-                                    </button>
-                                </div>
-                                <textarea
-                                    style={{
-                                        width: '100%',
-                                        height: '220px',
-                                        padding: '8px',
-                                        border: '1px solid #ced4da',
-                                        borderRadius: '4px',
-                                        fontFamily: 'monospace',
-                                        fontSize: '12px'
-                                    }}
-                                    value={(settings.quickSearchList || []).join('\n')}
-                                    onInput={(e) => {
-                                        const lines = e.currentTarget.value.split('\n').map((line) => line.trim()).filter(Boolean);
-                                        setSettings({ ...settings, quickSearchList: lines });
-                                    }}
-                                />
-                                <div style={{ marginTop: '6px', fontSize: '12px', color: '#666' }}>
-                                    每行一个模板，支持占位符：
-                                    {' '}
-                                    <code>{'{imdbid}'}</code>
-                                    {' '}
-                                    <code>{'{imdbno}'}</code>
-                                    {' '}
-                                    <code>{'{search_name}'}</code>
-                                    {' '}
-                                    <code>{'{title}'}</code>
-                                    {' '}
-                                    <code>{'{doubanid}'}</code>
                                 </div>
                             </div>
-                            <button
-                                onClick={handleSaveSettings}
-                                style={{
-                                    padding: '10px 20px',
-                                    background: '#007bff',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                Save Settings
-                            </button>
+
+                            {/* 4. API Keys (Least frequent) */}
+                            <div className="af-card">
+                                <div className="af-card-header">{t.servicesApiKeys}</div>
+                                <InputRow label="PtpImg API Key" value={settings.ptpImgApiKey} onInput={v => setSettings({ ...settings, ptpImgApiKey: v })} />
+                                <InputRow label="Pixhost API Key" value={settings.pixhostApiKey} onInput={v => setSettings({ ...settings, pixhostApiKey: v })} />
+                                <InputRow label="Freeimage API Key" value={settings.freeimageApiKey} onInput={v => setSettings({ ...settings, freeimageApiKey: v })} />
+                                <InputRow label="Gifyu API Key" value={settings.gifyuApiKey} onInput={v => setSettings({ ...settings, gifyuApiKey: v })} />
+                                <InputRow label="HDBImg API Key" value={settings.hdbImgApiKey} onInput={v => setSettings({ ...settings, hdbImgApiKey: v })} desc="Optional" />
+                                <InputRow label="HDBImg Endpoint" value={settings.hdbImgEndpoint} onInput={v => setSettings({ ...settings, hdbImgEndpoint: v })} />
+                            </div>
                         </div>
                     )}
+
+                    {/* Sites */}
                     {activeTab === 'sites' && (
                         <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
-                                <h3>转发站点设置</h3>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <button onClick={selectAllSites} style={{ padding: '5px 10px', background: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>全选</button>
-                                    <button onClick={clearAllSites} style={{ padding: '5px 10px', background: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>取消全选</button>
+                            <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+                                <button className="af-btn af-btn-primary" onClick={selectAllSites}>{t.selectAll}</button>
+                                <button className="af-btn" onClick={clearAllSites}>{t.clearAll}</button>
+                            </div>
+
+                            <div className="af-card">
+                                <div className="af-card-header">{t.enabledSites}</div>
+                                <div className="af-grid">
+                                    {allSites.map(site => (
+                                        <div
+                                            key={site.name}
+                                            className="af-checkbox-card"
+                                            onClick={() => toggleSite(site.name)}
+                                            style={{ background: (settings.enabledSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
+                                        >
+                                            <input type="checkbox" checked={(settings.enabledSites || []).includes(site.name)} readOnly />
+                                            <span style={{ fontSize: '12px' }}>{site.name}</span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(120px, 1fr))', gap: '8px', padding: '10px', border: '1px solid #eee', borderRadius: '6px', background: '#fafafa' }}>
-                                {allSites.map((site) => (
-                                    <label key={site.name} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                                        <input
-                                            type="checkbox"
-                                            checked={(settings.enabledSites || []).includes(site.name)}
-                                            onChange={() => toggleSite(site.name)}
+
+                            <div className="af-card">
+                                <div className="af-card-header">{t.favoriteSites}</div>
+                                <div className="af-grid">
+                                    {allSites.map(site => (
+                                        <div
+                                            key={'fav-' + site.name}
+                                            className="af-checkbox-card"
+                                            onClick={() => toggleFavoriteSite(site.name)}
+                                            style={{ background: (settings.favoriteSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
+                                        >
+                                            <input type="checkbox" checked={(settings.favoriteSites || []).includes(site.name)} readOnly />
+                                            <span style={{ fontSize: '12px' }}>{site.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="af-card">
+                                <div className="af-card-header">{t.listPageQuickSearch}</div>
+                                <div style={{ padding: '0 16px' }}>
+                                    {(['PTP', 'HDB', 'HDT', 'UHD'] as const).map(key => (
+                                        <CheckboxRow
+                                            key={key}
+                                            label={key}
+                                            checked={!!settings.showSearchOnList?.[key]}
+                                            onChange={() => setSettings({
+                                                ...settings,
+                                                showSearchOnList: { ...settings.showSearchOnList, [key]: !settings.showSearchOnList?.[key] }
+                                            })}
                                         />
-                                        <span title={site.description || ''}>{site.name}</span>
-                                    </label>
-                                ))}
-                            </div>
-                            <div style={{ marginTop: '20px' }}>
-                                <button
-                                    onClick={handleSaveSettings}
-                                    style={{
-                                        padding: '10px 20px',
-                                        background: '#007bff',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Save Sites
-                                </button>
-                            </div>
-
-                            <div style={{ marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
-                                <h3 style={{ marginBottom: '12px' }}>常用站点设置</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, minmax(120px, 1fr))', gap: '8px', padding: '10px', border: '1px solid #eee', borderRadius: '6px', background: '#fafafa' }}>
-                                    {allSites.map((site) => (
-                                        <label key={`fav-${site.name}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={(settings.favoriteSites || []).includes(site.name)}
-                                                onChange={() => toggleFavoriteSite(site.name)}
-                                            />
-                                            <span title={site.description || ''}>{site.name}</span>
-                                        </label>
                                     ))}
-                                </div>
-                                <div style={{ marginTop: '20px' }}>
-                                    <button
-                                        onClick={handleSaveSettings}
-                                        style={{
-                                            padding: '10px 20px',
-                                            background: '#007bff',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        Save Favorites
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div style={{ marginTop: '30px', borderTop: '1px solid #eee', paddingTop: '20px' }}>
-                                <h3 style={{ marginBottom: '12px' }}>是否在种子列表页显示快速搜索</h3>
-                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                                    {(['PTP', 'HDB', 'HDT', 'UHD'] as const).map((key) => (
-                                        <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <input
-                                                type="checkbox"
-                                                checked={!!settings.showSearchOnList?.[key]}
-                                                onChange={() =>
-                                                    setSettings({
-                                                        ...settings,
-                                                        showSearchOnList: {
-                                                            ...settings.showSearchOnList,
-                                                            [key]: !settings.showSearchOnList?.[key]
-                                                        }
-                                                    })
-                                                }
-                                            />
-                                            <span>{key}</span>
-                                        </label>
-                                    ))}
-                                </div>
-                                <div style={{ marginTop: '20px' }}>
-                                    <button
-                                        onClick={handleSaveSettings}
-                                        style={{
-                                            padding: '10px 20px',
-                                            background: '#007bff',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer'
-                                        }}
-                                    >
-                                        Save Search Toggles
-                                    </button>
                                 </div>
                             </div>
                         </div>
                     )}
-                    {activeTab === 'logs' && (
+
+                    {/* Remote */}
+                    {activeTab === 'remote' && (
                         <div>
-                            <p>Logs placeholder...</p>
+                            <div className="af-card">
+                                <div className="af-card-header">{t.globalSettings}</div>
+                                <CheckboxRow label={t.enableSidebar} checked={!!settings.enableRemoteSidebar} onChange={() => setAndPersist({ ...settings, enableRemoteSidebar: !settings.enableRemoteSidebar })} />
+                                <CheckboxRow label={t.skipCheckingDefault} checked={!!settings.remoteSkipCheckingDefault} onChange={() => setAndPersist({ ...settings, remoteSkipCheckingDefault: !settings.remoteSkipCheckingDefault })} />
+                                <CheckboxRow label={t.askConfirmBeforePush} checked={!!settings.remoteAskSkipConfirm} onChange={() => setAndPersist({ ...settings, remoteAskSkipConfirm: !settings.remoteAskSkipConfirm })} />
+                            </div>
+
+                            <div className="af-card">
+                                <div className="af-card-header">{t.clientConfigs}</div>
+                                <div style={{ padding: '16px' }}>
+                                    <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
+                                        <button className="af-btn" onClick={() => {
+                                            setRemoteForm({
+                                                type: 'qb', name: '', url: '', username: '', password: '', paths: [{ label: 'default', path: '' }]
+                                            });
+                                            setRemoteModalOpen(true);
+                                        }}>
+                                            {t.addClient}
+                                        </button>
+                                        <label className="af-btn">
+                                            {t.importJson}
+                                            <input
+                                                type="file"
+                                                style={{ display: 'none' }}
+                                                accept=".json"
+                                                onChange={(e) => {
+                                                    const f = e.currentTarget.files?.[0];
+                                                    if (!f) return;
+                                                    const r = new FileReader();
+                                                    r.onload = (ev) => {
+                                                        try {
+                                                            const json = JSON.parse(ev.target?.result as string);
+                                                            setAndPersist({ ...settings, remoteServer: json });
+                                                            alert('Config loaded');
+                                                        } catch { alert('Invalid JSON'); }
+                                                    };
+                                                    r.readAsText(f);
+                                                }}
+                                            />
+                                        </label>
+                                    </div>
+
+                                    {settings.remoteServer && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                            {Object.entries(settings.remoteServer.qbittorrent || {}).map(([name, conf]) => (
+                                                <div key={'qb' + name} className="af-row" style={{ background: '#f9f9f9', borderRadius: '8px' }}>
+                                                    <span className="af-label"><strong>[QB]</strong> {name}</span>
+                                                    <div style={{ fontSize: '12px', color: '#666', marginRight: '8px' }}>{conf.url}</div>
+                                                </div>
+                                            ))}
+                                            {Object.entries(settings.remoteServer.transmission || {}).map(([name, conf]) => (
+                                                <div key={'tr' + name} className="af-row" style={{ background: '#f9f9f9', borderRadius: '8px' }}>
+                                                    <span className="af-label"><strong>[TR]</strong> {name}</span>
+                                                    <div style={{ fontSize: '12px', color: '#666', marginRight: '8px' }}>{conf.url}</div>
+                                                </div>
+                                            ))}
+                                            {Object.entries(settings.remoteServer.deluge || {}).map(([name, conf]) => (
+                                                <div key={'de' + name} className="af-row" style={{ background: '#f9f9f9', borderRadius: '8px' }}>
+                                                    <span className="af-label"><strong>[DE]</strong> {name}</span>
+                                                    <div style={{ fontSize: '12px', color: '#666', marginRight: '8px' }}>{conf.url}</div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
+
+            {/* Remote Config Modal - Using English for tech labels potentially, but keys are translated */}
+            {remoteModalOpen && (
+                <div style={{
+                    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+                    background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100000
+                }}>
+                    <div className="af-panel" style={{ width: '400px', maxHeight: '90%', padding: '0', boxShadow: '0 20px 40px rgba(0,0,0,0.3)' }}>
+                        <div className="af-header">
+                            <h3 className="af-title">{t.addClient}</h3>
+                            <button
+                                type="button"
+                                className="af-close-btn"
+                                onMouseDown={(e) => e.stopPropagation()}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setRemoteModalOpen(false);
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        <div style={{ padding: '20px', overflowY: 'auto' }}>
+                            <div className="af-row">
+                                <span className="af-label">{t.type}</span>
+                                <div className="af-segmented">
+                                    {(['qb', 'tr', 'de'] as const).map(t => (
+                                        <div key={t} className={`af-segment-opt ${remoteForm.type === t ? 'active' : ''}`} onClick={() => setRemoteForm({ ...remoteForm, type: t })}>{t.toUpperCase()}</div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="af-row"><input className="af-input" style={{ flex: 1 }} placeholder={t.name} value={remoteForm.name} onInput={e => setRemoteForm({ ...remoteForm, name: e.currentTarget.value })} /></div>
+                            <div className="af-row"><input className="af-input" style={{ flex: 1 }} placeholder={t.url} value={remoteForm.url} onInput={e => setRemoteForm({ ...remoteForm, url: e.currentTarget.value })} /></div>
+                            <div className="af-row"><input className="af-input" style={{ flex: 1 }} placeholder={t.username} value={remoteForm.username} onInput={e => setRemoteForm({ ...remoteForm, username: e.currentTarget.value })} /></div>
+                            <div className="af-row"><input className="af-input" style={{ flex: 1 }} placeholder={t.password} type="password" value={remoteForm.password} onInput={e => setRemoteForm({ ...remoteForm, password: e.currentTarget.value })} /></div>
+
+                            <div style={{ marginTop: '10px' }}>
+                                <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>{t.downloadPaths}</div>
+                                {remoteForm.paths.map((p, i) => (
+                                    <div key={i} style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
+                                        <input className="af-input" style={{ width: '80px' }} placeholder={t.pathLabel} value={p.label} onInput={e => {
+                                            const np = [...remoteForm.paths]; np[i].label = e.currentTarget.value; setRemoteForm({ ...remoteForm, paths: np });
+                                        }} />
+                                        <input className="af-input" style={{ flex: 1 }} placeholder={t.pathValue} value={p.path} onInput={e => {
+                                            const np = [...remoteForm.paths]; np[i].path = e.currentTarget.value; setRemoteForm({ ...remoteForm, paths: np });
+                                        }} />
+                                    </div>
+                                ))}
+                                <button type="button" className="af-btn" style={{ width: '100%', marginTop: '4px' }} onClick={() => setRemoteForm({ ...remoteForm, paths: [...remoteForm.paths, { label: '', path: '' }] })}>{t.addPath}</button>
+                            </div>
+                        </div>
+                        <div style={{ padding: '16px', borderTop: '1px solid var(--af-border-light)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                            <button type="button" className="af-btn" style={{ marginRight: 'auto' }} onClick={async (e) => {
+                                const btn = e.currentTarget;
+                                const originalText = btn.textContent;
+                                btn.textContent = t.testing;
+                                btn.disabled = true;
+                                try {
+                                    const { type, url, username, password } = remoteForm;
+                                    let res = { ok: false, message: '' };
+                                    if (type === 'qb') res = await RemoteServerTestService.testQbittorrent({ url, username, password });
+                                    else if (type === 'tr') res = await RemoteServerTestService.testTransmission({ url, username, password });
+                                    else res = await RemoteServerTestService.testDeluge({ url, password });
+
+                                    alert(res.ok ? `${t.testSuccess}: ${res.message}` : `${t.testFailed}: ${res.message}`);
+                                } catch (err: any) {
+                                    alert(`${t.testFailed}: ${err?.message || String(err)}`);
+                                } finally {
+                                    btn.textContent = t.testConnection;
+                                    btn.disabled = false;
+                                }
+                            }}>{t.testConnection}</button>
+                            <button type="button" className="af-btn" onClick={() => setRemoteModalOpen(false)}>{t.cancel}</button>
+                            <button type="button" className="af-btn af-btn-primary" onClick={async () => {
+                                const newSettings = { ...settings };
+                                if (!newSettings.remoteServer) newSettings.remoteServer = {};
+                                const key = remoteForm.type === 'qb' ? 'qbittorrent' : remoteForm.type === 'tr' ? 'transmission' : 'deluge';
+                                if (!newSettings.remoteServer[key]) newSettings.remoteServer[key] = {};
+
+                                const pathsMap: Record<string, string> = {};
+                                remoteForm.paths.forEach(p => { if (p.label && p.path) pathsMap[p.label] = p.path; });
+
+                                newSettings.remoteServer[key]![remoteForm.name] = {
+                                    url: remoteForm.url,
+                                    username: remoteForm.username,
+                                    password: remoteForm.password,
+                                    path: pathsMap
+                                };
+
+                                await setAndPersist(newSettings);
+                                setRemoteModalOpen(false);
+                            }}>{t.save}</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

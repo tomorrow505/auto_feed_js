@@ -2,10 +2,13 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { exec } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = process.cwd();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
-const PORT = 5174;
+const BASE_PORT = Number.parseInt(process.env.AUTO_FEED_DEV_PORT || '5174', 10) || 5174;
 
 const runBuild = () =>
   new Promise((resolve, reject) => {
@@ -42,6 +45,11 @@ const startServer = () => {
     if (url === '/' || url === '/auto-feed-refactor.user.js') {
       return serveFile(res, path.join(DIST, 'auto-feed-refactor.user.js'));
     }
+    // Compatibility: some tooling (vite-plugin-monkey) uses this install endpoint.
+    // In "full" mode we just serve the full bundled userscript.
+    if (url === '/__vite-plugin-monkey.install.user.js') {
+      return serveFile(res, path.join(DIST, 'auto-feed-refactor.user.js'));
+    }
     // Avoid accidental installation of the loader when user expects full script.
     if (url === '/auto-feed-loader.user.js') {
       res.writeHead(302, { Location: '/auto-feed-refactor.user.js' });
@@ -55,15 +63,28 @@ const startServer = () => {
     res.end();
   });
 
-  server.listen(PORT, () => {
-    console.log(`[Auto-Feed] Full script dev server: http://localhost:${PORT}/auto-feed-refactor.user.js`);
+  server.on('error', (err) => {
+    if (err && err.code === 'EADDRINUSE') {
+      console.error(`[Auto-Feed] Port ${BASE_PORT} is in use.`);
+      console.error('[Auto-Feed] If you are running the loader dev server, stop it first (npm run dev:loader).');
+      process.exit(1);
+    }
+    throw err;
+  });
+
+  server.listen({ port: BASE_PORT, host: '127.0.0.1' }, () => {
+    console.log(`[Auto-Feed] Full script dev server: http://127.0.0.1:${BASE_PORT}/auto-feed-refactor.user.js`);
+    console.log(`[Auto-Feed] Monkey install URL: http://127.0.0.1:${BASE_PORT}/__vite-plugin-monkey.install.user.js?origin=http%3A%2F%2F127.0.0.1%3A${BASE_PORT}`);
   });
 };
 
 const watch = process.argv.includes('--watch');
+const noBuild = process.argv.includes('--no-build') || process.env.AUTO_FEED_NO_BUILD === '1';
 
 const main = async () => {
-  await runBuild();
+  if (!noBuild) {
+    await runBuild();
+  }
   startServer();
   if (!watch) return;
 

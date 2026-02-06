@@ -71,6 +71,12 @@ export class SiteManager {
 
         const adapter = this.activeEngine; // Alias for legacy code mindset
 
+        // Make sure floating forward UI doesn't leak across SPA navigations / non-source pages.
+        // (Previously the floating FAB could persist and block Settings/Fill toast clicks.)
+        if (!this.isForwardSourcePage(adapter, window.location.href)) {
+            this.removeFloatingButton();
+        }
+
         if (this.isUploadLikePage(window.location.href)) {
             try {
                 await UploadMetaFetchService.tryInject(adapter);
@@ -80,8 +86,8 @@ export class SiteManager {
         }
 
         // 1. INJECT UI IMMEDIATELY (Non-blocking)
-        // Source Mode: Always allow forwarding
-        if (window.location.href.match(/details?(\.php)?|threads|topics|torrents|detail\//i)) {
+        // Source Mode: Only show on "real" detail pages (legacy parity: don't show on list/home/etc.)
+        if (this.isForwardSourcePage(adapter, window.location.href)) {
             // We don't await this, ensuring UI renders ASAP.
             // Any storage needs inside it should be handled internally or via the button click.
             this.injectForwardButton(adapter).catch(err => console.error('[Auto-Feed] Injection Error:', err));
@@ -110,9 +116,6 @@ export class SiteManager {
 
     private async injectForwardButton(adapter: BaseEngine) {
         console.log('[Auto-Feed] Starting injectForwardButton for:', adapter.siteName);
-
-        // Always provide floating entry point as a fallback
-        this.injectFloatingButton(adapter);
 
         const config = adapter.getConfig ? adapter.getConfig() : null;
         const selectorList: string[] = [];
@@ -145,9 +148,28 @@ export class SiteManager {
                 if (btn.length) return btn.parent();
                 return $('h2.pr-\\[2em\\]').parent();
             }
+            // Prefer placing the inline buttons directly under the title for these sites.
+            // Legacy script inserts near the main title/details area (not at the bottom of info tables).
+            if (adapter.siteName === 'PTP') {
+                const title = $('.page__title').first();
+                if (title.length) return title;
+            }
+            if (adapter.siteName === 'HDB') {
+                const title = $('h1#top').first().add($('h1').first()).first();
+                if (title.length) return title;
+            }
+            if (adapter.siteName === 'CHDBits') {
+                const title = $('h1#top').first().add($('#top').first()).add($('h1').first()).first();
+                if (title.length) return title;
+            }
             for (const sel of selectorList) {
                 const el = $(sel).first();
                 if (el.length && el.is(':visible')) {
+                    const tag = (el.get(0)?.tagName || '').toLowerCase();
+                    // If we found a heading/title element, return itself so we can insert AFTER it.
+                    if (['h1', 'h2', 'h3'].includes(tag) || el.hasClass('page__title') || el.attr('id') === 'top') {
+                        return el;
+                    }
                     return el.parent().length ? el.parent() : el;
                 }
             }
@@ -175,13 +197,19 @@ export class SiteManager {
 
         if (anchor.length) {
             console.log('[Auto-Feed] Anchor found:', anchor);
+            // Inline UI is available, so ensure the floating fallback is not present.
+            this.removeFloatingButton();
 
-            // UI Container
-            const uiContainer = $('<div class="autofeed-ui" style="display: inline-flex; flex-direction: column; gap: 8px; margin-left: 10px; vertical-align: middle;"></div>');
+            // UI Container (placed under title on major sites)
+            const uiContainer = $('<div class="autofeed-ui" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:6px;"></div>');
 
             let cachedMeta: any = null;
 
             // 1. Forward Button
+            const { SettingsService } = await import('../services/SettingsService');
+            const uiLang = (await SettingsService.load()).uiLanguage || 'zh';
+            const forwardLabel = uiLang === 'zh' ? '转发' : 'Reupload';
+
             const forwardBtn = $(`
                 <button style="
                     background: linear-gradient(to bottom, #20B2AA, #008B8B); 
@@ -195,7 +223,7 @@ export class SiteManager {
                     display: flex; align-items: center; gap: 5px;
                     font-size: 13px;
                 ">
-                    <span>🚀</span> Forward
+                    <span>🚀</span> ${forwardLabel}
                 </button>
             `);
 
@@ -322,6 +350,17 @@ export class SiteManager {
                         settings.favoriteSites,
                         { chdBaseUrl: settings.chdBaseUrl }
                     );
+                    // Put quick search shortcuts in the forward popup, above image tools.
+                    try {
+                        const html = QuickSearchService.buildQuickSearchHtml(meta, settings.quickSearchList, settings.quickSearchPresets);
+                        if (html) {
+                            const block = $(`<div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #eee;"></div>`);
+                            block.append($(html));
+                            quickLinksRow.append(block);
+                        }
+                    } catch (e) {
+                        console.warn('[Auto-Feed] QuickSearch build failed:', e);
+                    }
                     QuickLinkService.injectImageTools(quickLinksRow, meta);
                     QuickLinkService.injectMetaFetchTools(quickLinksRow, meta);
                     quickLinksRow.show();
@@ -345,6 +384,10 @@ export class SiteManager {
 
             const placeInlineContainer = (target: JQuery) => {
                 const tag = (target.get(0)?.tagName || '').toLowerCase();
+                if (['h1', 'h2', 'h3'].includes(tag) || target.hasClass('page__title') || target.attr('id') === 'top') {
+                    target.after(uiContainer);
+                    return;
+                }
                 if (tag === 'tr') {
                     const colCount =
                         target.children('td,th').length ||
@@ -384,7 +427,8 @@ export class SiteManager {
             }).catch(() => { });
 
         } else {
-            console.log('[Auto-Feed] No anchor found for inline button (floating button already added)');
+            console.log('[Auto-Feed] No anchor found for inline button; using floating fallback');
+            this.injectFloatingButton(adapter);
         }
     }
 
@@ -403,7 +447,8 @@ export class SiteManager {
             position: fixed !important;
             bottom: 100px !important;
             right: 30px !important;
-            z-index: 2147483647 !important;
+            /* Keep this under our settings overlay to avoid blocking close clicks */
+            z-index: 99998 !important;
             display: flex !important;
             flex-direction: column !important;
             gap: 10px !important;
@@ -412,7 +457,19 @@ export class SiteManager {
         `;
 
         const mainBtn = document.createElement('button');
-        mainBtn.innerText = '🚀 Forward Torrent';
+        // Label follows UI language
+        const getMainLabel = async () => {
+            try {
+                const { SettingsService } = await import('../services/SettingsService');
+                const lang = (await SettingsService.load()).uiLanguage || 'zh';
+                return lang === 'zh' ? '🚀 转发种子' : '🚀 Reupload Torrent';
+            } catch {
+                return '🚀 转发种子';
+            }
+        };
+        // Don't block injection on async settings load.
+        mainBtn.innerText = '🚀 转发种子';
+        getMainLabel().then((label) => { mainBtn.innerText = label; }).catch(() => { });
         mainBtn.style.cssText = `
             pointer-events: auto !important;
             background: linear-gradient(135deg, #20B2AA, #008B8B) !important;
@@ -467,7 +524,7 @@ export class SiteManager {
 
                 linksPanel.style.display = 'block';
 
-                setTimeout(() => mainBtn.innerHTML = '🚀 Forward Torrent', 3000);
+                setTimeout(async () => { mainBtn.innerHTML = await getMainLabel(); }, 3000);
             } catch (e) {
                 console.error(e);
                 mainBtn.innerText = '❌ Error';
@@ -480,18 +537,18 @@ export class SiteManager {
         // Robust Append
         (document.body || document.documentElement).appendChild(fab);
         console.log('[Auto-Feed] Floating button matched and appended to body');
+    }
 
-        // Re-inject if removed (SPA)
-        setInterval(() => {
-            if (!document.getElementById(fabId)) {
-                console.log('[Auto-Feed] Floating button vanished, re-injecting...');
-                (document.body || document.documentElement).appendChild(fab);
-            }
-        }, 2000);
+    private removeFloatingButton() {
+        const fab = document.getElementById('autofeed-fab-forced');
+        if (fab) fab.remove();
     }
 
     private async injectFillButton(adapter: BaseEngine, meta: any) {
-        const notify = $(`<div style="position:fixed; bottom:10px; right:10px; z-index:9999; padding: 12px 14px; background: #4CAF50; color: white; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 520px;">
+        // Single instance (SPA-safe)
+        $('#autofeed-founddata-toast').remove();
+
+        const notify = $(`<div id="autofeed-founddata-toast" style="position:fixed; bottom:10px; right:10px; z-index:99997; padding: 12px 14px; background: #4CAF50; color: white; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 520px; pointer-events: auto;">
         <span style="font-size: 12px;">Found Data: <strong>${meta.title}</strong></span>
         <button id="autofeed-fill-btn" style="background: white; color: #4CAF50; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-weight: bold;">重新填充</button>
         <button id="autofeed-close-btn" style="background: transparent; color: white; border: 1px solid white; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Close</button>
@@ -524,7 +581,7 @@ export class SiteManager {
         // 点击获取仅在源站转发处提供，上传页面不提供
 
         notify.find('#autofeed-close-btn').on('click', () => {
-            notify.fadeOut();
+            notify.stop(true, true).fadeOut(150, () => notify.remove());
         });
     }
 
@@ -538,6 +595,23 @@ export class SiteManager {
 
     private isUploadLikePage(url: string): boolean {
         return !!url.match(/upload|offer|torrents\/create|torrents\/upload|torrent\/upload|torrents\/add|upload\.php|p_torrent\/video_upload|#\/torrent\/add|\/torrent\/add/i);
+    }
+
+    private isForwardSourcePage(adapter: BaseEngine, url: string): boolean {
+        const u = new URL(url, window.location.origin);
+        const path = u.pathname || '';
+        const qs = u.search || '';
+
+        // PTP: only when a specific torrent is targeted (torrentid present).
+        if (adapter.siteName === 'PTP') {
+            return path.includes('torrents.php') && /torrentid=\d+/i.test(qs);
+        }
+        // HDB / CHDBits: details.php?id=...
+        if (adapter.siteName === 'HDB' || adapter.siteName === 'CHDBits') {
+            return /details\.php/i.test(path) && /id=\d+/i.test(qs);
+        }
+        // Default fallback
+        return !!url.match(/details?(\.php)?|threads|topics|torrents\/\d+|detail\/\d+|detail\//i);
     }
 
     private async waitForForm(): Promise<boolean> {

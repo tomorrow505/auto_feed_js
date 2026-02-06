@@ -5,6 +5,9 @@ type GMRequest = {
     data?: any;
     responseType?: string;
     overrideMimeType?: string;
+    // Tampermonkey/Greasemonkey options (best-effort, depends on manager)
+    anonymous?: boolean;
+    withCredentials?: boolean;
     onload?: (response: any) => void;
     onerror?: (error: any) => void;
     ontimeout?: () => void;

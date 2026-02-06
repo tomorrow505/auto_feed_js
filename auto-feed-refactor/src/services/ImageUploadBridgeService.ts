@@ -30,7 +30,7 @@ export class ImageUploadBridgeService {
         return { urls: parts, gallery: gallery || undefined };
     }
 
-    static async prepareAndOpen(meta: TorrentMeta, host: 'hdbimg' | 'imgbox') {
+    static async prepareAndOpen(meta: TorrentMeta, host: 'hdbits' | 'imgbox' | 'pixhost' | 'hdbimg') {
         const rawUrls = meta.images?.length ? meta.images : ImageHostService.extractImageUrlsFromBBCode(meta.description || '');
         const normalized = Array.from(
             new Set(
@@ -48,11 +48,10 @@ export class ImageUploadBridgeService {
         const gallery = (meta.title || '').trim().replace(/\s+/g, '.');
         await this.queueImages(normalized, gallery || undefined);
 
-        if (host === 'imgbox') {
-            window.open('https://imgbox.com/', '_blank');
-        } else {
-            window.open('https://hdbimg.com/', '_blank');
-        }
+        if (host === 'imgbox') window.open('https://imgbox.com/', '_blank');
+        else if (host === 'pixhost') window.open('https://pixhost.to/', '_blank');
+        else if (host === 'hdbimg') window.open('https://hdbimg.com/', '_blank');
+        else window.open('https://img.hdbits.org/', '_blank');
     }
 
     static async tryInject() {
@@ -62,6 +61,7 @@ export class ImageUploadBridgeService {
         if (!url.match(/https?:\/\/(www\.)?(imgbox\.com|imagebam\.co|pixhost\.to|img\.hdbits\.org|hdbimg\.com)/i)) {
             return;
         }
+        const host = window.location.host.toLowerCase();
 
         const queue = await this.loadQueue();
         if (!queue || !queue.urls.length) return;
@@ -101,6 +101,15 @@ export class ImageUploadBridgeService {
                     $('#galleryname').val(queue.gallery);
                 }
 
+                // Legacy parity: set host-specific gallery/thumb options.
+                if (host.includes('pixhost.to')) {
+                    $('input.max_th_size').val('350');
+                    $('#gallery_box').prop('checked', true);
+                }
+                if (host.includes('img.hdbits.org')) {
+                    $('#thumbsize').val('w350');
+                }
+
                 await GMAdapter.setValue(IMAGE_QUEUE_KEY, '');
                 button.textContent = '拉取成功';
 
@@ -134,17 +143,58 @@ export class ImageUploadBridgeService {
         return 'image/jpeg';
     }
 
+    private static binaryStringToBytes(bin: string): Uint8Array {
+        const out = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i) & 0xff;
+        return out;
+    }
+
+    private static async fetchAsBlob(url: string, fallbackFilename: string): Promise<Blob> {
+        const resp = await GMAdapter.xmlHttpRequest({
+            method: 'GET',
+            url,
+            // Legacy-compatible binary download (works better than responseType:'blob' on some environments)
+            overrideMimeType: 'text/plain; charset=x-user-defined'
+        });
+
+        // Tampermonkey/Safari variants: sometimes response is Blob/ArrayBuffer; sometimes responseText is binary string.
+        const guessed = this.guessMime(fallbackFilename);
+
+        if (resp?.response instanceof Blob) {
+            const b: Blob = resp.response;
+            return b.type ? b : new Blob([b], { type: guessed });
+        }
+        if (resp?.response && (resp.response as any).byteLength !== undefined) {
+            return new Blob([resp.response], { type: guessed });
+        }
+        const text: string = resp?.responseText || '';
+        if (!text) {
+            // Fallback: try arraybuffer when responseText is empty (some environments ignore overrideMimeType)
+            const abResp = await GMAdapter.xmlHttpRequest({
+                method: 'GET',
+                url,
+                responseType: 'arraybuffer'
+            });
+            if (abResp?.response) return new Blob([abResp.response], { type: guessed });
+            return new Blob([], { type: guessed });
+        }
+        const bytes = this.binaryStringToBytes(text);
+        // TS lib types sometimes treat Uint8Array.buffer as ArrayBufferLike; materialize a real ArrayBuffer.
+        const ab = new ArrayBuffer(bytes.byteLength);
+        new Uint8Array(ab).set(bytes);
+        return new Blob([ab], { type: guessed });
+    }
+
     private static async buildFiles(urls: string[]): Promise<File[]> {
         const tasks = urls.map(async (raw, index) => {
             const url = this.normalizeFetchUrl(raw);
             const filename = decodeURIComponent(url.split('/').pop() || `image-${index}.jpg`).split('?')[0];
-            const resp = await GMAdapter.xmlHttpRequest({
-                method: 'GET',
-                url,
-                responseType: 'blob'
-            });
-            const blob: Blob = resp.response;
-            const type = blob?.type || this.guessMime(filename);
+            // Legacy: only pull obvious image formats; skip unknown urls.
+            if (!filename.match(/\.(png|jpe?g|gif|webp)$/i)) {
+                return new File([new Blob([], { type: this.guessMime(filename) })], filename || `image-${index}.jpg`, { type: this.guessMime(filename) });
+            }
+            const blob = await this.fetchAsBlob(url, filename || `image-${index}.jpg`);
+            const type = (blob && (blob as any).type) ? (blob as any).type : this.guessMime(filename);
             return new File([blob], filename || `image-${index}.jpg`, { type });
         });
         return Promise.all(tasks);

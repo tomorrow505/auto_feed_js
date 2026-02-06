@@ -16,14 +16,21 @@ export class RemoteDownloadService {
         // Only show on detail-like pages
         if (!this.isDetailPage(window.location.href)) return;
 
-        this.injectSidebar(settings.remoteServer, engine);
+        this.injectSidebar(settings.remoteServer, engine, {
+            skipDefault: !!settings.remoteSkipCheckingDefault,
+            askConfirm: !!settings.remoteAskSkipConfirm
+        });
     }
 
     private static isDetailPage(url: string): boolean {
         return !!url.match(/details?(\.php)?|threads|topics|torrents|detail\//i);
     }
 
-    private static injectSidebar(config: RemoteServerConfig, engine: any) {
+    private static injectSidebar(
+        config: RemoteServerConfig,
+        engine: any,
+        opts: { skipDefault: boolean; askConfirm: boolean }
+    ) {
         GMAdapter.xmlHttpRequest; // ensure GM granted
         this.injectStyles();
 
@@ -34,6 +41,7 @@ export class RemoteDownloadService {
                     <div class="download-icon">⬇</div>
                 </div>
                 <ul id="autofeed-remote-list"></ul>
+                <div id="autofeed-remote-status" style="display:none;"></div>
             </div>
         `);
 
@@ -63,6 +71,7 @@ export class RemoteDownloadService {
 
         const qb = config.qbittorrent || {};
         const tr = config.transmission || {};
+        const de = config.deluge || {};
 
         const $list = $('#autofeed-remote-list');
         Object.keys(qb).forEach((server) => {
@@ -81,6 +90,14 @@ export class RemoteDownloadService {
             });
         });
 
+        Object.keys(de).forEach((server) => {
+            $list.append(`<li class="menu-item" data-server="${server}" data-type="de"><a href="${de[server].url}" target="_blank">D-${server}</a><ul class="submenu" id="autofeed-ul-${server}"></ul></li>`);
+            const $submenu = $(`#autofeed-ul-${server}`);
+            Object.keys(de[server].path || {}).forEach((label) => {
+                $submenu.append(`<li><a href="#" class="de_download" data-path="${de[server].path[label]}">${label}</a></li>`);
+            });
+        });
+
         const dialogBox = (yesCallback: () => void, noCallback: () => void) => {
             $('.autofeed-remote-dialog').removeClass('hide').addClass('show');
             $('#autofeed-confirm').off('click').on('click', () => {
@@ -96,6 +113,21 @@ export class RemoteDownloadService {
             });
         };
 
+        const setStatus = (text: string, kind: 'info' | 'ok' | 'err' = 'info', hideAfterMs?: number) => {
+            const el = document.getElementById('autofeed-remote-status') as HTMLDivElement | null;
+            if (!el) return;
+            el.style.display = 'block';
+            el.setAttribute('data-kind', kind);
+            el.textContent = text;
+            if (hideAfterMs && hideAfterMs > 0) {
+                window.setTimeout(() => {
+                    const el2 = document.getElementById('autofeed-remote-status') as HTMLDivElement | null;
+                    if (!el2) return;
+                    el2.style.display = 'none';
+                }, hideAfterMs);
+            }
+        };
+
         $('.qb_download').on('click', async (e) => {
             e.preventDefault();
             const $target = $(e.currentTarget);
@@ -104,10 +136,12 @@ export class RemoteDownloadService {
             const label = $target.text();
             const server = qb[serverName];
             if (!server) return;
-            dialogBox(
-                () => this.pushToQb(engine, server, path, label, true),
-                () => this.pushToQb(engine, server, path, label, false)
-            );
+            const run = (skip: boolean) => {
+                setStatus(`正在推送(QB): ${serverName} / ${label}...`, 'info');
+                this.pushToQb(engine, server, path, label, skip, setStatus);
+            };
+            if (opts.askConfirm) dialogBox(() => run(true), () => run(false));
+            else run(opts.skipDefault);
         });
 
         $('.tr_download').on('click', async (e) => {
@@ -118,10 +152,28 @@ export class RemoteDownloadService {
             const label = $target.text();
             const server = tr[serverName];
             if (!server) return;
-            dialogBox(
-                () => this.pushToTransmission(engine, server, path, label, true),
-                () => this.pushToTransmission(engine, server, path, label, false)
-            );
+            const run = (skip: boolean) => {
+                setStatus(`正在推送(TR): ${serverName} / ${label}...`, 'info');
+                this.pushToTransmission(engine, server, path, label, skip, setStatus);
+            };
+            if (opts.askConfirm) dialogBox(() => run(true), () => run(false));
+            else run(opts.skipDefault);
+        });
+
+        $('.de_download').on('click', async (e) => {
+            e.preventDefault();
+            const $target = $(e.currentTarget);
+            const serverName = $target.closest('.menu-item').data('server');
+            const path = $target.data('path');
+            const label = $target.text();
+            const server = de[serverName];
+            if (!server) return;
+            const run = (skip: boolean) => {
+                setStatus(`正在推送(DE): ${serverName} / ${label}...`, 'info');
+                this.pushToDeluge(engine, server, path, label, skip, setStatus);
+            };
+            if (opts.askConfirm) dialogBox(() => run(true), () => run(false));
+            else run(opts.skipDefault);
         });
 
         const menuItems = document.querySelectorAll('#autofeed-remote-sidebar .menu-item');
@@ -152,15 +204,27 @@ export class RemoteDownloadService {
         }
     }
 
-    private static async pushToQb(engine: any, server: any, path: string, tag: string, skipChecking: boolean) {
+    private static async pushToQb(
+        engine: any,
+        server: any,
+        path: string,
+        tag: string,
+        skipChecking: boolean,
+        onStatus?: (text: string, kind?: 'info' | 'ok' | 'err', hideAfterMs?: number) => void
+    ) {
         const meta = await this.getMeta(engine);
         if (!meta?.torrentUrl) {
             alert('未找到种子下载链接');
+            onStatus?.('推送失败: 未找到种子链接', 'err', 3000);
             return;
         }
 
+        onStatus?.('下载种子中...', 'info');
         const blob = await this.downloadTorrentBlob(meta.torrentUrl);
-        if (!blob) return;
+        if (!blob) {
+            onStatus?.('推送失败: 种子下载失败', 'err', 3000);
+            return;
+        }
 
         const torrentFile = new File([blob], meta.torrentFilename || 'autofeed.torrent', { type: 'application/x-bittorrent' });
         const formData = new FormData();
@@ -178,30 +242,47 @@ export class RemoteDownloadService {
 
         const host = this.normalizeHost(server.url);
         try {
+            onStatus?.('登录 qBittorrent...', 'info');
             await this.qbRequest(host, '/auth/login', {
                 username: server.username,
                 password: server.password
             });
+            onStatus?.('推送中...', 'info');
             await this.qbRequest(host, '/torrents/add', formData);
             this.showToast();
+            onStatus?.('推送完成', 'ok', 3000);
         } catch (err) {
             console.error(err);
             alert('远程推送失败，请检查 QB 状态和配置');
+            onStatus?.('推送失败', 'err', 5000);
         }
     }
 
-    private static async pushToTransmission(engine: any, server: any, path: string, tag: string, skipChecking: boolean) {
+    private static async pushToTransmission(
+        engine: any,
+        server: any,
+        path: string,
+        tag: string,
+        skipChecking: boolean,
+        onStatus?: (text: string, kind?: 'info' | 'ok' | 'err', hideAfterMs?: number) => void
+    ) {
         const meta = await this.getMeta(engine);
         if (!meta?.torrentUrl) {
             alert('未找到种子下载链接');
+            onStatus?.('推送失败: 未找到种子链接', 'err', 3000);
             return;
         }
 
+        onStatus?.('下载种子中...', 'info');
         const base64 = await this.downloadTorrentBase64(meta.torrentUrl);
-        if (!base64) return;
+        if (!base64) {
+            onStatus?.('推送失败: 种子下载失败', 'err', 3000);
+            return;
+        }
 
         const host = this.normalizeHost(server.url);
         try {
+            onStatus?.('推送中...', 'info');
             await this.transmissionRequest(
                 `${host}transmission/rpc`,
                 server.username,
@@ -212,9 +293,99 @@ export class RemoteDownloadService {
                 skipChecking
             );
             this.showToast();
+            onStatus?.('推送完成', 'ok', 3000);
         } catch (err) {
             console.error(err);
             alert('远程推送失败，请检查 Transmission 状态和配置');
+            onStatus?.('推送失败', 'err', 5000);
+        }
+    }
+
+    private static delugeMsgId = 0;
+    private static normalizeDelugeEndpoint(url: string): string {
+        const host = this.normalizeHost(url);
+        if (!host) return '';
+        if (host.match(/\/json\/?$/i)) return host.replace(/\/$/, '');
+        return host.replace(/\/$/, '') + '/json';
+    }
+
+    private static async delugeRequest(endpoint: string, method: string, params: any[] = []) {
+        const id = this.delugeMsgId++;
+        const res = await GMAdapter.xmlHttpRequest({
+            method: 'POST',
+            url: endpoint,
+            headers: { 'Content-Type': 'application/json' },
+            withCredentials: true,
+            anonymous: false,
+            data: JSON.stringify({ id, method, params })
+        });
+        const text = res.responseText || '';
+        const json = text ? JSON.parse(text) : null;
+        if (!json) throw new Error('Deluge: empty response');
+        if (json.error) throw new Error(`Deluge: ${json.error}`);
+        return json.result;
+    }
+
+    private static async pushToDeluge(
+        engine: any,
+        server: any,
+        path: string,
+        tag: string,
+        skipChecking: boolean,
+        onStatus?: (text: string, kind?: 'info' | 'ok' | 'err', hideAfterMs?: number) => void
+    ) {
+        const meta = await this.getMeta(engine);
+        if (!meta?.torrentUrl) {
+            alert('未找到种子下载链接');
+            onStatus?.('推送失败: 未找到种子链接', 'err', 3000);
+            return;
+        }
+
+        onStatus?.('下载种子中...', 'info');
+        const base64 = await this.downloadTorrentBase64(meta.torrentUrl);
+        if (!base64) {
+            onStatus?.('推送失败: 种子下载失败', 'err', 3000);
+            return;
+        }
+
+        const endpoint = this.normalizeDelugeEndpoint(server.url);
+        if (!endpoint) {
+            alert('Deluge 地址为空');
+            return;
+        }
+
+        const options: any = {
+            add_paused: false
+        };
+        if (path) options.download_location = path;
+        if (skipChecking) {
+            // Similar to "skip verify": assume files exist and enter seed mode.
+            options.seed_mode = true;
+        }
+
+        try {
+            onStatus?.('登录 Deluge...', 'info');
+            await this.delugeRequest(endpoint, 'auth.login', [server.password || '']);
+            onStatus?.('推送中...', 'info');
+            const result = await this.delugeRequest(endpoint, 'core.add_torrent_file', ['', base64, options]);
+
+            // Optional label plugin
+            try {
+                const hash = Array.isArray(result) && Array.isArray(result[0]) ? result[0][1] : '';
+                if (hash) await this.delugeRequest(endpoint, 'label.set_torrent', [hash, tag]);
+            } catch {}
+
+            if (result === null) {
+                alert('远程推送失败: Deluge 返回空结果');
+                onStatus?.('推送失败: Deluge 返回空结果', 'err', 5000);
+                return;
+            }
+            this.showToast();
+            onStatus?.('推送完成', 'ok', 3000);
+        } catch (err) {
+            console.error(err);
+            alert('远程推送失败，请检查 Deluge Web 状态和配置');
+            onStatus?.('推送失败', 'err', 5000);
         }
     }
 
@@ -398,6 +569,18 @@ export class RemoteDownloadService {
             padding: 0;
             margin: 0;
         }
+        #autofeed-remote-status {
+            padding: 8px 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ecf0f1;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.15;
+            background: rgba(0, 0, 0, 0.08);
+            word-break: break-word;
+        }
+        #autofeed-remote-status[data-kind="ok"] { color: #b6f7c1; }
+        #autofeed-remote-status[data-kind="err"] { color: #ffd0d0; }
         #autofeed-remote-sidebar li a {
             display: flex;
             justify-content: center;

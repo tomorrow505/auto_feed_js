@@ -67,7 +67,7 @@
 System.addImportMap({ imports: {"jquery":"user:jquery"} });
 System.set("user:jquery", (()=>{const _=jQuery;('default' in _)||(_.default=_);return _})());
 
-System.register("./__entry.js", ['./__monkey.entry-Bddmwiuq.js'], (function (exports, module) {
+System.register("./__entry.js", ['./__monkey.entry-Bp_BrHPF.js'], (function (exports, module) {
 	'use strict';
 	return {
 		setters: [null],
@@ -79,7 +79,7 @@ System.register("./__entry.js", ['./__monkey.entry-Bddmwiuq.js'], (function (exp
 	};
 }));
 
-System.register("./__monkey.entry-Bddmwiuq.js", ['jquery'], (function (exports, module) {
+System.register("./__monkey.entry-Bp_BrHPF.js", ['jquery'], (function (exports, module) {
   'use strict';
   var $$1;
   return {
@@ -440,7 +440,7 @@ ${content}
           if (fileInput) {
             try {
               const { TorrentService } = await __vitePreload(async () => {
-                const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
+                const { TorrentService: TorrentService2 } = await module.import('./TorrentService-pxyyCZrj-DHzjrriL.js');
                 return { TorrentService: TorrentService2 };
               }, true ? void 0 : void 0);
               const result = await TorrentService.buildForwardTorrentFile(meta, config.name, null);
@@ -1125,6 +1125,8 @@ ${content}
         showQuickSearchOnDouban: true,
         showQuickSearchOnImdb: true,
         enableRemoteSidebar: false,
+        remoteSkipCheckingDefault: false,
+        remoteAskSkipConfirm: false,
         remoteServer: null,
         imdbToDoubanMethod: 0,
         ptgenApi: 3,
@@ -1139,7 +1141,8 @@ ${content}
           HDB: false,
           HDT: false,
           UHD: false
-        }
+        },
+        uiLanguage: "zh"
       };
       class SettingsService {
         static async load() {
@@ -1327,7 +1330,7 @@ ${content}
             if (fileInput) {
               try {
                 const { TorrentService } = await __vitePreload(async () => {
-                  const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
+                  const { TorrentService: TorrentService2 } = await module.import('./TorrentService-pxyyCZrj-DHzjrriL.js');
                   return { TorrentService: TorrentService2 };
                 }, true ? void 0 : void 0);
                 const file = TorrentService.base64ToFile(meta.torrentBase64, meta.torrentFilename);
@@ -2069,7 +2072,7 @@ ${mediainfo.trim()}
           meta.standardSel = meta.standardSel || getStandardSel(infoText);
           try {
             const { TorrentService } = await __vitePreload(async () => {
-              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
+              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-pxyyCZrj-DHzjrriL.js');
               return { TorrentService: TorrentService2 };
             }, true ? void 0 : void 0);
             const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, null);
@@ -2411,7 +2414,7 @@ ${mediainfo.trim()}
           }
           try {
             const { TorrentService } = await __vitePreload(async () => {
-              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
+              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-pxyyCZrj-DHzjrriL.js');
               return { TorrentService: TorrentService2 };
             }, true ? void 0 : void 0);
             const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, null);
@@ -2687,7 +2690,7 @@ ${mediainfo.trim()}
             const announceText = $$1("h2").find("div").text().trim();
             const announceUrl = ((_a = announceText.match(/https?:\/\/[^\s"'<>]+/)) == null ? void 0 : _a[0]) || announceText || null;
             const { TorrentService } = await __vitePreload(async () => {
-              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
+              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-pxyyCZrj-DHzjrriL.js');
               return { TorrentService: TorrentService2 };
             }, true ? void 0 : void 0);
             const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, announceUrl);
@@ -3087,7 +3090,7 @@ ${comparePicture}`;
           const announce = ((_a = $$1('input[value*="announce"]').val()) == null ? void 0 : _a.toString()) || null;
           try {
             const { TorrentService } = await __vitePreload(async () => {
-              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
+              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-pxyyCZrj-DHzjrriL.js');
               return { TorrentService: TorrentService2 };
             }, true ? void 0 : void 0);
             const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, announce);
@@ -3483,7 +3486,7 @@ ${shots.map((u2) => `[img]${u2}[/img]`).join("\n")}`.trim();
               }
               const announce = passkey ? `http://tracker.hdbits.org/announce.php?passkey=${passkey}` : null;
               const { TorrentService } = await __vitePreload(async () => {
-                const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
+                const { TorrentService: TorrentService2 } = await module.import('./TorrentService-pxyyCZrj-DHzjrriL.js');
                 return { TorrentService: TorrentService2 };
               }, true ? void 0 : void 0);
               const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, announce);
@@ -3671,7 +3674,9 @@ ${info.picInfo}`.trim());
         static getFullSizeUrl(url) {
           let newUrl = url;
           if (url.match(/imgbox/)) {
-            newUrl = url.replace("thumbs2", "images2").replace("t.png", "o.png");
+            newUrl = url.replace("thumbs2", "images2");
+            newUrl = newUrl.replace(/_t\.(png|jpg|jpeg|gif)(\?|$)/i, (_m, ext, tail) => `_o.${ext}${tail || ""}`);
+            newUrl = newUrl.replace("t.png", "o.png");
           } else if (url.match(/pixhost/)) {
             newUrl = url.replace("//t", "//img").replace("thumbs", "images");
           } else if (url.match(/shewang.net|pterclub.net|img4k.net|img.hdhome.org|img.hdchina.org/)) {
@@ -4198,11 +4203,10 @@ ${updated.description || ""}`.trim();
           }
           const gallery = (meta.title || "").trim().replace(/\s+/g, ".");
           await this.queueImages(normalized, gallery || void 0);
-          if (host === "imgbox") {
-            window.open("https://imgbox.com/", "_blank");
-          } else {
-            window.open("https://hdbimg.com/", "_blank");
-          }
+          if (host === "imgbox") window.open("https://imgbox.com/", "_blank");
+          else if (host === "pixhost") window.open("https://pixhost.to/", "_blank");
+          else if (host === "hdbimg") window.open("https://hdbimg.com/", "_blank");
+          else window.open("https://img.hdbits.org/", "_blank");
         }
         static async tryInject() {
           if (document.body.dataset.autofeedImageHost === "1") return;
@@ -4210,6 +4214,7 @@ ${updated.description || ""}`.trim();
           if (!url.match(/https?:\/\/(www\.)?(imgbox\.com|imagebam\.co|pixhost\.to|img\.hdbits\.org|hdbimg\.com)/i)) {
             return;
           }
+          const host = window.location.host.toLowerCase();
           const queue = await this.loadQueue();
           if (!queue || !queue.urls.length) return;
           const $fileInput = await this.waitForFileInput();
@@ -4242,6 +4247,13 @@ ${updated.description || ""}`.trim();
                 $$1('input[name="gallery_name"]').val(queue.gallery);
                 $$1("#galleryname").val(queue.gallery);
               }
+              if (host.includes("pixhost.to")) {
+                $$1("input.max_th_size").val("350");
+                $$1("#gallery_box").prop("checked", true);
+              }
+              if (host.includes("img.hdbits.org")) {
+                $$1("#thumbsize").val("w350");
+              }
               await GMAdapter.setValue(IMAGE_QUEUE_KEY, "");
               button.textContent = "拉取成功";
             } catch (err) {
@@ -4271,17 +4283,50 @@ ${updated.description || ""}`.trim();
           if (ext === "gif") return "image/gif";
           return "image/jpeg";
         }
+        static binaryStringToBytes(bin) {
+          const out = new Uint8Array(bin.length);
+          for (let i2 = 0; i2 < bin.length; i2++) out[i2] = bin.charCodeAt(i2) & 255;
+          return out;
+        }
+        static async fetchAsBlob(url, fallbackFilename) {
+          const resp = await GMAdapter.xmlHttpRequest({
+            method: "GET",
+            url,
+            // Legacy-compatible binary download (works better than responseType:'blob' on some environments)
+            overrideMimeType: "text/plain; charset=x-user-defined"
+          });
+          const guessed = this.guessMime(fallbackFilename);
+          if ((resp == null ? void 0 : resp.response) instanceof Blob) {
+            const b = resp.response;
+            return b.type ? b : new Blob([b], { type: guessed });
+          }
+          if ((resp == null ? void 0 : resp.response) && resp.response.byteLength !== void 0) {
+            return new Blob([resp.response], { type: guessed });
+          }
+          const text = (resp == null ? void 0 : resp.responseText) || "";
+          if (!text) {
+            const abResp = await GMAdapter.xmlHttpRequest({
+              method: "GET",
+              url,
+              responseType: "arraybuffer"
+            });
+            if (abResp == null ? void 0 : abResp.response) return new Blob([abResp.response], { type: guessed });
+            return new Blob([], { type: guessed });
+          }
+          const bytes = this.binaryStringToBytes(text);
+          const ab = new ArrayBuffer(bytes.byteLength);
+          new Uint8Array(ab).set(bytes);
+          return new Blob([ab], { type: guessed });
+        }
         static async buildFiles(urls) {
           const tasks = urls.map(async (raw, index) => {
             const url = this.normalizeFetchUrl(raw);
             const filename = decodeURIComponent(url.split("/").pop() || `image-${index}.jpg`).split("?")[0];
-            const resp = await GMAdapter.xmlHttpRequest({
-              method: "GET",
-              url,
-              responseType: "blob"
-            });
-            const blob = resp.response;
-            const type = (blob == null ? void 0 : blob.type) || this.guessMime(filename);
+            if (!filename.match(/\.(png|jpe?g|gif|webp)$/i)) {
+              return new File([new Blob([], { type: this.guessMime(filename) })], filename || `image-${index}.jpg`, { type: this.guessMime(filename) });
+            }
+            const blob = await this.fetchAsBlob(url, filename || `image-${index}.jpg`);
+            const type = blob && blob.type ? blob.type : this.guessMime(filename);
             return new File([blob], filename || `image-${index}.jpg`, { type });
           });
           return Promise.all(tasks);
@@ -4312,11 +4357,11 @@ ${updated.description || ""}`.trim();
         `;
           const panel = document.createElement("div");
           panel.style.cssText = `
-            width: 68vw;
+            width: 64vw;
             max-width: 980px;
-            height: 52vh;
-            max-height: 460px;
-            min-height: 260px;
+            height: 38vh;
+            max-height: 320px;
+            min-height: 200px;
             background: #fff;
             border-radius: 8px;
             display: flex;
@@ -4431,10 +4476,10 @@ ${updated.description || ""}`.trim();
             showLinks("GIFYU 结果", before, meta.description || "");
             alert("已转存至 Gifyu");
           });
-          const hdbimg = makeToolLink("HDBIMG");
+          const hdbimg = makeToolLink("HDB");
           hdbimg.on("click", async (e2) => {
             e2.preventDefault();
-            await ImageUploadBridgeService.prepareAndOpen(meta, "hdbimg");
+            await ImageUploadBridgeService.prepareAndOpen(meta, "hdbits");
           });
           const imgbox = makeToolLink("IMGBOX");
           imgbox.on("click", async (e2) => {
@@ -4725,7 +4770,7 @@ ${updated.description || ""}`.trim();
           row.append('<span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>');
           items.forEach((item) => {
             const link = $$1(
-              `<a href="${item.url}" target="_blank" style="display:inline-block; margin-right:6px; margin-bottom:4px; padding:2px 6px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${item.name}</a>`
+              `<a href="${item.url}" target="_blank" style="display:inline-block; margin-right:3px; margin-bottom:4px; padding:2px 5px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${item.name}</a>`
             );
             row.append(link);
           });
@@ -5054,6 +5099,20 @@ ${updated.description || ""}`.trim();
         }
       }
       class QuickSearchService {
+        /**
+         * Build a compact "quick search" links row for using inside other UIs (forward popup, etc).
+         * Returns a string of HTML (no container), or empty string if nothing can be built.
+         */
+        static buildQuickSearchHtml(meta, quickSearchList, quickSearchPresets) {
+          const makeLink = (name, url) => `<a href="${url}" target="_blank" style="display:inline-block; margin-right:3px; margin-bottom:4px; padding:2px 5px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${name}</a>`;
+          const list = Array.isArray(quickSearchList) && quickSearchList.length ? quickSearchList : Array.isArray(quickSearchPresets) && quickSearchPresets.length ? quickSearchPresets : DEFAULT_QUICK_SEARCH_TEMPLATES;
+          const items = buildQuickSearchItems(list, meta);
+          if (!items.length) return "";
+          const links = items.map((item) => makeLink(item.name, item.url)).join("");
+          return `<div class="autofeed-search-links" style="font-size: 12px;">
+            <span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>${links}
+        </div>`;
+        }
         static async tryInject() {
           const url = window.location.href;
           const settings = await SettingsService.load();
@@ -5071,7 +5130,7 @@ ${updated.description || ""}`.trim();
             const row = $$1('<div class="autofeed-search-links" style="margin-top: 6px; font-size: 12px;"></div>');
             row.append('<span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>');
             const makeLink = (name, url) => $$1(
-              `<a href="${url}" target="_blank" style="display:inline-block; margin-right:6px; margin-bottom:4px; padding:2px 6px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${name}</a>`
+              `<a href="${url}" target="_blank" style="display:inline-block; margin-right:3px; margin-bottom:4px; padding:2px 5px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${name}</a>`
             );
             if (Array.isArray(s2.quickSearchList)) {
               const items = buildQuickSearchItems(s2.quickSearchList, meta);
@@ -5178,12 +5237,15 @@ ${updated.description || ""}`.trim();
           const engine = SiteRegistry.getEngine(window.location.href);
           if (!engine) return;
           if (!this.isDetailPage(window.location.href)) return;
-          this.injectSidebar(settings.remoteServer, engine);
+          this.injectSidebar(settings.remoteServer, engine, {
+            skipDefault: !!settings.remoteSkipCheckingDefault,
+            askConfirm: !!settings.remoteAskSkipConfirm
+          });
         }
         static isDetailPage(url) {
           return !!url.match(/details?(\.php)?|threads|topics|torrents|detail\//i);
         }
-        static injectSidebar(config, engine) {
+        static injectSidebar(config, engine, opts) {
           this.injectStyles();
           $$1("body").append(`
             <div id="autofeed-remote-sidebar">
@@ -5192,6 +5254,7 @@ ${updated.description || ""}`.trim();
                     <div class="download-icon">⬇</div>
                 </div>
                 <ul id="autofeed-remote-list"></ul>
+                <div id="autofeed-remote-status" style="display:none;"></div>
             </div>
         `);
           $$1("body").append(`
@@ -5218,6 +5281,7 @@ ${updated.description || ""}`.trim();
         `);
           const qb = config.qbittorrent || {};
           const tr = config.transmission || {};
+          const de = config.deluge || {};
           const $list = $$1("#autofeed-remote-list");
           Object.keys(qb).forEach((server) => {
             $list.append(`<li class="menu-item" data-server="${server}" data-type="qb"><a href="${qb[server].url}" target="_blank">Q-${server}</a><ul class="submenu" id="autofeed-ul-${server}"></ul></li>`);
@@ -5231,6 +5295,13 @@ ${updated.description || ""}`.trim();
             const $submenu = $$1(`#autofeed-ul-${server}`);
             Object.keys(tr[server].path || {}).forEach((label) => {
               $submenu.append(`<li><a href="#" class="tr_download" data-path="${tr[server].path[label]}">${label}</a></li>`);
+            });
+          });
+          Object.keys(de).forEach((server) => {
+            $list.append(`<li class="menu-item" data-server="${server}" data-type="de"><a href="${de[server].url}" target="_blank">D-${server}</a><ul class="submenu" id="autofeed-ul-${server}"></ul></li>`);
+            const $submenu = $$1(`#autofeed-ul-${server}`);
+            Object.keys(de[server].path || {}).forEach((label) => {
+              $submenu.append(`<li><a href="#" class="de_download" data-path="${de[server].path[label]}">${label}</a></li>`);
             });
           });
           const dialogBox = (yesCallback, noCallback) => {
@@ -5247,6 +5318,20 @@ ${updated.description || ""}`.trim();
               $$1(".autofeed-remote-dialog").addClass("hide");
             });
           };
+          const setStatus = (text, kind = "info", hideAfterMs) => {
+            const el = document.getElementById("autofeed-remote-status");
+            if (!el) return;
+            el.style.display = "block";
+            el.setAttribute("data-kind", kind);
+            el.textContent = text;
+            if (hideAfterMs && hideAfterMs > 0) {
+              window.setTimeout(() => {
+                const el2 = document.getElementById("autofeed-remote-status");
+                if (!el2) return;
+                el2.style.display = "none";
+              }, hideAfterMs);
+            }
+          };
           $$1(".qb_download").on("click", async (e2) => {
             e2.preventDefault();
             const $target = $$1(e2.currentTarget);
@@ -5255,10 +5340,12 @@ ${updated.description || ""}`.trim();
             const label = $target.text();
             const server = qb[serverName];
             if (!server) return;
-            dialogBox(
-              () => this.pushToQb(engine, server, path, label, true),
-              () => this.pushToQb(engine, server, path, label, false)
-            );
+            const run = (skip) => {
+              setStatus(`正在推送(QB): ${serverName} / ${label}...`, "info");
+              this.pushToQb(engine, server, path, label, skip, setStatus);
+            };
+            if (opts.askConfirm) dialogBox(() => run(true), () => run(false));
+            else run(opts.skipDefault);
           });
           $$1(".tr_download").on("click", async (e2) => {
             e2.preventDefault();
@@ -5268,10 +5355,27 @@ ${updated.description || ""}`.trim();
             const label = $target.text();
             const server = tr[serverName];
             if (!server) return;
-            dialogBox(
-              () => this.pushToTransmission(engine, server, path, label, true),
-              () => this.pushToTransmission(engine, server, path, label, false)
-            );
+            const run = (skip) => {
+              setStatus(`正在推送(TR): ${serverName} / ${label}...`, "info");
+              this.pushToTransmission(engine, server, path, label, skip, setStatus);
+            };
+            if (opts.askConfirm) dialogBox(() => run(true), () => run(false));
+            else run(opts.skipDefault);
+          });
+          $$1(".de_download").on("click", async (e2) => {
+            e2.preventDefault();
+            const $target = $$1(e2.currentTarget);
+            const serverName = $target.closest(".menu-item").data("server");
+            const path = $target.data("path");
+            const label = $target.text();
+            const server = de[serverName];
+            if (!server) return;
+            const run = (skip) => {
+              setStatus(`正在推送(DE): ${serverName} / ${label}...`, "info");
+              this.pushToDeluge(engine, server, path, label, skip, setStatus);
+            };
+            if (opts.askConfirm) dialogBox(() => run(true), () => run(false));
+            else run(opts.skipDefault);
           });
           const menuItems = document.querySelectorAll("#autofeed-remote-sidebar .menu-item");
           menuItems.forEach((item) => {
@@ -5299,14 +5403,19 @@ ${updated.description || ""}`.trim();
             return null;
           }
         }
-        static async pushToQb(engine, server, path, tag, skipChecking) {
+        static async pushToQb(engine, server, path, tag, skipChecking, onStatus) {
           const meta = await this.getMeta(engine);
           if (!(meta == null ? void 0 : meta.torrentUrl)) {
             alert("未找到种子下载链接");
+            onStatus == null ? void 0 : onStatus("推送失败: 未找到种子链接", "err", 3e3);
             return;
           }
+          onStatus == null ? void 0 : onStatus("下载种子中...", "info");
           const blob = await this.downloadTorrentBlob(meta.torrentUrl);
-          if (!blob) return;
+          if (!blob) {
+            onStatus == null ? void 0 : onStatus("推送失败: 种子下载失败", "err", 3e3);
+            return;
+          }
           const torrentFile = new File([blob], meta.torrentFilename || "autofeed.torrent", { type: "application/x-bittorrent" });
           const formData = new FormData();
           const siteUpLimits = {
@@ -5322,27 +5431,37 @@ ${updated.description || ""}`.trim();
           formData.append("skip_checking", String(skipChecking));
           const host = this.normalizeHost(server.url);
           try {
+            onStatus == null ? void 0 : onStatus("登录 qBittorrent...", "info");
             await this.qbRequest(host, "/auth/login", {
               username: server.username,
               password: server.password
             });
+            onStatus == null ? void 0 : onStatus("推送中...", "info");
             await this.qbRequest(host, "/torrents/add", formData);
             this.showToast();
+            onStatus == null ? void 0 : onStatus("推送完成", "ok", 3e3);
           } catch (err) {
             console.error(err);
             alert("远程推送失败，请检查 QB 状态和配置");
+            onStatus == null ? void 0 : onStatus("推送失败", "err", 5e3);
           }
         }
-        static async pushToTransmission(engine, server, path, tag, skipChecking) {
+        static async pushToTransmission(engine, server, path, tag, skipChecking, onStatus) {
           const meta = await this.getMeta(engine);
           if (!(meta == null ? void 0 : meta.torrentUrl)) {
             alert("未找到种子下载链接");
+            onStatus == null ? void 0 : onStatus("推送失败: 未找到种子链接", "err", 3e3);
             return;
           }
+          onStatus == null ? void 0 : onStatus("下载种子中...", "info");
           const base64 = await this.downloadTorrentBase64(meta.torrentUrl);
-          if (!base64) return;
+          if (!base64) {
+            onStatus == null ? void 0 : onStatus("推送失败: 种子下载失败", "err", 3e3);
+            return;
+          }
           const host = this.normalizeHost(server.url);
           try {
+            onStatus == null ? void 0 : onStatus("推送中...", "info");
             await this.transmissionRequest(
               `${host}transmission/rpc`,
               server.username,
@@ -5353,9 +5472,81 @@ ${updated.description || ""}`.trim();
               skipChecking
             );
             this.showToast();
+            onStatus == null ? void 0 : onStatus("推送完成", "ok", 3e3);
           } catch (err) {
             console.error(err);
             alert("远程推送失败，请检查 Transmission 状态和配置");
+            onStatus == null ? void 0 : onStatus("推送失败", "err", 5e3);
+          }
+        }
+        static normalizeDelugeEndpoint(url) {
+          const host = this.normalizeHost(url);
+          if (!host) return "";
+          if (host.match(/\/json\/?$/i)) return host.replace(/\/$/, "");
+          return host.replace(/\/$/, "") + "/json";
+        }
+        static async delugeRequest(endpoint, method, params = []) {
+          const id = this.delugeMsgId++;
+          const res = await GMAdapter.xmlHttpRequest({
+            method: "POST",
+            url: endpoint,
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
+            anonymous: false,
+            data: JSON.stringify({ id, method, params })
+          });
+          const text = res.responseText || "";
+          const json = text ? JSON.parse(text) : null;
+          if (!json) throw new Error("Deluge: empty response");
+          if (json.error) throw new Error(`Deluge: ${json.error}`);
+          return json.result;
+        }
+        static async pushToDeluge(engine, server, path, tag, skipChecking, onStatus) {
+          const meta = await this.getMeta(engine);
+          if (!(meta == null ? void 0 : meta.torrentUrl)) {
+            alert("未找到种子下载链接");
+            onStatus == null ? void 0 : onStatus("推送失败: 未找到种子链接", "err", 3e3);
+            return;
+          }
+          onStatus == null ? void 0 : onStatus("下载种子中...", "info");
+          const base64 = await this.downloadTorrentBase64(meta.torrentUrl);
+          if (!base64) {
+            onStatus == null ? void 0 : onStatus("推送失败: 种子下载失败", "err", 3e3);
+            return;
+          }
+          const endpoint = this.normalizeDelugeEndpoint(server.url);
+          if (!endpoint) {
+            alert("Deluge 地址为空");
+            return;
+          }
+          const options = {
+            add_paused: false
+          };
+          if (path) options.download_location = path;
+          if (skipChecking) {
+            options.seed_mode = true;
+          }
+          try {
+            onStatus == null ? void 0 : onStatus("登录 Deluge...", "info");
+            await this.delugeRequest(endpoint, "auth.login", [server.password || ""]);
+            onStatus == null ? void 0 : onStatus("推送中...", "info");
+            const result = await this.delugeRequest(endpoint, "core.add_torrent_file", ["", base64, options]);
+            try {
+              const hash = Array.isArray(result) && Array.isArray(result[0]) ? result[0][1] : "";
+              if (hash) await this.delugeRequest(endpoint, "label.set_torrent", [hash, tag]);
+            } catch {
+            }
+            if (result === null) {
+              alert("远程推送失败: Deluge 返回空结果");
+              onStatus == null ? void 0 : onStatus("推送失败: Deluge 返回空结果", "err", 5e3);
+              return;
+            }
+            this.showToast();
+            onStatus == null ? void 0 : onStatus("推送完成", "ok", 3e3);
+          } catch (err) {
+            console.error(err);
+            alert("远程推送失败，请检查 Deluge Web 状态和配置");
+            onStatus == null ? void 0 : onStatus("推送失败", "err", 5e3);
           }
         }
         static async downloadTorrentBlob(url) {
@@ -5519,6 +5710,18 @@ ${updated.description || ""}`.trim();
             padding: 0;
             margin: 0;
         }
+        #autofeed-remote-status {
+            padding: 8px 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ecf0f1;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.15;
+            background: rgba(0, 0, 0, 0.08);
+            word-break: break-word;
+        }
+        #autofeed-remote-status[data-kind="ok"] { color: #b6f7c1; }
+        #autofeed-remote-status[data-kind="err"] { color: #ffd0d0; }
         #autofeed-remote-sidebar li a {
             display: flex;
             justify-content: center;
@@ -5645,6 +5848,7 @@ ${updated.description || ""}`.trim();
           }
         }
       }
+      __publicField(RemoteDownloadService, "delugeMsgId", 0);
       class UploadMetaFetchService {
         static async tryInject(adapter) {
           if (document.body.dataset.autofeedUploadFetch === "1") return;
@@ -5676,7 +5880,7 @@ ${updated.description || ""}`.trim();
               });
               await StorageService.save(updated);
               const { normalizeMeta } = await __vitePreload(async () => {
-                const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
+                const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-KsvfuXt2-BMmlZnNY.js');
                 return { normalizeMeta: normalizeMeta2 };
               }, true ? void 0 : void 0);
               const normalized = normalizeMeta(updated, adapter.siteName);
@@ -5765,6 +5969,9 @@ ${updated.description || ""}`.trim();
           }
           if (!this.activeEngine) return;
           const adapter = this.activeEngine;
+          if (!this.isForwardSourcePage(adapter, window.location.href)) {
+            this.removeFloatingButton();
+          }
           if (this.isUploadLikePage(window.location.href)) {
             try {
               await UploadMetaFetchService.tryInject(adapter);
@@ -5772,7 +5979,7 @@ ${updated.description || ""}`.trim();
               console.error("[Auto-Feed] UploadMetaFetch Error:", e2);
             }
           }
-          if (window.location.href.match(/details?(\.php)?|threads|topics|torrents|detail\//i)) {
+          if (this.isForwardSourcePage(adapter, window.location.href)) {
             this.injectForwardButton(adapter).catch((err) => console.error("[Auto-Feed] Injection Error:", err));
           }
           try {
@@ -5796,7 +6003,6 @@ ${updated.description || ""}`.trim();
         async injectForwardButton(adapter) {
           var _a;
           console.log("[Auto-Feed] Starting injectForwardButton for:", adapter.siteName);
-          this.injectFloatingButton(adapter);
           const config = adapter.getConfig ? adapter.getConfig() : null;
           const selectorList = [];
           const titleSelectors = (_a = config == null ? void 0 : config.selectors) == null ? void 0 : _a.title;
@@ -5820,14 +6026,31 @@ ${updated.description || ""}`.trim();
             'td.rowhead:contains("Title")'
           );
           const findAnchor = () => {
+            var _a2;
             if (adapter.siteName === "MTeam") {
               const btn = $$1("button.ant-btn-primary").first();
               if (btn.length) return btn.parent();
               return $$1("h2.pr-\\[2em\\]").parent();
             }
+            if (adapter.siteName === "PTP") {
+              const title = $$1(".page__title").first();
+              if (title.length) return title;
+            }
+            if (adapter.siteName === "HDB") {
+              const title = $$1("h1#top").first().add($$1("h1").first()).first();
+              if (title.length) return title;
+            }
+            if (adapter.siteName === "CHDBits") {
+              const title = $$1("h1#top").first().add($$1("#top").first()).add($$1("h1").first()).first();
+              if (title.length) return title;
+            }
             for (const sel of selectorList) {
               const el = $$1(sel).first();
               if (el.length && el.is(":visible")) {
+                const tag = (((_a2 = el.get(0)) == null ? void 0 : _a2.tagName) || "").toLowerCase();
+                if (["h1", "h2", "h3"].includes(tag) || el.hasClass("page__title") || el.attr("id") === "top") {
+                  return el;
+                }
                 return el.parent().length ? el.parent() : el;
               }
             }
@@ -5852,8 +6075,15 @@ ${updated.description || ""}`.trim();
           const anchor = await waitForAnchor();
           if (anchor.length) {
             console.log("[Auto-Feed] Anchor found:", anchor);
-            const uiContainer = $$1('<div class="autofeed-ui" style="display: inline-flex; flex-direction: column; gap: 8px; margin-left: 10px; vertical-align: middle;"></div>');
+            this.removeFloatingButton();
+            const uiContainer = $$1('<div class="autofeed-ui" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:6px;"></div>');
             let cachedMeta = null;
+            const { SettingsService: SettingsService2 } = await __vitePreload(async () => {
+              const { SettingsService: SettingsService3 } = await Promise.resolve().then(() => SettingsService$1);
+              return { SettingsService: SettingsService3 };
+            }, void 0 );
+            const uiLang = (await SettingsService2.load()).uiLanguage || "zh";
+            const forwardLabel = uiLang === "zh" ? "转发" : "Reupload";
             const forwardBtn = $$1(`
                 <button style="
                     background: linear-gradient(to bottom, #20B2AA, #008B8B); 
@@ -5867,7 +6097,7 @@ ${updated.description || ""}`.trim();
                     display: flex; align-items: center; gap: 5px;
                     font-size: 13px;
                 ">
-                    <span>🚀</span> Forward
+                    <span>🚀</span> ${forwardLabel}
                 </button>
             `);
             const fetchBtn = $$1(`
@@ -5896,7 +6126,7 @@ ${updated.description || ""}`.trim();
                   return { MetaCleaner: MetaCleaner2 };
                 }, true ? void 0 : void 0);
                 const { normalizeMeta } = await __vitePreload(async () => {
-                  const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
+                  const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-KsvfuXt2-BMmlZnNY.js');
                   return { normalizeMeta: normalizeMeta2 };
                 }, true ? void 0 : void 0);
                 meta = MetaCleaner.clean(meta);
@@ -5936,7 +6166,7 @@ ${updated.description || ""}`.trim();
                   return { MetaCleaner: MetaCleaner2 };
                 }, true ? void 0 : void 0);
                 const { normalizeMeta } = await __vitePreload(async () => {
-                  const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
+                  const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-KsvfuXt2-BMmlZnNY.js');
                   return { normalizeMeta: normalizeMeta2 };
                 }, true ? void 0 : void 0);
                 meta = MetaCleaner.clean(meta);
@@ -5946,7 +6176,7 @@ ${updated.description || ""}`.trim();
                     forwardBtn.find("span").text("⬇️");
                     console.log(`[Auto-Feed] Downloading torrent from: ${meta.torrentUrl}`);
                     const { TorrentService } = await __vitePreload(async () => {
-                      const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
+                      const { TorrentService: TorrentService2 } = await module.import('./TorrentService-pxyyCZrj-DHzjrriL.js');
                       return { TorrentService: TorrentService2 };
                     }, true ? void 0 : void 0);
                     const base64 = await TorrentService.download(meta.torrentUrl);
@@ -5987,6 +6217,16 @@ ${updated.description || ""}`.trim();
                   settings.favoriteSites,
                   { chdBaseUrl: settings.chdBaseUrl }
                 );
+                try {
+                  const html = QuickSearchService.buildQuickSearchHtml(meta, settings.quickSearchList, settings.quickSearchPresets);
+                  if (html) {
+                    const block = $$1(`<div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #eee;"></div>`);
+                    block.append($$1(html));
+                    quickLinksRow.append(block);
+                  }
+                } catch (e22) {
+                  console.warn("[Auto-Feed] QuickSearch build failed:", e22);
+                }
                 QuickLinkService.injectImageTools(quickLinksRow, meta);
                 QuickLinkService.injectMetaFetchTools(quickLinksRow, meta);
                 quickLinksRow.show();
@@ -6007,6 +6247,10 @@ ${updated.description || ""}`.trim();
             const placeInlineContainer = (target) => {
               var _a2;
               const tag = (((_a2 = target.get(0)) == null ? void 0 : _a2.tagName) || "").toLowerCase();
+              if (["h1", "h2", "h3"].includes(tag) || target.hasClass("page__title") || target.attr("id") === "top") {
+                target.after(uiContainer);
+                return;
+              }
               if (tag === "tr") {
                 const colCount = target.children("td,th").length || target.closest("table").find("tr").first().children("td,th").length || 1;
                 const row = $$1(`<tr class="autofeed-row"><td colspan="${colCount}"></td></tr>`);
@@ -6037,7 +6281,8 @@ ${updated.description || ""}`.trim();
             }).catch(() => {
             });
           } else {
-            console.log("[Auto-Feed] No anchor found for inline button (floating button already added)");
+            console.log("[Auto-Feed] No anchor found for inline button; using floating fallback");
+            this.injectFloatingButton(adapter);
           }
         }
         injectFloatingButton(adapter) {
@@ -6053,7 +6298,8 @@ ${updated.description || ""}`.trim();
             position: fixed !important;
             bottom: 100px !important;
             right: 30px !important;
-            z-index: 2147483647 !important;
+            /* Keep this under our settings overlay to avoid blocking close clicks */
+            z-index: 99998 !important;
             display: flex !important;
             flex-direction: column !important;
             gap: 10px !important;
@@ -6061,7 +6307,23 @@ ${updated.description || ""}`.trim();
             pointer-events: none !important;
         `;
           const mainBtn = document.createElement("button");
-          mainBtn.innerText = "🚀 Forward Torrent";
+          const getMainLabel = async () => {
+            try {
+              const { SettingsService: SettingsService2 } = await __vitePreload(async () => {
+                const { SettingsService: SettingsService3 } = await Promise.resolve().then(() => SettingsService$1);
+                return { SettingsService: SettingsService3 };
+              }, true ? void 0 : void 0);
+              const lang = (await SettingsService2.load()).uiLanguage || "zh";
+              return lang === "zh" ? "🚀 转发种子" : "🚀 Reupload Torrent";
+            } catch {
+              return "🚀 转发种子";
+            }
+          };
+          mainBtn.innerText = "🚀 转发种子";
+          getMainLabel().then((label) => {
+            mainBtn.innerText = label;
+          }).catch(() => {
+          });
           mainBtn.style.cssText = `
             pointer-events: auto !important;
             background: linear-gradient(135deg, #20B2AA, #008B8B) !important;
@@ -6107,7 +6369,9 @@ ${updated.description || ""}`.trim();
               );
               QuickLinkService.injectImageTools($$1(linksPanel), meta);
               linksPanel.style.display = "block";
-              setTimeout(() => mainBtn.innerHTML = "🚀 Forward Torrent", 3e3);
+              setTimeout(async () => {
+                mainBtn.innerHTML = await getMainLabel();
+              }, 3e3);
             } catch (e2) {
               console.error(e2);
               mainBtn.innerText = "❌ Error";
@@ -6117,15 +6381,14 @@ ${updated.description || ""}`.trim();
           fab.appendChild(mainBtn);
           (document.body || document.documentElement).appendChild(fab);
           console.log("[Auto-Feed] Floating button matched and appended to body");
-          setInterval(() => {
-            if (!document.getElementById(fabId)) {
-              console.log("[Auto-Feed] Floating button vanished, re-injecting...");
-              (document.body || document.documentElement).appendChild(fab);
-            }
-          }, 2e3);
+        }
+        removeFloatingButton() {
+          const fab = document.getElementById("autofeed-fab-forced");
+          if (fab) fab.remove();
         }
         async injectFillButton(adapter, meta) {
-          const notify = $$1(`<div style="position:fixed; bottom:10px; right:10px; z-index:9999; padding: 12px 14px; background: #4CAF50; color: white; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 520px;">
+          $$1("#autofeed-founddata-toast").remove();
+          const notify = $$1(`<div id="autofeed-founddata-toast" style="position:fixed; bottom:10px; right:10px; z-index:99997; padding: 12px 14px; background: #4CAF50; color: white; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; max-width: 520px; pointer-events: auto;">
         <span style="font-size: 12px;">Found Data: <strong>${meta.title}</strong></span>
         <button id="autofeed-fill-btn" style="background: white; color: #4CAF50; border: none; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-weight: bold;">重新填充</button>
         <button id="autofeed-close-btn" style="background: transparent; color: white; border: 1px solid white; padding: 4px 8px; border-radius: 3px; cursor: pointer;">Close</button>
@@ -6133,7 +6396,7 @@ ${updated.description || ""}`.trim();
           $$1("body").append(notify);
           try {
             const { normalizeMeta } = await __vitePreload(async () => {
-              const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
+              const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-KsvfuXt2-BMmlZnNY.js');
               return { normalizeMeta: normalizeMeta2 };
             }, true ? void 0 : void 0);
             const normalized = normalizeMeta(meta, adapter.siteName);
@@ -6148,7 +6411,7 @@ ${updated.description || ""}`.trim();
           notify.find("#autofeed-fill-btn").on("click", async () => {
             notify.find("#autofeed-fill-btn").text("Filling...");
             const { normalizeMeta } = await __vitePreload(async () => {
-              const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
+              const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-KsvfuXt2-BMmlZnNY.js');
               return { normalizeMeta: normalizeMeta2 };
             }, void 0 );
             const normalized = normalizeMeta(meta, adapter.siteName);
@@ -6157,7 +6420,7 @@ ${updated.description || ""}`.trim();
             setTimeout(() => notify.fadeOut(), 2e3);
           });
           notify.find("#autofeed-close-btn").on("click", () => {
-            notify.fadeOut();
+            notify.stop(true, true).fadeOut(150, () => notify.remove());
           });
         }
         showStatusToast(message) {
@@ -6169,6 +6432,18 @@ ${updated.description || ""}`.trim();
         }
         isUploadLikePage(url) {
           return !!url.match(/upload|offer|torrents\/create|torrents\/upload|torrent\/upload|torrents\/add|upload\.php|p_torrent\/video_upload|#\/torrent\/add|\/torrent\/add/i);
+        }
+        isForwardSourcePage(adapter, url) {
+          const u2 = new URL(url, window.location.origin);
+          const path = u2.pathname || "";
+          const qs = u2.search || "";
+          if (adapter.siteName === "PTP") {
+            return path.includes("torrents.php") && /torrentid=\d+/i.test(qs);
+          }
+          if (adapter.siteName === "HDB" || adapter.siteName === "CHDBits") {
+            return /details\.php/i.test(path) && /id=\d+/i.test(qs);
+          }
+          return !!url.match(/details?(\.php)?|threads|topics|torrents\/\d+|detail\/\d+|detail\//i);
         }
         async waitForForm() {
           const selectors = [
@@ -6553,9 +6828,255 @@ ${updated.description || ""}`.trim();
       function D(n2, t2) {
         return "function" == typeof t2 ? t2(n2) : t2;
       }
+      const normalizeHost = (url) => {
+        if (!url) return "";
+        return url.endsWith("/") ? url : `${url}/`;
+      };
+      class RemoteServerTestService {
+        static async testQbittorrent(server) {
+          const host = normalizeHost(server.url);
+          if (!host) return { ok: false, message: "URL 为空" };
+          try {
+            const login = await GMAdapter.xmlHttpRequest({
+              method: "POST",
+              url: `${host}api/v2/auth/login`,
+              headers: { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" },
+              data: new URLSearchParams({ username: server.username, password: server.password }).toString()
+            });
+            if (login.status !== 200) {
+              return { ok: false, message: `登录失败: HTTP ${login.status}` };
+            }
+          } catch (err) {
+            return { ok: false, message: `登录失败: ${(err == null ? void 0 : err.message) || String(err)}` };
+          }
+          try {
+            const versionResp = await GMAdapter.xmlHttpRequest({
+              method: "GET",
+              url: `${host}api/v2/app/version`
+            });
+            if (versionResp.status !== 200) return { ok: false, message: `Version 请求失败: HTTP ${versionResp.status}` };
+            const ver = (versionResp.responseText || "").trim();
+            return { ok: true, message: ver ? `OK: qBittorrent ${ver}` : "OK" };
+          } catch (err) {
+            return { ok: false, message: `Version 请求失败: ${(err == null ? void 0 : err.message) || String(err)}` };
+          }
+        }
+        static async testTransmission(server) {
+          var _a;
+          const host = normalizeHost(server.url);
+          if (!host) return { ok: false, message: "URL 为空" };
+          const rpcUrl = `${host}transmission/rpc`;
+          const auth = "Basic " + btoa(`${server.username}:${server.password}`);
+          const payload = JSON.stringify({ method: "session-get" });
+          const requestOnce = async (sessionId) => GMAdapter.xmlHttpRequest({
+            method: "POST",
+            url: rpcUrl,
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: auth,
+              ...sessionId ? { "X-Transmission-Session-Id": sessionId } : {}
+            },
+            data: payload
+          });
+          try {
+            const first = await requestOnce();
+            if (first.status === 200) return { ok: true, message: "OK: Transmission RPC" };
+            if (first.status !== 409) return { ok: false, message: `RPC 失败: HTTP ${first.status}` };
+            const match = (first.responseHeaders || "").match(/X-Transmission-Session-Id:\s*(.+)/i);
+            const sid = (_a = match == null ? void 0 : match[1]) == null ? void 0 : _a.trim();
+            if (!sid) return { ok: false, message: "RPC 失败: 缺少 Session-Id" };
+            const second = await requestOnce(sid);
+            if (second.status === 200) return { ok: true, message: "OK: Transmission RPC" };
+            return { ok: false, message: `RPC 失败: HTTP ${second.status}` };
+          } catch (err) {
+            return { ok: false, message: `RPC 失败: ${(err == null ? void 0 : err.message) || String(err)}` };
+          }
+        }
+        static async testDeluge(server) {
+          let host = normalizeHost(server.url);
+          if (!host) return { ok: false, message: "URL 为空" };
+          if (!host.match(/\/json\/?$/i)) host = host.replace(/\/$/, "") + "/json";
+          const request = async (id, method, params = []) => {
+            const res = await GMAdapter.xmlHttpRequest({
+              method: "POST",
+              url: host,
+              headers: { "Content-Type": "application/json" },
+              withCredentials: true,
+              anonymous: false,
+              data: JSON.stringify({ id, method, params })
+            });
+            const text = res.responseText || "";
+            let json = null;
+            try {
+              json = text ? JSON.parse(text) : null;
+            } catch {
+              json = null;
+            }
+            return { res, json, text };
+          };
+          let loginOk = false;
+          try {
+            const login = await request(0, "auth.login", [server.password || ""]);
+            if (login.res.status !== 200) return { ok: false, message: `登录失败: HTTP ${login.res.status}` };
+            if (!login.json) return { ok: false, message: `登录失败: 非JSON响应 (HTTP ${login.res.status})` };
+            if (login.json.error) return { ok: false, message: `登录失败: ${login.json.error}` };
+            loginOk = !!login.json.result;
+          } catch (err) {
+            return { ok: false, message: `登录失败: ${(err == null ? void 0 : err.message) || String(err)}` };
+          }
+          try {
+            const info = await request(1, "daemon.info", []);
+            if (info.res.status !== 200) return { ok: false, message: `Info 请求失败: HTTP ${info.res.status}` };
+            if (!info.json) {
+              const snippet = (info.text || "").slice(0, 120).replace(/\s+/g, " ");
+              return { ok: false, message: `Info 请求失败: 非JSON响应 ${snippet ? `(${snippet})` : ""}` };
+            }
+            if (info.json.error) return { ok: false, message: `Info 请求失败: ${info.json.error}` };
+            const ver = String(info.json.result || "").trim();
+            if (!loginOk) {
+              return { ok: true, message: ver ? `OK: Deluge ${ver} (注意: 登录返回 false，但会话可能已存在)` : "OK: Deluge (注意: 登录返回 false，但会话可能已存在)" };
+            }
+            return { ok: true, message: ver ? `OK: Deluge ${ver}` : "OK: Deluge" };
+          } catch (err) {
+            return { ok: false, message: `Info 请求失败: ${(err == null ? void 0 : err.message) || String(err)}` };
+          }
+        }
+        static countServers(config) {
+          const qb = (config == null ? void 0 : config.qbittorrent) ? Object.keys(config.qbittorrent).length : 0;
+          const tr = (config == null ? void 0 : config.transmission) ? Object.keys(config.transmission).length : 0;
+          const de = (config == null ? void 0 : config.deluge) ? Object.keys(config.deluge).length : 0;
+          return { qb, tr, de };
+        }
+      }
+      const i18n = {
+        zh: {
+          dashboard: "仪表盘",
+          settings: "设置",
+          sites: "站点",
+          remote: "远程推送",
+          status: "状态",
+          active: "运行中",
+          currentHost: "当前域名",
+          version: "版本",
+          pageFeatures: "页面增强",
+          externalSources: "数据源",
+          quickSearchEditor: "快速搜索编辑",
+          servicesApiKeys: "服务 API Key",
+          targetSites: "目标站点",
+          save: "保存",
+          selectAll: "全选",
+          clearAll: "取消全选",
+          enabledSites: "启用转发 (来源)",
+          favoriteSites: "常用站点 (目标)",
+          listPageQuickSearch: "列表页快速搜索",
+          globalSettings: "全局设置",
+          clientConfigs: "客户端配置",
+          enableSidebar: "启用侧边栏",
+          skipCheckingDefault: "默认跳过校验",
+          askConfirmBeforePush: "推送前询问确认",
+          addClient: "添加客户端",
+          importJson: "导入 JSON",
+          chdDomain: "CHD 域名",
+          ptpShowDouban: "PTP: 显示豆瓣信息",
+          ptpShowGroupName: "PTP: 显示组名",
+          ptpGroupNamePos: "PTP 组名位置",
+          before: "前",
+          after: "后",
+          hdbShowDouban: "HDB: 显示豆瓣信息",
+          hdbCollapseDouban: "HDB: 折叠豆瓣信息",
+          doubanQuickSearch: "豆瓣: 快速搜索",
+          imdbQuickSearch: "IMDb: 快速搜索",
+          imdbToDoubanMethod: "IMDb -> 豆瓣 获取方式",
+          ptgenSource: "PTGen 来源",
+          loading: "加载中...",
+          saved: "设置已保存",
+          configLoaded: "配置已加载",
+          add: "添加",
+          cancel: "取消",
+          name: "名称",
+          url: "地址",
+          username: "用户名",
+          password: "密码",
+          downloadPaths: "下载路径",
+          addPath: "+ 添加路径",
+          pathLabel: "标签",
+          pathValue: "路径",
+          type: "类型",
+          api: "API",
+          scrape: "爬虫",
+          language: "语言",
+          testConnection: "测试连接",
+          testing: "测试中...",
+          testSuccess: "连接成功",
+          testFailed: "连接失败"
+        },
+        en: {
+          dashboard: "Dashboard",
+          settings: "Settings",
+          sites: "Sites",
+          remote: "Remote",
+          status: "Status",
+          active: "Active",
+          currentHost: "Current Host",
+          version: "Version",
+          pageFeatures: "Page Features",
+          externalSources: "External Sources",
+          quickSearchEditor: "Quick Search Editor",
+          servicesApiKeys: "Services API Keys",
+          targetSites: "Target Sites",
+          save: "Save",
+          selectAll: "Select All",
+          clearAll: "Clear All",
+          enabledSites: "Enabled Sites (Source)",
+          favoriteSites: "Favorite Sites (Target)",
+          listPageQuickSearch: "List Page Quick Search",
+          globalSettings: "Global Settings",
+          clientConfigs: "Client Configs",
+          enableSidebar: "Enable Sidebar",
+          skipCheckingDefault: "Skip Checking (Default)",
+          askConfirmBeforePush: "Ask Confirm Before Push",
+          addClient: "Add Client",
+          importJson: "Import JSON",
+          chdDomain: "CHD Domain",
+          ptpShowDouban: "PTP: Show Douban Info",
+          ptpShowGroupName: "PTP: Show Group Name",
+          ptpGroupNamePos: "PTP Group Name Position",
+          before: "Before",
+          after: "After",
+          hdbShowDouban: "HDB: Show Douban Info",
+          hdbCollapseDouban: "HDB: Collapse Douban Info",
+          doubanQuickSearch: "Douban: Quick Search",
+          imdbQuickSearch: "IMDb: Quick Search",
+          imdbToDoubanMethod: "IMDb -> Douban Method",
+          ptgenSource: "PTGen Source",
+          loading: "Loading...",
+          saved: "Settings Saved",
+          configLoaded: "Config Loaded",
+          add: "Add",
+          cancel: "Cancel",
+          name: "Name",
+          url: "URL",
+          username: "Username",
+          password: "Password",
+          downloadPaths: "Download Paths",
+          addPath: "+ Add Path",
+          pathLabel: "Label",
+          pathValue: "Path",
+          type: "Type",
+          api: "API",
+          scrape: "Scrape",
+          language: "Language",
+          testConnection: "Test Connection",
+          testing: "Testing...",
+          testSuccess: "Connection OK",
+          testFailed: "Connection Failed"
+        }
+      };
       const App = () => {
         const [isOpen, setIsOpen] = d(false);
         const [activeTab, setActiveTab] = d("dashboard");
+        const [panelPos, setPanelPos] = d(null);
+        const [drag, setDrag] = d(null);
         const [settings, setSettings] = d({
           ptpImgApiKey: "",
           pixhostApiKey: "",
@@ -6574,6 +7095,8 @@ ${updated.description || ""}`.trim();
           showQuickSearchOnDouban: true,
           showQuickSearchOnImdb: true,
           enableRemoteSidebar: false,
+          remoteSkipCheckingDefault: false,
+          remoteAskSkipConfirm: false,
           remoteServer: null,
           imdbToDoubanMethod: 0,
           ptgenApi: 3,
@@ -6586,10 +7109,22 @@ ${updated.description || ""}`.trim();
             HDB: false,
             HDT: false,
             UHD: false
-          }
+          },
+          uiLanguage: "zh"
+        });
+        const [remoteModalOpen, setRemoteModalOpen] = d(false);
+        const [remoteForm, setRemoteForm] = d({
+          type: "qb",
+          name: "",
+          url: "",
+          username: "",
+          password: "",
+          paths: [{ label: "default", path: "" }]
         });
         const [quickPreset, setQuickPreset] = d("");
         const [quickPresetInput, setQuickPresetInput] = d("");
+        const clamp = (v2, min, max) => Math.min(max, Math.max(min, v2));
+        const getPanelSize = () => ({ w: 720, h: 560 });
         y(() => {
           const handleKey = (e2) => {
             if (e2.altKey && e2.code === "KeyS") {
@@ -6607,25 +7142,73 @@ ${updated.description || ""}`.trim();
           });
           return () => window.removeEventListener("keydown", handleKey);
         }, []);
+        y(() => {
+          if (!isOpen) return;
+          const onKeyDown = (e2) => {
+            if (e2.key === "Escape") setIsOpen(false);
+          };
+          const onMouseDown = (e2) => {
+            const host = document.getElementById("auto-feed-overlay-host");
+            const root = host == null ? void 0 : host.shadowRoot;
+            if (!host || !root) return;
+            const target = e2.target;
+            const inUI = !!target && (root.contains(target) || host.contains(target));
+            if (!inUI) setIsOpen(false);
+          };
+          document.addEventListener("keydown", onKeyDown);
+          document.addEventListener("mousedown", onMouseDown);
+          return () => {
+            document.removeEventListener("keydown", onKeyDown);
+            document.removeEventListener("mousedown", onMouseDown);
+          };
+        }, [isOpen]);
+        y(() => {
+          if (!isOpen) return;
+          if (panelPos) return;
+          const { w: w2, h: h2 } = getPanelSize();
+          setPanelPos({
+            x: Math.max(20, window.innerWidth - w2 - 20),
+            y: Math.max(20, Math.floor((window.innerHeight - h2) / 2))
+          });
+        }, [isOpen, panelPos]);
+        y(() => {
+          if (!drag) return;
+          const onMove = (e2) => {
+            e2.preventDefault();
+            const { w: w2, h: h2 } = getPanelSize();
+            const nextX = clamp(e2.clientX - drag.offsetX, 0, Math.max(0, window.innerWidth - w2));
+            const nextY = clamp(e2.clientY - drag.offsetY, 0, Math.max(0, window.innerHeight - h2));
+            setPanelPos({ x: nextX, y: nextY });
+          };
+          const onUp = () => setDrag(null);
+          document.addEventListener("mousemove", onMove, true);
+          document.addEventListener("mouseup", onUp, true);
+          return () => {
+            document.removeEventListener("mousemove", onMove, true);
+            document.removeEventListener("mouseup", onUp, true);
+          };
+        }, [drag]);
         const handleSaveSettings = async () => {
           await SettingsService.save(settings);
-          alert("Settings Saved!");
+        };
+        const setAndPersist = (next) => {
+          setSettings(next);
+          SettingsService.save(next).catch(() => {
+          });
         };
         const allSites = SiteCatalogService.getAllSites();
+        const t2 = i18n[settings.uiLanguage] || i18n.en;
         const getQuickSearchPresetLabel = (line) => {
           var _a;
           const anchorText = (_a = line.match(/>([^<]+)<\/a>/i)) == null ? void 0 : _a[1];
           if (anchorText) return anchorText.trim();
           const pipe = line.split("|");
           if (pipe.length > 1) return pipe[0].trim();
-          if (line.match(/^https?:\/\//i)) {
-            try {
-              return new URL(line).hostname.replace(/^www\./, "");
-            } catch {
-              return line;
-            }
+          try {
+            return new URL(line).hostname.replace(/^www\./, "");
+          } catch {
+            return line;
           }
-          return line;
         };
         const quickSearchPresets = Array.from(/* @__PURE__ */ new Set([
           ...DEFAULT_QUICK_SEARCH_TEMPLATES,
@@ -6633,651 +7216,823 @@ ${updated.description || ""}`.trim();
         ]));
         const toggleSite = (name) => {
           const set = new Set(settings.enabledSites || []);
-          if (set.has(name)) {
-            set.delete(name);
-          } else {
-            set.add(name);
-          }
+          if (set.has(name)) set.delete(name);
+          else set.add(name);
           setSettings({ ...settings, enabledSites: Array.from(set) });
         };
         const toggleFavoriteSite = (name) => {
           const set = new Set(settings.favoriteSites || []);
-          if (set.has(name)) {
-            set.delete(name);
-          } else {
-            set.add(name);
-          }
+          if (set.has(name)) set.delete(name);
+          else set.add(name);
           setSettings({ ...settings, favoriteSites: Array.from(set) });
         };
-        const selectAllSites = () => {
-          setSettings({ ...settings, enabledSites: SiteCatalogService.getAllSiteNames() });
-        };
-        const clearAllSites = () => {
-          setSettings({ ...settings, enabledSites: [] });
-        };
+        const selectAllSites = () => setSettings({ ...settings, enabledSites: SiteCatalogService.getAllSiteNames() });
+        const clearAllSites = () => setSettings({ ...settings, enabledSites: [] });
+        const CheckboxRow = ({ label, checked, onChange, desc }) => /* @__PURE__ */ u$1("label", { className: "af-row", style: { cursor: "pointer" }, children: [
+          /* @__PURE__ */ u$1("div", { className: "af-label", children: [
+            /* @__PURE__ */ u$1("div", { children: label }),
+            desc && /* @__PURE__ */ u$1("div", { className: "af-label-desc", children: desc })
+          ] }),
+          /* @__PURE__ */ u$1("div", { className: "af-toggle", children: [
+            /* @__PURE__ */ u$1("input", { type: "checkbox", checked, onChange }),
+            /* @__PURE__ */ u$1("span", { className: "af-slider" })
+          ] })
+        ] });
+        const InputRow = ({ label, value, onInput, placeholder, desc }) => /* @__PURE__ */ u$1("div", { className: "af-row", children: [
+          /* @__PURE__ */ u$1("div", { className: "af-label", children: [
+            /* @__PURE__ */ u$1("div", { children: label }),
+            desc && /* @__PURE__ */ u$1("div", { className: "af-label-desc", children: desc })
+          ] }),
+          /* @__PURE__ */ u$1(
+            "input",
+            {
+              className: "af-input",
+              style: { width: "200px" },
+              type: "text",
+              value,
+              onInput: (e2) => onInput(e2.currentTarget.value),
+              placeholder
+            }
+          )
+        ] });
         if (!isOpen) {
           return /* @__PURE__ */ u$1(
             "div",
             {
               style: {
                 position: "fixed",
-                bottom: "20px",
-                right: "20px",
+                bottom: "24px",
+                right: "24px",
                 zIndex: 99999,
-                background: "#2c3e50",
-                color: "white",
-                padding: "10px",
-                borderRadius: "50%",
+                background: "rgba(255,255,255,0.8)",
+                backdropFilter: "blur(10px)",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+                padding: "8px",
+                borderRadius: "16px",
                 cursor: "pointer",
-                width: "50px",
-                height: "50px",
+                width: "48px",
+                height: "48px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-                fontSize: "24px"
+                transition: "transform 0.2s",
+                border: "1px solid rgba(255,255,255,0.4)",
+                color: "#333"
               },
               onClick: () => setIsOpen(true),
-              title: "Open Auto-Feed Settings (Alt+S)",
-              children: "⚙️"
+              title: "Auto-Feed Settings",
+              onMouseEnter: (e2) => e2.currentTarget.style.transform = "scale(1.1)",
+              onMouseLeave: (e2) => e2.currentTarget.style.transform = "scale(1)",
+              children: /* @__PURE__ */ u$1("span", { style: { fontSize: "24px" }, children: "⚙️" })
             }
           );
         }
-        return /* @__PURE__ */ u$1("div", { style: {
-          position: "fixed",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          background: "rgba(0,0,0,0.5)",
-          zIndex: 99999,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center"
-        }, onClick: (e2) => {
-          if (e2.target === e2.currentTarget) setIsOpen(false);
-        }, children: /* @__PURE__ */ u$1("div", { style: {
-          width: "800px",
-          height: "600px",
-          background: "white",
-          borderRadius: "8px",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          boxShadow: "0 5px 20px rgba(0,0,0,0.5)"
-        }, onClick: (e2) => e2.stopPropagation(), children: [
-          /* @__PURE__ */ u$1("div", { style: {
-            padding: "15px 20px",
-            background: "#f8f9fa",
-            borderBottom: "1px solid #dee2e6",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }, children: [
-            /* @__PURE__ */ u$1("h2", { style: { margin: 0, fontSize: "18px", color: "#333" }, children: "Auto-Feed Refactor" }),
-            /* @__PURE__ */ u$1(
-              "button",
-              {
-                onClick: () => setIsOpen(false),
-                style: {
-                  background: "none",
-                  border: "none",
-                  fontSize: "20px",
-                  cursor: "pointer",
-                  color: "#6c757d"
-                },
-                children: "×"
-              }
-            )
-          ] }),
-          /* @__PURE__ */ u$1("div", { style: {
-            display: "flex",
-            borderBottom: "1px solid #dee2e6",
-            background: "#fff"
-          }, children: ["dashboard", "settings", "sites", "logs"].map((tab) => /* @__PURE__ */ u$1(
-            "div",
-            {
-              onClick: () => setActiveTab(tab),
-              style: {
-                padding: "10px 20px",
-                cursor: "pointer",
-                borderBottom: activeTab === tab ? "2px solid #007bff" : "2px solid transparent",
-                color: activeTab === tab ? "#007bff" : "#495057",
-                fontWeight: activeTab === tab ? "bold" : "normal",
-                textTransform: "capitalize"
-              },
-              children: tab
+        const { w: panelW, h: panelH } = getPanelSize();
+        const pos = panelPos || { x: 20, y: 20 };
+        return /* @__PURE__ */ u$1(
+          "div",
+          {
+            className: "af-panel",
+            style: {
+              position: "fixed",
+              left: `${pos.x}px`,
+              top: `${pos.y}px`,
+              width: `${panelW}px`,
+              height: `${panelH}px`,
+              zIndex: 99999
             },
-            tab
-          )) }),
-          /* @__PURE__ */ u$1("div", { style: { flex: 1, padding: "20px", overflowY: "auto", background: "#fff", color: "#333" }, children: [
-            activeTab === "dashboard" && /* @__PURE__ */ u$1("div", { children: [
-              /* @__PURE__ */ u$1("p", { children: [
-                "Status: ",
-                /* @__PURE__ */ u$1("span", { style: { color: "green", fontWeight: "bold" }, children: "Active" })
-              ] }),
-              /* @__PURE__ */ u$1("p", { children: [
-                "Current Site: ",
-                window.location.hostname
-              ] }),
-              /* @__PURE__ */ u$1("p", { children: "Tip: Use Alt+S to toggle this menu." })
-            ] }),
-            activeTab === "settings" && /* @__PURE__ */ u$1("div", { children: [
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px" }, children: [
-                /* @__PURE__ */ u$1("label", { style: { display: "block", marginBottom: "5px" }, children: "CHD 站点域名" }),
-                /* @__PURE__ */ u$1(
-                  "select",
+            onClick: (e2) => e2.stopPropagation(),
+            onMouseDown: (e2) => e2.stopPropagation(),
+            onKeyDown: (e2) => e2.stopPropagation(),
+            children: [
+              /* @__PURE__ */ u$1(
+                "div",
+                {
+                  className: "af-header",
+                  onMouseDown: (e2) => {
+                    if (e2.target.closest("button")) return;
+                    setDrag({ offsetX: e2.clientX - pos.x, offsetY: e2.clientY - pos.y });
+                  },
+                  children: [
+                    /* @__PURE__ */ u$1("div", { style: { display: "flex", alignItems: "center", gap: "10px" }, children: [
+                      /* @__PURE__ */ u$1("h2", { className: "af-title", children: "Auto-Feed Refactor" }),
+                      /* @__PURE__ */ u$1(
+                        "select",
+                        {
+                          className: "af-input",
+                          style: { padding: "2px 8px", fontSize: "12px", height: "26px" },
+                          value: settings.uiLanguage,
+                          onChange: (e2) => setAndPersist({ ...settings, uiLanguage: e2.currentTarget.value }),
+                          children: [
+                            /* @__PURE__ */ u$1("option", { value: "zh", children: "中文" }),
+                            /* @__PURE__ */ u$1("option", { value: "en", children: "English" })
+                          ]
+                        }
+                      )
+                    ] }),
+                    /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "10px" }, children: [
+                      /* @__PURE__ */ u$1("button", { type: "button", className: "af-btn af-btn-primary", onClick: handleSaveSettings, children: t2.save }),
+                      /* @__PURE__ */ u$1(
+                        "button",
+                        {
+                          type: "button",
+                          className: "af-close-btn",
+                          onMouseDown: (e2) => e2.stopPropagation(),
+                          onClick: (e2) => {
+                            e2.preventDefault();
+                            e2.stopPropagation();
+                            setIsOpen(false);
+                          },
+                          children: "×"
+                        }
+                      )
+                    ] })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ u$1("div", { className: "af-layout", children: [
+                /* @__PURE__ */ u$1("div", { className: "af-sidebar", children: [
+                  { id: "dashboard", label: t2.dashboard, icon: "📊" },
+                  { id: "settings", label: t2.settings, icon: "🔧" },
+                  { id: "sites", label: t2.sites, icon: "🌐" },
+                  { id: "remote", label: t2.remote, icon: "📡" }
+                ].map((item) => /* @__PURE__ */ u$1(
+                  "div",
                   {
-                    style: { width: "100%", padding: "8px", border: "1px solid #ced4da", borderRadius: "4px" },
-                    value: settings.chdBaseUrl,
-                    onChange: (e2) => {
-                      const value = e2.currentTarget.value;
-                      const normalized = value.endsWith("/") ? value : `${value}/`;
-                      setSettings({ ...settings, chdBaseUrl: normalized });
-                    },
+                    className: `af-nav-item ${activeTab === item.id ? "active" : ""}`,
+                    onClick: () => setActiveTab(item.id),
                     children: [
-                      /* @__PURE__ */ u$1("option", { value: "https://chdbits.co/", children: "chdbits.co (默认)" }),
-                      /* @__PURE__ */ u$1("option", { value: "https://ptchdbits.co/", children: "ptchdbits.co" }),
-                      /* @__PURE__ */ u$1("option", { value: "https://ptchdbits.org/", children: "ptchdbits.org" }),
-                      /* @__PURE__ */ u$1("option", { value: "https://chddiy.xyz/", children: "chddiy.xyz" })
+                      item.icon,
+                      " ",
+                      item.label
                     ]
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px" }, children: [
-                /* @__PURE__ */ u$1("label", { style: { display: "block", marginBottom: "5px" }, children: "PtpImg API Key" }),
-                /* @__PURE__ */ u$1(
-                  "input",
-                  {
-                    type: "text",
-                    style: { width: "100%", padding: "8px", border: "1px solid #ced4da", borderRadius: "4px" },
-                    value: settings.ptpImgApiKey,
-                    onInput: (e2) => setSettings({ ...settings, ptpImgApiKey: e2.currentTarget.value })
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px" }, children: [
-                /* @__PURE__ */ u$1("label", { style: { display: "block", marginBottom: "5px" }, children: "Pixhost API Key" }),
-                /* @__PURE__ */ u$1(
-                  "input",
-                  {
-                    type: "text",
-                    style: { width: "100%", padding: "8px", border: "1px solid #ced4da", borderRadius: "4px" },
-                    value: settings.pixhostApiKey,
-                    onInput: (e2) => setSettings({ ...settings, pixhostApiKey: e2.currentTarget.value })
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px" }, children: [
-                /* @__PURE__ */ u$1("label", { style: { display: "block", marginBottom: "5px" }, children: "Freeimage API Key" }),
-                /* @__PURE__ */ u$1(
-                  "input",
-                  {
-                    type: "text",
-                    style: { width: "100%", padding: "8px", border: "1px solid #ced4da", borderRadius: "4px" },
-                    value: settings.freeimageApiKey,
-                    onInput: (e2) => setSettings({ ...settings, freeimageApiKey: e2.currentTarget.value })
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px" }, children: [
-                /* @__PURE__ */ u$1("label", { style: { display: "block", marginBottom: "5px" }, children: "Gifyu API Key" }),
-                /* @__PURE__ */ u$1(
-                  "input",
-                  {
-                    type: "text",
-                    style: { width: "100%", padding: "8px", border: "1px solid #ced4da", borderRadius: "4px" },
-                    value: settings.gifyuApiKey,
-                    onInput: (e2) => setSettings({ ...settings, gifyuApiKey: e2.currentTarget.value })
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px" }, children: [
-                /* @__PURE__ */ u$1("label", { style: { display: "block", marginBottom: "5px" }, children: "HDBImg API Key (可选)" }),
-                /* @__PURE__ */ u$1(
-                  "input",
-                  {
-                    type: "text",
-                    style: { width: "100%", padding: "8px", border: "1px solid #ced4da", borderRadius: "4px" },
-                    value: settings.hdbImgApiKey,
-                    onInput: (e2) => setSettings({ ...settings, hdbImgApiKey: e2.currentTarget.value })
-                  }
-                )
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px" }, children: [
-                /* @__PURE__ */ u$1("label", { style: { display: "block", marginBottom: "5px" }, children: "HDBImg API Endpoint" }),
-                /* @__PURE__ */ u$1(
-                  "input",
-                  {
-                    type: "text",
-                    style: { width: "100%", padding: "8px", border: "1px solid #ced4da", borderRadius: "4px" },
-                    value: settings.hdbImgEndpoint,
-                    onInput: (e2) => setSettings({ ...settings, hdbImgEndpoint: e2.currentTarget.value })
-                  }
-                ),
-                /* @__PURE__ */ u$1("div", { style: { fontSize: "12px", color: "#666", marginTop: "4px" }, children: "默认：https://hdbimg.com/api/1/upload，如接口不同可自行修改" })
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px", padding: "10px", border: "1px solid #eee", borderRadius: "6px", background: "#fafafa" }, children: [
-                /* @__PURE__ */ u$1("div", { style: { fontWeight: "bold", marginBottom: "8px" }, children: "页面增强功能" }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "checkbox",
-                      checked: !!settings.ptpShowDouban,
-                      onChange: () => setSettings({ ...settings, ptpShowDouban: !settings.ptpShowDouban })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "PTP 中文评分/简介" })
-                ] }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "checkbox",
-                      checked: !!settings.ptpShowGroupName,
-                      onChange: () => setSettings({ ...settings, ptpShowGroupName: !settings.ptpShowGroupName })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "PTP 组名显示" })
-                ] }),
-                /* @__PURE__ */ u$1("div", { style: { display: "flex", alignItems: "center", gap: "10px", marginBottom: "6px", paddingLeft: "18px" }, children: [
-                  /* @__PURE__ */ u$1("span", { style: { color: "#666" }, children: "组名位置:" }),
-                  /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "4px" }, children: [
-                    /* @__PURE__ */ u$1(
-                      "input",
-                      {
-                        type: "radio",
-                        name: "ptp_name_location",
-                        value: "0",
-                        checked: settings.ptpNameLocation === 0,
-                        onChange: () => setSettings({ ...settings, ptpNameLocation: 0 })
-                      }
-                    ),
-                    /* @__PURE__ */ u$1("span", { children: "前" })
+                  },
+                  item.id
+                )) }),
+                /* @__PURE__ */ u$1("div", { className: "af-content", children: [
+                  activeTab === "dashboard" && /* @__PURE__ */ u$1("div", { children: [
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.status }),
+                      /* @__PURE__ */ u$1("div", { className: "af-row", children: [
+                        /* @__PURE__ */ u$1("span", { className: "af-label", children: t2.status }),
+                        /* @__PURE__ */ u$1("span", { style: { color: "var(--af-success)", fontWeight: "600" }, children: t2.active })
+                      ] }),
+                      /* @__PURE__ */ u$1("div", { className: "af-row", children: [
+                        /* @__PURE__ */ u$1("span", { className: "af-label", children: t2.currentHost }),
+                        /* @__PURE__ */ u$1("span", { style: { color: "var(--af-text-secondary)" }, children: window.location.hostname })
+                      ] }),
+                      /* @__PURE__ */ u$1("div", { className: "af-row", children: [
+                        /* @__PURE__ */ u$1("span", { className: "af-label", children: t2.version }),
+                        /* @__PURE__ */ u$1("span", { style: { color: "var(--af-text-secondary)" }, children: "Refactor v1.0" })
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ u$1("div", { style: { textAlign: "center", color: "var(--af-text-secondary)", marginTop: "20px", fontSize: "12px" }, children: [
+                      "Press ",
+                      /* @__PURE__ */ u$1("span", { style: { padding: "2px 6px", background: "#eee", borderRadius: "4px" }, children: "Alt+S" }),
+                      " to toggle overlay"
+                    ] })
                   ] }),
-                  /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "4px" }, children: [
-                    /* @__PURE__ */ u$1(
-                      "input",
-                      {
-                        type: "radio",
-                        name: "ptp_name_location",
-                        value: "1",
-                        checked: settings.ptpNameLocation !== 0,
-                        onChange: () => setSettings({ ...settings, ptpNameLocation: 1 })
-                      }
-                    ),
-                    /* @__PURE__ */ u$1("span", { children: "后" })
+                  activeTab === "settings" && /* @__PURE__ */ u$1("div", { children: [
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.pageFeatures }),
+                      /* @__PURE__ */ u$1(CheckboxRow, { label: t2.ptpShowDouban, checked: !!settings.ptpShowDouban, onChange: () => setSettings({ ...settings, ptpShowDouban: !settings.ptpShowDouban }) }),
+                      /* @__PURE__ */ u$1(CheckboxRow, { label: t2.ptpShowGroupName, checked: !!settings.ptpShowGroupName, onChange: () => setSettings({ ...settings, ptpShowGroupName: !settings.ptpShowGroupName }) }),
+                      /* @__PURE__ */ u$1("div", { className: "af-row", children: [
+                        /* @__PURE__ */ u$1("span", { className: "af-label", children: t2.ptpGroupNamePos }),
+                        /* @__PURE__ */ u$1("div", { className: "af-segmented", children: [0, 1].map((v2) => /* @__PURE__ */ u$1(
+                          "div",
+                          {
+                            className: `af-segment-opt ${settings.ptpNameLocation === v2 ? "active" : ""}`,
+                            onClick: () => setSettings({ ...settings, ptpNameLocation: v2 }),
+                            children: v2 === 0 ? t2.before : t2.after
+                          },
+                          v2
+                        )) })
+                      ] }),
+                      /* @__PURE__ */ u$1(CheckboxRow, { label: t2.hdbShowDouban, checked: !!settings.hdbShowDouban, onChange: () => setSettings({ ...settings, hdbShowDouban: !settings.hdbShowDouban }) }),
+                      /* @__PURE__ */ u$1(CheckboxRow, { label: t2.hdbCollapseDouban, checked: !!settings.hdbHideDouban, onChange: () => setSettings({ ...settings, hdbHideDouban: !settings.hdbHideDouban }) }),
+                      /* @__PURE__ */ u$1(CheckboxRow, { label: t2.doubanQuickSearch, checked: !!settings.showQuickSearchOnDouban, onChange: () => setSettings({ ...settings, showQuickSearchOnDouban: !settings.showQuickSearchOnDouban }) }),
+                      /* @__PURE__ */ u$1(CheckboxRow, { label: t2.imdbQuickSearch, checked: !!settings.showQuickSearchOnImdb, onChange: () => setSettings({ ...settings, showQuickSearchOnImdb: !settings.showQuickSearchOnImdb }) })
+                    ] }),
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.externalSources }),
+                      /* @__PURE__ */ u$1("div", { className: "af-row", children: [
+                        /* @__PURE__ */ u$1("span", { className: "af-label", children: t2.imdbToDoubanMethod }),
+                        /* @__PURE__ */ u$1("div", { className: "af-segmented", children: [t2.api, t2.scrape].map((l2, i2) => /* @__PURE__ */ u$1("div", { className: `af-segment-opt ${settings.imdbToDoubanMethod === i2 ? "active" : ""}`, onClick: () => setSettings({ ...settings, imdbToDoubanMethod: i2 }), children: l2 })) })
+                      ] }),
+                      /* @__PURE__ */ u$1("div", { className: "af-row", children: [
+                        /* @__PURE__ */ u$1("span", { className: "af-label", children: t2.ptgenSource }),
+                        /* @__PURE__ */ u$1("div", { className: "af-segmented", children: [
+                          /* @__PURE__ */ u$1("div", { className: `af-segment-opt ${settings.ptgenApi === 0 ? "active" : ""}`, onClick: () => setSettings({ ...settings, ptgenApi: 0 }), children: "IYUU" }),
+                          /* @__PURE__ */ u$1("div", { className: `af-segment-opt ${settings.ptgenApi === 1 ? "active" : ""}`, onClick: () => setSettings({ ...settings, ptgenApi: 1 }), children: "PTGen" }),
+                          /* @__PURE__ */ u$1("div", { className: `af-segment-opt ${settings.ptgenApi === 3 ? "active" : ""}`, onClick: () => setSettings({ ...settings, ptgenApi: 3 }), children: "Douban" })
+                        ] })
+                      ] }),
+                      /* @__PURE__ */ u$1("div", { className: "af-row", children: [
+                        /* @__PURE__ */ u$1("span", { className: "af-label", children: t2.chdDomain }),
+                        /* @__PURE__ */ u$1(
+                          "select",
+                          {
+                            className: "af-input",
+                            value: settings.chdBaseUrl,
+                            onChange: (e2) => setSettings({ ...settings, chdBaseUrl: e2.currentTarget.value.endsWith("/") ? e2.currentTarget.value : e2.currentTarget.value + "/" }),
+                            children: [
+                              /* @__PURE__ */ u$1("option", { value: "https://chdbits.co/", children: "chdbits.co" }),
+                              /* @__PURE__ */ u$1("option", { value: "https://ptchdbits.co/", children: "ptchdbits.co" }),
+                              /* @__PURE__ */ u$1("option", { value: "https://ptchdbits.org/", children: "ptchdbits.org" }),
+                              /* @__PURE__ */ u$1("option", { value: "https://chddiy.xyz/", children: "chddiy.xyz" })
+                            ]
+                          }
+                        )
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.quickSearchEditor }),
+                      /* @__PURE__ */ u$1("div", { style: { padding: "12px" }, children: [
+                        /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "8px", marginBottom: "8px" }, children: [
+                          /* @__PURE__ */ u$1("select", { className: "af-input", style: { flex: 1 }, value: quickPreset, onChange: (e2) => setQuickPreset(e2.currentTarget.value), children: quickSearchPresets.map((l2) => /* @__PURE__ */ u$1("option", { value: l2, children: getQuickSearchPresetLabel(l2) }, l2)) }),
+                          /* @__PURE__ */ u$1("button", { className: "af-btn", onClick: () => {
+                            if (!quickPreset) return;
+                            const set = new Set(settings.quickSearchList || []);
+                            set.add(quickPreset);
+                            setSettings({ ...settings, quickSearchList: Array.from(set) });
+                          }, children: t2.add })
+                        ] }),
+                        /* @__PURE__ */ u$1(
+                          "textarea",
+                          {
+                            className: "af-input",
+                            style: { width: "100%", height: "150px", fontFamily: "monospace" },
+                            value: (settings.quickSearchList || []).join("\n"),
+                            onInput: (e2) => setSettings({ ...settings, quickSearchList: e2.currentTarget.value.split("\n").filter(Boolean) })
+                          }
+                        )
+                      ] })
+                    ] }),
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.servicesApiKeys }),
+                      /* @__PURE__ */ u$1(InputRow, { label: "PtpImg API Key", value: settings.ptpImgApiKey, onInput: (v2) => setSettings({ ...settings, ptpImgApiKey: v2 }) }),
+                      /* @__PURE__ */ u$1(InputRow, { label: "Pixhost API Key", value: settings.pixhostApiKey, onInput: (v2) => setSettings({ ...settings, pixhostApiKey: v2 }) }),
+                      /* @__PURE__ */ u$1(InputRow, { label: "Freeimage API Key", value: settings.freeimageApiKey, onInput: (v2) => setSettings({ ...settings, freeimageApiKey: v2 }) }),
+                      /* @__PURE__ */ u$1(InputRow, { label: "Gifyu API Key", value: settings.gifyuApiKey, onInput: (v2) => setSettings({ ...settings, gifyuApiKey: v2 }) }),
+                      /* @__PURE__ */ u$1(InputRow, { label: "HDBImg API Key", value: settings.hdbImgApiKey, onInput: (v2) => setSettings({ ...settings, hdbImgApiKey: v2 }), desc: "Optional" }),
+                      /* @__PURE__ */ u$1(InputRow, { label: "HDBImg Endpoint", value: settings.hdbImgEndpoint, onInput: (v2) => setSettings({ ...settings, hdbImgEndpoint: v2 }) })
+                    ] })
+                  ] }),
+                  activeTab === "sites" && /* @__PURE__ */ u$1("div", { children: [
+                    /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "10px", marginBottom: "16px" }, children: [
+                      /* @__PURE__ */ u$1("button", { className: "af-btn af-btn-primary", onClick: selectAllSites, children: t2.selectAll }),
+                      /* @__PURE__ */ u$1("button", { className: "af-btn", onClick: clearAllSites, children: t2.clearAll })
+                    ] }),
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.enabledSites }),
+                      /* @__PURE__ */ u$1("div", { className: "af-grid", children: allSites.map((site) => /* @__PURE__ */ u$1(
+                        "div",
+                        {
+                          className: "af-checkbox-card",
+                          onClick: () => toggleSite(site.name),
+                          style: { background: (settings.enabledSites || []).includes(site.name) ? "rgba(0,113,227,0.1)" : void 0 },
+                          children: [
+                            /* @__PURE__ */ u$1("input", { type: "checkbox", checked: (settings.enabledSites || []).includes(site.name), readOnly: true }),
+                            /* @__PURE__ */ u$1("span", { style: { fontSize: "12px" }, children: site.name })
+                          ]
+                        },
+                        site.name
+                      )) })
+                    ] }),
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.favoriteSites }),
+                      /* @__PURE__ */ u$1("div", { className: "af-grid", children: allSites.map((site) => /* @__PURE__ */ u$1(
+                        "div",
+                        {
+                          className: "af-checkbox-card",
+                          onClick: () => toggleFavoriteSite(site.name),
+                          style: { background: (settings.favoriteSites || []).includes(site.name) ? "rgba(0,113,227,0.1)" : void 0 },
+                          children: [
+                            /* @__PURE__ */ u$1("input", { type: "checkbox", checked: (settings.favoriteSites || []).includes(site.name), readOnly: true }),
+                            /* @__PURE__ */ u$1("span", { style: { fontSize: "12px" }, children: site.name })
+                          ]
+                        },
+                        "fav-" + site.name
+                      )) })
+                    ] }),
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.listPageQuickSearch }),
+                      /* @__PURE__ */ u$1("div", { style: { padding: "0 16px" }, children: ["PTP", "HDB", "HDT", "UHD"].map((key) => {
+                        var _a;
+                        return /* @__PURE__ */ u$1(
+                          CheckboxRow,
+                          {
+                            label: key,
+                            checked: !!((_a = settings.showSearchOnList) == null ? void 0 : _a[key]),
+                            onChange: () => {
+                              var _a2;
+                              return setSettings({
+                                ...settings,
+                                showSearchOnList: { ...settings.showSearchOnList, [key]: !((_a2 = settings.showSearchOnList) == null ? void 0 : _a2[key]) }
+                              });
+                            }
+                          },
+                          key
+                        );
+                      }) })
+                    ] })
+                  ] }),
+                  activeTab === "remote" && /* @__PURE__ */ u$1("div", { children: [
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.globalSettings }),
+                      /* @__PURE__ */ u$1(CheckboxRow, { label: t2.enableSidebar, checked: !!settings.enableRemoteSidebar, onChange: () => setAndPersist({ ...settings, enableRemoteSidebar: !settings.enableRemoteSidebar }) }),
+                      /* @__PURE__ */ u$1(CheckboxRow, { label: t2.skipCheckingDefault, checked: !!settings.remoteSkipCheckingDefault, onChange: () => setAndPersist({ ...settings, remoteSkipCheckingDefault: !settings.remoteSkipCheckingDefault }) }),
+                      /* @__PURE__ */ u$1(CheckboxRow, { label: t2.askConfirmBeforePush, checked: !!settings.remoteAskSkipConfirm, onChange: () => setAndPersist({ ...settings, remoteAskSkipConfirm: !settings.remoteAskSkipConfirm }) })
+                    ] }),
+                    /* @__PURE__ */ u$1("div", { className: "af-card", children: [
+                      /* @__PURE__ */ u$1("div", { className: "af-card-header", children: t2.clientConfigs }),
+                      /* @__PURE__ */ u$1("div", { style: { padding: "16px" }, children: [
+                        /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "10px", marginBottom: "16px" }, children: [
+                          /* @__PURE__ */ u$1("button", { className: "af-btn", onClick: () => {
+                            setRemoteForm({
+                              type: "qb",
+                              name: "",
+                              url: "",
+                              username: "",
+                              password: "",
+                              paths: [{ label: "default", path: "" }]
+                            });
+                            setRemoteModalOpen(true);
+                          }, children: t2.addClient }),
+                          /* @__PURE__ */ u$1("label", { className: "af-btn", children: [
+                            t2.importJson,
+                            /* @__PURE__ */ u$1(
+                              "input",
+                              {
+                                type: "file",
+                                style: { display: "none" },
+                                accept: ".json",
+                                onChange: (e2) => {
+                                  var _a;
+                                  const f2 = (_a = e2.currentTarget.files) == null ? void 0 : _a[0];
+                                  if (!f2) return;
+                                  const r2 = new FileReader();
+                                  r2.onload = (ev) => {
+                                    var _a2;
+                                    try {
+                                      const json = JSON.parse((_a2 = ev.target) == null ? void 0 : _a2.result);
+                                      setAndPersist({ ...settings, remoteServer: json });
+                                      alert("Config loaded");
+                                    } catch {
+                                      alert("Invalid JSON");
+                                    }
+                                  };
+                                  r2.readAsText(f2);
+                                }
+                              }
+                            )
+                          ] })
+                        ] }),
+                        settings.remoteServer && /* @__PURE__ */ u$1("div", { style: { display: "flex", flexDirection: "column", gap: "8px" }, children: [
+                          Object.entries(settings.remoteServer.qbittorrent || {}).map(([name, conf]) => /* @__PURE__ */ u$1("div", { className: "af-row", style: { background: "#f9f9f9", borderRadius: "8px" }, children: [
+                            /* @__PURE__ */ u$1("span", { className: "af-label", children: [
+                              /* @__PURE__ */ u$1("strong", { children: "[QB]" }),
+                              " ",
+                              name
+                            ] }),
+                            /* @__PURE__ */ u$1("div", { style: { fontSize: "12px", color: "#666", marginRight: "8px" }, children: conf.url })
+                          ] }, "qb" + name)),
+                          Object.entries(settings.remoteServer.transmission || {}).map(([name, conf]) => /* @__PURE__ */ u$1("div", { className: "af-row", style: { background: "#f9f9f9", borderRadius: "8px" }, children: [
+                            /* @__PURE__ */ u$1("span", { className: "af-label", children: [
+                              /* @__PURE__ */ u$1("strong", { children: "[TR]" }),
+                              " ",
+                              name
+                            ] }),
+                            /* @__PURE__ */ u$1("div", { style: { fontSize: "12px", color: "#666", marginRight: "8px" }, children: conf.url })
+                          ] }, "tr" + name)),
+                          Object.entries(settings.remoteServer.deluge || {}).map(([name, conf]) => /* @__PURE__ */ u$1("div", { className: "af-row", style: { background: "#f9f9f9", borderRadius: "8px" }, children: [
+                            /* @__PURE__ */ u$1("span", { className: "af-label", children: [
+                              /* @__PURE__ */ u$1("strong", { children: "[DE]" }),
+                              " ",
+                              name
+                            ] }),
+                            /* @__PURE__ */ u$1("div", { style: { fontSize: "12px", color: "#666", marginRight: "8px" }, children: conf.url })
+                          ] }, "de" + name))
+                        ] })
+                      ] })
+                    ] })
+                  ] })
+                ] })
+              ] }),
+              remoteModalOpen && /* @__PURE__ */ u$1("div", { style: {
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                background: "rgba(0,0,0,0.4)",
+                backdropFilter: "blur(4px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1e5
+              }, children: /* @__PURE__ */ u$1("div", { className: "af-panel", style: { width: "400px", maxHeight: "90%", padding: "0", boxShadow: "0 20px 40px rgba(0,0,0,0.3)" }, children: [
+                /* @__PURE__ */ u$1("div", { className: "af-header", children: [
+                  /* @__PURE__ */ u$1("h3", { className: "af-title", children: t2.addClient }),
+                  /* @__PURE__ */ u$1(
+                    "button",
+                    {
+                      type: "button",
+                      className: "af-close-btn",
+                      onMouseDown: (e2) => e2.stopPropagation(),
+                      onClick: (e2) => {
+                        e2.preventDefault();
+                        e2.stopPropagation();
+                        setRemoteModalOpen(false);
+                      },
+                      children: "×"
+                    }
+                  )
+                ] }),
+                /* @__PURE__ */ u$1("div", { style: { padding: "20px", overflowY: "auto" }, children: [
+                  /* @__PURE__ */ u$1("div", { className: "af-row", children: [
+                    /* @__PURE__ */ u$1("span", { className: "af-label", children: t2.type }),
+                    /* @__PURE__ */ u$1("div", { className: "af-segmented", children: ["qb", "tr", "de"].map((t22) => /* @__PURE__ */ u$1("div", { className: `af-segment-opt ${remoteForm.type === t22 ? "active" : ""}`, onClick: () => setRemoteForm({ ...remoteForm, type: t22 }), children: t22.toUpperCase() }, t22)) })
+                  ] }),
+                  /* @__PURE__ */ u$1("div", { className: "af-row", children: /* @__PURE__ */ u$1("input", { className: "af-input", style: { flex: 1 }, placeholder: t2.name, value: remoteForm.name, onInput: (e2) => setRemoteForm({ ...remoteForm, name: e2.currentTarget.value }) }) }),
+                  /* @__PURE__ */ u$1("div", { className: "af-row", children: /* @__PURE__ */ u$1("input", { className: "af-input", style: { flex: 1 }, placeholder: t2.url, value: remoteForm.url, onInput: (e2) => setRemoteForm({ ...remoteForm, url: e2.currentTarget.value }) }) }),
+                  /* @__PURE__ */ u$1("div", { className: "af-row", children: /* @__PURE__ */ u$1("input", { className: "af-input", style: { flex: 1 }, placeholder: t2.username, value: remoteForm.username, onInput: (e2) => setRemoteForm({ ...remoteForm, username: e2.currentTarget.value }) }) }),
+                  /* @__PURE__ */ u$1("div", { className: "af-row", children: /* @__PURE__ */ u$1("input", { className: "af-input", style: { flex: 1 }, placeholder: t2.password, type: "password", value: remoteForm.password, onInput: (e2) => setRemoteForm({ ...remoteForm, password: e2.currentTarget.value }) }) }),
+                  /* @__PURE__ */ u$1("div", { style: { marginTop: "10px" }, children: [
+                    /* @__PURE__ */ u$1("div", { style: { fontSize: "12px", fontWeight: "bold", marginBottom: "4px" }, children: t2.downloadPaths }),
+                    remoteForm.paths.map((p2, i2) => /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "4px", marginBottom: "4px" }, children: [
+                      /* @__PURE__ */ u$1("input", { className: "af-input", style: { width: "80px" }, placeholder: t2.pathLabel, value: p2.label, onInput: (e2) => {
+                        const np = [...remoteForm.paths];
+                        np[i2].label = e2.currentTarget.value;
+                        setRemoteForm({ ...remoteForm, paths: np });
+                      } }),
+                      /* @__PURE__ */ u$1("input", { className: "af-input", style: { flex: 1 }, placeholder: t2.pathValue, value: p2.path, onInput: (e2) => {
+                        const np = [...remoteForm.paths];
+                        np[i2].path = e2.currentTarget.value;
+                        setRemoteForm({ ...remoteForm, paths: np });
+                      } })
+                    ] }, i2)),
+                    /* @__PURE__ */ u$1("button", { type: "button", className: "af-btn", style: { width: "100%", marginTop: "4px" }, onClick: () => setRemoteForm({ ...remoteForm, paths: [...remoteForm.paths, { label: "", path: "" }] }), children: t2.addPath })
                   ] })
                 ] }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "checkbox",
-                      checked: !!settings.hdbShowDouban,
-                      onChange: () => setSettings({ ...settings, hdbShowDouban: !settings.hdbShowDouban })
+                /* @__PURE__ */ u$1("div", { style: { padding: "16px", borderTop: "1px solid var(--af-border-light)", display: "flex", justifyContent: "flex-end", gap: "10px" }, children: [
+                  /* @__PURE__ */ u$1("button", { type: "button", className: "af-btn", style: { marginRight: "auto" }, onClick: async (e2) => {
+                    const btn = e2.currentTarget;
+                    btn.textContent;
+                    btn.textContent = t2.testing;
+                    btn.disabled = true;
+                    try {
+                      const { type, url, username, password } = remoteForm;
+                      let res = { ok: false, message: "" };
+                      if (type === "qb") res = await RemoteServerTestService.testQbittorrent({ url, username, password });
+                      else if (type === "tr") res = await RemoteServerTestService.testTransmission({ url, username, password });
+                      else res = await RemoteServerTestService.testDeluge({ url, password });
+                      alert(res.ok ? `${t2.testSuccess}: ${res.message}` : `${t2.testFailed}: ${res.message}`);
+                    } catch (err) {
+                      alert(`${t2.testFailed}: ${(err == null ? void 0 : err.message) || String(err)}`);
+                    } finally {
+                      btn.textContent = t2.testConnection;
+                      btn.disabled = false;
                     }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "HDB 中文豆瓣信息" })
-                ] }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "checkbox",
-                      checked: !!settings.hdbHideDouban,
-                      onChange: () => setSettings({ ...settings, hdbHideDouban: !settings.hdbHideDouban })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "HDB 豆瓣信息默认折叠" })
-                ] }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px", marginTop: "10px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "checkbox",
-                      checked: !!settings.showQuickSearchOnDouban,
-                      onChange: () => setSettings({ ...settings, showQuickSearchOnDouban: !settings.showQuickSearchOnDouban })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "豆瓣页面快速搜索/工具" })
-                ] }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "checkbox",
-                      checked: !!settings.showQuickSearchOnImdb,
-                      onChange: () => setSettings({ ...settings, showQuickSearchOnImdb: !settings.showQuickSearchOnImdb })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "IMDb 页面快速搜索/工具" })
-                ] }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "checkbox",
-                      checked: !!settings.enableRemoteSidebar,
-                      onChange: () => setSettings({ ...settings, enableRemoteSidebar: !settings.enableRemoteSidebar })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "启用远程推送侧边栏" })
-                ] }),
-                /* @__PURE__ */ u$1("div", { style: { marginTop: "8px", fontSize: "12px", color: "#666" }, children: "远程推送 JSON 配置：" }),
-                /* @__PURE__ */ u$1(
-                  "input",
-                  {
-                    type: "file",
-                    accept: ".json,application/json",
-                    onChange: (e2) => {
-                      var _a;
-                      const file = (_a = e2.currentTarget.files) == null ? void 0 : _a[0];
-                      if (!file) return;
-                      const reader = new FileReader();
-                      reader.onload = (evt) => {
-                        var _a2;
-                        try {
-                          const json = JSON.parse(String(((_a2 = evt.target) == null ? void 0 : _a2.result) || "{}"));
-                          setSettings({ ...settings, remoteServer: json });
-                          alert("远程服务器配置已加载");
-                        } catch (err) {
-                          alert("JSON 解析失败，请检查格式");
-                        }
-                      };
-                      reader.readAsText(file);
-                    }
-                  }
-                ),
-                settings.remoteServer && /* @__PURE__ */ u$1("pre", { style: { marginTop: "8px", padding: "8px", background: "#fff", border: "1px solid #ddd", borderRadius: "4px", maxHeight: "150px", overflow: "auto" }, children: JSON.stringify(settings.remoteServer, null, 2) })
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px", padding: "10px", border: "1px solid #eee", borderRadius: "6px", background: "#fafafa" }, children: [
-                /* @__PURE__ */ u$1("div", { style: { fontWeight: "bold", marginBottom: "8px" }, children: "外站信息获取" }),
-                /* @__PURE__ */ u$1("div", { style: { marginBottom: "6px", color: "#666" }, children: "选择 IMDb 到豆瓣 ID 的获取方式" }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "radio",
-                      name: "imdb2douban_method",
-                      value: "0",
-                      checked: settings.imdbToDoubanMethod === 0,
-                      onChange: () => setSettings({ ...settings, imdbToDoubanMethod: 0 })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "豆瓣 API" })
-                ] }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "radio",
-                      name: "imdb2douban_method",
-                      value: "1",
-                      checked: settings.imdbToDoubanMethod === 1,
-                      onChange: () => setSettings({ ...settings, imdbToDoubanMethod: 1 })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "豆瓣爬取" })
-                ] }),
-                /* @__PURE__ */ u$1("div", { style: { marginTop: "10px", marginBottom: "6px", color: "#666" }, children: "选择 PTGen 的 API 节点" }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "radio",
-                      name: "ptgen_api",
-                      value: "0",
-                      checked: settings.ptgenApi === 0,
-                      onChange: () => setSettings({ ...settings, ptgenApi: 0 })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "api.iyuu.cn" })
-                ] }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "radio",
-                      name: "ptgen_api",
-                      value: "1",
-                      checked: settings.ptgenApi === 1,
-                      onChange: () => setSettings({ ...settings, ptgenApi: 1 })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "ptgen" })
-                ] }),
-                /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "radio",
-                      name: "ptgen_api",
-                      value: "3",
-                      checked: settings.ptgenApi === 3,
-                      onChange: () => setSettings({ ...settings, ptgenApi: 3 })
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { children: "豆瓣页面爬取" })
+                  }, children: t2.testConnection }),
+                  /* @__PURE__ */ u$1("button", { type: "button", className: "af-btn", onClick: () => setRemoteModalOpen(false), children: t2.cancel }),
+                  /* @__PURE__ */ u$1("button", { type: "button", className: "af-btn af-btn-primary", onClick: async () => {
+                    const newSettings = { ...settings };
+                    if (!newSettings.remoteServer) newSettings.remoteServer = {};
+                    const key = remoteForm.type === "qb" ? "qbittorrent" : remoteForm.type === "tr" ? "transmission" : "deluge";
+                    if (!newSettings.remoteServer[key]) newSettings.remoteServer[key] = {};
+                    const pathsMap = {};
+                    remoteForm.paths.forEach((p2) => {
+                      if (p2.label && p2.path) pathsMap[p2.label] = p2.path;
+                    });
+                    newSettings.remoteServer[key][remoteForm.name] = {
+                      url: remoteForm.url,
+                      username: remoteForm.username,
+                      password: remoteForm.password,
+                      path: pathsMap
+                    };
+                    await setAndPersist(newSettings);
+                    setRemoteModalOpen(false);
+                  }, children: t2.save })
                 ] })
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginBottom: "15px", padding: "10px", border: "1px solid #eee", borderRadius: "6px", background: "#fafafa" }, children: [
-                /* @__PURE__ */ u$1("div", { style: { fontWeight: "bold", marginBottom: "8px" }, children: "快速搜索站点设置" }),
-                /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "8px", alignItems: "center", marginBottom: "8px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "select",
-                    {
-                      style: { flex: 1, padding: "6px", border: "1px solid #ced4da", borderRadius: "4px" },
-                      value: quickPreset,
-                      onChange: (e2) => setQuickPreset(e2.currentTarget.value),
-                      children: quickSearchPresets.map((line) => /* @__PURE__ */ u$1("option", { value: line, children: getQuickSearchPresetLabel(line) }, line))
-                    }
-                  ),
-                  /* @__PURE__ */ u$1(
-                    "button",
-                    {
-                      onClick: () => {
-                        if (!quickPreset) return;
-                        const set = new Set(settings.quickSearchList || []);
-                        set.add(quickPreset);
-                        setSettings({ ...settings, quickSearchList: Array.from(set) });
-                      },
-                      style: { padding: "6px 10px", border: "1px solid #ddd", borderRadius: "4px", cursor: "pointer", background: "#f5f5f5" },
-                      children: "新增"
-                    }
-                  )
-                ] }),
-                /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "8px", alignItems: "center", marginBottom: "8px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "text",
-                      placeholder: "自定义模板（支持 <a href=...> 或 Name|URL）",
-                      style: { flex: 1, padding: "6px", border: "1px solid #ced4da", borderRadius: "4px" },
-                      value: quickPresetInput,
-                      onInput: (e2) => setQuickPresetInput(e2.currentTarget.value)
-                    }
-                  ),
-                  /* @__PURE__ */ u$1(
-                    "button",
-                    {
-                      onClick: () => {
-                        const value = quickPresetInput.trim();
-                        if (!value) return;
-                        const set = new Set(settings.quickSearchPresets || []);
-                        set.add(value);
-                        setSettings({ ...settings, quickSearchPresets: Array.from(set) });
-                        setQuickPresetInput("");
-                      },
-                      style: { padding: "6px 10px", border: "1px solid #ddd", borderRadius: "4px", cursor: "pointer", background: "#f5f5f5" },
-                      children: "加入下拉框"
-                    }
-                  )
-                ] }),
-                /* @__PURE__ */ u$1(
-                  "textarea",
-                  {
-                    style: {
-                      width: "100%",
-                      height: "220px",
-                      padding: "8px",
-                      border: "1px solid #ced4da",
-                      borderRadius: "4px",
-                      fontFamily: "monospace",
-                      fontSize: "12px"
-                    },
-                    value: (settings.quickSearchList || []).join("\n"),
-                    onInput: (e2) => {
-                      const lines = e2.currentTarget.value.split("\n").map((line) => line.trim()).filter(Boolean);
-                      setSettings({ ...settings, quickSearchList: lines });
-                    }
-                  }
-                ),
-                /* @__PURE__ */ u$1("div", { style: { marginTop: "6px", fontSize: "12px", color: "#666" }, children: [
-                  "每行一个模板，支持占位符：",
-                  " ",
-                  /* @__PURE__ */ u$1("code", { children: "{imdbid}" }),
-                  " ",
-                  /* @__PURE__ */ u$1("code", { children: "{imdbno}" }),
-                  " ",
-                  /* @__PURE__ */ u$1("code", { children: "{search_name}" }),
-                  " ",
-                  /* @__PURE__ */ u$1("code", { children: "{title}" }),
-                  " ",
-                  /* @__PURE__ */ u$1("code", { children: "{doubanid}" })
-                ] })
-              ] }),
-              /* @__PURE__ */ u$1(
-                "button",
-                {
-                  onClick: handleSaveSettings,
-                  style: {
-                    padding: "10px 20px",
-                    background: "#007bff",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  },
-                  children: "Save Settings"
-                }
-              )
-            ] }),
-            activeTab === "sites" && /* @__PURE__ */ u$1("div", { children: [
-              /* @__PURE__ */ u$1("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: "15px" }, children: [
-                /* @__PURE__ */ u$1("h3", { children: "转发站点设置" }),
-                /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "8px" }, children: [
-                  /* @__PURE__ */ u$1("button", { onClick: selectAllSites, style: { padding: "5px 10px", background: "#28a745", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }, children: "全选" }),
-                  /* @__PURE__ */ u$1("button", { onClick: clearAllSites, style: { padding: "5px 10px", background: "#6c757d", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }, children: "取消全选" })
-                ] })
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { display: "grid", gridTemplateColumns: "repeat(6, minmax(120px, 1fr))", gap: "8px", padding: "10px", border: "1px solid #eee", borderRadius: "6px", background: "#fafafa" }, children: allSites.map((site) => /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px", fontSize: "13px" }, children: [
-                /* @__PURE__ */ u$1(
-                  "input",
-                  {
-                    type: "checkbox",
-                    checked: (settings.enabledSites || []).includes(site.name),
-                    onChange: () => toggleSite(site.name)
-                  }
-                ),
-                /* @__PURE__ */ u$1("span", { title: site.description || "", children: site.name })
-              ] }, site.name)) }),
-              /* @__PURE__ */ u$1("div", { style: { marginTop: "20px" }, children: /* @__PURE__ */ u$1(
-                "button",
-                {
-                  onClick: handleSaveSettings,
-                  style: {
-                    padding: "10px 20px",
-                    background: "#007bff",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  },
-                  children: "Save Sites"
-                }
-              ) }),
-              /* @__PURE__ */ u$1("div", { style: { marginTop: "30px", borderTop: "1px solid #eee", paddingTop: "20px" }, children: [
-                /* @__PURE__ */ u$1("h3", { style: { marginBottom: "12px" }, children: "常用站点设置" }),
-                /* @__PURE__ */ u$1("div", { style: { display: "grid", gridTemplateColumns: "repeat(6, minmax(120px, 1fr))", gap: "8px", padding: "10px", border: "1px solid #eee", borderRadius: "6px", background: "#fafafa" }, children: allSites.map((site) => /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px", fontSize: "13px" }, children: [
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "checkbox",
-                      checked: (settings.favoriteSites || []).includes(site.name),
-                      onChange: () => toggleFavoriteSite(site.name)
-                    }
-                  ),
-                  /* @__PURE__ */ u$1("span", { title: site.description || "", children: site.name })
-                ] }, `fav-${site.name}`)) }),
-                /* @__PURE__ */ u$1("div", { style: { marginTop: "20px" }, children: /* @__PURE__ */ u$1(
-                  "button",
-                  {
-                    onClick: handleSaveSettings,
-                    style: {
-                      padding: "10px 20px",
-                      background: "#007bff",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer"
-                    },
-                    children: "Save Favorites"
-                  }
-                ) })
-              ] }),
-              /* @__PURE__ */ u$1("div", { style: { marginTop: "30px", borderTop: "1px solid #eee", paddingTop: "20px" }, children: [
-                /* @__PURE__ */ u$1("h3", { style: { marginBottom: "12px" }, children: "是否在种子列表页显示快速搜索" }),
-                /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "12px", flexWrap: "wrap" }, children: ["PTP", "HDB", "HDT", "UHD"].map((key) => {
-                  var _a;
-                  return /* @__PURE__ */ u$1("label", { style: { display: "flex", alignItems: "center", gap: "6px" }, children: [
-                    /* @__PURE__ */ u$1(
-                      "input",
-                      {
-                        type: "checkbox",
-                        checked: !!((_a = settings.showSearchOnList) == null ? void 0 : _a[key]),
-                        onChange: () => {
-                          var _a2;
-                          return setSettings({
-                            ...settings,
-                            showSearchOnList: {
-                              ...settings.showSearchOnList,
-                              [key]: !((_a2 = settings.showSearchOnList) == null ? void 0 : _a2[key])
-                            }
-                          });
-                        }
-                      }
-                    ),
-                    /* @__PURE__ */ u$1("span", { children: key })
-                  ] }, key);
-                }) }),
-                /* @__PURE__ */ u$1("div", { style: { marginTop: "20px" }, children: /* @__PURE__ */ u$1(
-                  "button",
-                  {
-                    onClick: handleSaveSettings,
-                    style: {
-                      padding: "10px 20px",
-                      background: "#007bff",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer"
-                    },
-                    children: "Save Search Toggles"
-                  }
-                ) })
-              ] })
-            ] }),
-            activeTab === "logs" && /* @__PURE__ */ u$1("div", { children: /* @__PURE__ */ u$1("p", { children: "Logs placeholder..." }) })
-          ] })
-        ] }) });
+              ] }) })
+            ]
+          }
+        );
       };
+      const appleStyles = `
+:host {
+    --af-bg-primary: rgba(245, 245, 247, 0.95);
+    --af-bg-secondary: #ffffff;
+    --af-text-primary: #1d1d1f;
+    --af-text-secondary: #86868b;
+    --af-accent: #0071e3;
+    --af-accent-hover: #0077ed;
+    --af-border: #d2d2d7;
+    --af-border-light: #e5e5ea;
+    --af-danger: #ff3b30;
+    --af-success: #34c759;
+    --af-warn: #ffcc00;
+    --af-radius-l: 12px;
+    --af-radius-m: 8px;
+    --af-radius-s: 6px;
+    --af-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    --af-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    font-family: var(--af-font);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+.af-panel {
+    background: var(--af-bg-primary);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: var(--af-radius-l);
+    box-shadow: var(--af-shadow);
+    color: var(--af-text-primary);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-size: 13px;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.af-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.8);
+    border-bottom: 1px solid var(--af-border-light);
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.af-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin: 0;
+}
+
+.af-close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--af-text-secondary);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+.af-close-btn:hover {
+    background: rgba(0,0,0,0.05);
+    color: var(--af-text-primary);
+}
+
+/* Layout */
+.af-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.af-sidebar {
+    width: 180px;
+    background: rgba(242, 242, 247, 0.5);
+    border-right: 1px solid var(--af-border-light);
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.af-nav-item {
+    padding: 8px 12px;
+    border-radius: var(--af-radius-s);
+    cursor: pointer;
+    font-weight: 500;
+    color: var(--af-text-primary);
+    transition: background 0.2s;
+}
+.af-nav-item:hover {
+    background: rgba(0,0,0,0.05);
+}
+.af-nav-item.active {
+    background: rgba(0,113,227,0.12);
+    color: var(--af-accent);
+}
+
+.af-content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: var(--af-bg-secondary);
+}
+
+/* Components */
+.af-card {
+    background: #fff;
+    border-radius: var(--af-radius-l);
+    border: 1px solid var(--af-border-light);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.af-card-header {
+    background: #fcfcfc;
+    padding: 10px 16px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--af-border-light);
+    color: var(--af-text-secondary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.af-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--af-border-light);
+    min-height: 44px;
+}
+.af-row:last-child {
+    border-bottom: none;
+}
+
+.af-label {
+    flex: 1;
+    font-size: 13px;
+}
+.af-label-desc {
+    font-size: 11px;
+    color: var(--af-text-secondary);
+    margin-top: 2px;
+}
+
+/* Inputs */
+.af-input {
+    padding: 6px 10px;
+    border: 1px solid var(--af-border);
+    border-radius: var(--af-radius-s);
+    font-size: 13px;
+    outline: none;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+.af-input:focus {
+    border-color: var(--af-accent);
+    box-shadow: 0 0 0 3px rgba(0,113,227,0.2);
+}
+
+/* Buttons */
+.af-btn {
+    padding: 6px 14px;
+    border-radius: var(--af-radius-s);
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(0,0,0,0.05);
+    color: var(--af-accent);
+}
+.af-btn:hover {
+    background: rgba(0,0,0,0.1);
+}
+.af-btn-primary {
+    background: var(--af-accent);
+    color: #fff;
+}
+.af-btn-primary:hover {
+    background: var(--af-accent-hover);
+}
+.af-btn-danger {
+    background: rgba(255,59,48,0.1);
+    color: var(--af-danger);
+}
+.af-btn-danger:hover {
+    background: rgba(255,59,48,0.2);
+}
+
+/* iOS Toggle Switch */
+.af-toggle {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+}
+.af-toggle input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.af-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #e9e9ea;
+    transition: .3s;
+    border-radius: 20px;
+}
+.af-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.af-toggle input:checked + .af-slider {
+    background-color: var(--af-success);
+}
+.af-toggle input:checked + .af-slider:before {
+    transform: translateX(16px);
+}
+
+/* Site Grid */
+.af-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 8px;
+    padding: 16px;
+}
+.af-checkbox-card {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background: #f5f5f7;
+    border-radius: var(--af-radius-s);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.af-checkbox-card:hover {
+    background: #e5e5e7;
+}
+.af-checkbox-card input {
+    margin-right: 8px;
+}
+
+/* Segmented Control */
+.af-segmented {
+    display: flex;
+    background: #efeff0;
+    padding: 2px;
+    border-radius: var(--af-radius-m);
+}
+.af-segment-opt {
+    flex: 1;
+    text-align: center;
+    padding: 4px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    color: var(--af-text-primary);
+    transition: all 0.2s;
+}
+.af-segment-opt.active {
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    font-weight: 500;
+}
+`;
       function mountUI() {
         const host = document.createElement("div");
         host.id = "auto-feed-overlay-host";
         document.body.appendChild(host);
         const shadow = host.attachShadow({ mode: "open" });
+        const styleEl = document.createElement("style");
+        styleEl.textContent = appleStyles;
+        shadow.appendChild(styleEl);
         const container = document.createElement("div");
         shadow.appendChild(container);
         G(/* @__PURE__ */ u$1(App, {}), container);
@@ -7317,7 +8072,7 @@ ${updated.description || ""}`.trim();
   };
 }));
 
-System.register("./TorrentService-EFzdq8v2-DG0Yz6Zs.js", ['./__monkey.entry-Bddmwiuq.js', 'jquery'], (function (exports, module) {
+System.register("./TorrentService-pxyyCZrj-DHzjrriL.js", ['./__monkey.entry-Bp_BrHPF.js', 'jquery'], (function (exports, module) {
   'use strict';
   var GMAdapter;
   return {
@@ -7577,7 +8332,7 @@ System.register("./TorrentService-EFzdq8v2-DG0Yz6Zs.js", ['./__monkey.entry-Bddm
   };
 }));
 
-System.register("./normalize-BAJrKNMT-CulNThvw.js", ['./__monkey.entry-Bddmwiuq.js', 'jquery'], (function (exports, module) {
+System.register("./normalize-KsvfuXt2-BMmlZnNY.js", ['./__monkey.entry-Bp_BrHPF.js', 'jquery'], (function (exports, module) {
   'use strict';
   var dealWithTitle, dealWithSubtitle, getSmallDescrFromDescr, getSourceSelFromDescr, getMediumSel, getCodecSel, getAudioCodecSel, getStandardSel, getMediainfoPictureFromDescr, addThanks, getType;
   return {

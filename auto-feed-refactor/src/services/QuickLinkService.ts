@@ -25,11 +25,11 @@ export class QuickLinkService {
 
         const panel = document.createElement('div');
         panel.style.cssText = `
-            width: 68vw;
+            width: 64vw;
             max-width: 980px;
-            height: 52vh;
-            max-height: 460px;
-            min-height: 260px;
+            height: 38vh;
+            max-height: 320px;
+            min-height: 200px;
             background: #fff;
             border-radius: 8px;
             display: flex;
@@ -161,10 +161,11 @@ export class QuickLinkService {
             alert('已转存至 Gifyu');
         });
 
-        const hdbimg = makeToolLink('HDBIMG');
+        const hdbimg = makeToolLink('HDB');
         hdbimg.on('click', async (e) => {
             e.preventDefault();
-            await ImageUploadBridgeService.prepareAndOpen(meta, 'hdbimg');
+            // Legacy: "转存HDB" opens HDBits image host (img.hdbits.org)
+            await ImageUploadBridgeService.prepareAndOpen(meta, 'hdbits');
         });
 
         const imgbox = makeToolLink('IMGBOX');

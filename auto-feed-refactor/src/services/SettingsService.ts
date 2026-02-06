@@ -20,6 +20,8 @@ export interface AppSettings {
     showQuickSearchOnDouban: boolean;
     showQuickSearchOnImdb: boolean;
     enableRemoteSidebar: boolean;
+    remoteSkipCheckingDefault: boolean;
+    remoteAskSkipConfirm: boolean;
     remoteServer: RemoteServerConfig | null;
     imdbToDoubanMethod: number; // 0: Douban API, 1: Douban scrape
     ptgenApi: number; // 0: api.iyuu.cn, 1: ptgen, 3: Douban page scrape
@@ -33,6 +35,7 @@ export interface AppSettings {
         HDT: boolean;
         UHD: boolean;
     };
+    uiLanguage: 'zh' | 'en';
 }
 
 export interface RemoteServerConfig {
@@ -45,6 +48,11 @@ export interface RemoteServerConfig {
     transmission?: Record<string, {
         url: string;
         username: string;
+        password: string;
+        path: Record<string, string>;
+    }>;
+    deluge?: Record<string, {
+        url: string;
         password: string;
         path: Record<string, string>;
     }>;
@@ -68,6 +76,8 @@ const DEFAULT_SETTINGS: AppSettings = {
     showQuickSearchOnDouban: true,
     showQuickSearchOnImdb: true,
     enableRemoteSidebar: false,
+    remoteSkipCheckingDefault: false,
+    remoteAskSkipConfirm: false,
     remoteServer: null,
     imdbToDoubanMethod: 0,
     ptgenApi: 3,
@@ -82,7 +92,8 @@ const DEFAULT_SETTINGS: AppSettings = {
         HDB: false,
         HDT: false,
         UHD: false
-    }
+    },
+    uiLanguage: 'zh'
 };
 
 export class SettingsService {

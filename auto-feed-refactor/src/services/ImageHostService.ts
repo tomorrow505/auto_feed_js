@@ -14,7 +14,10 @@ export class ImageHostService {
         let newUrl = url;
 
         if (url.match(/imgbox/)) {
-            newUrl = url.replace('thumbs2', 'images2').replace('t.png', 'o.png');
+            // Legacy: thumbs2 -> images2, *_t.ext -> *_o.ext (jpg/png/gif)
+            newUrl = url.replace('thumbs2', 'images2');
+            newUrl = newUrl.replace(/_t\.(png|jpg|jpeg|gif)(\?|$)/i, (_m, ext, tail) => `_o.${ext}${tail || ''}`);
+            newUrl = newUrl.replace('t.png', 'o.png'); // extra fallback for older patterns
         } else if (url.match(/pixhost/)) {
             newUrl = url.replace('//t', '//img').replace('thumbs', 'images');
         } else if (url.match(/shewang.net|pterclub.net|img4k.net|img.hdhome.org|img.hdchina.org/)) {
