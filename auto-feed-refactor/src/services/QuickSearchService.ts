@@ -28,20 +28,22 @@ export class QuickSearchService {
         settings.then((s) => {
             const row = $('<div class="autofeed-search-links" style="margin-top: 6px; font-size: 12px;"></div>');
             row.append('<span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>');
+            const makeLink = (name: string, url: string) =>
+                $(
+                    `<a href="${url}" target="_blank" style="display:inline-block; margin-right:6px; margin-bottom:4px; padding:2px 6px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${name}</a>`
+                );
 
             if (Array.isArray(s.quickSearchList)) {
                 const items = buildQuickSearchItems(s.quickSearchList, meta);
                 if (!items.length) return;
                 items.forEach((item) => {
-                    const link = $(`<a href="${item.url}" target="_blank" style="margin-right:6px; color:#2c3e50;">${item.name}</a>`);
-                    row.append(link);
+                    row.append(makeLink(item.name, item.url));
                 });
             } else {
                 const items = buildQuickSearchItems(DEFAULT_QUICK_SEARCH_TEMPLATES, meta);
                 if (items.length) {
                     items.forEach((item) => {
-                        const link = $(`<a href="${item.url}" target="_blank" style="margin-right:6px; color:#2c3e50;">${item.name}</a>`);
-                        row.append(link);
+                        row.append(makeLink(item.name, item.url));
                     });
                 } else {
                     const allSites = SiteCatalogService.getAllSites().filter((site) => site.baseUrl);
@@ -57,8 +59,7 @@ export class QuickSearchService {
                             } as TorrentMeta,
                             { chdBaseUrl: s.chdBaseUrl }
                         );
-                        const link = $(`<a href="${url}" target="_blank" style="margin-right:6px; color:#2c3e50;">${site.name}</a>`);
-                        row.append(link);
+                        row.append(makeLink(site.name, url));
                     });
                 }
             }

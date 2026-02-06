@@ -27,6 +27,7 @@
 // @match        https://hdsky.me/*
 // @match        https://ourbits.club/*
 // @match        https://hdcmct.org/*
+// @match        https://springsunday.net/*
 // @match        https://www.douban.com/subject/*
 // @match        https://movie.douban.com/subject/*
 // @match        https://www.imdb.com/title/tt*
@@ -66,7 +67,7 @@
 System.addImportMap({ imports: {"jquery":"user:jquery"} });
 System.set("user:jquery", (()=>{const _=jQuery;('default' in _)||(_.default=_);return _})());
 
-System.register("./__entry.js", ['./__monkey.entry-pxiUrdlY.js'], (function (exports, module) {
+System.register("./__entry.js", ['./__monkey.entry-Bddmwiuq.js'], (function (exports, module) {
 	'use strict';
 	return {
 		setters: [null],
@@ -78,7 +79,7 @@ System.register("./__entry.js", ['./__monkey.entry-pxiUrdlY.js'], (function (exp
 	};
 }));
 
-System.register("./__monkey.entry-pxiUrdlY.js", ['jquery'], (function (exports, module) {
+System.register("./__monkey.entry-Bddmwiuq.js", ['jquery'], (function (exports, module) {
   'use strict';
   var $$1;
   return {
@@ -439,7 +440,7 @@ ${content}
           if (fileInput) {
             try {
               const { TorrentService } = await __vitePreload(async () => {
-                const { TorrentService: TorrentService2 } = await module.import('./TorrentService-DBpL5kU2-DokdCOJA.js');
+                const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
                 return { TorrentService: TorrentService2 };
               }, true ? void 0 : void 0);
               const result = await TorrentService.buildForwardTorrentFile(meta, config.name, null);
@@ -634,16 +635,555 @@ ${content}
           await fillGazelle(meta, this.config);
         }
       }
+      const hasGMObject = typeof GM !== "undefined";
+      class GMAdapter {
+        static async getValue(key, defaultValue) {
+          try {
+            if (typeof GM_getValue !== "undefined") {
+              return GM_getValue(key, defaultValue);
+            }
+            if (hasGMObject && typeof GM.getValue === "function") {
+              return await GM.getValue(key, defaultValue);
+            }
+          } catch {
+          }
+          try {
+            const raw = localStorage.getItem(key);
+            if (raw === null || raw === void 0) return defaultValue;
+            return raw;
+          } catch {
+            return defaultValue;
+          }
+        }
+        static async setValue(key, value) {
+          try {
+            if (typeof GM_setValue !== "undefined") {
+              GM_setValue(key, value);
+              return;
+            }
+            if (hasGMObject && typeof GM.setValue === "function") {
+              await GM.setValue(key, value);
+              return;
+            }
+          } catch {
+          }
+          try {
+            localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
+          } catch {
+          }
+        }
+        static async setClipboard(text) {
+          try {
+            if (typeof GM_setClipboard !== "undefined") {
+              GM_setClipboard(text);
+              return;
+            }
+            if (hasGMObject && typeof GM.setClipboard === "function") {
+              await GM.setClipboard(text);
+              return;
+            }
+          } catch {
+          }
+          try {
+            await navigator.clipboard.writeText(text);
+          } catch {
+          }
+        }
+        static async deleteValue(key) {
+          try {
+            if (typeof GM_deleteValue !== "undefined") {
+              GM_deleteValue(key);
+              return;
+            }
+            if (hasGMObject && typeof GM.deleteValue === "function") {
+              await GM.deleteValue(key);
+              return;
+            }
+          } catch {
+          }
+          try {
+            localStorage.removeItem(key);
+          } catch {
+          }
+        }
+        static xmlHttpRequest(details) {
+          return new Promise((resolve, reject) => {
+            const withCallbacks = {
+              ...details,
+              onload: (resp) => {
+                var _a;
+                (_a = details.onload) == null ? void 0 : _a.call(details, resp);
+                resolve(resp);
+              },
+              onerror: (err) => {
+                var _a;
+                (_a = details.onerror) == null ? void 0 : _a.call(details, err);
+                reject(err);
+              },
+              ontimeout: () => {
+                var _a;
+                (_a = details.ontimeout) == null ? void 0 : _a.call(details);
+                reject(new Error("timeout"));
+              }
+            };
+            if (typeof GM_xmlhttpRequest === "function") {
+              GM_xmlhttpRequest(withCallbacks);
+              return;
+            }
+            if (hasGMObject && typeof GM.xmlHttpRequest === "function") {
+              const result = GM.xmlHttpRequest(withCallbacks);
+              if (result && typeof result.then === "function") {
+                result.then(resolve).catch(reject);
+              }
+              return;
+            }
+            reject(new Error("GM_xmlhttpRequest not available"));
+          });
+        }
+      } exports("G", GMAdapter);
+      const NexusSites = [
+        {
+          name: "MTeam",
+          type: SiteType.MTeam,
+          keywords: ["m-team.cc", "m-team.io"],
+          baseUrl: "https://kp.m-team.cc/",
+          description: "M-Team TP (New AntD Layout)",
+          features: {
+            imdbSearch: true,
+            doubanSearch: true
+          },
+          selectors: {
+            title: [
+              "h2.ant-typography",
+              // New Antd
+              "#top",
+              // Legacy Nexus
+              "h1#top",
+              ".torrent-title",
+              ".ant-descriptions-item-content:first"
+            ],
+            description: [
+              'div[id="kdescr"]',
+              // Classic
+              ".braft-output-content",
+              // New Editor
+              ".ant-card-body .markdown",
+              "#description"
+            ],
+            // Hardcode these for now to be safe
+            nameInput: "input#name",
+            descrInput: "textarea#description",
+            imdbInput: "input#imdb_id"
+          }
+        },
+        {
+          name: "HDSky",
+          type: SiteType.NexusPHP,
+          keywords: ["hdsky.me"],
+          baseUrl: "https://hdsky.me/",
+          description: "HDSky"
+        },
+        {
+          name: "OurBits",
+          type: SiteType.NexusPHP,
+          keywords: ["ourbits.club"],
+          baseUrl: "https://ourbits.club/",
+          description: "OurBits"
+        },
+        {
+          name: "CMCT",
+          type: SiteType.NexusPHP,
+          keywords: ["hdcmct.org", "springsunday.net"],
+          baseUrl: "https://springsunday.net/",
+          description: "SpringSunday"
+        },
+        {
+          name: "TTG",
+          type: SiteType.NexusPHP,
+          keywords: ["totheglory.im"],
+          baseUrl: "https://totheglory.im/",
+          description: "TTG (Nexus-like parsing)"
+        },
+        {
+          name: "pterclub",
+          type: SiteType.NexusPHP,
+          keywords: ["pterclub.net"],
+          baseUrl: "https://pterclub.net/",
+          description: "Pter"
+        },
+        {
+          name: "HDArea",
+          type: SiteType.NexusPHP,
+          keywords: ["hdarea.co"],
+          baseUrl: "https://hdarea.co/",
+          description: "HDArea"
+        },
+        {
+          name: "Audiences",
+          type: SiteType.NexusPHP,
+          keywords: ["audiences.me"],
+          baseUrl: "https://audiences.me/",
+          description: "Audiences"
+        },
+        {
+          name: "FRDS",
+          type: SiteType.NexusPHP,
+          keywords: ["keepfrds.com"],
+          baseUrl: "https://keepfrds.com/",
+          description: "FRDS"
+        },
+        {
+          name: "CHDBits",
+          type: SiteType.CHDBits,
+          keywords: ["chdbits.co", "ptchdbits.co", "ptchdbits.org", "chddiy.xyz", "chdbits"],
+          baseUrl: "https://chdbits.co/",
+          description: "CHDBits",
+          features: {
+            imdbSearch: true
+          }
+        },
+        {
+          name: "PTP",
+          type: SiteType.PTP,
+          keywords: ["passthepopcorn.me"],
+          baseUrl: "https://passthepopcorn.me/",
+          description: "PassThePopcorn"
+        },
+        {
+          name: "HDB",
+          type: SiteType.HDB,
+          keywords: ["hdbits.org"],
+          baseUrl: "https://hdbits.org/",
+          description: "HDBits"
+        },
+        {
+          name: "KG",
+          type: SiteType.KG,
+          keywords: ["karagarga.in"],
+          baseUrl: "https://karagarga.in/",
+          description: "Karagarga"
+        }
+      ];
+      const GazelleSites = [
+        {
+          name: "RED",
+          type: SiteType.Gazelle,
+          keywords: ["redacted.sh"],
+          baseUrl: "https://redacted.sh/",
+          description: "Redacted",
+          features: {
+            imdbSearch: false,
+            doubanSearch: false
+          }
+        },
+        {
+          name: "OPS",
+          type: SiteType.Gazelle,
+          keywords: ["orpheus.network"],
+          baseUrl: "https://orpheus.network/",
+          description: "Orpheus"
+        },
+        {
+          name: "DIC",
+          type: SiteType.Gazelle,
+          keywords: ["dicmusic.com"],
+          baseUrl: "https://dicmusic.com/",
+          description: "DICMusic"
+        }
+      ];
+      const Unit3DSites = [
+        {
+          name: "BLU",
+          type: SiteType.Unit3DClassic,
+          keywords: ["blutopia.cc"],
+          baseUrl: "https://blutopia.cc/",
+          description: "Blutopia"
+        },
+        {
+          name: "Tik",
+          type: SiteType.Unit3DClassic,
+          keywords: ["cinematik.net"],
+          baseUrl: "https://cinematik.net/",
+          description: "Cinematik (Tik)"
+        },
+        {
+          name: "Aither",
+          type: SiteType.Unit3DClassic,
+          keywords: ["aither.cc"],
+          baseUrl: "https://aither.cc/",
+          description: "Aither"
+        },
+        {
+          name: "FNP",
+          type: SiteType.Unit3DClassic,
+          keywords: ["fearnopeer.com"],
+          baseUrl: "https://fearnopeer.com/",
+          description: "FearNoPeer"
+        },
+        {
+          name: "OnlyEncodes",
+          type: SiteType.Unit3DClassic,
+          keywords: ["onlyencodes.cc"],
+          baseUrl: "https://onlyencodes.cc/",
+          description: "OnlyEncodes"
+        },
+        {
+          name: "DarkLand",
+          type: SiteType.Unit3DClassic,
+          keywords: ["darkland.top"],
+          baseUrl: "https://darkland.top/",
+          description: "DarkLand"
+        },
+        {
+          name: "ReelFliX",
+          type: SiteType.Unit3DClassic,
+          keywords: ["reelflix.xyz"],
+          baseUrl: "https://reelflix.xyz/",
+          description: "ReelFliX"
+        },
+        {
+          name: "ACM",
+          type: SiteType.Unit3DClassic,
+          keywords: ["eiga.moi"],
+          baseUrl: "https://eiga.moi/",
+          description: "ACM"
+        },
+        {
+          name: "Monika",
+          type: SiteType.Unit3DClassic,
+          keywords: ["monikadesign.uk"],
+          baseUrl: "https://monikadesign.uk/",
+          description: "Monika"
+        },
+        {
+          name: "DTR",
+          type: SiteType.Unit3DClassic,
+          keywords: ["torrent.desi"],
+          baseUrl: "https://torrent.desi/",
+          description: "DTR"
+        },
+        {
+          name: "HDOli",
+          type: SiteType.Unit3DClassic,
+          keywords: ["hd-olimpo.club"],
+          baseUrl: "https://hd-olimpo.club/",
+          description: "HDOli"
+        },
+        {
+          name: "HONE",
+          type: SiteType.Unit3DClassic,
+          keywords: ["hawke.uno"],
+          baseUrl: "https://hawke.uno/",
+          description: "HONE"
+        },
+        {
+          name: "BHD",
+          type: SiteType.BHD,
+          keywords: ["beyond-hd.me"],
+          baseUrl: "https://beyond-hd.me/",
+          description: "Beyond-HD",
+          features: {
+            imdbSearch: true,
+            doubanSearch: false
+          }
+        },
+        {
+          name: "HDF",
+          type: SiteType.Unit3D,
+          keywords: ["hdf.world"],
+          baseUrl: "https://hdf.world/",
+          description: "HDFans"
+        },
+        {
+          name: "PrivateHD",
+          type: SiteType.Unit3D,
+          keywords: ["privatehd.to"],
+          baseUrl: "https://privatehd.to/",
+          description: "PrivateHD"
+        }
+      ];
+      class SiteCatalogService {
+        static getAllSites() {
+          return [...NexusSites, ...GazelleSites, ...Unit3DSites];
+        }
+        static getAllSiteNames() {
+          return this.getAllSites().map((s2) => s2.name);
+        }
+        static getDefaultEnabledSiteNames() {
+          return this.getAllSiteNames();
+        }
+      }
+      function getSearchName(name, type) {
+        var _a;
+        let searchName = name || "";
+        if (type === "音乐") {
+          searchName = searchName.split("-").pop() || searchName;
+          searchName = searchName.replace(/\d{4}.*|\*/g, "").trim();
+          return searchName;
+        }
+        if (searchName.match(/S\d{1,3}/i)) {
+          searchName = searchName.split(/S\d{1,3}/i)[0];
+          searchName = searchName.replace(/(19|20)\d{2}/gi, "").trim();
+        } else if (searchName.match(/(19|20)\d{2}/)) {
+          const year = (_a = searchName.match(/(19|20)\d{2}/g)) == null ? void 0 : _a.pop();
+          if (year) searchName = searchName.split(year)[0];
+        }
+        searchName = searchName.replace(/repack|Extended|cut/gi, "");
+        searchName = searchName.split(/aka/i)[0];
+        return searchName.trim();
+      }
+      const DEFAULT_QUICK_SEARCH_TEMPLATES = [
+        '<a href="https://passthepopcorn.me/torrents.php?searchstr={imdbid}" target="_blank">PTP</a>',
+        '<a href="https://hdbits.org/browse.php?search={imdbid}" target="_blank">HDB</a>',
+        '<a href="https://karagarga.in/browse.php?search={imdbid}&search_type=imdb" target="_blank">KG</a>',
+        '<a href="https://beyond-hd.me/torrents?imdb={imdbid}" target="_blank">BHD</a>',
+        '<a href="https://blutopia.xyz/torrents?imdbid={imdbno}&perPage=25&imdbId={imdbno}" target="_blank">BLU</a>',
+        '<a href="https://totheglory.im/browse.php?search_field=imdb{imdbno}&c=M" target="_blank">TTG</a>',
+        '<a href="https://chdbits.co/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">CHD</a>',
+        '<a href="https://springsunday.net/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">CMCT</a>',
+        '<a href="https://hdsky.me/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">HDSky</a>',
+        '<a href="https://search.douban.com/movie/subject_search?search_text={imdbid}&cat=1002" target="_blank">Douban</a>',
+        '<a href="https://www.imdb.com/title/{imdbid}/" target="_blank">IMDb</a>'
+      ];
+      const extractFromAnchor = (line) => {
+        var _a, _b;
+        const href = (_a = line.match(/href=["']([^"']+)["']/i)) == null ? void 0 : _a[1];
+        const text = (_b = line.match(/>([^<]+)<\/a>/i)) == null ? void 0 : _b[1];
+        if (!href) return null;
+        return { name: (text || href).trim(), url: href.trim() };
+      };
+      const extractFromPipe = (line) => {
+        const parts = line.split("|");
+        if (parts.length < 2) return null;
+        const name = parts[0].trim();
+        const url = parts.slice(1).join("|").trim();
+        if (!url) return null;
+        return { name: name || url, url };
+      };
+      const extractFromUrl = (line) => {
+        if (!line.match(/^https?:\/\//i)) return null;
+        try {
+          const u2 = new URL(line);
+          return { name: u2.hostname.replace(/^www\./, ""), url: line };
+        } catch {
+          return null;
+        }
+      };
+      const fillTemplate = (url, meta) => {
+        var _a, _b, _c, _d, _e;
+        const imdbId = meta.imdbId || ((_b = (_a = meta.imdbUrl) == null ? void 0 : _a.match(/tt\d+/)) == null ? void 0 : _b[0]) || "";
+        const imdbNo = imdbId.replace(/^tt/i, "");
+        const doubanId = meta.doubanId || ((_d = (_c = meta.doubanUrl) == null ? void 0 : _c.match(/subject\/(\d+)/)) == null ? void 0 : _d[1]) || "";
+        const searchNameRaw = getSearchName(meta.title || "", meta.type) || meta.title || "";
+        let searchName = searchNameRaw;
+        if ((meta.title || "").match(/S\d+/i)) {
+          const number = (_e = (meta.title || "").match(/S(\d+)/i)) == null ? void 0 : _e[1];
+          if (number) searchName = `${searchName} Season ${parseInt(number, 10)}`;
+        }
+        const replacements = {
+          "{imdbid}": imdbId,
+          "{imdbno}": imdbNo,
+          "{doubanid}": doubanId,
+          "{dbid}": doubanId,
+          "{search_name}": encodeURIComponent(searchName),
+          "{searchstr}": encodeURIComponent(searchName),
+          "{title}": encodeURIComponent(meta.title || "")
+        };
+        let out = url;
+        Object.entries(replacements).forEach(([key, value]) => {
+          out = out.split(key).join(value || "");
+        });
+        return out;
+      };
+      const buildQuickSearchItems = (lines, meta) => {
+        const items = [];
+        const cleaned = (lines || []).map((l2) => l2.trim()).filter((l2) => l2 && !l2.startsWith("#"));
+        cleaned.forEach((line) => {
+          let parsed = extractFromAnchor(line) || extractFromPipe(line) || extractFromUrl(line);
+          if (!parsed) return;
+          const filled = fillTemplate(parsed.url, meta);
+          if (filled.match(/\{(imdbid|imdbno|search_name|searchstr|title|doubanid|dbid)\}/)) return;
+          items.push({ name: parsed.name, url: filled });
+        });
+        return items;
+      };
+      const DEFAULT_SETTINGS = {
+        ptpImgApiKey: "",
+        pixhostApiKey: "",
+        freeimageApiKey: "",
+        gifyuApiKey: "",
+        hdbImgApiKey: "",
+        hdbImgEndpoint: "https://hdbimg.com/api/1/upload",
+        doubanCookie: "",
+        tmdbApiKey: "",
+        chdBaseUrl: "https://chdbits.co/",
+        ptpShowDouban: true,
+        ptpShowGroupName: true,
+        ptpNameLocation: 1,
+        hdbShowDouban: true,
+        hdbHideDouban: false,
+        showQuickSearchOnDouban: true,
+        showQuickSearchOnImdb: true,
+        enableRemoteSidebar: false,
+        remoteServer: null,
+        imdbToDoubanMethod: 0,
+        ptgenApi: 3,
+        quickSearchList: DEFAULT_QUICK_SEARCH_TEMPLATES.slice(),
+        quickSearchPresets: [],
+        enabledSites: SiteCatalogService.getDefaultEnabledSiteNames(),
+        favoriteSites: ["TTG", "CMCT", "pterclub", "CHDBits", "BHD", "MTeam"].filter(
+          (name) => SiteCatalogService.getAllSiteNames().includes(name)
+        ),
+        showSearchOnList: {
+          PTP: true,
+          HDB: false,
+          HDT: false,
+          UHD: false
+        }
+      };
+      class SettingsService {
+        static async load() {
+          return new Promise((resolve) => {
+            try {
+              GMAdapter.getValue(this.KEY, null).then((stored) => {
+                if (stored) {
+                  resolve({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
+                  return;
+                }
+                resolve({ ...DEFAULT_SETTINGS });
+              });
+              return;
+            } catch (e2) {
+              console.error("Error loading settings", e2);
+            }
+            resolve({ ...DEFAULT_SETTINGS });
+          });
+        }
+        static async save(settings) {
+          return new Promise((resolve) => {
+            const data = JSON.stringify(settings);
+            GMAdapter.setValue(this.KEY, data).then(() => resolve());
+          });
+        }
+      }
+      __publicField(SettingsService, "KEY", "auto_feed_settings");
+      const SettingsService$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+        __proto__: null,
+        SettingsService
+      }, Symbol.toStringTag, { value: "Module" }));
       class Unit3DEngine extends BaseEngine {
         constructor(config, url) {
           super(config, url);
         }
         async parse() {
+          var _a;
           this.log("Parsing Unit3D page...");
           const selectors = {
             title: "h1.text-center, h1",
             description: ".panel-body.markdown-body, .panel-body",
-            imdb: '.list-group-item:contains("IMDB") a'
+            imdb: '.list-group-item:contains("IMDB") a',
+            // Link usually
+            tmdb: '.list-group-item:contains("TMDB") a'
           };
           const configSelectors = this.config.selectors || {};
           const getText = (selector) => {
@@ -686,6 +1226,12 @@ ${content}
             const match = imdbLink.match(/tt\d+/);
             if (match) meta.imdbId = match[0];
           }
+          const tmdbLink = $$1(selectors.tmdb).attr("href");
+          if (tmdbLink) {
+            meta.tmdbUrl = tmdbLink;
+            const id = (_a = tmdbLink.match(/themoviedb\.org\/(tv|movie)\/(\d+)/i)) == null ? void 0 : _a[2];
+            if (id) meta.tmdbId = id;
+          }
           const image = $$1(".movie-poster img, .sidebar img").attr("src");
           if (image) {
             meta.images.push(image);
@@ -694,11 +1240,13 @@ ${content}
           return meta;
         }
         async fill(meta) {
+          var _a;
           this.log("Filling Unit3D form...");
           const formSelectors = {
             name: 'input[name="name"]',
             description: 'textarea[name="description"]',
             imdb: 'input[name="imdb_id"]',
+            tmdb: 'input[name="tmdb_id"]',
             category: 'select[name="category_id"]',
             type: 'select[name="type_id"]'
           };
@@ -707,13 +1255,47 @@ ${content}
           if (meta.imdbId) {
             $$1(formSelectors.imdb).val(meta.imdbId);
           }
+          if (!meta.tmdbId && meta.imdbId) {
+            try {
+              const settings = await SettingsService.load();
+              if (settings.tmdbApiKey) {
+                const api = `https://api.themoviedb.org/3/find/${meta.imdbId}?api_key=${settings.tmdbApiKey}&external_source=imdb_id`;
+                await new Promise((resolve) => {
+                  GMAdapter.xmlHttpRequest({
+                    method: "GET",
+                    url: api,
+                    onload: (resp) => {
+                      var _a2, _b, _c, _d;
+                      try {
+                        const data = JSON.parse(resp.responseText || "{}");
+                        const movieId = (_b = (_a2 = data == null ? void 0 : data.movie_results) == null ? void 0 : _a2[0]) == null ? void 0 : _b.id;
+                        const tvId = (_d = (_c = data == null ? void 0 : data.tv_results) == null ? void 0 : _c[0]) == null ? void 0 : _d.id;
+                        if (movieId) meta.tmdbId = String(movieId);
+                        if (tvId) meta.tmdbId = String(tvId);
+                      } catch {
+                      }
+                      resolve();
+                    },
+                    onerror: () => resolve()
+                  }).catch(() => resolve());
+                });
+              }
+            } catch {
+            }
+          }
+          if (meta.tmdbId) {
+            $$1(formSelectors.tmdb).val(meta.tmdbId);
+          } else if (meta.tmdbUrl) {
+            const id = (_a = meta.tmdbUrl.match(/themoviedb\.org\/(tv|movie)\/(\d+)/i)) == null ? void 0 : _a[2];
+            if (id) $$1(formSelectors.tmdb).val(id);
+          }
           const pickOption = (selector, keywords) => {
             const select = document.querySelector(selector);
             if (!select) return;
             const opts = Array.from(select.options);
             const found = opts.find((opt) => {
-              var _a;
-              const text = ((_a = opt.textContent) == null ? void 0 : _a.trim()) || "";
+              var _a2;
+              const text = ((_a2 = opt.textContent) == null ? void 0 : _a2.trim()) || "";
               return keywords.some((k2) => typeof k2 === "string" ? text.includes(k2) : k2.test(text));
             });
             if (found) found.selected = true;
@@ -745,7 +1327,7 @@ ${content}
             if (fileInput) {
               try {
                 const { TorrentService } = await __vitePreload(async () => {
-                  const { TorrentService: TorrentService2 } = await module.import('./TorrentService-DBpL5kU2-DokdCOJA.js');
+                  const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
                   return { TorrentService: TorrentService2 };
                 }, true ? void 0 : void 0);
                 const file = TorrentService.base64ToFile(meta.torrentBase64, meta.torrentFilename);
@@ -1006,543 +1588,6 @@ ${content}
         }
         return link;
       }
-      const NexusSites = [
-        {
-          name: "MTeam",
-          type: SiteType.MTeam,
-          keywords: ["m-team.cc", "m-team.io"],
-          baseUrl: "https://kp.m-team.cc/",
-          description: "M-Team TP (New AntD Layout)",
-          features: {
-            imdbSearch: true,
-            doubanSearch: true
-          },
-          selectors: {
-            title: [
-              "h2.ant-typography",
-              // New Antd
-              "#top",
-              // Legacy Nexus
-              "h1#top",
-              ".torrent-title",
-              ".ant-descriptions-item-content:first"
-            ],
-            description: [
-              'div[id="kdescr"]',
-              // Classic
-              ".braft-output-content",
-              // New Editor
-              ".ant-card-body .markdown",
-              "#description"
-            ],
-            // Hardcode these for now to be safe
-            nameInput: "input#name",
-            descrInput: "textarea#description",
-            imdbInput: "input#imdb_id"
-          }
-        },
-        {
-          name: "HDSky",
-          type: SiteType.NexusPHP,
-          keywords: ["hdsky.me"],
-          baseUrl: "https://hdsky.me/",
-          description: "HDSky"
-        },
-        {
-          name: "OurBits",
-          type: SiteType.NexusPHP,
-          keywords: ["ourbits.club"],
-          baseUrl: "https://ourbits.club/",
-          description: "OurBits"
-        },
-        {
-          name: "CMCT",
-          type: SiteType.NexusPHP,
-          keywords: ["hdcmct.org"],
-          baseUrl: "https://hdcmct.org/",
-          description: "SpringSunday"
-        },
-        {
-          name: "TTG",
-          type: SiteType.NexusPHP,
-          keywords: ["totheglory.im"],
-          baseUrl: "https://totheglory.im/",
-          description: "TTG (Nexus-like parsing)"
-        },
-        {
-          name: "pterclub",
-          type: SiteType.NexusPHP,
-          keywords: ["pterclub.net"],
-          baseUrl: "https://pterclub.net/",
-          description: "Pter"
-        },
-        {
-          name: "HDArea",
-          type: SiteType.NexusPHP,
-          keywords: ["hdarea.co"],
-          baseUrl: "https://hdarea.co/",
-          description: "HDArea"
-        },
-        {
-          name: "Audiences",
-          type: SiteType.NexusPHP,
-          keywords: ["audiences.me"],
-          baseUrl: "https://audiences.me/",
-          description: "Audiences"
-        },
-        {
-          name: "FRDS",
-          type: SiteType.NexusPHP,
-          keywords: ["keepfrds.com"],
-          baseUrl: "https://keepfrds.com/",
-          description: "FRDS"
-        },
-        {
-          name: "CHDBits",
-          type: SiteType.CHDBits,
-          keywords: ["chdbits.co", "ptchdbits.co", "ptchdbits.org", "chddiy.xyz", "chdbits"],
-          baseUrl: "https://chdbits.co/",
-          description: "CHDBits",
-          features: {
-            imdbSearch: true
-          }
-        },
-        {
-          name: "PTP",
-          type: SiteType.PTP,
-          keywords: ["passthepopcorn.me"],
-          baseUrl: "https://passthepopcorn.me/",
-          description: "PassThePopcorn"
-        },
-        {
-          name: "HDB",
-          type: SiteType.HDB,
-          keywords: ["hdbits.org"],
-          baseUrl: "https://hdbits.org/",
-          description: "HDBits"
-        },
-        {
-          name: "KG",
-          type: SiteType.KG,
-          keywords: ["karagarga.in"],
-          baseUrl: "https://karagarga.in/",
-          description: "Karagarga"
-        }
-      ];
-      const GazelleSites = [
-        {
-          name: "RED",
-          type: SiteType.Gazelle,
-          keywords: ["redacted.sh"],
-          baseUrl: "https://redacted.sh/",
-          description: "Redacted",
-          features: {
-            imdbSearch: false,
-            doubanSearch: false
-          }
-        },
-        {
-          name: "OPS",
-          type: SiteType.Gazelle,
-          keywords: ["orpheus.network"],
-          baseUrl: "https://orpheus.network/",
-          description: "Orpheus"
-        },
-        {
-          name: "DIC",
-          type: SiteType.Gazelle,
-          keywords: ["dicmusic.com"],
-          baseUrl: "https://dicmusic.com/",
-          description: "DICMusic"
-        }
-      ];
-      const Unit3DSites = [
-        {
-          name: "BLU",
-          type: SiteType.Unit3DClassic,
-          keywords: ["blutopia.cc"],
-          baseUrl: "https://blutopia.cc/",
-          description: "Blutopia"
-        },
-        {
-          name: "Tik",
-          type: SiteType.Unit3DClassic,
-          keywords: ["cinematik.net"],
-          baseUrl: "https://cinematik.net/",
-          description: "Cinematik (Tik)"
-        },
-        {
-          name: "Aither",
-          type: SiteType.Unit3DClassic,
-          keywords: ["aither.cc"],
-          baseUrl: "https://aither.cc/",
-          description: "Aither"
-        },
-        {
-          name: "FNP",
-          type: SiteType.Unit3DClassic,
-          keywords: ["fearnopeer.com"],
-          baseUrl: "https://fearnopeer.com/",
-          description: "FearNoPeer"
-        },
-        {
-          name: "OnlyEncodes",
-          type: SiteType.Unit3DClassic,
-          keywords: ["onlyencodes.cc"],
-          baseUrl: "https://onlyencodes.cc/",
-          description: "OnlyEncodes"
-        },
-        {
-          name: "DarkLand",
-          type: SiteType.Unit3DClassic,
-          keywords: ["darkland.top"],
-          baseUrl: "https://darkland.top/",
-          description: "DarkLand"
-        },
-        {
-          name: "ReelFliX",
-          type: SiteType.Unit3DClassic,
-          keywords: ["reelflix.xyz"],
-          baseUrl: "https://reelflix.xyz/",
-          description: "ReelFliX"
-        },
-        {
-          name: "ACM",
-          type: SiteType.Unit3DClassic,
-          keywords: ["eiga.moi"],
-          baseUrl: "https://eiga.moi/",
-          description: "ACM"
-        },
-        {
-          name: "Monika",
-          type: SiteType.Unit3DClassic,
-          keywords: ["monikadesign.uk"],
-          baseUrl: "https://monikadesign.uk/",
-          description: "Monika"
-        },
-        {
-          name: "DTR",
-          type: SiteType.Unit3DClassic,
-          keywords: ["torrent.desi"],
-          baseUrl: "https://torrent.desi/",
-          description: "DTR"
-        },
-        {
-          name: "HDOli",
-          type: SiteType.Unit3DClassic,
-          keywords: ["hd-olimpo.club"],
-          baseUrl: "https://hd-olimpo.club/",
-          description: "HDOli"
-        },
-        {
-          name: "HONE",
-          type: SiteType.Unit3DClassic,
-          keywords: ["hawke.uno"],
-          baseUrl: "https://hawke.uno/",
-          description: "HONE"
-        },
-        {
-          name: "BHD",
-          type: SiteType.BHD,
-          keywords: ["beyond-hd.me"],
-          baseUrl: "https://beyond-hd.me/",
-          description: "Beyond-HD",
-          features: {
-            imdbSearch: true,
-            doubanSearch: false
-          }
-        },
-        {
-          name: "HDF",
-          type: SiteType.Unit3D,
-          keywords: ["hdf.world"],
-          baseUrl: "https://hdf.world/",
-          description: "HDFans"
-        },
-        {
-          name: "PrivateHD",
-          type: SiteType.Unit3D,
-          keywords: ["privatehd.to"],
-          baseUrl: "https://privatehd.to/",
-          description: "PrivateHD"
-        }
-      ];
-      class SiteCatalogService {
-        static getAllSites() {
-          return [...NexusSites, ...GazelleSites, ...Unit3DSites];
-        }
-        static getAllSiteNames() {
-          return this.getAllSites().map((s2) => s2.name);
-        }
-        static getDefaultEnabledSiteNames() {
-          return this.getAllSiteNames();
-        }
-      }
-      const hasGMObject = typeof GM !== "undefined";
-      class GMAdapter {
-        static async getValue(key, defaultValue) {
-          try {
-            if (typeof GM_getValue !== "undefined") {
-              return GM_getValue(key, defaultValue);
-            }
-            if (hasGMObject && typeof GM.getValue === "function") {
-              return await GM.getValue(key, defaultValue);
-            }
-          } catch {
-          }
-          try {
-            const raw = localStorage.getItem(key);
-            if (raw === null || raw === void 0) return defaultValue;
-            return raw;
-          } catch {
-            return defaultValue;
-          }
-        }
-        static async setValue(key, value) {
-          try {
-            if (typeof GM_setValue !== "undefined") {
-              GM_setValue(key, value);
-              return;
-            }
-            if (hasGMObject && typeof GM.setValue === "function") {
-              await GM.setValue(key, value);
-              return;
-            }
-          } catch {
-          }
-          try {
-            localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
-          } catch {
-          }
-        }
-        static async setClipboard(text) {
-          try {
-            if (typeof GM_setClipboard !== "undefined") {
-              GM_setClipboard(text);
-              return;
-            }
-            if (hasGMObject && typeof GM.setClipboard === "function") {
-              await GM.setClipboard(text);
-              return;
-            }
-          } catch {
-          }
-          try {
-            await navigator.clipboard.writeText(text);
-          } catch {
-          }
-        }
-        static async deleteValue(key) {
-          try {
-            if (typeof GM_deleteValue !== "undefined") {
-              GM_deleteValue(key);
-              return;
-            }
-            if (hasGMObject && typeof GM.deleteValue === "function") {
-              await GM.deleteValue(key);
-              return;
-            }
-          } catch {
-          }
-          try {
-            localStorage.removeItem(key);
-          } catch {
-          }
-        }
-        static xmlHttpRequest(details) {
-          return new Promise((resolve, reject) => {
-            const withCallbacks = {
-              ...details,
-              onload: (resp) => {
-                var _a;
-                (_a = details.onload) == null ? void 0 : _a.call(details, resp);
-                resolve(resp);
-              },
-              onerror: (err) => {
-                var _a;
-                (_a = details.onerror) == null ? void 0 : _a.call(details, err);
-                reject(err);
-              },
-              ontimeout: () => {
-                var _a;
-                (_a = details.ontimeout) == null ? void 0 : _a.call(details);
-                reject(new Error("timeout"));
-              }
-            };
-            if (typeof GM_xmlhttpRequest === "function") {
-              GM_xmlhttpRequest(withCallbacks);
-              return;
-            }
-            if (hasGMObject && typeof GM.xmlHttpRequest === "function") {
-              const result = GM.xmlHttpRequest(withCallbacks);
-              if (result && typeof result.then === "function") {
-                result.then(resolve).catch(reject);
-              }
-              return;
-            }
-            reject(new Error("GM_xmlhttpRequest not available"));
-          });
-        }
-      } exports("G", GMAdapter);
-      function getSearchName(name, type) {
-        var _a;
-        let searchName = name || "";
-        if (type === "音乐") {
-          searchName = searchName.split("-").pop() || searchName;
-          searchName = searchName.replace(/\d{4}.*|\*/g, "").trim();
-          return searchName;
-        }
-        if (searchName.match(/S\d{1,3}/i)) {
-          searchName = searchName.split(/S\d{1,3}/i)[0];
-          searchName = searchName.replace(/(19|20)\d{2}/gi, "").trim();
-        } else if (searchName.match(/(19|20)\d{2}/)) {
-          const year = (_a = searchName.match(/(19|20)\d{2}/g)) == null ? void 0 : _a.pop();
-          if (year) searchName = searchName.split(year)[0];
-        }
-        searchName = searchName.replace(/repack|Extended|cut/gi, "");
-        searchName = searchName.split(/aka/i)[0];
-        return searchName.trim();
-      }
-      const DEFAULT_QUICK_SEARCH_TEMPLATES = [
-        '<a href="https://passthepopcorn.me/torrents.php?searchstr={imdbid}" target="_blank">PTP</a>',
-        '<a href="https://hdbits.org/browse.php?search={imdbid}" target="_blank">HDB</a>',
-        '<a href="https://karagarga.in/browse.php?search={imdbid}&search_type=imdb" target="_blank">KG</a>',
-        '<a href="https://beyond-hd.me/torrents?imdb={imdbid}" target="_blank">BHD</a>',
-        '<a href="https://blutopia.xyz/torrents?imdbid={imdbno}&perPage=25&imdbId={imdbno}" target="_blank">BLU</a>',
-        '<a href="https://totheglory.im/browse.php?search_field=imdb{imdbno}&c=M" target="_blank">TTG</a>',
-        '<a href="https://chdbits.co/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">CHD</a>',
-        '<a href="https://springsunday.net/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">CMCT</a>',
-        '<a href="https://hdsky.me/torrents.php?search={imdbid}&search_area=4&search_mode=0" target="_blank">HDSky</a>',
-        '<a href="https://search.douban.com/movie/subject_search?search_text={imdbid}&cat=1002" target="_blank">Douban</a>',
-        '<a href="https://www.imdb.com/title/{imdbid}/" target="_blank">IMDb</a>'
-      ];
-      const extractFromAnchor = (line) => {
-        var _a, _b;
-        const href = (_a = line.match(/href=["']([^"']+)["']/i)) == null ? void 0 : _a[1];
-        const text = (_b = line.match(/>([^<]+)<\/a>/i)) == null ? void 0 : _b[1];
-        if (!href) return null;
-        return { name: (text || href).trim(), url: href.trim() };
-      };
-      const extractFromPipe = (line) => {
-        const parts = line.split("|");
-        if (parts.length < 2) return null;
-        const name = parts[0].trim();
-        const url = parts.slice(1).join("|").trim();
-        if (!url) return null;
-        return { name: name || url, url };
-      };
-      const extractFromUrl = (line) => {
-        if (!line.match(/^https?:\/\//i)) return null;
-        try {
-          const u2 = new URL(line);
-          return { name: u2.hostname.replace(/^www\./, ""), url: line };
-        } catch {
-          return null;
-        }
-      };
-      const fillTemplate = (url, meta) => {
-        var _a, _b, _c, _d, _e;
-        const imdbId = meta.imdbId || ((_b = (_a = meta.imdbUrl) == null ? void 0 : _a.match(/tt\d+/)) == null ? void 0 : _b[0]) || "";
-        const imdbNo = imdbId.replace(/^tt/i, "");
-        const doubanId = meta.doubanId || ((_d = (_c = meta.doubanUrl) == null ? void 0 : _c.match(/subject\/(\d+)/)) == null ? void 0 : _d[1]) || "";
-        const searchNameRaw = getSearchName(meta.title || "", meta.type) || meta.title || "";
-        let searchName = searchNameRaw;
-        if ((meta.title || "").match(/S\d+/i)) {
-          const number = (_e = (meta.title || "").match(/S(\d+)/i)) == null ? void 0 : _e[1];
-          if (number) searchName = `${searchName} Season ${parseInt(number, 10)}`;
-        }
-        const replacements = {
-          "{imdbid}": imdbId,
-          "{imdbno}": imdbNo,
-          "{doubanid}": doubanId,
-          "{dbid}": doubanId,
-          "{search_name}": encodeURIComponent(searchName),
-          "{searchstr}": encodeURIComponent(searchName),
-          "{title}": encodeURIComponent(meta.title || "")
-        };
-        let out = url;
-        Object.entries(replacements).forEach(([key, value]) => {
-          out = out.split(key).join(value || "");
-        });
-        return out;
-      };
-      const buildQuickSearchItems = (lines, meta) => {
-        const items = [];
-        const cleaned = (lines || []).map((l2) => l2.trim()).filter((l2) => l2 && !l2.startsWith("#"));
-        cleaned.forEach((line) => {
-          let parsed = extractFromAnchor(line) || extractFromPipe(line) || extractFromUrl(line);
-          if (!parsed) return;
-          const filled = fillTemplate(parsed.url, meta);
-          if (filled.match(/\{(imdbid|imdbno|search_name|searchstr|title|doubanid|dbid)\}/)) return;
-          items.push({ name: parsed.name, url: filled });
-        });
-        return items;
-      };
-      const DEFAULT_SETTINGS = {
-        ptpImgApiKey: "",
-        pixhostApiKey: "",
-        freeimageApiKey: "",
-        gifyuApiKey: "",
-        hdbImgApiKey: "",
-        hdbImgEndpoint: "https://hdbimg.com/api/1/upload",
-        doubanCookie: "",
-        tmdbApiKey: "",
-        chdBaseUrl: "https://chdbits.co/",
-        ptpShowDouban: true,
-        ptpShowGroupName: true,
-        ptpNameLocation: 1,
-        hdbShowDouban: true,
-        hdbHideDouban: false,
-        showQuickSearchOnDouban: true,
-        showQuickSearchOnImdb: true,
-        enableRemoteSidebar: false,
-        remoteServer: null,
-        imdbToDoubanMethod: 0,
-        ptgenApi: 3,
-        quickSearchList: DEFAULT_QUICK_SEARCH_TEMPLATES.slice(),
-        quickSearchPresets: [],
-        quickSearchTextareaHeight: 220,
-        enabledSites: SiteCatalogService.getDefaultEnabledSiteNames(),
-        favoriteSites: ["TTG", "CMCT", "pterclub", "CHDBits", "BHD", "MTeam"].filter(
-          (name) => SiteCatalogService.getAllSiteNames().includes(name)
-        ),
-        showSearchOnList: {
-          PTP: true,
-          HDB: false,
-          HDT: false,
-          UHD: false
-        }
-      };
-      class SettingsService {
-        static async load() {
-          return new Promise((resolve) => {
-            try {
-              GMAdapter.getValue(this.KEY, null).then((stored) => {
-                if (stored) {
-                  resolve({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
-                  return;
-                }
-                resolve({ ...DEFAULT_SETTINGS });
-              });
-              return;
-            } catch (e2) {
-              console.error("Error loading settings", e2);
-            }
-            resolve({ ...DEFAULT_SETTINGS });
-          });
-        }
-        static async save(settings) {
-          return new Promise((resolve) => {
-            const data = JSON.stringify(settings);
-            GMAdapter.setValue(this.KEY, data).then(() => resolve());
-          });
-        }
-      }
-      __publicField(SettingsService, "KEY", "auto_feed_settings");
-      const SettingsService$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-        __proto__: null,
-        SettingsService
-      }, Symbol.toStringTag, { value: "Module" }));
       class Unit3DClassicEngine extends Unit3DEngine {
         async parse() {
           var _a, _b, _c, _d;
@@ -2024,7 +2069,7 @@ ${mediainfo.trim()}
           meta.standardSel = meta.standardSel || getStandardSel(infoText);
           try {
             const { TorrentService } = await __vitePreload(async () => {
-              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-DBpL5kU2-DokdCOJA.js');
+              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
               return { TorrentService: TorrentService2 };
             }, true ? void 0 : void 0);
             const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, null);
@@ -2366,7 +2411,7 @@ ${mediainfo.trim()}
           }
           try {
             const { TorrentService } = await __vitePreload(async () => {
-              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-DBpL5kU2-DokdCOJA.js');
+              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
               return { TorrentService: TorrentService2 };
             }, true ? void 0 : void 0);
             const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, null);
@@ -2642,7 +2687,7 @@ ${mediainfo.trim()}
             const announceText = $$1("h2").find("div").text().trim();
             const announceUrl = ((_a = announceText.match(/https?:\/\/[^\s"'<>]+/)) == null ? void 0 : _a[0]) || announceText || null;
             const { TorrentService } = await __vitePreload(async () => {
-              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-DBpL5kU2-DokdCOJA.js');
+              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
               return { TorrentService: TorrentService2 };
             }, true ? void 0 : void 0);
             const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, announceUrl);
@@ -3042,7 +3087,7 @@ ${comparePicture}`;
           const announce = ((_a = $$1('input[value*="announce"]').val()) == null ? void 0 : _a.toString()) || null;
           try {
             const { TorrentService } = await __vitePreload(async () => {
-              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-DBpL5kU2-DokdCOJA.js');
+              const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
               return { TorrentService: TorrentService2 };
             }, true ? void 0 : void 0);
             const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, announce);
@@ -3178,11 +3223,11 @@ ${comparePicture}`;
           }
           try {
             const info = getMediainfoPictureFromDescr(meta.description || "", { mediumSel: meta.mediumSel });
-            const releaseDesc = meta.fullMediaInfo ? `${meta.fullMediaInfo}
-
-${info.picInfo || ""}`.trim() : `${info.mediainfo || ""}
-
-${info.picInfo || ""}`.trim();
+            const miText = (meta.fullMediaInfo || info.mediainfo || "").trim();
+            const miWrapped = miText ? `[mediainfo]
+${miText}
+[/mediainfo]` : "";
+            const releaseDesc = `${miWrapped}${miWrapped && info.picInfo ? "\n\n" : ""}${info.picInfo || ""}`.trim();
             $$1("#release_desc").val(releaseDesc);
           } catch {
             $$1("#release_desc").val((meta.description || "").replace(/\[\/?.{1,20}\]\n?/g, ""));
@@ -3438,7 +3483,7 @@ ${shots.map((u2) => `[img]${u2}[/img]`).join("\n")}`.trim();
               }
               const announce = passkey ? `http://tracker.hdbits.org/announce.php?passkey=${passkey}` : null;
               const { TorrentService } = await __vitePreload(async () => {
-                const { TorrentService: TorrentService2 } = await module.import('./TorrentService-DBpL5kU2-DokdCOJA.js');
+                const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
                 return { TorrentService: TorrentService2 };
               }, true ? void 0 : void 0);
               const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, announce);
@@ -4496,17 +4541,31 @@ ${updated.description || ""}`.trim();
           return buildSearchUrl(site, meta, options);
         }
         static injectForwardLinks(container, meta, enabledSites, favoriteSites, options) {
+          const detectExclusive = (m2) => {
+            const text = `${m2.title || ""} ${m2.smallDescr || ""} ${m2.subtitle || ""} ${m2.description || ""}`.replace(/\[.*?\]/g, "");
+            return !!text.match(/(拒绝转发|不允许转发|严禁转发|谢绝.*?转载|禁转|禁止转载|謝絕.*?轉載|exclusive|严禁转载)/i);
+          };
+          const isExclusive = detectExclusive(meta);
           const allSites = SiteCatalogService.getAllSites().filter((s2) => s2.baseUrl);
-          const enabled = enabledSites && enabledSites.length ? new Set(enabledSites) : null;
-          const sites = enabled ? allSites.filter((s2) => enabled.has(s2.name)) : allSites;
+          const enabledSet = Array.isArray(enabledSites) ? new Set(enabledSites) : null;
+          const sites = enabledSet ? allSites.filter((s2) => enabledSet.has(s2.name)) : allSites;
           if (!sites.length) return;
           const row = $$1('<div class="autofeed-forward-links" style="margin: 10px 0; padding: 10px; border-top: 1px solid #eee; font-size: 13px;"></div>');
           const header = $$1('<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"></div>');
           header.append('<div style="color:#2c3e50; font-weight:bold;">转发站点：</div>');
-          const tabWrap = $$1('<div style="margin-left:auto; display:flex; gap:6px;"></div>');
-          const tabUpload = $$1('<button style="padding:2px 8px; border:1px solid #ddd; background:#2c3e50; color:#fff; border-radius:4px; cursor:pointer;">发布</button>');
-          const tabSearch = $$1('<button style="padding:2px 8px; border:1px solid #ddd; background:#f5f5f5; color:#333; border-radius:4px; cursor:pointer;">检索</button>');
-          tabWrap.append(tabUpload, tabSearch);
+          if (isExclusive) {
+            header.append('<div style="color:#c0392b; font-weight:bold;">[疑似禁转/禁止转载]</div>');
+          }
+          const tabWrap = $$1(`
+            <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+                <span style="color:#666; font-weight:bold;">模式:</span>
+            </div>
+        `);
+          const seg = $$1('<div role="tablist" style="display:inline-flex; border:1px solid #cfd6dc; border-radius:999px; overflow:hidden; background:#f0f2f4;"></div>');
+          const tabUpload = $$1('<button role="tab" aria-pressed="true" style="padding:3px 10px; border:none; background:#2c3e50; color:#fff; cursor:pointer; font-weight:bold;">发布</button>');
+          const tabSearch = $$1('<button role="tab" aria-pressed="false" style="padding:3px 10px; border:none; background:transparent; color:#2c3e50; cursor:pointer; font-weight:bold;">检索</button>');
+          seg.append(tabUpload, tabSearch);
+          tabWrap.append(seg);
           header.append(tabWrap);
           row.append(header);
           const uploadDiv = $$1('<div style="display:flex; flex-direction:column; gap:6px;"></div>');
@@ -4529,27 +4588,46 @@ ${updated.description || ""}`.trim();
                         <span>${name}</span>
                     </a>
                 `);
+              if (isExclusive && mode === "upload") {
+                link.css({ color: "#999" });
+                link.find("span").text(`禁转至${name}`);
+                link.on("click", (e2) => {
+                  const ok = window.confirm("该资源疑似禁转/禁止转载，确认仍要打开发布页面？");
+                  if (!ok) e2.preventDefault();
+                });
+              }
               rowWrap.append(link);
             });
             return rowWrap;
           };
-          const uploadFavRow = buildRow("常用", favSites, "upload");
-          const uploadAllRow = buildRow("全部", otherSites.length ? otherSites : sites, "upload");
-          if (uploadFavRow) uploadDiv.append(uploadFavRow);
-          if (uploadAllRow) uploadDiv.append(uploadAllRow);
-          const searchFavRow = buildRow("常用", favSites, "search");
-          const searchAllRow = buildRow("全部", otherSites.length ? otherSites : sites, "search");
-          if (searchFavRow) searchDiv.append(searchFavRow);
-          if (searchAllRow) searchDiv.append(searchAllRow);
+          if (favSites.length) {
+            const uploadFavRow = buildRow("常用", favSites, "upload");
+            const uploadOtherRow = buildRow("其他", otherSites, "upload");
+            if (uploadFavRow) uploadDiv.append(uploadFavRow);
+            if (uploadOtherRow) uploadDiv.append(uploadOtherRow);
+            const searchFavRow = buildRow("常用", favSites, "search");
+            const searchOtherRow = buildRow("其他", otherSites, "search");
+            if (searchFavRow) searchDiv.append(searchFavRow);
+            if (searchOtherRow) searchDiv.append(searchOtherRow);
+          } else {
+            const uploadAllRow = buildRow("站点", sites, "upload");
+            const searchAllRow = buildRow("站点", sites, "search");
+            if (uploadAllRow) uploadDiv.append(uploadAllRow);
+            if (searchAllRow) searchDiv.append(searchAllRow);
+          }
           tabUpload.on("click", () => {
+            tabUpload.attr("aria-pressed", "true");
+            tabSearch.attr("aria-pressed", "false");
             tabUpload.css({ background: "#2c3e50", color: "#fff" });
-            tabSearch.css({ background: "#f5f5f5", color: "#333" });
+            tabSearch.css({ background: "transparent", color: "#2c3e50" });
             uploadDiv.show();
             searchDiv.hide();
           });
           tabSearch.on("click", () => {
+            tabUpload.attr("aria-pressed", "false");
+            tabSearch.attr("aria-pressed", "true");
             tabSearch.css({ background: "#2c3e50", color: "#fff" });
-            tabUpload.css({ background: "#f5f5f5", color: "#333" });
+            tabUpload.css({ background: "transparent", color: "#2c3e50" });
             uploadDiv.hide();
             searchDiv.show();
           });
@@ -4646,7 +4724,9 @@ ${updated.description || ""}`.trim();
           const row = $$1('<div class="autofeed-search-links" style="margin-top: 4px; font-size: 12px;"></div>');
           row.append('<span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>');
           items.forEach((item) => {
-            const link = $$1(`<a href="${item.url}" target="_blank" style="margin-right:6px; color:#2c3e50;">${item.name}</a>`);
+            const link = $$1(
+              `<a href="${item.url}" target="_blank" style="display:inline-block; margin-right:6px; margin-bottom:4px; padding:2px 6px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${item.name}</a>`
+            );
             row.append(link);
           });
           container.append(row);
@@ -4990,19 +5070,20 @@ ${updated.description || ""}`.trim();
           settings.then((s2) => {
             const row = $$1('<div class="autofeed-search-links" style="margin-top: 6px; font-size: 12px;"></div>');
             row.append('<span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>');
+            const makeLink = (name, url) => $$1(
+              `<a href="${url}" target="_blank" style="display:inline-block; margin-right:6px; margin-bottom:4px; padding:2px 6px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${name}</a>`
+            );
             if (Array.isArray(s2.quickSearchList)) {
               const items = buildQuickSearchItems(s2.quickSearchList, meta);
               if (!items.length) return;
               items.forEach((item) => {
-                const link = $$1(`<a href="${item.url}" target="_blank" style="margin-right:6px; color:#2c3e50;">${item.name}</a>`);
-                row.append(link);
+                row.append(makeLink(item.name, item.url));
               });
             } else {
               const items = buildQuickSearchItems(DEFAULT_QUICK_SEARCH_TEMPLATES, meta);
               if (items.length) {
                 items.forEach((item) => {
-                  const link = $$1(`<a href="${item.url}" target="_blank" style="margin-right:6px; color:#2c3e50;">${item.name}</a>`);
-                  row.append(link);
+                  row.append(makeLink(item.name, item.url));
                 });
               } else {
                 const allSites = SiteCatalogService.getAllSites().filter((site) => site.baseUrl);
@@ -5018,8 +5099,7 @@ ${updated.description || ""}`.trim();
                     },
                     { chdBaseUrl: s2.chdBaseUrl }
                   );
-                  const link = $$1(`<a href="${url}" target="_blank" style="margin-right:6px; color:#2c3e50;">${site.name}</a>`);
-                  row.append(link);
+                  row.append(makeLink(site.name, url));
                 });
               }
             }
@@ -5596,7 +5676,7 @@ ${updated.description || ""}`.trim();
               });
               await StorageService.save(updated);
               const { normalizeMeta } = await __vitePreload(async () => {
-                const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BJd7VxQT-BU6-wKi2.js');
+                const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
                 return { normalizeMeta: normalizeMeta2 };
               }, true ? void 0 : void 0);
               const normalized = normalizeMeta(updated, adapter.siteName);
@@ -5816,7 +5896,7 @@ ${updated.description || ""}`.trim();
                   return { MetaCleaner: MetaCleaner2 };
                 }, true ? void 0 : void 0);
                 const { normalizeMeta } = await __vitePreload(async () => {
-                  const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BJd7VxQT-BU6-wKi2.js');
+                  const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
                   return { normalizeMeta: normalizeMeta2 };
                 }, true ? void 0 : void 0);
                 meta = MetaCleaner.clean(meta);
@@ -5856,7 +5936,7 @@ ${updated.description || ""}`.trim();
                   return { MetaCleaner: MetaCleaner2 };
                 }, true ? void 0 : void 0);
                 const { normalizeMeta } = await __vitePreload(async () => {
-                  const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BJd7VxQT-BU6-wKi2.js');
+                  const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
                   return { normalizeMeta: normalizeMeta2 };
                 }, true ? void 0 : void 0);
                 meta = MetaCleaner.clean(meta);
@@ -5866,7 +5946,7 @@ ${updated.description || ""}`.trim();
                     forwardBtn.find("span").text("⬇️");
                     console.log(`[Auto-Feed] Downloading torrent from: ${meta.torrentUrl}`);
                     const { TorrentService } = await __vitePreload(async () => {
-                      const { TorrentService: TorrentService2 } = await module.import('./TorrentService-DBpL5kU2-DokdCOJA.js');
+                      const { TorrentService: TorrentService2 } = await module.import('./TorrentService-EFzdq8v2-DG0Yz6Zs.js');
                       return { TorrentService: TorrentService2 };
                     }, true ? void 0 : void 0);
                     const base64 = await TorrentService.download(meta.torrentUrl);
@@ -6053,7 +6133,7 @@ ${updated.description || ""}`.trim();
           $$1("body").append(notify);
           try {
             const { normalizeMeta } = await __vitePreload(async () => {
-              const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BJd7VxQT-BU6-wKi2.js');
+              const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
               return { normalizeMeta: normalizeMeta2 };
             }, true ? void 0 : void 0);
             const normalized = normalizeMeta(meta, adapter.siteName);
@@ -6068,7 +6148,7 @@ ${updated.description || ""}`.trim();
           notify.find("#autofeed-fill-btn").on("click", async () => {
             notify.find("#autofeed-fill-btn").text("Filling...");
             const { normalizeMeta } = await __vitePreload(async () => {
-              const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BJd7VxQT-BU6-wKi2.js');
+              const { normalizeMeta: normalizeMeta2 } = await module.import('./normalize-BAJrKNMT-CulNThvw.js');
               return { normalizeMeta: normalizeMeta2 };
             }, void 0 );
             const normalized = normalizeMeta(meta, adapter.siteName);
@@ -6499,7 +6579,6 @@ ${updated.description || ""}`.trim();
           ptgenApi: 3,
           quickSearchList: [],
           quickSearchPresets: [],
-          quickSearchTextareaHeight: 220,
           enabledSites: [],
           favoriteSites: [],
           showSearchOnList: {
@@ -7036,29 +7115,12 @@ ${updated.description || ""}`.trim();
                     }
                   )
                 ] }),
-                /* @__PURE__ */ u$1("div", { style: { display: "flex", gap: "8px", alignItems: "center", marginBottom: "8px" }, children: [
-                  /* @__PURE__ */ u$1("label", { style: { color: "#666" }, children: "输入框高度(px)" }),
-                  /* @__PURE__ */ u$1(
-                    "input",
-                    {
-                      type: "number",
-                      min: 120,
-                      max: 600,
-                      style: { width: "120px", padding: "6px", border: "1px solid #ced4da", borderRadius: "4px" },
-                      value: settings.quickSearchTextareaHeight || 220,
-                      onInput: (e2) => {
-                        const value = parseInt(e2.currentTarget.value, 10);
-                        setSettings({ ...settings, quickSearchTextareaHeight: Number.isFinite(value) ? value : 220 });
-                      }
-                    }
-                  )
-                ] }),
                 /* @__PURE__ */ u$1(
                   "textarea",
                   {
                     style: {
                       width: "100%",
-                      height: `${settings.quickSearchTextareaHeight || 220}px`,
+                      height: "220px",
                       padding: "8px",
                       border: "1px solid #ced4da",
                       borderRadius: "4px",
@@ -7255,7 +7317,7 @@ ${updated.description || ""}`.trim();
   };
 }));
 
-System.register("./TorrentService-DBpL5kU2-DokdCOJA.js", ['./__monkey.entry-pxiUrdlY.js', 'jquery'], (function (exports, module) {
+System.register("./TorrentService-EFzdq8v2-DG0Yz6Zs.js", ['./__monkey.entry-Bddmwiuq.js', 'jquery'], (function (exports, module) {
   'use strict';
   var GMAdapter;
   return {
@@ -7515,7 +7577,7 @@ System.register("./TorrentService-DBpL5kU2-DokdCOJA.js", ['./__monkey.entry-pxiU
   };
 }));
 
-System.register("./normalize-BJd7VxQT-BU6-wKi2.js", ['./__monkey.entry-pxiUrdlY.js', 'jquery'], (function (exports, module) {
+System.register("./normalize-BAJrKNMT-CulNThvw.js", ['./__monkey.entry-Bddmwiuq.js', 'jquery'], (function (exports, module) {
   'use strict';
   var dealWithTitle, dealWithSubtitle, getSmallDescrFromDescr, getSourceSelFromDescr, getMediumSel, getCodecSel, getAudioCodecSel, getStandardSel, getMediainfoPictureFromDescr, addThanks, getType;
   return {

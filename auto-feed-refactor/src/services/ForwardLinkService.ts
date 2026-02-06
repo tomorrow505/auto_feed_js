@@ -91,20 +91,38 @@ export class ForwardLinkService {
         favoriteSites?: string[],
         options?: ForwardLinkOptions
     ) {
+        const detectExclusive = (m: TorrentMeta) => {
+            const text = `${m.title || ''} ${m.smallDescr || ''} ${m.subtitle || ''} ${m.description || ''}`
+                .replace(/\[.*?\]/g, '');
+            return !!text.match(/(拒绝转发|不允许转发|严禁转发|谢绝.*?转载|禁转|禁止转载|謝絕.*?轉載|exclusive|严禁转载)/i);
+        };
+        const isExclusive = detectExclusive(meta);
+
         const allSites = SiteCatalogService.getAllSites().filter((s) => s.baseUrl);
-        const enabled = enabledSites && enabledSites.length ? new Set(enabledSites) : null;
-        const sites = enabled ? allSites.filter((s) => enabled.has(s.name)) : allSites;
+        // If settings provides an array (even empty), treat it as the source of truth.
+        // Empty means "show nothing" rather than "show all".
+        const enabledSet = Array.isArray(enabledSites) ? new Set(enabledSites) : null;
+        const sites = enabledSet ? allSites.filter((s) => enabledSet.has(s.name)) : allSites;
 
         if (!sites.length) return;
 
         const row = $('<div class="autofeed-forward-links" style="margin: 10px 0; padding: 10px; border-top: 1px solid #eee; font-size: 13px;"></div>');
         const header = $('<div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;"></div>');
         header.append('<div style="color:#2c3e50; font-weight:bold;">转发站点：</div>');
+        if (isExclusive) {
+            header.append('<div style="color:#c0392b; font-weight:bold;">[疑似禁转/禁止转载]</div>');
+        }
 
-        const tabWrap = $('<div style="margin-left:auto; display:flex; gap:6px;"></div>');
-        const tabUpload = $('<button style="padding:2px 8px; border:1px solid #ddd; background:#2c3e50; color:#fff; border-radius:4px; cursor:pointer;">发布</button>');
-        const tabSearch = $('<button style="padding:2px 8px; border:1px solid #ddd; background:#f5f5f5; color:#333; border-radius:4px; cursor:pointer;">检索</button>');
-        tabWrap.append(tabUpload, tabSearch);
+        const tabWrap = $(`
+            <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+                <span style="color:#666; font-weight:bold;">模式:</span>
+            </div>
+        `);
+        const seg = $('<div role="tablist" style="display:inline-flex; border:1px solid #cfd6dc; border-radius:999px; overflow:hidden; background:#f0f2f4;"></div>');
+        const tabUpload = $('<button role="tab" aria-pressed="true" style="padding:3px 10px; border:none; background:#2c3e50; color:#fff; cursor:pointer; font-weight:bold;">发布</button>');
+        const tabSearch = $('<button role="tab" aria-pressed="false" style="padding:3px 10px; border:none; background:transparent; color:#2c3e50; cursor:pointer; font-weight:bold;">检索</button>');
+        seg.append(tabUpload, tabSearch);
+        tabWrap.append(seg);
         header.append(tabWrap);
         row.append(header);
 
@@ -130,30 +148,49 @@ export class ForwardLinkService {
                         <span>${name}</span>
                     </a>
                 `);
+                if (isExclusive && mode === 'upload') {
+                    link.css({ color: '#999' });
+                    link.find('span').text(`禁转至${name}`);
+                    link.on('click', (e) => {
+                        const ok = window.confirm('该资源疑似禁转/禁止转载，确认仍要打开发布页面？');
+                        if (!ok) e.preventDefault();
+                    });
+                }
                 rowWrap.append(link);
             });
             return rowWrap;
         };
 
-        const uploadFavRow = buildRow('常用', favSites, 'upload');
-        const uploadAllRow = buildRow('全部', otherSites.length ? otherSites : sites, 'upload');
-        if (uploadFavRow) uploadDiv.append(uploadFavRow);
-        if (uploadAllRow) uploadDiv.append(uploadAllRow);
+        if (favSites.length) {
+            const uploadFavRow = buildRow('常用', favSites, 'upload');
+            const uploadOtherRow = buildRow('其他', otherSites, 'upload');
+            if (uploadFavRow) uploadDiv.append(uploadFavRow);
+            if (uploadOtherRow) uploadDiv.append(uploadOtherRow);
 
-        const searchFavRow = buildRow('常用', favSites, 'search');
-        const searchAllRow = buildRow('全部', otherSites.length ? otherSites : sites, 'search');
-        if (searchFavRow) searchDiv.append(searchFavRow);
-        if (searchAllRow) searchDiv.append(searchAllRow);
+            const searchFavRow = buildRow('常用', favSites, 'search');
+            const searchOtherRow = buildRow('其他', otherSites, 'search');
+            if (searchFavRow) searchDiv.append(searchFavRow);
+            if (searchOtherRow) searchDiv.append(searchOtherRow);
+        } else {
+            const uploadAllRow = buildRow('站点', sites, 'upload');
+            const searchAllRow = buildRow('站点', sites, 'search');
+            if (uploadAllRow) uploadDiv.append(uploadAllRow);
+            if (searchAllRow) searchDiv.append(searchAllRow);
+        }
 
         tabUpload.on('click', () => {
+            tabUpload.attr('aria-pressed', 'true');
+            tabSearch.attr('aria-pressed', 'false');
             tabUpload.css({ background: '#2c3e50', color: '#fff' });
-            tabSearch.css({ background: '#f5f5f5', color: '#333' });
+            tabSearch.css({ background: 'transparent', color: '#2c3e50' });
             uploadDiv.show();
             searchDiv.hide();
         });
         tabSearch.on('click', () => {
+            tabUpload.attr('aria-pressed', 'false');
+            tabSearch.attr('aria-pressed', 'true');
             tabSearch.css({ background: '#2c3e50', color: '#fff' });
-            tabUpload.css({ background: '#f5f5f5', color: '#333' });
+            tabUpload.css({ background: 'transparent', color: '#2c3e50' });
             uploadDiv.hide();
             searchDiv.show();
         });

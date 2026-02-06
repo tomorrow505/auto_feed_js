@@ -25,7 +25,6 @@ export interface AppSettings {
     ptgenApi: number; // 0: api.iyuu.cn, 1: ptgen, 3: Douban page scrape
     quickSearchList: string[];
     quickSearchPresets: string[];
-    quickSearchTextareaHeight: number;
     enabledSites: string[];
     favoriteSites: string[];
     showSearchOnList: {
@@ -74,7 +73,6 @@ const DEFAULT_SETTINGS: AppSettings = {
     ptgenApi: 3,
     quickSearchList: DEFAULT_QUICK_SEARCH_TEMPLATES.slice(),
     quickSearchPresets: [],
-    quickSearchTextareaHeight: 220,
     enabledSites: SiteCatalogService.getDefaultEnabledSiteNames(),
     favoriteSites: ['TTG', 'CMCT', 'pterclub', 'CHDBits', 'BHD', 'MTeam'].filter((name) =>
         SiteCatalogService.getAllSiteNames().includes(name)

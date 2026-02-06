@@ -49,8 +49,8 @@ export const NexusSites: SiteConfig[] = [
     {
         name: 'CMCT',
         type: SiteType.NexusPHP,
-        keywords: ['hdcmct.org'],
-        baseUrl: 'https://hdcmct.org/',
+        keywords: ['hdcmct.org', 'springsunday.net'],
+        baseUrl: 'https://springsunday.net/',
         description: 'SpringSunday'
     },
     {

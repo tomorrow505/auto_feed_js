@@ -42,6 +42,7 @@ export default defineConfig({
                     'https://hdsky.me/*',
                     'https://ourbits.club/*',
                     'https://hdcmct.org/*',
+                    'https://springsunday.net/*',
                     'https://www.douban.com/subject/*',
                     'https://movie.douban.com/subject/*',
                     'https://www.imdb.com/title/tt*',

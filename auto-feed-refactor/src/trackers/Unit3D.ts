@@ -4,6 +4,8 @@ import { TorrentMeta } from '../types/TorrentMeta';
 import { SiteConfig } from '../types/SiteConfig';
 import { htmlToBBCode } from '../utils/htmlToBBCode';
 import $ from 'jquery';
+import { GMAdapter } from '../services/GMAdapter';
+import { SettingsService } from '../services/SettingsService';
 
 export class Unit3DEngine extends BaseEngine {
     constructor(config: SiteConfig, url: string) {
@@ -75,6 +77,13 @@ export class Unit3DEngine extends BaseEngine {
             if (match) meta.imdbId = match[0];
         }
 
+        const tmdbLink = $(selectors.tmdb).attr('href');
+        if (tmdbLink) {
+            meta.tmdbUrl = tmdbLink;
+            const id = tmdbLink.match(/themoviedb\.org\/(tv|movie)\/(\d+)/i)?.[2];
+            if (id) meta.tmdbId = id;
+        }
+
         const image = $('.movie-poster img, .sidebar img').attr('src');
         if (image) {
             meta.images.push(image);
@@ -101,6 +110,40 @@ export class Unit3DEngine extends BaseEngine {
 
         if (meta.imdbId) {
             $(formSelectors.imdb).val(meta.imdbId);
+        }
+
+        // TMDB id: if missing but imdb exists and api key is configured, try to resolve via TMDB find API.
+        if (!meta.tmdbId && meta.imdbId) {
+            try {
+                const settings = await SettingsService.load();
+                if (settings.tmdbApiKey) {
+                    const api = `https://api.themoviedb.org/3/find/${meta.imdbId}?api_key=${settings.tmdbApiKey}&external_source=imdb_id`;
+                    await new Promise<void>((resolve) => {
+                        GMAdapter.xmlHttpRequest({
+                            method: 'GET',
+                            url: api,
+                            onload: (resp: any) => {
+                                try {
+                                    const data = JSON.parse(resp.responseText || '{}');
+                                    const movieId = data?.movie_results?.[0]?.id;
+                                    const tvId = data?.tv_results?.[0]?.id;
+                                    if (movieId) meta.tmdbId = String(movieId);
+                                    if (tvId) meta.tmdbId = String(tvId);
+                                } catch {}
+                                resolve();
+                            },
+                            onerror: () => resolve()
+                        }).catch(() => resolve());
+                    });
+                }
+            } catch {}
+        }
+
+        if (meta.tmdbId) {
+            $(formSelectors.tmdb).val(meta.tmdbId);
+        } else if (meta.tmdbUrl) {
+            const id = meta.tmdbUrl.match(/themoviedb\.org\/(tv|movie)\/(\d+)/i)?.[2];
+            if (id) $(formSelectors.tmdb).val(id);
         }
 
         // Best-effort selects by matching option text

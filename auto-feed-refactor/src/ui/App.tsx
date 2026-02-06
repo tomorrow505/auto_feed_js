@@ -30,7 +30,6 @@ export const App = () => {
         ptgenApi: 3,
         quickSearchList: [],
         quickSearchPresets: [],
-        quickSearchTextareaHeight: 220,
         enabledSites: [],
         favoriteSites: [],
         showSearchOnList: {
@@ -519,24 +518,10 @@ export const App = () => {
                                         加入下拉框
                                     </button>
                                 </div>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                                    <label style={{ color: '#666' }}>输入框高度(px)</label>
-                                    <input
-                                        type="number"
-                                        min={120}
-                                        max={600}
-                                        style={{ width: '120px', padding: '6px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                                        value={settings.quickSearchTextareaHeight || 220}
-                                        onInput={(e) => {
-                                            const value = parseInt(e.currentTarget.value, 10);
-                                            setSettings({ ...settings, quickSearchTextareaHeight: Number.isFinite(value) ? value : 220 });
-                                        }}
-                                    />
-                                </div>
                                 <textarea
                                     style={{
                                         width: '100%',
-                                        height: `${settings.quickSearchTextareaHeight || 220}px`,
+                                        height: '220px',
                                         padding: '8px',
                                         border: '1px solid #ced4da',
                                         borderRadius: '4px',

@@ -42,8 +42,11 @@ const startServer = () => {
     if (url === '/' || url === '/auto-feed-refactor.user.js') {
       return serveFile(res, path.join(DIST, 'auto-feed-refactor.user.js'));
     }
+    // Avoid accidental installation of the loader when user expects full script.
     if (url === '/auto-feed-loader.user.js') {
-      return serveFile(res, path.join(DIST, 'auto-feed-loader.user.js'));
+      res.writeHead(302, { Location: '/auto-feed-refactor.user.js' });
+      res.end();
+      return;
     }
     if (url.endsWith('.map')) {
       return serveFile(res, path.join(DIST, path.basename(url)));

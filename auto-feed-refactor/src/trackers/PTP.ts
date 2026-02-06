@@ -422,9 +422,9 @@ export class PTPEngine extends BaseEngine {
         // Release description
         try {
             const info = getMediainfoPictureFromDescr(meta.description || '', { mediumSel: meta.mediumSel });
-            const releaseDesc = meta.fullMediaInfo
-                ? `${meta.fullMediaInfo}\n\n${info.picInfo || ''}`.trim()
-                : `${info.mediainfo || ''}\n\n${info.picInfo || ''}`.trim();
+            const miText = (meta.fullMediaInfo || info.mediainfo || '').trim();
+            const miWrapped = miText ? `[mediainfo]\n${miText}\n[/mediainfo]` : '';
+            const releaseDesc = `${miWrapped}${miWrapped && info.picInfo ? '\n\n' : ''}${info.picInfo || ''}`.trim();
             $('#release_desc').val(releaseDesc);
         } catch {
             $('#release_desc').val((meta.description || '').replace(/\[\/?.{1,20}\]\n?/g, ''));

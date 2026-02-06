@@ -97,7 +97,9 @@ export class ListSearchService {
         const row = $('<div class="autofeed-search-links" style="margin-top: 4px; font-size: 12px;"></div>');
         row.append('<span style="color:#666; font-weight:bold; margin-right:4px;">快速搜索:</span>');
         items.forEach((item) => {
-            const link = $(`<a href="${item.url}" target="_blank" style="margin-right:6px; color:#2c3e50;">${item.name}</a>`);
+            const link = $(
+                `<a href="${item.url}" target="_blank" style="display:inline-block; margin-right:6px; margin-bottom:4px; padding:2px 6px; background:#2c3e50; color:#fff; border:1px solid #1a252f; border-radius:4px; text-decoration:none;">${item.name}</a>`
+            );
             row.append(link);
         });
 
