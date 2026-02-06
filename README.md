@@ -2,7 +2,6 @@
 
 这是 `auto_feed.user.js` 的**模块化重构版本**，保持原脚本功能一致，并拆分为可维护的引擎/服务/模板结构，支持本地开发、构建与发布。  
 原作者：**tomorrow505**  
-重构维护：**gawain**
 
 简化版 Wiki：`docs/wiki/Home.md`
 
@@ -56,63 +55,74 @@ Unit3D / Unit3D Classic：
 ## TODO（重构迁移中）
 - 未实测站点的解析/预填验证（见“已适配站点”列表）
 - 外站 HDB/PTP 的解析与预填细节继续对齐原脚本
-- CMCT / Pter / TTG / HDSky 等常用站点做逐项验证
-- 旧脚本的“站点特化逻辑”逐条迁移
-- 特殊站点（如 Gazette / 小众站）按需补引擎适配
-- 快速检索/转发按钮在部分站点样式对齐
-- 远程推送侧边栏在更多站点详情页稳定性验证
+# Auto-Feed Refactor (PT 自动转载/发布脚本)
 
-## 已知限制
-- 某些站点需要单独 DOM 结构适配，仍在迁移中
-- 个别站点跨域资源（图标/图片）可能被浏览器拦截
-- Safari 无法直接使用本地 loader，请使用完整脚本安装
+[![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue.svg)](https://www.typescriptlang.org/)
+[![Preact](https://img.shields.io/badge/Framework-Preact-673ab7.svg)](https://preactjs.com/)
+[![License](https://img.shields.io/badge/License-GPL%203.0-green.svg)](LICENSE)
 
-## 项目结构
-```
-src/
-  trackers/            # 站点解析/填充（PT 语义：Tracker 适配）
-  services/            # 通用服务（存储/图床/爬取/远程）
-  templates/           # 通用模板（Nexus/Gazelle 等）
-  ui/                  # 设置面板
-scripts/               # 本地开发辅助脚本（不参与功能逻辑）
-docs/wiki/             # 重构版 Wiki（只记录重构版现状与差距）
-dist/                  # 构建产物（用户脚本，默认不提交）
-```
+> 这是 `auto_feed.user.js` 的**模块化重构版本**，保持原脚本核心功能一致，并采用现代架构重写，提供更流畅的交互体验与更强的扩展性。
 
-## 开发运行环境
-推荐环境：
-- Node.js 18+（已验证 18.20.x）
-- npm 10+
-- TypeScript 5+
-- Vite 5 + vite-plugin-monkey
+---
 
-## 开发启动
+## ✨ 核心特性
+
+### 1. 极致简约的 UI 体验
+重构版摒弃了传统的 HTML 拼接，采用 **Preact + Shadow DOM** 打造了现代化简约界面：
+- **深色模式**: 完美适配现代 PT 站点的暗色主题。 
+- **多语言**: 内置中/英双语切换，国际化支持更友善。
+
+### 2. 强大的转载引擎
+支持跨架构、跨站点的无缝转载，智能识别并预填表单：
+- **NexusPHP**: M-Team, HDSky, CHDBits, SSD, TTG 等。
+- **Unit3D**: BHD, BLU, Aither 等。
+- **Gazelle**: PTP, RED, OPS, DIC 等。
+- **特殊架构**: HDBits, KG, AvistaZ 系列。
+
+### 3. 智能辅助工具
+- **图片转存**: 集成 PTPIMG, PIXhost, Hostik 等主流图床，支持批量截图转存与“桥接模式”一键拉取。
+- **远程推送**: 一键将种子推送到 qBittorrent, Transmission, Deluge，支持连接测试与路径映射。
+- **种子清洗**: 自动移除隐私信息（Comment, Created By），源站 Tracker 替换，保护账号安全。
+- **元数据增强**: 自动从豆瓣/IMDb 获取中文简介、海报与评分，补齐外站资源信息。
+
+---
+
+## 🚀 快速开始
+
+### 安装
+1. 安装浏览器扩展 **Tampermonkey**。
+2. [点击安装脚本](dist/auto_feed.user.js) (或从 GreasyFork 安装)。
+3. 访问支持的 PT 站点，按下 `Alt + S` 打开设置面板。
+
+### 开发指南
+如果你想参与开发或自行构建：
+
 ```bash
+# 1. 克隆项目
+git clone https://github.com/your-repo/auto_feed_js.git
+
+# 2. 安装依赖
 npm install
-npm run dev
-```
-开发默认启动 Vite（端口 5173），通过 `vite-plugin-monkey` 的安装入口进行调试。
 
-## 构建
-```bash
+# 3. 启动开发服务器 (支持热更新)
+npm run dev
+
+# 4. 构建发布版本
 npm run build
 ```
-构建产物在 `dist/`：
-- `dist/auto_feed.user.js`（完整脚本）
 
-## 使用说明
-1. 生产/日常使用：安装 `dist/auto_feed.user.js`
-2. 本地开发：`npm run dev`，通过 `vite-plugin-monkey` 的 install 页面安装开发版脚本
-3. 设置面板：`Alt+S` 打开脚本设置
+---
 
-## CI/CD
-本项目已配置 GitHub Actions：
-- **CI**：push/PR 自动安装依赖并构建
-- **CD**：推送 tag（`v*`）自动打包并发布 Release
+## 📚 文档中心
+- [用户手册 (Usage)](docs/wiki/Usage.md)
+- [功能对照表 (Feature Parity)](docs/wiki/FEATURE_PARITY.md)
+- [图像工具详解](docs/wiki/Image-Tools.md)
+- [支持站点列表](docs/wiki/Site-Support.md)
 
-## 作者与致谢
-- 原作者：**tomorrow505**
-- 重构维护：**gawain**
+---
 
-## 许可证
+## 🤝 致谢
+- 原作者：**tomorrow505** (感谢大佬的开创性工作)
+
+## 📄 许可证
 GPL-3.0

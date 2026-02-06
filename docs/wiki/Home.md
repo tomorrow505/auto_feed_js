@@ -1,63 +1,50 @@
-# Auto-Feed Refactor Wiki
+# 🤖 Auto-Feed Refactor Wiki
 
-这是重构版（`refactor-dev` 分支）的内置 Wiki，目标是让后来维护者能快速理解：
-1. 脚本在做什么
-2. 代码结构在哪里
-3. 目前已实现哪些能力，哪些仍在规划中
+欢迎使用 **Auto-Feed Refactor**！这是一个专为 PT (Private Tracker) 爱好者设计的自动化脚本，旨在通过模块化的架构，提供极致的转载与发布效率。
 
-旧版完整功能与细节参考原项目 Wiki（tomorrow505/auto_feed_js/wiki），本 Wiki 只记录重构版的现状与路线图。
+> [!NOTE]
+> 本 Wiki 记录了重构版（v3.x）的现状及其与旧版（v2.x）的功能集成情况。
 
-## 快速入口
-- 安装脚本：`dist/auto_feed.user.js`
-- 核心入口：`src/main.ts`
-- 站点适配（PT 语义：Tracker）：`src/trackers/`
-- 通用能力：`src/services/`
-- 设置面板：`src/ui/`（默认 `Alt+S` 打开）
+---
 
-## 典型用法（简版）
-1. 在源站的种子详情页点击 `转发/Reupload` 打开面板。
-2. 选择 `发布/检索` 模式。
-3. 点击目标站点打开新页。
-4. 在目标站上传页自动预填（右下角会出现 Found Data 提示，可手动点“重新填充”）。
+## 🌟 核心理念
+- **简约而不简单**: 基于 Preact + TypeScript，代码结构清晰，易于维护。
+- **极致美学**: 采用 Apple 风格 UI，支持深色/浅色模式与多语言切换。
+- **安全优先**: 所有的种子清洗与图片转存逻辑均在本地运行，保护个人私钥安全。
 
-## 功能状态
-已实现（可用但仍需逐站细化）：
-- 一键转发主链路：源站解析 -> 缓存 -> 目标站预填
-- 禁转/拒转关键字提示（部分站点/场景）
-- 快速搜索：豆瓣/IMDb 页面 + 部分站点列表页（PTP/HDB 等）
-- 图床能力：
-  - 图床按钮组（原图/PTPIMG/PIXHOST/IMGBOX/HDBits/Hostik 等）
-  - 图片处理大窗口（提取、替换、缩略、链接处理等）
-  - 图床“一键拉取”桥接（预填文件选择框，不自动上传）
-- 远程推送侧边栏（qB/TR/Deluge 等，持续对齐交互细节）
+---
 
-规划中（与旧版对齐的差距）：
-- 更多站点覆盖与站点特例迁移
-- 分类/媒介/编码/音轨/分辨率/匿名等字段的逐站预填对齐
-- 外站信息与中文增强（ptgen、IMDb->豆瓣、中文简介/副标题等）
-- 种子清洗细节与 gazelle 多 torrent 选择逻辑完善
+## 🗺️ 快速导航
 
-差距清单与优先级：`todo.md`
+### 📖 使用手册
+| 模块 | 说明 |
+| :--- | :--- |
+| [🚀 使用教程](Usage.md) | 从安装到完成第一次转载。 |
+| [🔧 设置详解](Settings.md) | 如何配置 API Key、远程推送等。 |
+| [🖼️ 图像工具集](Image-Tools.md) | 截图转存、对比图制作与图床桥接。 |
+| [📡 远程推送](Remote-Download.md) | qB/TR/Deluge 的集成与路径映射。 |
 
-## 本 Wiki 页面
-- `docs/wiki/Development.md`
-- `docs/wiki/Feature-Gap.md`
-- `docs/wiki/Usage.md`
-- `docs/wiki/Settings.md`
-- `docs/wiki/Image-Tools.md`
-- `docs/wiki/Remote-Download.md`
-- `docs/wiki/Site-Support.md`
+### 🛠️ 开发者中心
+| 模块 | 说明 |
+| :--- | :--- |
+| [⚙️ 代码结构](Development.md) | 想要改代码？先看这里。 |
+| [🌍 站点适配指南](Site-Support.md) | 如何添加或修改站点规则。 |
+| [📊 功能差距](Feature-Gap.md) | 对照旧版的补齐进度。 |
 
-## 教程大纲（对照旧版）
-已实现：
-- 安装与开发：`docs/wiki/Development.md`
-- 基本转发与预填：`docs/wiki/Usage.md`
-- 设置面板：`docs/wiki/Settings.md`
-- 图片处理与图床桥接：`docs/wiki/Image-Tools.md`
-- 远程推送（基础能力）：`docs/wiki/Remote-Download.md`
+---
 
-规划中：
-- Ptgen/外站中文信息更完整对齐（简介/副标题等）
-- 洗种与种子清洗细节完全对齐（多 tracker/gazelle 多种子）
-- 禁转提示规则细节完全对齐
-- 站点覆盖与大量站点特例迁移
+## 🚩 典型工作流
+1. **解析 (Parse)**: 脚本自动抓取源站种子页面中的 MediaInfo、简介、图片链接。
+2. **增强 (Enhance)**: 一键获取豆瓣评分、中文名、Ptgen 简介及海报。
+3. **清洗 (Clean)**: 自动移除种子中的个人信息，随机化创建时间。
+4. **注入 (Fill)**: 跳转目标站，毫秒级自动预填所有发布项与文件。
+
+---
+
+## 📅 版本与路线图
+- **Current (v3.1.x)**: 核心框架完成，支持 NexusPHP/Gazelle/Unit3D 主流站点。
+- **Upcoming (P0)**: 深度对齐 PTP/HDB 转发逻辑，补齐种子自动下载链路。
+- **Vision**: 通过配置化引擎实现“零代码”站点扩展。
+
+> [!TIP]
+> 详细的任务进度请参考根目录下的 [todo.md](file:///Users/gawaintan/workSpace/Tools/auto_feed_js/todo.md)。
