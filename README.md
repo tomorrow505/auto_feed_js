@@ -1,66 +1,118 @@
-## 📝auto-feed
-【油猴脚本】PT站一键转载脚本，支持国内外100多个主流站点。不定时修复bug或者更新站点提交到GitHub，一般半个月（月中和月末）统一推送到greasyfork提供安装。
+# Auto-Feed Refactor
 
-### 📖使用介绍
-脚本使用教程：详见项目 [wiki（GitHub）](https://github.com/tomorrow505/auto_feed_js/wiki)| [wiki（Gitee）](https://gitee.com/tomorrow505/auto_feed_js/wikis/Home)
+这是 `auto_feed.user.js` 的**模块化重构版本**，保持原脚本功能一致，并拆分为可维护的引擎/服务/模板结构，支持本地开发、构建与发布。  
+原作者：**tomorrow505**  
+重构维护：**gawain**
 
-油猴安装地址：https://greasyfork.org/zh-CN/scripts/424132-auto-feed 或 https://gitee.com/tomorrow505/auto_feed_js/raw/master/auto_feed.user.js
+简化版 Wiki：`docs/wiki/Home.md`
 
-如果无法翻墙，请使用Gitee的地址进行安装，并在脚本头部（源代码1~110行左右）添加以下4个库：<br>
-// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/jquery.js <br>
-// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/jquery_ui.js <br>
-// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/imgCheckbox.js <br>
-// @require      https://gitee.com/tomorrow505/auto-feed-helper/raw/master/require_libraries/music-helper.js <br>
- 
-### 👀项目特点
-+ 支持一键转载填充相应内容
-+ 支持外站根据imdb获取豆瓣详情
-+ 支持一键转载多站
-+ 支持查重转载切换
-+ 支持防盗链或其他图床转存到公共图床
-+ 支持自定义站点显示顺序
-+ 支持大量外站中文显示
-+ 英化支持部分小语种外站，主要wiki和rules.
-+ 发布省略种子下载上传步骤，[自动清洗种子](https://github.com/tomorrow505/auto_feed_js/wiki/%E6%B8%85%E6%B4%97%E7%A7%8D%E5%AD%90-%E8%87%AA%E5%8A%A8%E4%B8%8B%E8%BD%BD%E5%8F%91%E5%B8%83%E7%9A%84%E7%A7%8D%E5%AD%90)……
-+ 支持豆瓣音乐和豆瓣读书简介一键获取
-+ qq非官方链接自动跳转
-+ 支持一键签到适配站点
-+ PT吧广告自动隐藏
-+ qb远程推送下载
-+ ……
+## 功能概览
+- 站点识别 + 一键转发（源站解析 → 目标站预填）
+- 站点模块化（NexusPHP / Unit3D / Gazelle / 站点定制引擎）
+- 快速搜索 + 快捷转发按钮
+- 豆瓣/IMDb 快速工具、PTGen 数据获取
+- 远程下载侧边栏（qBittorrent / Transmission）
+- 图床转存（PTPIMG / Pixhost / Freeimage / Gifyu / HDBIMG）
 
-### 📢关于更新
+## 已适配站点（未完全测试）
+说明：以下为代码层面已接入的站点清单，**并非全部经过实测**。  
+如遇解析/预填不完整，请在 TODO 里补登记。
 
-由于个人时间精力有限，站点太多了也搞不过来，如果有想要支持的站点欢迎提交PR，或者负责账号邀请问题<br>
-对于无号还要进站去适配的情况，请耐心等待，因为进站需要时间，不一定会马上开展。
+NexusPHP / CHD 体系：
+- MTeam
+- HDSky
+- OurBits
+- CMCT (SpringSunday)
+- TTG
+- pterclub
+- HDArea
+- Audiences
+- FRDS
+- CHDBits
 
-注意：谢绝支持类似exo,avgv,nicept等仅限成人类资源的站点。请不要提issue请求支持了。
+Gazelle / PTP / HDB：
+- PTP
+- HDB
+- RED
+- OPS
+- DIC
+- KG
 
-因为太多新的站点开了一段时间不温不火就关了，没有一点水花，适配了又只能默默删除。在此制定一个基本适配标准（满足其一再提交issue或反馈，特殊情况除外）：<br>
-1、开站时间满3个月；<br>
-2、站内活种超3000。<br>
+Unit3D / Unit3D Classic：
+- BHD
+- Tik
+- Aither
+- BLU
+- DarkLand
+- ACM
+- HDOli
+- Monika
+- DTR
+- HONE
+- FNP
+- OnlyEncodes
+- ReelFliX
 
-### 🐛反馈
+## TODO（重构迁移中）
+- 未实测站点的解析/预填验证（见“已适配站点”列表）
+- 外站 HDB/PTP 的解析与预填细节继续对齐原脚本
+- CMCT / Pter / TTG / HDSky 等常用站点做逐项验证
+- 旧脚本的“站点特化逻辑”逐条迁移
+- 特殊站点（如 Gazette / 小众站）按需补引擎适配
+- 快速检索/转发按钮在部分站点样式对齐
+- 远程推送侧边栏在更多站点详情页稳定性验证
 
-<font color="red"><b>汇报bug或者提issue的时候尽量说明源站链接、文字说明、截图、待发布站点等尽可能详实的信息以便排查。</b></font>
+## 已知限制
+- 某些站点需要单独 DOM 结构适配，仍在迁移中
+- 个别站点跨域资源（图标/图片）可能被浏览器拦截
+- Safari 无法直接使用本地 loader，请使用完整脚本安装
 
-不按说明反馈将增加复现时间，短时间复现不了的我将不会修复。
+## 项目结构
+```
+src/
+  trackers/            # 站点解析/填充（PT 语义：Tracker 适配）
+  services/            # 通用服务（存储/图床/爬取/远程）
+  templates/           # 通用模板（Nexus/Gazelle 等）
+  ui/                  # 设置面板
+scripts/               # 本地开发辅助脚本（不参与功能逻辑）
+docs/wiki/             # 重构版 Wiki（只记录重构版现状与差距）
+dist/                  # 构建产物（用户脚本，默认不提交）
+```
 
-## 💵关于打赏
+## 开发运行环境
+推荐环境：
+- Node.js 18+（已验证 18.20.x）
+- npm 10+
+- TypeScript 5+
+- Vite 5 + vite-plugin-monkey
 
-开发不易，从19年开发，21年开源维护至今。如果你喜欢这个脚本，请捐赠我作为更新维护的动力吧。
+## 开发启动
+```bash
+npm install
+npm run dev
+```
+开发默认启动 Vite（端口 5173），通过 `vite-plugin-monkey` 的安装入口进行调试。
 
-|                   Alipay                    |                     WeChat                     |
-| :-----------------------------------------: | :--------------------------------------------: |
-| <img src="https://i.ibb.co/FkFXNSmx/ali-pay.png" width = "160" height = "160" alt="支付宝" align=center /> | <img src="https://i.ibb.co/Kz6GkrcN/wechat-pay.png" width = "160" height = "160" alt="微信" align=center /> |
+## 构建
+```bash
+npm run build
+```
+构建产物在 `dist/`：
+- `dist/auto_feed.user.js`（完整脚本）
 
- ## 💻贡献者
+## 使用说明
+1. 生产/日常使用：安装 `dist/auto_feed.user.js`
+2. 本地开发：`npm run dev`，通过 `vite-plugin-monkey` 的 install 页面安装开发版脚本
+3. 设置面板：`Alt+S` 打开脚本设置
 
-<a href="https://github.com/eryajf/learn-github/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=tomorrow505/auto_feed_js" />
-</a>
+## CI/CD
+本项目已配置 GitHub Actions：
+- **CI**：push/PR 自动安装依赖并构建
+- **CD**：推送 tag（`v*`）自动打包并发布 Release
 
-## Star History
+## 作者与致谢
+- 原作者：**tomorrow505**
+- 重构维护：**gawain**
 
-[![Star History Chart](https://api.star-history.com/svg?repos=tomorrow505/auto_feed_js&type=Date)](https://star-history.com/#tomorrow505/auto_feed_js&Date)
-
+## 许可证
+GPL-3.0

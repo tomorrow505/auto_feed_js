@@ -11,7 +11,18 @@
 /debug
 _refs/
 REFACTOR_PLAN_OLD.md
+auto_feed_js.wiki/
 
-auto-feed-refactor/node_modules/
-auto-feed-refactor/.vite/
-auto-feed-refactor/dist/.DS_Store
+node_modules/
+.vite/
+dist/.DS_Store
+
+# Local-only reference / build outputs (avoid conflicts between legacy and refactor branches)
+auto_feed.user.js
+dist/
+
+# Local-only dev helpers (do not commit)
+scripts/dev-full.js
+scripts/generate-loader.js
+scripts/postbuild-copy.js
+scripts/verify-torrent-service.ts
