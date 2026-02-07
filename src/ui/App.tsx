@@ -168,6 +168,31 @@ export const App = () => {
     const allSites = SiteCatalogService.getAllSites();
     const t = i18n[settings.uiLanguage as SupportedLang] || i18n.en;
 
+    // Group sites following legacy wiki taxonomy: NP (NexusPHP), Unit3D, GZ (Gazelle), plus "Other".
+    // This only affects how they are shown in settings, not runtime matching/engines.
+    const groupLabel = (site: any): string => {
+        const type = site.type as string;
+        if (['NexusPHP', 'MTeam', 'CHDBits'].includes(type)) return 'NP';
+        if (['Unit3D', 'Unit3DClassic', 'BHD'].includes(type)) return 'Unit3D';
+        if (['Gazelle', 'PTP', 'HDB', 'KG'].includes(type)) return 'GZ';
+        if (['Avistaz'].includes(type)) return 'AVZ';
+        return 'Other';
+    };
+
+    const groupSites = (sites: any[]) => {
+        const groups: Record<string, any[]> = { NP: [], Unit3D: [], GZ: [], AVZ: [], Other: [] };
+        for (const s of sites) {
+            const g = groupLabel(s);
+            if (!groups[g]) groups[g] = [];
+            groups[g].push(s);
+        }
+        const order = ['NP', 'Unit3D', 'GZ', 'AVZ', 'Other'];
+        for (const k of Object.keys(groups)) {
+            groups[k] = groups[k].slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+        }
+        return order.map((k) => ({ key: k, items: groups[k] || [] })).filter((g) => g.items.length);
+    };
+
     const getQuickSearchPresetLabel = (line: string) => {
         const anchorText = line.match(/>([^<]+)<\/a>/i)?.[1];
         if (anchorText) return anchorText.trim();
@@ -555,36 +580,50 @@ export const App = () => {
 
                             <div className="af-card">
                                 <div className="af-card-header">{t.enabledSites}</div>
-                                <div className="af-grid">
-                                    {allSites.map(site => (
-                                        <div
-                                            key={site.name}
-                                            className="af-checkbox-card"
-                                            onClick={() => toggleSite(site.name)}
-                                            style={{ background: (settings.enabledSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
-                                        >
-                                            <input type="checkbox" checked={(settings.enabledSites || []).includes(site.name)} readOnly />
-                                            <span style={{ fontSize: '12px' }}>{site.name}</span>
+                                {groupSites(allSites).map((g) => (
+                                    <div key={'en-' + g.key} style={{ padding: '0 16px 16px' }}>
+                                        <div style={{ fontSize: '12px', fontWeight: 700, opacity: 0.75, margin: '10px 0 8px' }}>
+                                            {g.key}
                                         </div>
-                                    ))}
-                                </div>
+                                        <div className="af-grid">
+                                            {g.items.map((site: any) => (
+                                                <div
+                                                    key={site.name}
+                                                    className="af-checkbox-card"
+                                                    onClick={() => toggleSite(site.name)}
+                                                    style={{ background: (settings.enabledSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
+                                                >
+                                                    <input type="checkbox" checked={(settings.enabledSites || []).includes(site.name)} readOnly />
+                                                    <span style={{ fontSize: '12px' }}>{site.name}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
 
                             <div className="af-card">
                                 <div className="af-card-header">{t.favoriteSites}</div>
-                                <div className="af-grid">
-                                    {allSites.map(site => (
-                                        <div
-                                            key={'fav-' + site.name}
-                                            className="af-checkbox-card"
-                                            onClick={() => toggleFavoriteSite(site.name)}
-                                            style={{ background: (settings.favoriteSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
-                                        >
-                                            <input type="checkbox" checked={(settings.favoriteSites || []).includes(site.name)} readOnly />
-                                            <span style={{ fontSize: '12px' }}>{site.name}</span>
+                                {groupSites(allSites).map((g) => (
+                                    <div key={'fav-' + g.key} style={{ padding: '0 16px 16px' }}>
+                                        <div style={{ fontSize: '12px', fontWeight: 700, opacity: 0.75, margin: '10px 0 8px' }}>
+                                            {g.key}
                                         </div>
-                                    ))}
-                                </div>
+                                        <div className="af-grid">
+                                            {g.items.map((site: any) => (
+                                                <div
+                                                    key={'fav-' + site.name}
+                                                    className="af-checkbox-card"
+                                                    onClick={() => toggleFavoriteSite(site.name)}
+                                                    style={{ background: (settings.favoriteSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
+                                                >
+                                                    <input type="checkbox" checked={(settings.favoriteSites || []).includes(site.name)} readOnly />
+                                                    <span style={{ fontSize: '12px' }}>{site.name}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
 
                             <div className="af-card">

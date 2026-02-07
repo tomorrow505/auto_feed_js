@@ -3,6 +3,15 @@ import { SiteConfig, SiteType } from '../types/SiteConfig';
 
 export const GazelleSites: SiteConfig[] = [
     {
+        name: 'PTP',
+        // PTP is a Gazelle (GZ) site. Keep a dedicated engine type for PTP-specific logic,
+        // but group/configure it under the Gazelle site list for settings parity.
+        type: SiteType.PTP,
+        keywords: ['passthepopcorn.me'],
+        baseUrl: 'https://passthepopcorn.me/',
+        description: 'PassThePopcorn'
+    },
+    {
         name: 'RED',
         type: SiteType.Gazelle,
         keywords: ['redacted.sh'],

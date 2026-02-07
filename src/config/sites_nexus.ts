@@ -99,13 +99,6 @@ export const NexusSites: SiteConfig[] = [
         }
     },
     {
-        name: 'PTP',
-        type: SiteType.PTP,
-        keywords: ['passthepopcorn.me'],
-        baseUrl: 'https://passthepopcorn.me/',
-        description: 'PassThePopcorn'
-    },
-    {
         name: 'HDB',
         type: SiteType.HDB,
         keywords: ['hdbits.org'],

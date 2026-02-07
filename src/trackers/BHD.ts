@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { Unit3DEngine } from './Unit3D';
+import { Unit3DEngine } from '../templates/unit3d';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { SiteConfig } from '../types/SiteConfig';
 import { getLabel, getType } from '../common/legacy/text';
