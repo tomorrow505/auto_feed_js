@@ -3,6 +3,7 @@ name: Sync Docs To GitHub Wiki
 on:
   push:
     branches:
+      - dev
       - refactor-dev
   workflow_dispatch:
 
