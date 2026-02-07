@@ -1,0 +1,48 @@
+name: Dev Release (refactor-dev)
+
+on:
+  push:
+    branches:
+      - refactor-dev
+
+permissions:
+  contents: write
+
+jobs:
+  dev_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Update dev tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -f dev "${GITHUB_SHA}"
+          git push -f origin dev
+
+      - name: Create/Update dev pre-release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: dev
+          name: Dev Build (refactor-dev)
+          prerelease: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/auto_feed.user.js
+

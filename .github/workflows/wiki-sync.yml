@@ -1,0 +1,55 @@
+name: Sync Docs To GitHub Wiki
+
+on:
+  push:
+    branches:
+      - refactor-dev
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check wiki repo exists
+        id: wiki_check
+        run: |
+          set -euo pipefail
+          if git ls-remote "https://github.com/${GITHUB_REPOSITORY}.wiki.git" >/dev/null 2>&1; then
+            echo "exists=1" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Sync
+        if: steps.wiki_check.outputs.exists == '1'
+        env:
+          WIKI_URL: https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.wiki.git
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/wiki
+          git clone "$WIKI_URL" /tmp/wiki
+
+          # IMPORTANT: do not delete the wiki repo metadata.
+          rsync -av --delete --exclude='.git/' docs/wiki/ /tmp/wiki/
+
+          cd /tmp/wiki
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "Wiki already up to date."
+            exit 0
+          fi
+          git add -A
+          git commit -m "Sync from docs/wiki (refactor-dev)"
+          git push
+
+      - name: Wiki not initialized (skip)
+        if: steps.wiki_check.outputs.exists != '1'
+        run: |
+          echo "GitHub Wiki repo does not exist yet. Create the first Wiki page in GitHub UI once, then re-run this workflow."

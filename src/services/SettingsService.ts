@@ -1,0 +1,138 @@
+import { SiteCatalogService } from './SiteCatalogService';
+import { GMAdapter } from './GMAdapter';
+import { DEFAULT_QUICK_SEARCH_TEMPLATES } from './QuickSearchTemplateService';
+
+export interface AppSettings {
+    ptpImgApiKey: string;
+    pixhostApiKey: string;
+    freeimageApiKey: string;
+    gifyuApiKey: string;
+    hdbImgApiKey: string;
+    hdbImgEndpoint: string;
+    doubanCookie: string;
+    tmdbApiKey: string;
+    chdBaseUrl: string;
+    ptpShowDouban: boolean;
+    ptpShowGroupName: boolean;
+    ptpNameLocation: number;
+    hdbShowDouban: boolean;
+    hdbHideDouban: boolean;
+    showQuickSearchOnDouban: boolean;
+    showQuickSearchOnImdb: boolean;
+    defaultAnonymous: boolean;
+    remoteSidebarOpacity: number; // 0.3 - 1.0
+    settingsPanelOpacity: number; // 0.3 - 1.0
+    popupOpacity: number; // 0.3 - 1.0 (forward popup, toolbox panel, dialogs)
+    maskOpacity: number; // 0.1 - 0.8 (modal backdrops)
+    toastOpacity: number; // 0.3 - 1.0 (toasts)
+    enableRemoteSidebar: boolean;
+    remoteSkipCheckingDefault: boolean;
+    remoteAskSkipConfirm: boolean;
+    remoteServer: RemoteServerConfig | null;
+    imdbToDoubanMethod: number; // 0: Douban API, 1: Douban scrape
+    ptgenApi: number; // 0: api.iyuu.cn, 1: ptgen, 3: Douban page scrape
+    quickSearchList: string[];
+    quickSearchPresets: string[];
+    enabledSites: string[];
+    favoriteSites: string[];
+    showSearchOnList: {
+        PTP: boolean;
+        HDB: boolean;
+        HDT: boolean;
+        UHD: boolean;
+    };
+    uiLanguage: 'zh' | 'en';
+}
+
+export interface RemoteServerConfig {
+    qbittorrent?: Record<string, {
+        url: string;
+        username: string;
+        password: string;
+        path: Record<string, string>;
+    }>;
+    transmission?: Record<string, {
+        url: string;
+        username: string;
+        password: string;
+        path: Record<string, string>;
+    }>;
+    deluge?: Record<string, {
+        url: string;
+        password: string;
+        path: Record<string, string>;
+    }>;
+}
+
+const DEFAULT_SETTINGS: AppSettings = {
+    ptpImgApiKey: '',
+    pixhostApiKey: '',
+    freeimageApiKey: '',
+    gifyuApiKey: '',
+    hdbImgApiKey: '',
+    hdbImgEndpoint: 'https://hdbimg.com/api/1/upload',
+    doubanCookie: '',
+    tmdbApiKey: '',
+    chdBaseUrl: 'https://chdbits.co/',
+    ptpShowDouban: true,
+    ptpShowGroupName: true,
+    ptpNameLocation: 1,
+    hdbShowDouban: true,
+    hdbHideDouban: false,
+    showQuickSearchOnDouban: true,
+    showQuickSearchOnImdb: true,
+    defaultAnonymous: false,
+    remoteSidebarOpacity: 0.92,
+    settingsPanelOpacity: 0.95,
+    popupOpacity: 0.96,
+    maskOpacity: 0.25,
+    toastOpacity: 0.95,
+    enableRemoteSidebar: false,
+    remoteSkipCheckingDefault: false,
+    remoteAskSkipConfirm: false,
+    remoteServer: null,
+    imdbToDoubanMethod: 0,
+    ptgenApi: 3,
+    quickSearchList: DEFAULT_QUICK_SEARCH_TEMPLATES.slice(),
+    quickSearchPresets: [],
+    enabledSites: SiteCatalogService.getDefaultEnabledSiteNames(),
+    favoriteSites: ['TTG', 'CMCT', 'pterclub', 'CHDBits', 'BHD', 'MTeam'].filter((name) =>
+        SiteCatalogService.getAllSiteNames().includes(name)
+    ),
+    showSearchOnList: {
+        PTP: true,
+        HDB: false,
+        HDT: false,
+        UHD: false
+    },
+    uiLanguage: 'zh'
+};
+
+export class SettingsService {
+    private static KEY = 'auto_feed_settings';
+
+    static async load(): Promise<AppSettings> {
+        return new Promise((resolve) => {
+            try {
+                GMAdapter.getValue<string | null>(this.KEY, null).then((stored) => {
+                    if (stored) {
+                        resolve({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
+                        return;
+                    }
+                    resolve({ ...DEFAULT_SETTINGS });
+                });
+                return;
+            } catch (e) {
+                console.error('Error loading settings', e);
+            }
+            resolve({ ...DEFAULT_SETTINGS });
+        });
+    }
+
+    static async save(settings: AppSettings): Promise<void> {
+        return new Promise((resolve) => {
+            const data = JSON.stringify(settings);
+            GMAdapter.setValue(this.KEY, data).then(() => resolve());
+        });
+    }
+}
