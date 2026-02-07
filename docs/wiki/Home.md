@@ -58,4 +58,4 @@
 - **Vision**: 通过配置化引擎实现“零代码”站点扩展。
 
 > [!TIP]
-> 详细的任务进度请参考根目录下的 [todo.md](../../todo.md)。
+> 功能对照与缺口清单请参考 [FEATURE_PARITY.md](FEATURE_PARITY.md)。
