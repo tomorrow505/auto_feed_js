@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import { Unit3DEngine } from './Unit3D';
+import { Unit3DEngine } from './unit3d';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { getType } from '../common/legacy/text';
 import { matchLink } from '../common/legacy/links';

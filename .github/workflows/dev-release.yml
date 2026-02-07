@@ -34,7 +34,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -f dev "${GITHUB_SHA}"
-          git push -f origin dev
+          # Avoid ambiguity if a branch named 'dev' exists.
+          git push -f origin refs/tags/dev
 
       - name: Create/Update dev pre-release
         uses: softprops/action-gh-release@v2
@@ -45,4 +46,3 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             dist/auto_feed.user.js
-

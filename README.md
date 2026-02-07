@@ -9,7 +9,7 @@
 
 ## 安装（Release）
 1. 安装浏览器扩展 Tampermonkey。
-2. 安装脚本（dev 频道，随 `refactor-dev` 自动更新）：
+2. 安装脚本（dev 频道，随 `refactor-dev` 分支自动更新）：
    https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
 3. 稳定版（打 tag `v*` 后）：
    https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js
@@ -20,7 +20,7 @@
 ## 使用引导
 - 进 PT 种子详情页后，按 `Alt + S` 打开设置面板。
 - 站点详情页标题旁会出现 `转发/Reupload` 和 `点击获取`（按站点与页面类型注入）。
-- “功能差距/缺失清单”见：[`todo.md`](todo.md)
+- “功能差距/缺失清单”见：[`docs/wiki/FEATURE_PARITY.md`](docs/wiki/FEATURE_PARITY.md)
 
 ## 开发/构建
 环境：

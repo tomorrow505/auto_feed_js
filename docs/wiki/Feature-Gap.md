@@ -1,6 +1,6 @@
 # Feature Gap (Legacy vs Refactor)
 
-本页只做“差距导航”，具体任务粒度与勾选请看 `todo.md`。
+本页只做“差距导航”，具体任务粒度与勾选请看 `FEATURE_PARITY.md`。
 
 ## 旧版关键能力 (重构版仍需补齐)
 - 转发主链路的“逐站预填细节”对齐：PTP/HDB/CHD 作为源与目标时的字段、勾选项、标题清洗、特殊规则
@@ -14,8 +14,8 @@
 - 一键签到、简化 MediaInfo 等辅助功能迁移
 
 ## 旧版 Wiki 页面对应
-- `设置页面` -> `docs/wiki/Settings.md` + `todo.md` (设置能力差距)
-- `源种子页面` + `转载功能` + `发布页面` -> `docs/wiki/Usage.md` + `todo.md` (逐站逻辑差距)
-- `查重及快搜` -> `docs/wiki/Usage.md` + `todo.md`
-- `图片转存` + `图片处理` -> `docs/wiki/Image-Tools.md` + `todo.md`
-- `qb推送` -> `docs/wiki/Remote-Download.md` + `todo.md`
+- `设置页面` -> `docs/wiki/Settings.md` + `FEATURE_PARITY.md` (设置能力差距)
+- `源种子页面` + `转载功能` + `发布页面` -> `docs/wiki/Usage.md` + `FEATURE_PARITY.md` (逐站逻辑差距)
+- `查重及快搜` -> `docs/wiki/Usage.md` + `FEATURE_PARITY.md`
+- `图片转存` + `图片处理` -> `docs/wiki/Image-Tools.md` + `FEATURE_PARITY.md`
+- `qb推送` -> `docs/wiki/Remote-Download.md` + `FEATURE_PARITY.md`

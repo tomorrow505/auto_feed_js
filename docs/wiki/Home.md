@@ -9,7 +9,7 @@
 
 ## 快速入口
 - 安装脚本：
-  - dev（随 `refactor-dev` 自动更新）：https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
+  - dev（随 `refactor-dev` 分支自动更新）：https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
   - stable（打 tag `v*` 后）：https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js
 - 核心入口：`src/main.ts`
 - 站点适配（PT 语义：Tracker）：`src/trackers/`
@@ -58,4 +58,4 @@
 - **Vision**: 通过配置化引擎实现“零代码”站点扩展。
 
 > [!TIP]
-> 详细的任务进度请参考根目录下的 [todo.md](../../todo.md)。
+> 功能对照与缺口清单请参考 [FEATURE_PARITY.md](FEATURE_PARITY.md)。
