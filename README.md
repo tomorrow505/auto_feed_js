@@ -9,7 +9,7 @@
 
 ## 安装（Release）
 1. 安装浏览器扩展 Tampermonkey。
-2. 安装脚本（dev 频道，随 `dev` 分支自动更新）：
+2. 安装脚本（dev 频道，随 `refactor-dev` 分支自动更新）：
    https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
 3. 稳定版（打 tag `v*` 后）：
    https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js

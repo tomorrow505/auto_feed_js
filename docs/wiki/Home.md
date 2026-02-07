@@ -9,7 +9,7 @@
 
 ## 快速入口
 - 安装脚本：
-  - dev（随 `dev` 分支自动更新）：https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
+  - dev（随 `refactor-dev` 分支自动更新）：https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
   - stable（打 tag `v*` 后）：https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js
 - 核心入口：`src/main.ts`
 - 站点适配（PT 语义：Tracker）：`src/trackers/`

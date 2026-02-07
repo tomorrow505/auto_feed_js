@@ -3,7 +3,6 @@ name: Dev Release (refactor-dev)
 on:
   push:
     branches:
-      - dev
       - refactor-dev
 
 permissions:
