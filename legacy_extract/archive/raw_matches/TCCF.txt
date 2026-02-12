@@ -1,4 +1,0 @@
-  'TCCF': { 'url': 'https://et8.org/', 'enable': 1 },
-      var np_sites = ['CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', 'HDSky', 'ITZMX',
-        if (forward_site == 'TCCF') {
-    else if (forward_site == 'TCCF') {

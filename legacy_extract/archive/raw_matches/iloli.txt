@@ -1,4 +1,0 @@
-  'iloli': { 'url': 'https://mua.xloli.cc/', 'enable': 1 },
-ndance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice', 'OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
-        case 'iloli':
-    else if (forward_site == 'iloli') {

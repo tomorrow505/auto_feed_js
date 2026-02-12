@@ -1,7 +1,0 @@
-  'NanYang': { 'url': 'https://nanyangpt.com/', 'enable': 1 },
-  'NanYang': /-nytv/i,
-        'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'HITPT', 'ITZMX', 'OurBits', 'UBits'];
-    if (origin_site == 'CMCT' || origin_site == 'NanYang' || origin_site == 'CHDBits') {
-      } else if (raw_info.type == '电影' && ['HUDBT', 'MTeam', 'TLFbits', 'PuTao', 'TJUPT', 'NanYang', 'BYR', 'TTG'].indexOf(forward_site) < 0) {
-        if (['NanYang', 'CMCT', 'iTS', 'NPUPT', 'xthor'].indexOf(forward_site) > -1) {
-    else if (forward_site == 'NanYang') {

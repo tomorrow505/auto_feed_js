@@ -1,3 +1,0 @@
-  'PTSkit': { 'url': 'https://www.ptskit.org/', 'enable': 1 },
-        case 'PTSkit':
-    else if (forward_site == 'PTSkit') {

@@ -1,5 +1,0 @@
-    20220802：支持转入ITZMX、HDPt(明教)，修复1PTBA部分bug。(by shmt86)
-  'ITZMX': { 'url': 'https://pt.itzmx.com/', 'enable': 1 },
-      var np_sites = ['CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', 'HDSky', 'ITZMX',
-        'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'HITPT', 'ITZMX', 'OurBits', 'UBits'];
-    else if (forward_site == 'ITZMX') {

@@ -1,3 +1,0 @@
-  'MARCH': { 'url': 'https://duckboobee.org/', 'enable': 1 },
-        case 'MARCH':
-    else if (forward_site == 'MARCH') {

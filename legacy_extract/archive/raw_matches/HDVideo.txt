@@ -1,6 +1,0 @@
-  'HDVideo': { 'url': 'https://hdvideo.top/', 'enable': 1 },
-  'HDVideo': /(-HDVWEB|-HDVMV)/i,
-        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN'
-      $('#HDVideo').attr('disabled', true).css("pointer-events", "none").css("color", "grey").text(' 禁转至HDVideo');
-        case 'HDVideo':
-    else if (forward_site == 'HDVideo') {

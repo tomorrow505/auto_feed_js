@@ -1,3 +1,0 @@
-  'Tokyo': { 'url': 'https://www.tokyopt.xyz/', 'enable': 1 },
-        case 'Tokyo':
-    else if (forward_site == 'Tokyo') {

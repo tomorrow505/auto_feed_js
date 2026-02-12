@@ -1,3 +1,0 @@
-  'SBPT': { 'url': 'https://sbpt.link/', 'enable': 1 },
-        case 'SBPT':
-    else if (forward_site == 'SBPT') {

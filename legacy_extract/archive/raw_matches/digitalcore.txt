@@ -1,9 +1,0 @@
-// @match        https://digitalcore.club/torrent/*
-  'digitalcore': 'https://digitalcore.club/',
-    } else if (n.nodeName == 'DIV' && n.className == 'quoted' && site_url.match(/digitalcore/)) {
-ia.cc|star-space.net|torrent.desi|hudbt|fearnopeer.com|darkland.top|onlyencodes.cc|cinemageddon|eiga.moi|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com|m-team.cc/i)) {
-  if (site_url.match(/^https:\/\/digitalcore.club\/torrent\/\d+/)) {
-    var unsupported_sites = ['digitalcore', 'HD-Only', 'HOU', 'OMG', 'TorrentLeech', 'MTeam', 'UBits', 'PigGo'];
-} else if (origin_site == "digitalcore" || origin_site == 'HDSpace') {
-    if (origin_site == 'digitalcore') {
-        } else if (['IN', 'digitalcore', 'BlueBird', 'bwtorrents', 'HOU', 'BLU', 'Tik', 'Aither', 'DarkLand', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(origin

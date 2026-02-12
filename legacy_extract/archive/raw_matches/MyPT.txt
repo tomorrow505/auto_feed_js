@@ -1,3 +1,0 @@
-  'MyPT': { 'url': 'https://cc.mypt.cc/', 'enable': 1 },
-        case 'MyPT':
-    else if (forward_site == 'MyPT') {

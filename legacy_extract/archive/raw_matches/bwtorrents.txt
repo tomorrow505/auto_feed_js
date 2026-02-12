@@ -1,7 +1,0 @@
-  'bwtorrents': 'https://bwtorrents.tv/',
-        if (site_url.match(/http(s*):\/\/totheglory.im.*|bwtorrents.tv/i)) {
-net|torrent.desi|hudbt|fearnopeer.com|darkland.top|onlyencodes.cc|cinemageddon|eiga.moi|hd-olimpo.club|digitalcore.club|bwtorrents.tv|myanonamouse|greatposterwall.com|m-team.cc/i)) {
-      log_in(['bwtorrents'], '#menu-aeon');
-    if (origin_site == 'bwtorrents') {
-      raw_info.torrent_url = `https://bwtorrents.tv/` + $('a[href^="download.php"]').attr('href');
-        } else if (['IN', 'digitalcore', 'BlueBird', 'bwtorrents', 'HOU', 'BLU', 'Tik', 'Aither', 'DarkLand', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(origin_site) >= 0) {

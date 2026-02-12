@@ -1,6 +1,0 @@
-  'ZMPT': { 'url': 'https://zmpt.cc/', 'enable': 1 },
-  'ZMPT': /ZmWeb|ZmPT/i,
-        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
-      } else if (origin_site == 'ZMPT') {
-        case 'ZMPT':
-    else if (forward_site == 'ZMPT') {

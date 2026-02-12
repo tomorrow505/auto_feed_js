@@ -1,3 +1,0 @@
-  'NovaHD': { 'url': 'https://pt.novahd.top/', 'enable': 1 },
-        case 'NovaHD':
-    else if (forward_site == 'NovaHD') {

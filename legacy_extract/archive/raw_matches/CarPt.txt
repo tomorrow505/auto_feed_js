@@ -1,6 +1,0 @@
-  'CarPt': { 'url': 'https://carpt.net/', 'enable': 1 },
-  'CarPt': /CarPT/i,
-      var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice', 'OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
-        if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'common_link', 'SC', 'avz', 'PHD', 'CNZ', 'TVV', 'ANT', 'NBL', 'CarPt'].indexOf(this.id) > -1) {
-        case "CarPt":
-    else if (forward_site == 'CarPt') {

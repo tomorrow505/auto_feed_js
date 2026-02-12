@@ -1,3 +1,0 @@
-  'DevTracker': { 'url': 'https://www.devtracker.me/', 'enable': 1 },
-        case 'DevTracker':
-    else if (forward_site == 'DevTracker') {

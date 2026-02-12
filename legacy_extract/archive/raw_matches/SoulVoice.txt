@@ -1,3 +1,0 @@
-  'SoulVoice': { 'url': 'https://pt.soulvoice.club/', 'enable': 1 },
-      var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice', 'OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
-    else if (forward_site == 'SoulVoice') {

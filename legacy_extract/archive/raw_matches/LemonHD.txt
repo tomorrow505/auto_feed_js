@@ -1,9 +1,0 @@
-  'LemonHD': { 'url': 'https://lemonhd.club/', 'enable': 1 },
-  '柠檬不甜': { 'url': 'https://lemonhd.net/', 'enable': 1 },
-  'LemonHD': /(-LHD|League(WEB|CD|NF|HD|TV|MV))$/i,
-        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
-      case 'LemonHD':
-    if ($('textarea[name="technical_info"]').length || forward_site == '影' || forward_site == 'LemonHD' || forward_site == 'HDDolby' || forward_site == 'MTeam' || forward_site == 'RouSi') {
-      if (forward_site == 'LemonHD') {
-        case 'LemonHD':
-    else if (forward_site == 'LemonHD') {

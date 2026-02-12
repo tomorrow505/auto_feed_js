@@ -1,4 +1,0 @@
-  'ECUST': { 'url': 'https://pt.ecust.pp.ua/', 'enable': 1 },
- var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice', 'OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
-        case 'ECUST':
-    else if (forward_site == 'ECUST') {

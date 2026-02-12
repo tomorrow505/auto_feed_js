@@ -29,3 +29,7 @@ scripts/verify-torrent-service.ts
 
 # Legacy extraction outputs (safe to delete/re-generate)
 legacy_extract/out/
+
+# Local reverse-engineering/reference material (keep local only)
+archive/
+legacy_extract/

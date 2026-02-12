@@ -1,6 +1,0 @@
-  'OKPT': { 'url': 'https://www.okpt.net/', 'enable': 1 },
-  'OKPT': /OK(WEB|Web)?$/i,
-      var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice', 'OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
-        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
-        case 'OKPT':
-    else if (forward_site == 'OKPT') {

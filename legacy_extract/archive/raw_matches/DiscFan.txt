@@ -1,4 +1,0 @@
-  'DiscFan': { 'url': 'https://discfan.net/', 'enable': 1 },
-        'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'HITPT', 'ITZMX', 'OurBits', 'UBits'];
-        case 'DiscFan':
-    else if (forward_site == 'DiscFan') {

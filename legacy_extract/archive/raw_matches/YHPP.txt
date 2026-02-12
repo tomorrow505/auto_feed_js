@@ -1,3 +1,0 @@
-  'YHPP': { 'url': 'https://www.yhpp.cc/', 'enable': 1 },
-        case 'YHPP':
-    else if (forward_site == 'YHPP') {

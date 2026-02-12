@@ -1,5 +1,0 @@
-  'torrentseeds': 'https://torrentseeds.org/',
-  if (site_url.match(/^https:\/\/(www.)?torrentseeds.org\/torrents\/\d+/)) {
-      var avz_list = ['avz', 'PHD', 'CNZ', 'torrentseeds'];
-    if (origin_site == 'torrentseeds') {
-        if (origin_site == 'NBL' || origin_site == 'IPT' || origin_site == 'torrentseeds' || origin_site == 'HONE') {

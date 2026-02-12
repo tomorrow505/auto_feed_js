@@ -1,4 +1,0 @@
-  '13City': { 'url': 'https://13city.org/', 'enable': 1 },
-  '13City': /-(13City|.*13City)/i,
-        case '13City':
-    else if (forward_site == '13City') {

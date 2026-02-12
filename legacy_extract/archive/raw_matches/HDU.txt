@@ -1,9 +1,0 @@
-  'HDU': { 'url': 'https://pt.upxin.net/', 'enable': 1 },
-      if (used_signin_sites.indexOf('HDU') > -1) {
-              $(`input[kname=HDU]`).parent().find('a').css({ "color": "red" });
-              console.log(`开始签到HDU：`, '成功！！！');
-              $(`input[kname=HDU]`).parent().find('a').css({ "color": "DarkOrange" });
-              console.log(`开始登录HDU：`, '成功！！！');
-              $(`input[kname=HDU]`).parent().find('a').css({ "color": "blue" });
-              console.log(`开始登录HDU：`, '失败！！！');
-    else if (forward_site == 'HDU') {

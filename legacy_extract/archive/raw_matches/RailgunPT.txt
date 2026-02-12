@@ -1,3 +1,0 @@
-  'RailgunPT': { 'url': 'https://bilibili.download/', 'enable': 1 },
-        case 'RailgunPT':
-    else if (forward_site == 'RailgunPT') {

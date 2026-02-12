@@ -1,4 +1,0 @@
-  'Dragon': { 'url': 'https://www.dragonhd.xyz/', 'enable': 1 },
-        'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'HITPT', 'ITZMX', 'OurBits', 'UBits'];
-    if (forward_site == 'PTer' || forward_site == 'Dragon' || forward_site == 'QingWa' || forward_site == 'MTeam') {
-    else if (forward_site == 'Dragon') {

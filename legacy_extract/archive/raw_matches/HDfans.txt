@@ -1,6 +1,0 @@
-  'HDfans': { 'url': 'http://hdfans.org/', 'enable': 1 },
-  'HDfans': /HDFans/i,
-        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
-    if (['CMCT', 'PTsbao', 'HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HDTime', 'HD-Only', 'HDfans',
-        case 'HDfans':
-    else if (forward_site == 'HDfans') {

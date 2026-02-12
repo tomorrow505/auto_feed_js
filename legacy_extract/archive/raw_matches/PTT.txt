@@ -1,9 +1,0 @@
-  'PTT': { 'url': 'https://www.pttime.org/', 'enable': 1 },
-        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
-            } else if (e == "PTT" && $("table.main").length) {
-      $('#PTT').attr('disabled', true).css("pointer-events", "none").css("color", "grey").text(' 禁转至PTT');
-          if (['PTT'].indexOf(this.id) > -1) {
-            alert('该资源触发了禁转规则(观众资源禁转到PTT)！！！');
-    if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$/i) && forward_site == 'PTT') {
-        case 'PTT':
-    else if (forward_site == 'PTT') {

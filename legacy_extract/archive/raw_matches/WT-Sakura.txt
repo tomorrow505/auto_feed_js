@@ -1,6 +1,0 @@
-    20220707：修复种子加载之后无效文件名的bug，修复BLU改版引起的bug. 优化洗种逻辑，适配WT-Sakura,冬樱。
-  'WT-Sakura': { 'url': 'https://wintersakura.net/', 'enable': 1 },
-  'WT-Sakura': /SakuraWEB|SakuraSUB|WScode/i,
-$('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['WT-Sakura'].url + 'attendance.php'}" target="_blank"><b>WT-Sakura</b></a></div>`);
-        case 'WT-Sakura':
-    else if (forward_site == 'WT-Sakura') {

@@ -1,9 +1,0 @@
-  'HDOli': 'https://hd-olimpo.club/',
-    if (['BHD', 'BLU', 'Tik', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX', 'IN'].indexOf(site) > -1) {
-  if (['PTP', 'xthor', 'HDF', 'BHD', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(site) > -1) {
-      log_in(['BLU', 'HDOli', 'Monika', 'Tik', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX'], 'nav[class="top-nav"]');
-    if (['ACM', 'HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
-      if (['BHD', 'ACM', 'HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
-          if (origin_site == 'HDOli') {
-    if (['ACM', 'HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
-        if (['PHD', 'avz', 'CNZ', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'BHD', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'OMG'].indexOf(origin_site) > -1) {

@@ -1,4 +1,0 @@
-  'HITPT': { 'url': 'https://www.hitpt.com/', 'enable': 1 },
-        'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'HITPT', 'ITZMX', 'OurBits', 'UBits'];
-        case 'HITPT':
-    else if (forward_site == 'HITPT') {
