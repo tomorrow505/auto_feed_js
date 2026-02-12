@@ -1,3 +1,0 @@
-  '躺平': { 'url': 'https://www.tangpt.top/', 'enable': 1 },
-        case '躺平':
-    else if (forward_site == '躺平') {

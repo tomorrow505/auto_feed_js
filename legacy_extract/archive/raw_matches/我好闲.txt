@@ -1,3 +1,0 @@
-  '我好闲': { 'url': 'http://whax.net/', 'enable': 1 },
-        case '我好闲':
-    else if (forward_site == '我好闲') {

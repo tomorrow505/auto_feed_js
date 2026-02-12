@@ -1,3 +1,0 @@
-  '好学': { 'url': 'https://www.hxpt.org/', 'enable': 1 },
-        case '好学':
-    else if (forward_site == '好学') {

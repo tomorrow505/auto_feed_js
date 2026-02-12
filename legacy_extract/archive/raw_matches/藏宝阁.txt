@@ -1,3 +1,0 @@
-  '藏宝阁': { 'url': 'https://cangbao.ge/', 'enable': 1 },
-        case '藏宝阁':
-    else if (forward_site == '藏宝阁') {

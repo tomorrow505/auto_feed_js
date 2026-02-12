@@ -1,6 +1,0 @@
-  '财神': { 'url': 'https://cspt.top/', 'enable': 1 },
-, '杏林', '海棠', 'Panda', 'KuFei', 'PTCafe', 'GTK', 'HHClub', '麒麟', 'AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', '唐门', '天枢', '财神', 'DevTraker',
-        if ($('textarea[name="screenshots"]').length || forward_site == '财神' || forward_site == 'LuckPT' || forward_site == 'MTeam') {
-          } else if (forward_site == '财神' || forward_site == 'LuckPT' || forward_site == 'MTeam') {
-        case '财神':
-    else if (forward_site == '财神') {

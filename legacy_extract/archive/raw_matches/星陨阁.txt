@@ -1,4 +1,0 @@
-  '星陨阁': { 'url': 'https://pt.xingyungept.org/', 'enable': 1 },
-'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
-        case '星陨阁':
-    else if (forward_site == '星陨阁') {

@@ -1,5 +1,0 @@
-  '麒麟': { 'url': 'https://www.hdkyl.in/', 'enable': 1 },
-  '麒麟': /-HDK(WEB|TV|MV|Game|DIY|ylin)/i,
-        'CyanBug', '杏林', '海棠', 'Panda', 'KuFei', 'PTCafe', 'GTK', 'HHClub', '麒麟', 'AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', '唐门', '天枢', '财神', 'DevTraker',
-        case '麒麟':
-    else if (forward_site == '麒麟') {

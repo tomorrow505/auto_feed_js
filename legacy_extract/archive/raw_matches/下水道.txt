@@ -1,3 +1,0 @@
-  '下水道': { 'url': 'https://sewerpt.com/', 'enable': 1 },
-        case '下水道':
-    else if (forward_site == '下水道') {

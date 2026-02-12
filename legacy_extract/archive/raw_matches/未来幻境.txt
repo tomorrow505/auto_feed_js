@@ -1,3 +1,0 @@
-  '未来幻境': { 'url': 'https://nex.jivon.de/', 'enable': 1 },
-        case '未来幻境':
-    else if (forward_site == '未来幻境') {

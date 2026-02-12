@@ -1,4 +1,0 @@
-  '柠檬不甜': { 'url': 'https://lemonhd.net/', 'enable': 1 },
-        'CDFile', '柠檬不甜', 'ALing', 'LongPT', 'BaoZi'
-        case '柠檬不甜':
-    else if (forward_site == '柠檬不甜') {

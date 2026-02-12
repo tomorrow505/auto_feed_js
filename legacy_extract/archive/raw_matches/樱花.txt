@@ -1,3 +1,0 @@
-  '樱花': { 'url': 'http://pt.ying.us.kg/', 'enable': 1 },
-        case '樱花':
-    else if (forward_site == '樱花') {

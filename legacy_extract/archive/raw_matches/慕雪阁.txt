@@ -1,3 +1,0 @@
-  '慕雪阁': { 'url': 'https://pt.muxuege.org/', 'enable': 1 },
-        case '慕雪阁':
-    else if (forward_site == '慕雪阁') {
