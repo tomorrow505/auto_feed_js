@@ -3,6 +3,20 @@ import { SiteConfig, SiteType } from '../types/SiteConfig';
 
 export const NexusSites: SiteConfig[] = [
     {
+        name: 'OpenCD',
+        type: SiteType.NexusPHP,
+        keywords: ['open.cd'],
+        baseUrl: 'https://open.cd/',
+        description: 'OpenCD'
+    },
+    {
+        name: 'HDHome',
+        type: SiteType.NexusPHP,
+        keywords: ['hdhome.org'],
+        baseUrl: 'https://hdhome.org/',
+        description: 'HDHome'
+    },
+    {
         name: 'MTeam',
         type: SiteType.MTeam,
         keywords: ['m-team.cc', 'm-team.io'],
@@ -58,21 +72,20 @@ export const NexusSites: SiteConfig[] = [
         type: SiteType.NexusPHP,
         keywords: ['totheglory.im'],
         baseUrl: 'https://totheglory.im/',
-        description: 'TTG (Nexus-like parsing)'
+        description: 'TTG (Nexus-like parsing)',
+        // TTG detail pages use a different description container (`#kt_d`) and sometimes lack a structured subtitle row.
+        // Rely on legacy normalization (`getSmallDescrFromDescr`) after parsing the raw description.
+        selectors: {
+            title: ['h1#top', 'h1'],
+            description: ['#kt_d', '#kdescr', '#description']
+        }
     },
     {
-        name: 'pterclub',
+        name: 'PTer',
         type: SiteType.NexusPHP,
         keywords: ['pterclub.net'],
         baseUrl: 'https://pterclub.net/',
         description: 'Pter'
-    },
-    {
-        name: 'HDArea',
-        type: SiteType.NexusPHP,
-        keywords: ['hdarea.co'],
-        baseUrl: 'https://hdarea.co/',
-        description: 'HDArea'
     },
     {
         name: 'Audiences',

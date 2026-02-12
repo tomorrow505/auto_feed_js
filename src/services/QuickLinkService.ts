@@ -3,8 +3,7 @@ import { TorrentMeta } from '../types/TorrentMeta';
 import { SettingsService } from './SettingsService';
 import { StorageService } from './StorageService';
 import { ImageHostService } from './ImageHostService';
-import { PtgenService } from './PtgenService';
-import { ImageUploadBridgeService } from './ImageUploadBridgeService';
+import { PtgenService, PtgenApplyFlags } from './PtgenService';
 
 export class QuickLinkService {
     private static clamp(n: number, min: number, max: number) {
@@ -208,19 +207,19 @@ export class QuickLinkService {
         const hdb = makeTool(t.hdb);
         hdb.on('click', async (e) => {
             e.preventDefault();
-            await ImageUploadBridgeService.prepareAndOpen(meta, 'hdbits');
+            await ImageHostService.prepareAndOpen(meta, 'hdbits');
         });
 
         const imgbox = makeTool(t.imgbox);
         imgbox.on('click', async (e) => {
             e.preventDefault();
-            await ImageUploadBridgeService.prepareAndOpen(meta, 'imgbox');
+            await ImageHostService.prepareAndOpen(meta, 'imgbox');
         });
 
         const hostik = makeTool(t.hostik);
         hostik.on('click', async (e) => {
             e.preventDefault();
-            await ImageUploadBridgeService.prepareAndOpen(meta, 'hostik');
+            await ImageHostService.prepareAndOpen(meta, 'hostik');
         });
 
         const freeimage = makeTool(t.free);
@@ -583,7 +582,7 @@ export class QuickLinkService {
             }
             if (urls[0] && urls[0].match(/t\.hdbits\.org/i)) {
                 const name = this.guessGalleryName(meta, meta.description || '').trim();
-                await ImageUploadBridgeService.queueImages(urls, name || undefined);
+                await ImageHostService.queueImages(urls, name || undefined);
                 window.open('https://pixhost.to/', '_blank');
                 return;
             }
@@ -598,7 +597,7 @@ export class QuickLinkService {
             const urls = this.extractImgUrlsFromTags(tags).map((u) => ImageHostService.getFullSizeUrl(u));
             if (!urls.length) return;
             const name = this.guessGalleryName(meta, meta.description || '').trim();
-            await ImageUploadBridgeService.queueImages(urls, name || undefined);
+            await ImageHostService.queueImages(urls, name || undefined);
             window.open('https://imgbox.com/', '_blank');
         });
 
@@ -608,7 +607,7 @@ export class QuickLinkService {
             const urls = this.extractImgUrlsFromTags(tags).map((u) => ImageHostService.getFullSizeUrl(u));
             if (!urls.length) return;
             const name = this.guessGalleryName(meta, meta.description || '').trim();
-            await ImageUploadBridgeService.queueImages(urls, name || undefined);
+            await ImageHostService.queueImages(urls, name || undefined);
             window.open('https://img.hdbits.org/', '_blank');
         });
 
@@ -618,7 +617,7 @@ export class QuickLinkService {
             const urls = this.extractImgUrlsFromTags(tags).map((u) => ImageHostService.getFullSizeUrl(u));
             if (!urls.length) return;
             const name = this.guessGalleryName(meta, meta.description || '').trim();
-            await ImageUploadBridgeService.queueImages(urls, name || undefined);
+            await ImageHostService.queueImages(urls, name || undefined);
             window.open('https://hostik.cinematik.net/index.php?/add_photos', '_blank');
         });
 
@@ -762,22 +761,57 @@ export class QuickLinkService {
         } catch { }
     }
 
+    // Public wrapper: legacy-like embedded UI needs to open the toolbox on demand.
+    static async openImageToolboxModal(meta: TorrentMeta, lang: 'zh' | 'en' = 'zh') {
+        // Best-effort: refresh from storage so late changes (e.g. HDB screenshot selection) are reflected.
+        try {
+            const stored = await StorageService.load();
+            if (stored) Object.assign(meta, stored);
+        } catch {}
+        return this.openImageToolbox(meta, lang);
+    }
+
     static injectMetaFetchTools(container: JQuery, meta: TorrentMeta, lang: 'zh' | 'en' = 'zh') {
         const t = lang === 'zh' ? {
             label: '外站信息: ',
             fetch: '点击获取',
             fetching: '获取中...',
             ok: '获取成功',
-            fail: '获取失败'
+            fail: '获取失败',
+            merge: '简介',
+            subtitle: '副标题',
+            region: '地区',
+            ids: 'ID'
         } : {
             label: 'External Info: ',
             fetch: 'Fetch',
             fetching: 'Fetching...',
             ok: 'Fetched',
-            fail: 'Failed'
+            fail: 'Failed',
+            merge: 'Descr',
+            subtitle: 'Subtitle',
+            region: 'Region',
+            ids: 'IDs'
         };
         const toolsDiv = $('<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-top: 1px dashed #ddd; padding-top: 8px; margin-top: 6px;"></div>');
         toolsDiv.append(`<span style="color: #2c3e50; font-weight: bold; margin-right: 5px;">${t.label}</span>`);
+
+        const optWrap = $(`
+            <span style="display:inline-flex; gap:8px; align-items:center; font-size: 12px; color: #444;">
+                <label style="display:inline-flex; gap:4px; align-items:center; cursor:pointer;">
+                    <input type="checkbox" data-k="mergeDescription" checked />${t.merge}
+                </label>
+                <label style="display:inline-flex; gap:4px; align-items:center; cursor:pointer;">
+                    <input type="checkbox" data-k="updateSubtitle" checked />${t.subtitle}
+                </label>
+                <label style="display:inline-flex; gap:4px; align-items:center; cursor:pointer;">
+                    <input type="checkbox" data-k="updateRegion" checked />${t.region}
+                </label>
+                <label style="display:inline-flex; gap:4px; align-items:center; cursor:pointer;">
+                    <input type="checkbox" data-k="updateIds" checked />${t.ids}
+                </label>
+            </span>
+        `);
 
         const btn = $(`<button type="button" style="color: #2c3e50; font-weight: 800; border: 1px solid #ddd; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.8); cursor: pointer;">${t.fetch}</button>`);
         btn.on('click', async (e) => {
@@ -788,10 +822,27 @@ export class QuickLinkService {
             btn.text(t.fetching);
             try {
                 const settings = await SettingsService.load();
+                const flags: PtgenApplyFlags = {};
+                try {
+                    optWrap.find('input[type="checkbox"]').each((_i, el) => {
+                        const key = (el as HTMLInputElement).dataset.k as keyof PtgenApplyFlags | undefined;
+                        if (!key) return;
+                        (flags as any)[key] = (el as HTMLInputElement).checked;
+                    });
+                } catch {}
+
                 const updated = await PtgenService.applyPtgen(meta, {
                     imdbToDoubanMethod: settings.imdbToDoubanMethod || 0,
-                    ptgenApi: settings.ptgenApi ?? 3
-                });
+                    ptgenApi: settings.ptgenApi ?? 3,
+                    doubanCookie: settings.doubanCookie || undefined
+                }, flags);
+                const changed =
+                    (updated.description || '') !== (meta.description || '') ||
+                    (updated.subtitle || '') !== (meta.subtitle || '') ||
+                    (updated.sourceSel || '') !== (meta.sourceSel || '') ||
+                    (updated.doubanId || '') !== (meta.doubanId || '') ||
+                    (updated.imdbId || '') !== (meta.imdbId || '');
+                if (!changed) throw new Error('No external meta fetched (missing IDs/blocked provider)');
                 Object.assign(meta, updated);
                 await StorageService.save(updated);
                 btn.text(t.ok);
@@ -803,6 +854,7 @@ export class QuickLinkService {
             }
         });
 
+        toolsDiv.append(optWrap);
         toolsDiv.append(btn);
         container.append(toolsDiv);
     }

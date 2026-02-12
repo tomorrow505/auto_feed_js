@@ -100,22 +100,23 @@ export const appleStyles = `
 }
 
 .af-sidebar {
-    width: 180px;
+    width: 120px;
     background: rgba(242, 242, 247, 0.5);
     border-right: 1px solid var(--af-border-light);
-    padding: 10px 8px;
+    padding: 8px 4px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
 .af-nav-item {
-    padding: 8px 12px;
+    padding: 7px 8px;
     border-radius: var(--af-radius-s);
     cursor: pointer;
     font-weight: 500;
     color: var(--af-text-primary);
     transition: background 0.2s;
+    font-size: 12px;
 }
 .af-nav-item:hover {
     background: rgba(0,0,0,0.05);
@@ -127,7 +128,7 @@ export const appleStyles = `
 
 .af-content {
     flex: 1;
-    padding: 20px;
+    padding: 16px;
     overflow-y: auto;
     background: var(--af-bg-secondary);
 }
@@ -162,6 +163,37 @@ export const appleStyles = `
 }
 .af-row:last-child {
     border-bottom: none;
+}
+
+.af-two-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    position: relative;
+}
+
+.af-two-col::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 1px;
+    background: var(--af-border-light);
+    pointer-events: none;
+}
+
+.af-two-col .af-row {
+    border-bottom: 1px solid var(--af-border-light);
+}
+
+@media (max-width: 860px) {
+    .af-two-col {
+        grid-template-columns: 1fr;
+    }
+    .af-two-col::before {
+        display: none;
+    }
 }
 
 .af-label {
@@ -260,24 +292,73 @@ export const appleStyles = `
 /* Site Grid */
 .af-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 8px;
-    padding: 16px;
+    grid-template-columns: repeat(auto-fill, 58px);
+    justify-content: start;
+    gap: 3px;
+    padding: 6px;
 }
-.af-checkbox-card {
+.af-site-tile {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    padding: 8px;
+    justify-content: center;
+    padding: 4px 2px;
     background: #f5f5f7;
     border-radius: var(--af-radius-s);
     cursor: pointer;
     transition: background 0.2s;
+    position: relative;
+    height: 46px;
+    user-select: none;
+    -webkit-user-select: none;
 }
-.af-checkbox-card:hover {
+.af-site-tile:hover {
     background: #e5e5e7;
 }
-.af-checkbox-card input {
-    margin-right: 8px;
+.af-site-check {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    margin: 0;
+    pointer-events: none;
+    transform: scale(0.78);
+    transform-origin: top left;
+}
+.af-site-icon {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.af-site-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    position: absolute;
+    inset: 0;
+}
+.af-site-icon span {
+    font-weight: 800;
+    font-size: 10px;
+    color: rgba(0,0,0,0.45);
+    position: relative;
+    z-index: 0;
+}
+.af-site-label {
+    margin-top: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    max-width: 56px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* Segmented Control */

@@ -1,4 +1,5 @@
-import { getSearchName } from '../common/legacy/search';
+import { getSearchName } from './rules/search';
+import { extractDoubanId, extractImdbId } from './rules/links';
 import { TorrentMeta } from '../types/TorrentMeta';
 
 export const DEFAULT_QUICK_SEARCH_TEMPLATES: string[] = [
@@ -18,6 +19,15 @@ export const DEFAULT_QUICK_SEARCH_TEMPLATES: string[] = [
 export interface QuickSearchItem {
     name: string;
     url: string;
+}
+
+export interface QuickSearchRenderOptions {
+    lang?: 'zh' | 'en';
+    className?: string;
+    alignCenter?: boolean;
+    bordered?: boolean;
+    fontColor?: string;
+    labelText?: string;
 }
 
 const extractFromAnchor = (line: string): { name: string; url: string } | null => {
@@ -47,9 +57,9 @@ const extractFromUrl = (line: string): { name: string; url: string } | null => {
 };
 
 const fillTemplate = (url: string, meta: Partial<TorrentMeta>): string => {
-    const imdbId = meta.imdbId || meta.imdbUrl?.match(/tt\d+/)?.[0] || '';
+    const imdbId = meta.imdbId || extractImdbId(meta.imdbUrl || '') || '';
     const imdbNo = imdbId.replace(/^tt/i, '');
-    const doubanId = meta.doubanId || meta.doubanUrl?.match(/subject\/(\d+)/)?.[1] || '';
+    const doubanId = meta.doubanId || extractDoubanId(meta.doubanUrl || '') || '';
     const searchNameRaw = getSearchName(meta.title || '', meta.type) || meta.title || '';
     let searchName = searchNameRaw;
     if ((meta.title || '').match(/S\d+/i)) {
@@ -77,7 +87,7 @@ export const buildQuickSearchItems = (lines: string[], meta: Partial<TorrentMeta
     const items: QuickSearchItem[] = [];
     const cleaned = (lines || []).map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
     cleaned.forEach((line) => {
-        let parsed =
+        const parsed =
             extractFromAnchor(line) ||
             extractFromPipe(line) ||
             extractFromUrl(line);
@@ -87,4 +97,42 @@ export const buildQuickSearchItems = (lines: string[], meta: Partial<TorrentMeta
         items.push({ name: parsed.name, url: filled });
     });
     return items;
+};
+
+export const resolveQuickSearchList = (quickSearchList?: string[], quickSearchPresets?: string[]): string[] => {
+    if (Array.isArray(quickSearchList) && quickSearchList.length) return quickSearchList;
+    if (Array.isArray(quickSearchPresets) && quickSearchPresets.length) return quickSearchPresets;
+    return DEFAULT_QUICK_SEARCH_TEMPLATES;
+};
+
+export const resolveQuickSearchSetting = (
+    settings?: { quickSearchList?: string[]; quickSearchPresets?: string[]; uiLanguage?: string } | null
+) => {
+    const lang: 'zh' | 'en' = settings?.uiLanguage === 'en' ? 'en' : 'zh';
+    return {
+        quickSearchList: Array.isArray(settings?.quickSearchList) ? settings?.quickSearchList : undefined,
+        quickSearchPresets: Array.isArray(settings?.quickSearchPresets) ? settings?.quickSearchPresets : undefined,
+        lang
+    };
+};
+
+export const renderQuickSearchHtml = (
+    meta: Partial<TorrentMeta>,
+    quickSearchList?: string[],
+    quickSearchPresets?: string[],
+    options?: QuickSearchRenderOptions
+): string => {
+    const list = resolveQuickSearchList(quickSearchList, quickSearchPresets);
+    const items = buildQuickSearchItems(list, meta);
+    if (!items.length) return '';
+
+    const lang = options?.lang || 'zh';
+    const label = options?.labelText || (lang === 'zh' ? '快速搜索：' : 'Quick Search:');
+    const fontColor = options?.fontColor || 'red';
+    const className = options?.className || 'search_urls autofeed-search-links';
+    const align = options?.alignCenter === false ? '' : ' align="center"';
+    const borderCss = options?.bordered === false ? '' : 'border: 1px solid blue;';
+    const style = `${borderCss}`.trim();
+    const links = items.map((it) => `<a href="${it.url}" target="_blank">${it.name}</a>`).join(' | ');
+    return `<div${align} style="${style}" class="${className}"><font color="${fontColor}">${label}${links}</font></div>`;
 };

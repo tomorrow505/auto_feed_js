@@ -3,6 +3,13 @@ import { SiteConfig, SiteType } from '../types/SiteConfig';
 
 export const GazelleSites: SiteConfig[] = [
     {
+        name: 'GPW',
+        type: SiteType.Gazelle,
+        keywords: ['greatposterwall.com'],
+        baseUrl: 'https://greatposterwall.com/',
+        description: 'GreatPosterWall'
+    },
+    {
         name: 'PTP',
         // PTP is a Gazelle (GZ) site. Keep a dedicated engine type for PTP-specific logic,
         // but group/configure it under the Gazelle site list for settings parity.
@@ -14,8 +21,8 @@ export const GazelleSites: SiteConfig[] = [
     {
         name: 'RED',
         type: SiteType.Gazelle,
-        keywords: ['redacted.sh'],
-        baseUrl: 'https://redacted.sh/',
+        keywords: ['redacted.ch', 'redacted.sh'],
+        baseUrl: 'https://redacted.ch/',
         description: 'Redacted',
         features: {
             imdbSearch: false,

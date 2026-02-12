@@ -1,11 +1,8 @@
 export function dealWithTitle(title: string): string {
     if (!title) return '';
     let t = title.replace(/\./g, ' ').replace(/torrent$/gi, '').trim() + ' ';
-    if (t.match(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1|4 0|5 0)[^\d]/)) {
-        t = t.replace(/[^\d](2 0|5 1|7 1|1 0|6 1|2 1|4 0|5 0)[^\d]/g, (data) => {
-            return data.slice(0, 2) + '.' + data.slice(3);
-        }).trim();
-    }
+    // Normalize channel tokens regardless of position (e.g. trailing "7 1-Group").
+    t = t.replace(/\b(2|5|7|1|6|4)\s(0|1)\b/g, '$1.$2');
     t = t.replace(/H ?(26[45])/i, 'H.$1').replace(/x265[.-]10bit/i, 'x265 10bit');
     t = t
         .replace(/\s+\[2?x?(免费|free)\].*$|\(限时.*\)|\(限時.*\)|\(已审|通过|待定\)/gi, '')

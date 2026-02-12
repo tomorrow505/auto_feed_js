@@ -1,17 +1,16 @@
 import { SiteCatalogService } from './SiteCatalogService';
 import { GMAdapter } from './GMAdapter';
-import { DEFAULT_QUICK_SEARCH_TEMPLATES } from './QuickSearchTemplateService';
+import { DEFAULT_QUICK_SEARCH_TEMPLATES } from '../common/quickSearch';
 
 export interface AppSettings {
     ptpImgApiKey: string;
     pixhostApiKey: string;
     freeimageApiKey: string;
     gifyuApiKey: string;
-    hdbImgApiKey: string;
-    hdbImgEndpoint: string;
     doubanCookie: string;
     tmdbApiKey: string;
     chdBaseUrl: string;
+    tlBaseUrl: string;
     ptpShowDouban: boolean;
     ptpShowGroupName: boolean;
     ptpNameLocation: number;
@@ -20,6 +19,7 @@ export interface AppSettings {
     showQuickSearchOnDouban: boolean;
     showQuickSearchOnImdb: boolean;
     defaultAnonymous: boolean;
+    autoDownloadAfterUpload: boolean;
     remoteSidebarOpacity: number; // 0.3 - 1.0
     settingsPanelOpacity: number; // 0.3 - 1.0
     popupOpacity: number; // 0.3 - 1.0 (forward popup, toolbox panel, dialogs)
@@ -42,6 +42,14 @@ export interface AppSettings {
         UHD: boolean;
     };
     uiLanguage: 'zh' | 'en';
+}
+
+// Built-in default (from v3 `used_tmdb_key`), used when user didn't configure one.
+export const FALLBACK_TMDB_API_KEY = '0f79586eb9d92afa2b7266f7928b055c';
+
+export function getEffectiveTmdbApiKey(settings?: Pick<AppSettings, 'tmdbApiKey'> | null): string {
+    const k = (settings?.tmdbApiKey || '').trim();
+    return k || FALLBACK_TMDB_API_KEY;
 }
 
 export interface RemoteServerConfig {
@@ -69,11 +77,10 @@ const DEFAULT_SETTINGS: AppSettings = {
     pixhostApiKey: '',
     freeimageApiKey: '',
     gifyuApiKey: '',
-    hdbImgApiKey: '',
-    hdbImgEndpoint: 'https://hdbimg.com/api/1/upload',
     doubanCookie: '',
     tmdbApiKey: '',
     chdBaseUrl: 'https://chdbits.co/',
+    tlBaseUrl: 'https://www.torrentleech.org/',
     ptpShowDouban: true,
     ptpShowGroupName: true,
     ptpNameLocation: 1,
@@ -82,6 +89,7 @@ const DEFAULT_SETTINGS: AppSettings = {
     showQuickSearchOnDouban: true,
     showQuickSearchOnImdb: true,
     defaultAnonymous: false,
+    autoDownloadAfterUpload: true,
     remoteSidebarOpacity: 0.92,
     settingsPanelOpacity: 0.95,
     popupOpacity: 0.96,
@@ -96,9 +104,8 @@ const DEFAULT_SETTINGS: AppSettings = {
     quickSearchList: DEFAULT_QUICK_SEARCH_TEMPLATES.slice(),
     quickSearchPresets: [],
     enabledSites: SiteCatalogService.getDefaultEnabledSiteNames(),
-    favoriteSites: ['TTG', 'CMCT', 'pterclub', 'CHDBits', 'BHD', 'MTeam'].filter((name) =>
-        SiteCatalogService.getAllSiteNames().includes(name)
-    ),
+    favoriteSites: ['PTer', 'CHDBits', 'HDSky', 'CMCT', 'Audiences', 'BLU', 'Tik', 'KG']
+        .filter((name) => SiteCatalogService.getSupportedSiteNames().includes(name)),
     showSearchOnList: {
         PTP: true,
         HDB: false,
@@ -111,27 +118,37 @@ const DEFAULT_SETTINGS: AppSettings = {
 export class SettingsService {
     private static KEY = 'auto_feed_settings';
 
+    private static migrate(settings: AppSettings): AppSettings {
+        // Rename site key: `pterclub` -> `PTer` (legacy parity + torrent `source` field correctness).
+        const rename = (v: string) => (v === 'pterclub' ? 'PTer' : v);
+        const supported = new Set(SiteCatalogService.getSupportedSiteNames());
+        const enabledSites = Array.from(new Set((settings.enabledSites || []).map(rename))).filter((x) => supported.has(x));
+        const favoriteSites = Array.from(new Set((settings.favoriteSites || []).map(rename))).filter((x) => enabledSites.includes(x));
+        return { ...settings, enabledSites, favoriteSites };
+    }
+
     static async load(): Promise<AppSettings> {
         return new Promise((resolve) => {
             try {
                 GMAdapter.getValue<string | null>(this.KEY, null).then((stored) => {
                     if (stored) {
-                        resolve({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
+                        const merged = { ...DEFAULT_SETTINGS, ...JSON.parse(stored) } as AppSettings;
+                        resolve(this.migrate(merged));
                         return;
                     }
-                    resolve({ ...DEFAULT_SETTINGS });
+                    resolve(this.migrate({ ...DEFAULT_SETTINGS }));
                 });
                 return;
             } catch (e) {
                 console.error('Error loading settings', e);
             }
-            resolve({ ...DEFAULT_SETTINGS });
+            resolve(this.migrate({ ...DEFAULT_SETTINGS }));
         });
     }
 
     static async save(settings: AppSettings): Promise<void> {
         return new Promise((resolve) => {
-            const data = JSON.stringify(settings);
+            const data = JSON.stringify(this.migrate(settings));
             GMAdapter.setValue(this.KEY, data).then(() => resolve());
         });
     }

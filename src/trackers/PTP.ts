@@ -3,8 +3,10 @@ import { BaseEngine } from '../core/BaseEngine';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { SiteConfig } from '../types/SiteConfig';
 import { htmlToBBCode } from '../utils/htmlToBBCode';
-import { getMediainfoPictureFromDescr } from '../common/legacy/media';
-import { getType } from '../common/legacy/text';
+import { extractImdbId } from '../common/rules/links';
+import { getMediainfoPictureFromDescr } from '../common/rules/media';
+import { getAudioCodecSel, getCodecSel, getMediumSel, getStandardSel, getType } from '../common/rules/text';
+import { rebuildReleaseTitleFromMedia } from '../common/rules/titleRebuild';
 
 const cleanTitle = (name: string) => name.replace(/\[|\]|\(|\)|mkv$|mp4$/gi, '').trim();
 
@@ -65,56 +67,96 @@ export class PTPEngine extends BaseEngine {
         this.log('Parsing PTP page...');
 
         const url = new URL(this.currentUrl);
-        let torrentId = url.searchParams.get('torrentid') || '';
-        let torrentBox: HTMLElement | null = null;
-        if (torrentId) {
-            torrentBox = document.getElementById(`torrent_${torrentId}`);
+        const torrentId = url.searchParams.get('torrentid') || '';
+        if (!torrentId) {
+            // Legacy expects a specific torrent in a multi-torrent group; avoid accidentally parsing another torrent.
+            throw new Error('[Auto-Feed][PTP] Missing torrentid in URL');
         }
+
+        const torrentBox = document.getElementById(`torrent_${torrentId}`) as HTMLElement | null;
         if (!torrentBox) {
-            const first = document.querySelector('[id^="torrent_"]') as HTMLElement | null;
-            if (first) {
-                torrentBox = first;
-                if (!torrentId) {
-                    const idMatch = first.id.match(/torrent_(\d+)/);
-                    if (idMatch) torrentId = idMatch[1];
-                }
-            }
+            // PTP pages are not SPA; if we can't find the box, the DOM likely hasn't loaded or the user is on a wrong page.
+            throw new Error(`[Auto-Feed][PTP] torrent_${torrentId} not found in DOM`);
         }
 
         const $torrentBox = torrentBox ? $(torrentBox) : $();
         const groupHeader = torrentId ? document.getElementById(`group_torrent_header_${torrentId}`) : null;
         const editionInfo = groupHeader ? $(groupHeader).find('a#PermaLinkedTorrentToggler').text().trim() : '';
 
+        // Title (legacy-inspired, but with strict scoping to avoid "串种子"):
+        // Prefer the release-like text from the mediainfo toggle anchor inside THIS torrent box.
         const titleCandidates: string[] = [];
-        if ($torrentBox.length) {
-            $torrentBox.find('a[onclick*="MediaInfoToggleShow"]').each((_, el) => {
-                const text = $(el).text().trim();
-                if (text && text.length > 4) titleCandidates.push(text);
-            });
-            if (torrentId) {
-                $torrentBox.find(`a[data-torrentid="${torrentId}"]`).each((_, el) => {
-                    const text = $(el).text().trim();
-                    if (text && text.length > 4) titleCandidates.push(text);
-                });
-                $torrentBox.find(`a[href*="torrentid=${torrentId}"]`).each((_, el) => {
-                    const text = $(el).text().trim();
-                    if (text && text.length > 4) titleCandidates.push(text);
-                });
-            }
-            const fileTd = torrentId ? document.querySelector(`#files_${torrentId} td`) : null;
-            if (fileTd?.textContent) titleCandidates.push(fileTd.textContent.trim());
-        }
-
-        const pickBestTitle = () => {
-            if (!titleCandidates.length) return '';
-            return titleCandidates.reduce((best, cur) => (cur.length > best.length ? cur : best), titleCandidates[0]);
+        const push = (s: string) => {
+            const t = cleanTitle(String(s || '').trim());
+            if (!t) return;
+            if (t.length < 5) return;
+            if (t.match(/^(show|hide)\\b/i)) return;
+            if (t.match(/media\\s*info/i)) return;
+            titleCandidates.push(t);
         };
 
-        let title = cleanTitle(pickBestTitle());
+        try {
+            const guards = torrentBox.getElementsByClassName('bbcode-table-guard');
+            const lastGuard = guards.length ? (guards[guards.length - 1] as HTMLElement) : null;
+            if (lastGuard) {
+                const as = lastGuard.getElementsByTagName('a');
+                for (let i = 0; i < as.length; i++) {
+                    const onclick = (as[i].getAttribute('onclick') || '').replace(/\\s+/g, ' ').trim();
+                    if (onclick.includes('MediaInfoToggleShow')) {
+                        push(as[i].textContent || '');
+                    }
+                }
+            }
+        } catch {}
+        try {
+            // Some layouts place this link outside the last guard; still scope to the torrent box.
+            torrentBox.querySelectorAll('a[onclick*="MediaInfoToggleShow"]').forEach((a) => push(a.textContent || ''));
+        } catch {}
+
+        // Strict fallback candidate only (avoid directly trusting file/folder names).
+        const fileTd = document.querySelector(`#files_${torrentId} td`) as HTMLElement | null;
+        const fileNameCandidate = cleanTitle(fileTd?.textContent || '');
+
+        const scoreReleaseLike = (s: string) => {
+            const t = (s || '').trim();
+            let score = 0;
+            if (!t) return score;
+            if (t.match(/(2160p|1080p|1080i|720p|480p|576p|4k|uhd|8k)/i)) score += 6;
+            if (t.match(/(WEB[- .]?DL|WEBRIP|HDTV|Blu[- ]?ray|BDRip|REMUX|DVDRip|DVD)/i)) score += 4;
+            if (t.match(/(x264|x265|H\\.?264|H\\.?265|AVC|HEVC|VC-1|MPEG-2|XviD|DivX|AV1)/i)) score += 3;
+            if (t.match(/-(?!\\s)([A-Za-z0-9]{2,})$/)) score += 2; // release group
+            if (t.match(/(19|20)\\d{2}/)) score += 1;
+            if (t.includes('.')) score += 1;
+            // Penalize direct file paths / very raw filenames.
+            if (t.match(/\\.(mkv|mp4|avi|m2ts|ts|iso|rar|zip)$/i)) score -= 5;
+            if (t.includes('/') || t.includes('\\\\')) score -= 8;
+            return score;
+        };
+
+        let title = '';
+        if (
+            fileNameCandidate &&
+            scoreReleaseLike(fileNameCandidate) >= 6 &&
+            !/[\\/]/.test(fileNameCandidate) &&
+            !/\.(mkv|mp4|avi|m2ts|ts|iso|rar|zip)$/i.test(fileNameCandidate)
+        ) {
+            titleCandidates.push(fileNameCandidate);
+        }
+        if (titleCandidates.length) {
+            title = titleCandidates.reduce((best, cur) => {
+                const sb = scoreReleaseLike(best);
+                const sc = scoreReleaseLike(cur);
+                if (sc > sb) return cur;
+                if (sc === sb && cur.length > best.length) return cur;
+                return best;
+            }, titleCandidates[0]);
+        }
+
         if (!title) {
             title = $('.page__title').first().text().trim() || $('h1').first().text().trim();
-            title = title.replace(/\[.*?\]/g, '').trim();
+            title = title.replace(/\\[.*?\\]/g, '').trim();
         }
+        title = title.replace(/\\s+-\\s+/i, '-').trim();
 
         let description = '';
         let fullMediaInfo = '';
@@ -187,7 +229,7 @@ export class PTPEngine extends BaseEngine {
             $('#imdb-title-link').attr('href') ||
             $('a[href*="imdb.com/title/"]').first().attr('href') ||
             '';
-        const imdbId = imdbLink.match(/tt\d+/)?.[0];
+        const imdbId = extractImdbId(imdbLink);
 
         let downloadLink = '';
         if (torrentId) {
@@ -198,8 +240,8 @@ export class PTPEngine extends BaseEngine {
         }
         if (!downloadLink) {
             downloadLink =
-                $('a[href*="action=download"]').first().attr('href') ||
-                $('a[href*="download"]').first().attr('href') ||
+                $(`a[href*="download&id=${torrentId}"]`).first().attr('href') ||
+                $(`a[href*="download.php?id=${torrentId}"]`).first().attr('href') ||
                 '';
         }
         let torrentUrl = '';
@@ -230,6 +272,8 @@ export class PTPEngine extends BaseEngine {
             meta.fullMediaInfo = fullMediaInfo;
         }
         if (torrentUrl) meta.torrentUrl = torrentUrl;
+        // PTP torrents are movies by definition in this script's workflow.
+        meta.type = meta.type || '电影';
         if (!meta.type && meta.title) meta.type = getType(meta.title);
 
         if (editionInfo.match(/DVD\d/i)) {
@@ -243,23 +287,51 @@ export class PTPEngine extends BaseEngine {
             if (parts.length) meta.title = parts.join(' ').trim();
         }
 
-        if (meta.description.match(/.MPLS/i)) {
+        const discBlob = `${meta.description || ''}\n${meta.fullMediaInfo || ''}`;
+        if (discBlob.match(/DISC INFO|\.MPLS|Disc Label|BDMV|Blu[- ]?ray|Ultra HD|UHD/i)) {
             const h2 = $('h2').first().text();
             const baseName = h2.split(/\[.*?\]/)[0].trim();
             const year = h2.match(/\[(\d+)\]/)?.[1] || '';
-            const base = [baseName, year].filter(Boolean).join(' ').trim();
-            let blurayName = getBlurayNameFromDescr(meta.description, base, meta.title);
-            const releaseGroup = groupHeader?.getAttribute('data-releasegroup');
-            if (releaseGroup) {
-                blurayName = blurayName.replace('NoGroup', releaseGroup);
+            const releaseGroup = (groupHeader?.getAttribute('data-releasegroup') || '').trim();
+
+            const rebuilt = rebuildReleaseTitleFromMedia(
+                {
+                    title: meta.title || '',
+                    description: discBlob,
+                    fullMediaInfo: meta.fullMediaInfo || ''
+                },
+                {
+                    preferredBaseName: baseName,
+                    preferredYear: year,
+                    releaseGroup,
+                    requireDiscInfo: true,
+                    defaultGroup: 'UNTOUCHED'
+                }
+            );
+
+            if (rebuilt) {
+                meta.title = rebuilt;
+            } else {
+                const base = [baseName, year].filter(Boolean).join(' ').trim();
+                let blurayName = getBlurayNameFromDescr(discBlob, base, meta.title);
+                if (releaseGroup) {
+                    blurayName = blurayName.replace('NoGroup', releaseGroup);
+                }
+                meta.title = blurayName.replace(/bluray/i, 'Blu-ray');
             }
             meta.mediumSel = 'Blu-ray';
-            meta.title = blurayName.replace(/bluray/i, 'Blu-ray');
         }
 
-        if (meta.title) {
-            meta.title = meta.title.replace(/\s+-\s+/i, '-').trim();
-        }
+        // Derive mandatory "quality" fields for Nexus targets (PTer/CMCT/Audiences/etc.)
+        // PTP pages expose these in the torrent header row; use best-effort parsing over text blobs.
+        try {
+            const headerText = groupHeader ? ($(groupHeader).text() || '') : '';
+            const infoText = `${meta.title || ''} ${meta.subtitle || meta.smallDescr || ''} ${editionInfo || ''} ${headerText} ${fullMediaInfo || ''} ${meta.description || ''}`;
+            meta.mediumSel = meta.mediumSel || getMediumSel(infoText, meta.title);
+            meta.codecSel = meta.codecSel || getCodecSel(infoText);
+            meta.audioCodecSel = meta.audioCodecSel || getAudioCodecSel(infoText);
+            meta.standardSel = meta.standardSel || getStandardSel(infoText);
+        } catch {}
 
         if (meta.title) {
             meta.torrentFilename = meta.title.replace(/ /g, '.').replace(/\*/g, '') + '.torrent';

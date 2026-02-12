@@ -3,11 +3,11 @@ import { BaseEngine } from '../core/BaseEngine';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { SiteConfig } from '../types/SiteConfig';
 import { htmlToBBCode } from '../utils/htmlToBBCode';
-import { matchLink } from '../common/legacy/links';
-import { addThanks } from '../common/legacy/teams';
-import { getType, getLabel, getMediumSel, getCodecSel, getAudioCodecSel, getStandardSel } from '../common/legacy/text';
-import { getMediainfoPictureFromDescr } from '../common/legacy/media';
-import { dealWithTitle } from '../common/legacy/title';
+import { extractDoubanId, extractImdbId, matchLink } from '../common/rules/links';
+import { addThanks } from '../common/rules/teams';
+import { getType, getLabel, getMediumSel, getCodecSel, getAudioCodecSel, getStandardSel } from '../common/rules/text';
+import { getMediainfoPictureFromDescr } from '../common/rules/media';
+import { dealWithTitle } from '../common/rules/title';
 
 export class MTeamEngine extends BaseEngine {
     constructor(config: SiteConfig, url: string) {
@@ -86,11 +86,11 @@ export class MTeamEngine extends BaseEngine {
             const imdbUrl = detail.descr && detail.descr.match(/title\/tt\d+/) ? matchLink('imdb', detail.descr) : detail.imdb;
             if (imdbUrl) {
                 meta.imdbUrl = imdbUrl;
-                meta.imdbId = imdbUrl.match(/tt\d+/)?.[0];
+                meta.imdbId = extractImdbId(imdbUrl);
             }
             if (detail.douban) {
                 meta.doubanUrl = detail.douban;
-                meta.doubanId = detail.douban.match(/subject\/(\d+)/)?.[1];
+                meta.doubanId = extractDoubanId(detail.douban);
             }
 
             if (!meta.description) {

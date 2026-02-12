@@ -1,10 +1,22 @@
 import { DoubanService, DoubanInfo } from './DoubanService';
 import { HtmlFetchService } from './HtmlFetchService';
 import { TorrentMeta } from '../types/TorrentMeta';
+import { getSmallDescrFromDescr, getSourceSelFromDescr } from '../common/rules/helpers';
+import { extractDoubanId, extractImdbId } from '../common/rules/links';
 
 export interface PtgenOptions {
     imdbToDoubanMethod: number; // 0: Douban API, 1: Douban scrape
     ptgenApi: number; // 0: api.iyuu.cn, 1: ptgen, 3: douban page scrape
+    doubanCookie?: string;
+}
+
+export interface PtgenApplyFlags {
+    mergeDescription?: boolean; // prepend ptgen block into description (default true)
+    updateSubtitle?: boolean;   // fill subtitle/smallDescr (default true)
+    updateRegion?: boolean;     // fill sourceSel (default true)
+    updateIds?: boolean;        // fill imdb/douban ids+urls (default true)
+    updateSynopsis?: boolean;   // fill synopsis (default true)
+    overwrite?: boolean;        // overwrite existing fields (default false)
 }
 
 const IYUU_API = 'https://api.iyuu.cn/App.Movie.Ptgen';
@@ -67,18 +79,21 @@ export class PtgenService {
         return '';
     }
 
-    static async resolveDoubanId(meta: TorrentMeta, method: number): Promise<string | null> {
+    static async resolveDoubanId(meta: TorrentMeta, method: number, doubanCookie?: string): Promise<string | null> {
         if (meta.doubanId) return meta.doubanId;
-        const doubanIdFromUrl = meta.doubanUrl?.match(/subject\/(\d+)/)?.[1];
+        const doubanIdFromUrl = extractDoubanId(meta.doubanUrl || '');
         if (doubanIdFromUrl) return doubanIdFromUrl;
 
-        const imdbId = meta.imdbId || meta.imdbUrl?.match(/tt\d+/)?.[0];
+        const imdbId = meta.imdbId || extractImdbId(meta.imdbUrl || '');
         if (!imdbId) return null;
 
         if (method === 0) {
             const url = `https://movie.douban.com/j/subject_suggest?q=${imdbId}`;
             try {
-                const text = await HtmlFetchService.getText(url);
+                const text = await HtmlFetchService.getText(url, {
+                    headers: doubanCookie ? { cookie: doubanCookie } : undefined,
+                    withCredentials: true
+                });
                 const json = JSON.parse(text);
                 if (Array.isArray(json) && json.length) {
                     const id = json[0]?.id?.toString();
@@ -89,21 +104,21 @@ export class PtgenService {
         }
 
         try {
-            const info = await DoubanService.getByImdb(imdbId);
+            const info = await DoubanService.getByImdb(imdbId, { cookie: doubanCookie, withCredentials: true });
             return info?.id || null;
         } catch {
             return null;
         }
     }
 
-    static async fetchPtgen(meta: TorrentMeta, options: PtgenOptions): Promise<{ format: string; doubanId?: string; synopsis?: string } | null> {
-        const imdbId = meta.imdbId || meta.imdbUrl?.match(/tt\d+/)?.[0] || '';
-        const doubanId = await this.resolveDoubanId(meta, options.imdbToDoubanMethod);
+    private static async fetchPtgenOnce(meta: TorrentMeta, options: PtgenOptions): Promise<{ format: string; doubanId?: string; synopsis?: string } | null> {
+        const imdbId = meta.imdbId || extractImdbId(meta.imdbUrl || '') || '';
+        const doubanId = await this.resolveDoubanId(meta, options.imdbToDoubanMethod, options.doubanCookie);
 
         if (options.ptgenApi === 3) {
             const info =
-                (doubanId ? await DoubanService.getById(doubanId) : null) ||
-                (imdbId ? await DoubanService.getByImdb(imdbId) : null);
+                (doubanId ? await DoubanService.getById(doubanId, { cookie: options.doubanCookie, withCredentials: true }) : null) ||
+                (imdbId ? await DoubanService.getByImdb(imdbId, { cookie: options.doubanCookie, withCredentials: true }) : null);
             if (!info) return null;
             return {
                 format: buildDoubanFormat(info, imdbId || undefined),
@@ -135,10 +150,18 @@ export class PtgenService {
         }
 
         try {
-            const text = await HtmlFetchService.getText(`${base}${query}`);
-            const json = JSON.parse(text);
-            let format = json?.data?.format || json?.format || json?.data || '';
+            const text = await HtmlFetchService.getText(`${base}${query}`, { withCredentials: true });
+            let format = '';
+            try {
+                const json = JSON.parse(text);
+                format = json?.data?.format || json?.format || json?.data || '';
+            } catch {
+                // Some providers may return plain text on errors/limits; best-effort fallback.
+                format = text || '';
+            }
             if (!format || typeof format !== 'string') return null;
+            // Heuristic: if it doesn't look like a ptgen/douban block, treat it as a failed response.
+            if (!format.match(/◎简\s*介|◎译\s*名|douban\.com\/subject\/\d+|imdb\.com\/title\/tt\d+/i)) return null;
             format = format.replace('hongleyou.cn', 'doubanio.com').replace(/\[\/img\]\[\/center\]/g, '[/img]');
             return { format };
         } catch {
@@ -146,34 +169,83 @@ export class PtgenService {
         }
     }
 
-    static async applyPtgen(meta: TorrentMeta, options: PtgenOptions): Promise<TorrentMeta> {
+    static async fetchPtgen(meta: TorrentMeta, options: PtgenOptions): Promise<{ format: string; doubanId?: string; synopsis?: string } | null> {
+        // Provider fallback:
+        // - 3 (douban scrape) can fail due to captcha/rate-limits.
+        // - 0/1 can fail due to outages.
+        const order = options.ptgenApi === 3 ? [3, 1, 0] : options.ptgenApi === 1 ? [1, 0] : options.ptgenApi === 0 ? [0, 1] : [options.ptgenApi];
+        const uniq = Array.from(new Set(order));
+        for (const api of uniq) {
+            try {
+                const r = await this.fetchPtgenOnce(meta, { ...options, ptgenApi: api });
+                if (r?.format) return r;
+            } catch {
+                // continue
+            }
+        }
+        return null;
+    }
+
+    static async applyPtgen(meta: TorrentMeta, options: PtgenOptions, flags?: PtgenApplyFlags): Promise<TorrentMeta> {
         const result = await this.fetchPtgen(meta, options);
         if (!result || !result.format) return meta;
         const updated: TorrentMeta = { ...meta };
 
-        updated.description = `${result.format}\n\n${updated.description || ''}`.trim();
-        const subtitle = this.extractSubtitleFromFormat(result.format);
-        if (subtitle) {
-            updated.subtitle = updated.subtitle || subtitle;
-            updated.smallDescr = updated.smallDescr || subtitle;
+        const overwrite = !!flags?.overwrite;
+        const mergeDescription = flags?.mergeDescription ?? true;
+        const updateSubtitle = flags?.updateSubtitle ?? true;
+        const updateRegion = flags?.updateRegion ?? true;
+        const updateIds = flags?.updateIds ?? true;
+        const updateSynopsis = flags?.updateSynopsis ?? true;
+
+        // Keep the raw ptgen/douban block available via `description` merge by default.
+        if (mergeDescription) {
+            updated.description = `${result.format}\n\n${updated.description || ''}`.trim();
         }
 
-        const imdbMatch = result.format.match(/imdb\.com\/title\/(tt\d+)/i)?.[1];
-        if (imdbMatch) {
-            updated.imdbId = updated.imdbId || imdbMatch;
-            updated.imdbUrl = updated.imdbUrl || `https://www.imdb.com/title/${imdbMatch}/`;
+        if (updateSubtitle) {
+            // Legacy parity:
+            // Prefer deriving small_descr from the fetched ptgen/douban block,
+            // so it includes translated titles + type/genre line when available.
+            const legacySmall = getSmallDescrFromDescr(result.format, updated.title || meta.title || '');
+            const fallback = this.extractSubtitleFromFormat(result.format);
+            const subtitle = legacySmall || fallback;
+            if (subtitle) {
+                if (overwrite || !updated.subtitle) updated.subtitle = subtitle;
+                if (overwrite || !updated.smallDescr) updated.smallDescr = subtitle;
+            }
         }
-        const doubanMatch = result.format.match(/douban\.com\/subject\/(\d+)/i)?.[1];
-        if (doubanMatch) {
-            updated.doubanId = updated.doubanId || doubanMatch;
-            updated.doubanUrl = updated.doubanUrl || `https://movie.douban.com/subject/${doubanMatch}/`;
+
+        // Region/area (used by PTer team_sel and some Nexus variants). Extract directly from ptgen block
+        // so targets can fill "地区/产地" even if they don't want to rely on description parsing.
+        if (updateRegion) {
+            try {
+                const region = getSourceSelFromDescr(result.format);
+                if (region && (overwrite || !updated.sourceSel)) updated.sourceSel = region;
+            } catch {}
         }
-        if (result.doubanId) {
-            updated.doubanId = updated.doubanId || result.doubanId;
-            updated.doubanUrl = updated.doubanUrl || `https://movie.douban.com/subject/${result.doubanId}/`;
+
+        if (updateIds) {
+            const imdbMatch = extractImdbId(result.format);
+            if (imdbMatch) {
+                if (overwrite || !updated.imdbId) updated.imdbId = imdbMatch;
+                if (overwrite || !updated.imdbUrl) updated.imdbUrl = `https://www.imdb.com/title/${imdbMatch}/`;
+            }
+            const doubanMatch = extractDoubanId(result.format);
+            if (doubanMatch) {
+                if (overwrite || !updated.doubanId) updated.doubanId = doubanMatch;
+                if (overwrite || !updated.doubanUrl) updated.doubanUrl = `https://movie.douban.com/subject/${doubanMatch}/`;
+            }
+            if (result.doubanId) {
+                if (overwrite || !updated.doubanId) updated.doubanId = result.doubanId;
+                if (overwrite || !updated.doubanUrl) updated.doubanUrl = `https://movie.douban.com/subject/${result.doubanId}/`;
+            }
         }
-        if (result.synopsis && !updated.synopsis) {
-            updated.synopsis = result.synopsis;
+
+        if (updateSynopsis) {
+            if (result.synopsis && (overwrite || !updated.synopsis)) {
+                updated.synopsis = result.synopsis;
+            }
         }
 
         return updated;

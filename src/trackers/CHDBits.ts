@@ -2,7 +2,7 @@ import $ from 'jquery';
 import { NexusPHPEngine } from './NexusPHP';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { SiteConfig } from '../types/SiteConfig';
-import { getLabel } from '../common/legacy/text';
+import { getLabel } from '../common/rules/text';
 
 export class CHDBitsEngine extends NexusPHPEngine {
     constructor(config: SiteConfig, url: string) {
@@ -12,6 +12,7 @@ export class CHDBitsEngine extends NexusPHPEngine {
     async fill(meta: TorrentMeta): Promise<void> {
         this.log('Filling CHDBits form...');
         await super.fill(meta);
+        this.lockNameField(meta.title || '');
 
         const labels = meta.labelInfo || getLabel(`${meta.smallDescr || meta.subtitle || ''}${meta.title}#separator#${meta.description}`);
         meta.labelInfo = labels;
@@ -20,6 +21,12 @@ export class CHDBitsEngine extends NexusPHPEngine {
             if (labels.gy) (document.getElementsByName('cnlang')[0] as HTMLInputElement).checked = true;
             if (labels.zz) (document.getElementsByName('cnsub')[0] as HTMLInputElement).checked = true;
             if (labels.diy) (document.getElementsByName('diy')[0] as HTMLInputElement).checked = true;
+        } catch {}
+        try {
+            // CHD variants differ by skin; match by id/name/value/label text.
+            this.checkByAlias(!!labels.hdr10, ['hdr10', 'hdr'], /(HDR10)/i);
+            this.checkByAlias(!!labels.hdr10plus, ['hdr10plus', 'hdrm', 'hdr10+'], /(HDR10\+|HDR\+)/i);
+            this.checkByAlias(!!labels.db, ['dovi', 'dolbyvision', 'db', 'dv'], /(Dolby.?Vision|杜比视界|DoVi|\bDV\b)/i);
         } catch {}
 
         try {
@@ -118,10 +125,55 @@ export class CHDBitsEngine extends NexusPHPEngine {
             const result = await TorrentService.buildForwardTorrentFile(meta, this.siteName, null);
             if (result) {
                 TorrentService.injectTorrentForSite(this.siteName, result.file, result.filename);
+                this.lockNameField(meta.title || '');
             }
         } catch (err) {
             console.error('[Auto-Feed][CHDBits] Torrent inject failed:', err);
         }
+    }
+
+    private lockNameField(target: string) {
+        const expect = String(target || '').trim();
+        if (!expect) return;
+        const apply = () => {
+            const inputs = Array.from(
+                document.querySelectorAll('input[name="name"], input#name, #name')
+            ) as HTMLInputElement[];
+            inputs.forEach((input) => {
+                if (!input) return;
+                if ((input.value || '').trim() === expect) return;
+                input.value = expect;
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        };
+        [0, 120, 360, 800, 1500, 2600, 4200, 6500, 9000, 12000].forEach((ms) => {
+            window.setTimeout(apply, ms);
+        });
+    }
+
+    private checkByAlias(on: boolean, aliases: string[], labelPattern: RegExp) {
+        if (!on) return;
+        const aliasSet = new Set(aliases.map((x) => String(x).toLowerCase()));
+        const inputs = Array.from(document.querySelectorAll('input[type="checkbox"]')) as HTMLInputElement[];
+        const getText = (el: HTMLInputElement) => {
+            if (el.id) {
+                const byFor = document.querySelector(`label[for="${el.id}"]`) as HTMLLabelElement | null;
+                if (byFor?.textContent) return byFor.textContent.trim();
+            }
+            return ((el.closest('label') as HTMLLabelElement | null)?.textContent || el.parentElement?.textContent || '').trim();
+        };
+        inputs.forEach((el) => {
+            const name = (el.name || '').toLowerCase();
+            const id = (el.id || '').toLowerCase();
+            const val = (el.value || '').toLowerCase();
+            const txt = getText(el);
+            const hit = aliasSet.has(name) || aliasSet.has(id) || aliasSet.has(val) || labelPattern.test(txt);
+            if (!hit) return;
+            el.checked = true;
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+        });
     }
 
     private checkTeam(meta: TorrentMeta, selectName: string) {

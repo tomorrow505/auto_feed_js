@@ -24,6 +24,15 @@ export const skipImg: string[] = [
     '[img]https://pic.imgdb.cn/item/6170004c2ab3f51d91c7782a.png[/img]'
 ];
 
+export interface MediaInfoResult {
+    mediainfo: string;
+    screenshots: string[];
+    description: string;
+}
+
+const IMG_REGEX = /(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/ig;
+const MEDIAINFO_KEYWORDS = /General|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率|DISC INFO:|\.MPLS|Video Codec|Disc Label/i;
+
 export function getMediainfoPictureFromDescr(
     descr: string,
     options?: { mediumSel?: string; skipImgList?: string[] }
@@ -95,4 +104,31 @@ export function getMediainfoPictureFromDescr(
     info.mediainfo = mediainfo.trim();
     info.picInfo = imgs.trim();
     return info;
+}
+
+export function parseMediaInfoFromDescription(
+    description: string,
+    options?: { mediumSel?: string; skipImgList?: string[] }
+): MediaInfoResult {
+    const source = String(description || '');
+    const info = getMediainfoPictureFromDescr(source, options);
+    const screenshots = (info.picInfo.match(/\[img\](.*?)\[\/img\]/ig) || [])
+        .map((item) => item.match(/\[img\](.*?)\[\/img\]/i)?.[1] || '')
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+    let cleanDescription = source.replace(IMG_REGEX, '');
+    if (info.mediainfo) {
+        cleanDescription = cleanDescription.replace(/\[quote.*?\][\s\S]*?\[\/quote\]/ig, (block) => (
+            MEDIAINFO_KEYWORDS.test(block) ? '' : block
+        ));
+        cleanDescription = cleanDescription.replace(info.mediainfo, '');
+    }
+    cleanDescription = cleanDescription.replace(/\n{3,}/g, '\n\n').trim();
+
+    return {
+        mediainfo: info.mediainfo || '',
+        screenshots,
+        description: cleanDescription
+    };
 }

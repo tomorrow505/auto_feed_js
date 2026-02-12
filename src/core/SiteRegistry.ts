@@ -11,6 +11,12 @@ import { BHDEngine } from '../trackers/BHD';
 import { PTPEngine } from '../trackers/PTP';
 import { HDBEngine } from '../trackers/HDB';
 import { KGEngine } from '../trackers/KG';
+import { TTGEngine } from '../trackers/TTG';
+import { GPWEngine } from '../trackers/GPW';
+import { REDEngine } from '../trackers/RED';
+import { OPSEngine } from '../trackers/OPS';
+import { DICEngine } from '../trackers/DIC';
+import { OpenCDEngine } from '../trackers/OpenCD';
 import { NexusSites } from '../config/sites_nexus';
 import { GazelleSites } from '../config/sites_gazelle';
 import { Unit3DSites } from '../config/sites_unit3d';
@@ -36,6 +42,17 @@ const engineMap: Record<string, new (config: SiteConfig, url: string) => BaseEng
     [SiteType.KG]: KGEngine
 };
 
+// Site-specific engines override framework-level engines.
+// This keeps per-site behavior isolated in dedicated files (TTG/GPW/RED/OPS/OpenCD etc).
+const siteEngineMap: Record<string, new (config: SiteConfig, url: string) => BaseEngine> = {
+    TTG: TTGEngine,
+    GPW: GPWEngine,
+    RED: REDEngine,
+    OPS: OPSEngine,
+    DIC: DICEngine,
+    OpenCD: OpenCDEngine
+};
+
 export class SiteRegistry {
 
     static registerConfig(config: SiteConfig) {
@@ -51,8 +68,8 @@ export class SiteRegistry {
         const config = this.matchConfig(url);
         if (!config) return null;
 
-        // 2. Find matching engine class
-        const EngineClass = engineMap[config.type];
+        // 2. Find matching engine class (site-specific first, then framework type)
+        const EngineClass = siteEngineMap[config.name] || engineMap[config.type];
         if (!EngineClass) {
             console.error(`[Auto-Feed] No engine registered for type: ${config.type}`);
             return null;

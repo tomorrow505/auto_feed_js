@@ -1,6 +1,10 @@
 export function getMediumSel(text: string, title?: string): string {
     let result = text;
-    if (result.match(/(Webdl|Web-dl|WEB[\. ])/i) && !(title || '').match(/webrip/i)) {
+    // Legacy parity: match WEB-DL variants but avoid broad `WEB ` / `WEB.` that can false-positive on "WEB:"
+    // metadata blocks (e.g. HDB details tables) and other unrelated text.
+    const t = title || '';
+    const webTokenInTitle = /(^|[ ._\\-])WEB([ ._\\-]|$)/i.test(t);
+    if ((result.match(/(WEBDL|WEB[-_. ]?DL|Web[-_. ]?DL)/i) || webTokenInTitle) && !t.match(/webrip/i)) {
         result = 'WEB-DL';
     } else if (result.match(/(UHDTV)/i)) {
         result = 'UHDTV';
@@ -181,7 +185,9 @@ export function getLabel(text: string): Record<string, boolean> {
         hdr: false
     };
 
-    if (myString.match(/([简繁].{0,12}字幕|[简繁中].{0,3}字|简中|DIY.{1,5}字|内封.{0,3}[繁中字])|(Text.*?[\s\S]*?Chinese|Text.*?[\s\S]*?Mandarin|subtitles.*chs|subtitles.*mandarin|subtitle.*chinese|Presentation Graphics.*?Chinese)/i)) {
+    // Chinese subtitle detection - more precise to avoid false positives from site metadata
+    // Must match actual subtitle track patterns, not general "Chinese" mentions
+    if (myString.match(/([简繁].{0,12}字幕|[简繁中].{0,3}字|简中|DIY.{1,5}字|内封.{0,3}[繁中字])|(Text[\s#]+\d+[\s\S]{0,100}?Language[\s:]+Chinese|Text[\s#]+\d+[\s\S]{0,100}?Language[\s:]+Mandarin|subtitles.*chs|Presentation Graphics[\s\S]{0,50}?Chinese)/i)) {
         labels.zz = true;
     }
     if (myString.match(/(英.{0,12}字幕|英.{0,3}字|内封.{0,3}英.{0,3}字)|(Text.*?[\s\S]*?English|subtitles.*eng|subtitle.*english|Graphics.*?English)/i)) {
@@ -202,7 +208,7 @@ export function getLabel(text: string): Record<string, boolean> {
         if (audio && audio.match(/Language.*?English/)) {
             labels.en = true;
         }
-    } catch (err) {}
+    } catch (err) { }
     if (name.match(/(粤.{0,3}语|粤.{0,3}配|Audio.*cantonese)/i)) {
         labels.yy = true;
     }

@@ -54,6 +54,6 @@ export interface SiteConfig {
         autoFill?: boolean;
     };
 
-    // Legacy "site_info" compatibility if needed
-    legacyUrl?: string;
+    // Optional alternate URL alias for trackers with multiple domains.
+    mirrorUrl?: string;
 }

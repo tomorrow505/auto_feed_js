@@ -4,12 +4,11 @@ import $ from 'jquery';
 import { StorageService } from '../services/StorageService';
 import { QuickLinkService } from '../services/QuickLinkService';
 import { ForwardLinkService } from '../services/ForwardLinkService';
-import { ListSearchService } from '../services/ListSearchService';
-import { PageEnhancerService } from '../services/PageEnhancerService';
-import { QuickSearchService } from '../services/QuickSearchService';
+import { PageEnhancerService, QuickSearchService } from '../services/PageEnhancerService';
 import { RemoteDownloadService } from '../services/RemoteDownloadService';
-import { ImageUploadBridgeService } from '../services/ImageUploadBridgeService';
-import { UploadMetaFetchService } from '../services/UploadMetaFetchService';
+import { ImageHostService } from '../services/ImageHostService';
+import { UploadMetaFetchService, AutoDownloadAfterUploadService } from '../services/UploadMetaFetchService';
+import { EmbedService } from '../services/EmbedService';
 
 export class SiteManager {
     private activeEngine: BaseEngine | null = null;
@@ -48,7 +47,7 @@ export class SiteManager {
 
         // Image host upload bridge (imgbox/hdbimg/etc.)
         try {
-            await ImageUploadBridgeService.tryInject();
+            await ImageHostService.tryInjectImageQueueBridge();
         } catch (e) {
             console.error('[Auto-Feed] ImageHost Error:', e);
         }
@@ -62,7 +61,7 @@ export class SiteManager {
 
         // List-page quick search injection (independent of engine)
         try {
-            await ListSearchService.tryInject();
+            await QuickSearchService.tryInjectList();
         } catch (e) {
             console.error('[Auto-Feed] ListSearch Error:', e);
         }
@@ -70,12 +69,10 @@ export class SiteManager {
         if (!this.activeEngine) return;
 
         const adapter = this.activeEngine; // Alias for legacy code mindset
-
-        // Make sure floating forward UI doesn't leak across SPA navigations / non-source pages.
-        // (Previously the floating FAB could persist and block Settings/Fill toast clicks.)
-        if (!this.isForwardSourcePage(adapter, window.location.href)) {
-            this.removeFloatingButton();
-        }
+        // If we just uploaded via Auto-Feed, auto-download the newly created torrent on detail pages.
+        try {
+            AutoDownloadAfterUploadService.tryAutoDownload(adapter, this.isUploadLikePage(window.location.href)).catch(() => {});
+        } catch {}
 
         if (this.isUploadLikePage(window.location.href)) {
             try {
@@ -88,9 +85,8 @@ export class SiteManager {
         // 1. INJECT UI IMMEDIATELY (Non-blocking)
         // Source Mode: Only show on "real" detail pages (legacy parity: don't show on list/home/etc.)
         if (this.isForwardSourcePage(adapter, window.location.href)) {
-            // We don't await this, ensuring UI renders ASAP.
-            // Any storage needs inside it should be handled internally or via the button click.
-            this.injectForwardButton(adapter).catch(err => console.error('[Auto-Feed] Injection Error:', err));
+            // Embedded transfer/search UI injection on source detail pages.
+            this.injectEmbeddedUI(adapter).catch(err => console.error('[Auto-Feed] Injection Error:', err));
         }
 
         // 2. CHECK STORAGE (Target Mode)
@@ -114,385 +110,23 @@ export class SiteManager {
         }
     }
 
-    private async injectForwardButton(adapter: BaseEngine) {
-        console.log('[Auto-Feed] Starting injectForwardButton for:', adapter.siteName);
-
-        const config = adapter.getConfig ? adapter.getConfig() : null;
-        const selectorList: string[] = [];
-        const titleSelectors = config?.selectors?.title;
-        if (titleSelectors) {
-            if (Array.isArray(titleSelectors)) selectorList.push(...titleSelectors);
-            else selectorList.push(titleSelectors);
-        }
-        selectorList.push(
-            'menu.torrent__buttons',
-            '.torrent__buttons',
-            'h1.bhd-title-h1',
-            'h1.torrent__name',
-            '.torrent-title',
-            'h1#top',
-            '#top',
-            'h1',
-            'h2',
-            '.movie__details',
-            '.movie-details',
-            'td.rowhead:contains("标题")',
-            'td.rowhead:contains("Title")'
-        );
-
-        // ... existing inline logic (attempt best effort)
-            const findAnchor = () => {
-            if (adapter.siteName === 'MTeam') {
-                // Try to find the "Download" button or its container
-                const btn = $('button.ant-btn-primary').first();
-                if (btn.length) return btn.parent();
-                return $('h2.pr-\\[2em\\]').parent();
-            }
-            // Prefer placing the inline buttons directly under the title for these sites.
-            // Legacy script inserts near the main title/details area (not at the bottom of info tables).
-            if (adapter.siteName === 'PTP') {
-                const title = $('.page__title').first();
-                if (title.length) return title;
-            }
-            if (adapter.siteName === 'HDB') {
-                // Prefer the details-area title; avoid picking site header titles.
-                const t1 = $('#details h1#top').first();
-                if (t1.length) return t1;
-                const t2 = $('#details h1').first();
-                if (t2.length) return t2;
-                const t3 = $('h1#top').first();
-                if (t3.length) return t3;
-                const t4 = $('h1.torrentname').first();
-                if (t4.length) return t4;
-                const t5 = $('h1').filter((_, el) => $(el).closest('#details').length > 0).first();
-                if (t5.length) return t5;
-            }
-            if (adapter.siteName === 'CHDBits') {
-                const title = $('h1#top').first().add($('#top').first()).add($('h1').first()).first();
-                if (title.length) return title;
-            }
-            for (const sel of selectorList) {
-                const el = $(sel).first();
-                if (el.length && el.is(':visible')) {
-                    const tag = (el.get(0)?.tagName || '').toLowerCase();
-                    // If we found a heading/title element, return itself so we can insert AFTER it.
-                    if (['h1', 'h2', 'h3'].includes(tag) || el.hasClass('page__title') || el.attr('id') === 'top') {
-                        return el;
-                    }
-                    return el.parent().length ? el.parent() : el;
-                }
-            }
-            return $();
-        };
-
-        const waitForAnchor = async () => {
-            return new Promise<JQuery>((resolve) => {
-                let attempts = 0;
-                const interval = setInterval(() => {
-                    attempts++;
-                    const el = findAnchor();
-                    if (el.length && el.is(':visible')) {
-                        clearInterval(interval);
-                        resolve(el);
-                    } else if (attempts > 10) { // Reduced wait time
-                        clearInterval(interval);
-                        resolve($());
-                    }
-                }, 500);
-            });
-        };
-
-        const anchor = await waitForAnchor();
-
-        if (anchor.length) {
-            console.log('[Auto-Feed] Anchor found:', anchor);
-            // Inline UI is available, so ensure the floating fallback is not present.
-            this.removeFloatingButton();
-
-            // UI Container (placed under title on major sites)
-            const uiContainer = $('<div class="autofeed-ui" style="display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:6px;"></div>');
-
-            // 1. Forward Button
+    private async injectEmbeddedUI(adapter: BaseEngine) {
+        console.log('[Auto-Feed] Starting injectEmbeddedUI for:', adapter.siteName);
+        try {
             const { SettingsService } = await import('../services/SettingsService');
-            const uiLang = (await SettingsService.load()).uiLanguage || 'zh';
-            const forwardLabel = uiLang === 'zh' ? '转发' : 'Reupload';
+            const settings = await SettingsService.load();
 
-            const forwardBtn = $(`
-                <button style="
-                    background: linear-gradient(to bottom, #20B2AA, #008B8B); 
-                    color: white; 
-                    border: 1px solid #006666; 
-                    padding: 4px 12px; 
-                    border-radius: 4px; 
-                    cursor: pointer; 
-                    font-weight: bold; 
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                    display: flex; align-items: center; gap: 5px;
-                    font-size: 13px;
-                ">
-                    <span>🚀</span> ${forwardLabel}
-                </button>
-            `);
+            // Parse immediately, store, then inject DOM using legacy-ish layout.
+            let meta = await adapter.parse();
+            const { normalizeMeta } = await import('../common/rules/normalize');
+            meta = this.cleanMeta(meta);
+            meta = normalizeMeta(meta, adapter.siteName);
+            await StorageService.save(meta);
 
-            // 2. Quick Links Container (Hidden by default, shown after parse/hover)
-            const quickLinksRow = $('<div style="display: none; position: absolute; background: white; border: 1px solid #ddd; padding: 10px; border-radius: 4px; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 400px; max-width: calc(100vw - 20px); margin-top: 5px;"></div>');
-
-            forwardBtn.on('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-
-                forwardBtn.find('span').text('⏳');
-                forwardBtn.css('opacity', '0.8');
-
-                try {
-                    console.log('[Auto-Feed] Parsing metadata...');
-                    let meta = await adapter.parse();
-
-                    // Clean metadata
-                    const { MetaCleaner } = await import('../services/MetaCleaner');
-                    const { normalizeMeta } = await import('../common/legacy/normalize');
-                    meta = MetaCleaner.clean(meta);
-                    meta = normalizeMeta(meta);
-
-                    console.log('[Auto-Feed] Parsed & Cleaned:', meta);
-                    await StorageService.save(meta);
-                    try {
-                        const saved = await StorageService.load();
-                        if (!saved || (!saved.title && !saved.description)) {
-                            this.showStatusToast('转发缓存写入失败，请检查脚本权限/存储。');
-                        }
-                    } catch (err) {
-                        console.error('[Auto-Feed] Storage Verify Error:', err);
-                        this.showStatusToast('转发缓存校验失败，请检查脚本权限/存储。');
-                    }
-
-                    forwardBtn.find('span').text('✅');
-                    // Show Forward/Search + Quick Links
-                    const { ForwardLinkService } = await import('../services/ForwardLinkService');
-                    const settings = await import('../services/SettingsService').then(m => m.SettingsService.load());
-                    // Global popup opacity (forward popup / dialogs / toolbox)
-                    const popupOpacity = Math.min(1, Math.max(0.3, Number(settings.popupOpacity ?? 0.96)));
-                    quickLinksRow.css('opacity', String(popupOpacity));
-                    ForwardLinkService.injectForwardLinks(
-                        quickLinksRow,
-                        meta,
-                        settings.enabledSites,
-                        settings.favoriteSites,
-                        { chdBaseUrl: settings.chdBaseUrl, lang: settings.uiLanguage }
-                    );
-                    // Put quick search shortcuts in the forward popup, above image tools.
-                    try {
-                        const html = QuickSearchService.buildQuickSearchHtml(meta, settings.quickSearchList, settings.quickSearchPresets, settings.uiLanguage);
-                        if (html) {
-                            const block = $(`<div style="margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #eee;"></div>`);
-                            block.append($(html));
-                            quickLinksRow.append(block);
-                        }
-                    } catch (e) {
-                        console.warn('[Auto-Feed] QuickSearch build failed:', e);
-                    }
-                    QuickLinkService.injectImageTools(quickLinksRow, meta, settings.uiLanguage);
-                    QuickLinkService.injectMetaFetchTools(quickLinksRow, meta, settings.uiLanguage);
-                    quickLinksRow.show();
-
-                    // Reposition logic for popup
-                    const offset = forwardBtn.offset();
-                    if (offset) {
-                        const margin = 10;
-                        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft || 0;
-                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
-                        const vw = window.innerWidth || document.documentElement.clientWidth || 1200;
-                        const vh = window.innerHeight || document.documentElement.clientHeight || 800;
-
-                        // Ensure the element is in DOM before measuring.
-                        $('body').append(quickLinksRow);
-                        const panelW = quickLinksRow.outerWidth() || 400;
-                        const panelH = quickLinksRow.outerHeight() || 240;
-
-                        let left = offset.left;
-                        let top = offset.top + (forwardBtn.outerHeight() || 30) + 5;
-
-                        // Clamp horizontally within viewport.
-                        const maxLeft = scrollLeft + vw - panelW - margin;
-                        if (left > maxLeft) left = maxLeft;
-                        if (left < scrollLeft + margin) left = scrollLeft + margin;
-
-                        // If bottom overflows, place above the button.
-                        if (top + panelH + margin > scrollTop + vh) {
-                            top = offset.top - panelH - margin;
-                        }
-                        if (top < scrollTop + margin) top = scrollTop + margin;
-
-                        quickLinksRow.css({ top, left });
-                        $('body').append(quickLinksRow); // Move to body to avoid overflow hidden
-                    }
-
-                } catch (e) {
-                    console.error('[Auto-Feed] Parse Error:', e);
-                    forwardBtn.find('span').text('❌');
-                    alert('Parsing failed. Check console.');
-                }
-            });
-
-            const placeInlineContainer = (target: JQuery) => {
-                const tag = (target.get(0)?.tagName || '').toLowerCase();
-                if (['h1', 'h2', 'h3'].includes(tag) || target.hasClass('page__title') || target.attr('id') === 'top') {
-                    target.after(uiContainer);
-                    return;
-                }
-                if (tag === 'tr') {
-                    const colCount =
-                        target.children('td,th').length ||
-                        target.closest('table').find('tr').first().children('td,th').length ||
-                        1;
-                    const row = $(`<tr class="autofeed-row"><td colspan="${colCount}"></td></tr>`);
-                    row.find('td').append(uiContainer);
-                    target.after(row);
-                    return;
-                }
-                if (['tbody', 'thead', 'tfoot', 'table'].includes(tag)) {
-                    const table = tag === 'table' ? target : target.closest('table');
-                    const colCount =
-                        table.find('tr').first().children('td,th').length || 1;
-                    const row = $(`<tr class="autofeed-row"><td colspan="${colCount}"></td></tr>`);
-                    row.find('td').append(uiContainer);
-                    const tbody = table.find('tbody').first();
-                    if (tbody.length) tbody.prepend(row);
-                    else table.prepend(row);
-                    return;
-                }
-                target.append(uiContainer);
-            };
-
-            // Assemble
-            if (adapter.siteName === 'MTeam') {
-                anchor.after(uiContainer);
-            } else {
-                placeInlineContainer(anchor);
-            }
-            uiContainer.append(forwardBtn);
-
-            // Auto-parse on load check
-            adapter.parse().then(meta => {
-                // Optional: Pre-fill status
-            }).catch(() => { });
-
-        } else {
-            console.log('[Auto-Feed] No anchor found for inline button; using floating fallback');
-            this.injectFloatingButton(adapter);
+            await EmbedService.inject(adapter, meta, settings);
+        } catch (e) {
+            console.error('[Auto-Feed] Embed injection failed:', e);
         }
-    }
-
-    private injectFloatingButton(adapter: BaseEngine) {
-        const fabId = 'autofeed-fab-forced';
-        console.log('[Auto-Feed] Attempting to inject floating button:', fabId);
-
-        if (document.getElementById(fabId)) {
-            console.log('[Auto-Feed] Floating button already exists');
-            return;
-        }
-
-        const fab = document.createElement('div');
-        fab.id = fabId;
-        fab.style.cssText = `
-            position: fixed !important;
-            bottom: 100px !important;
-            right: 30px !important;
-            /* Keep this under our settings overlay to avoid blocking close clicks */
-            z-index: 99998 !important;
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 10px !important;
-            align-items: flex-end !important;
-            pointer-events: none !important;
-        `;
-
-        const mainBtn = document.createElement('button');
-        // Label follows UI language
-        const getMainLabel = async () => {
-            try {
-                const { SettingsService } = await import('../services/SettingsService');
-                const lang = (await SettingsService.load()).uiLanguage || 'zh';
-                return lang === 'zh' ? '🚀 转发种子' : '🚀 Reupload Torrent';
-            } catch {
-                return '🚀 转发种子';
-            }
-        };
-        // Don't block injection on async settings load.
-        mainBtn.innerText = '🚀 转发种子';
-        getMainLabel().then((label) => { mainBtn.innerText = label; }).catch(() => { });
-        mainBtn.style.cssText = `
-            pointer-events: auto !important;
-            background: linear-gradient(135deg, #20B2AA, #008B8B) !important;
-            color: white !important;
-            border: 2px solid white !important;
-            border-radius: 50px !important;
-            padding: 12px 24px !important;
-            font-weight: bold !important;
-            font-size: 14px !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
-            cursor: pointer !important;
-            transition: transform 0.2s !important;
-        `;
-
-        const linksPanel = document.createElement('div');
-        linksPanel.style.cssText = `
-            display: none;
-            pointer-events: auto !important;
-            background: white !important;
-            padding: 10px !important;
-            border-radius: 8px !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
-            min-width: 200px !important;
-        `;
-
-        mainBtn.onclick = async () => {
-            mainBtn.innerText = '⏳ Parsing...';
-            try {
-                let meta = await adapter.parse();
-
-                // Clean metadata
-                const { MetaCleaner } = await import('../services/MetaCleaner');
-                meta = MetaCleaner.clean(meta);
-
-                await StorageService.save(meta);
-                mainBtn.innerText = '✅ Parsed';
-
-                // Load User Settings for Custom Sites
-                const settings = await import('../services/SettingsService').then(m => m.SettingsService.load());
-
-                // Use JQuery for the panel content injection if needed, or vanilla
-                // For now, simple text to prove it works
-                $(linksPanel).empty();
-                ForwardLinkService.injectForwardLinks(
-                    $(linksPanel),
-                    meta,
-                    settings.enabledSites,
-                    settings.favoriteSites,
-                    { chdBaseUrl: settings.chdBaseUrl, lang: settings.uiLanguage }
-                );
-                QuickLinkService.injectImageTools($(linksPanel), meta, settings.uiLanguage);
-
-                linksPanel.style.display = 'block';
-
-                setTimeout(async () => { mainBtn.innerHTML = await getMainLabel(); }, 3000);
-            } catch (e) {
-                console.error(e);
-                mainBtn.innerText = '❌ Error';
-            }
-        };
-
-        fab.appendChild(linksPanel);
-        fab.appendChild(mainBtn);
-
-        // Robust Append
-        (document.body || document.documentElement).appendChild(fab);
-        console.log('[Auto-Feed] Floating button matched and appended to body');
-    }
-
-    private removeFloatingButton() {
-        const fab = document.getElementById('autofeed-fab-forced');
-        if (fab) fab.remove();
     }
 
     private async injectFillButton(adapter: BaseEngine, meta: any) {
@@ -515,7 +149,7 @@ export class SiteManager {
 
         // Auto-fill once on upload-like pages
         try {
-            const { normalizeMeta } = await import('../common/legacy/normalize');
+            const { normalizeMeta } = await import('../common/rules/normalize');
             const normalized = normalizeMeta(meta, adapter.siteName);
             const ready = await this.waitForForm();
             if (ready) {
@@ -523,7 +157,10 @@ export class SiteManager {
                 // Apply default anonymous after form is present and filled.
                 try {
                     const settings = await import('../services/SettingsService').then(m => m.SettingsService.load());
-                    this.applyDefaultAnonymous(!!settings.defaultAnonymous);
+                    this.applyDefaultAnonymousWithRetry(!!settings.defaultAnonymous);
+                } catch {}
+                try {
+                    AutoDownloadAfterUploadService.hookUploadForm(adapter, normalized).catch(() => {});
                 } catch {}
                 notify.find('#autofeed-fill-btn').text('已自动填充');
             }
@@ -533,12 +170,15 @@ export class SiteManager {
 
         notify.find('#autofeed-fill-btn').on('click', async () => {
             notify.find('#autofeed-fill-btn').text('Filling...');
-            const { normalizeMeta } = await import('../common/legacy/normalize');
+            const { normalizeMeta } = await import('../common/rules/normalize');
             const normalized = normalizeMeta(meta, adapter.siteName);
             await adapter.fill(normalized);
             try {
                 const settings = await import('../services/SettingsService').then(m => m.SettingsService.load());
-                this.applyDefaultAnonymous(!!settings.defaultAnonymous);
+                this.applyDefaultAnonymousWithRetry(!!settings.defaultAnonymous);
+            } catch {}
+            try {
+                AutoDownloadAfterUploadService.hookUploadForm(adapter, normalized).catch(() => {});
             } catch {}
             notify.find('#autofeed-fill-btn').text('Done!');
             setTimeout(() => notify.fadeOut(), 2000);
@@ -569,6 +209,34 @@ export class SiteManager {
         setTimeout(() => toast.fadeOut(600, () => toast.remove()), 3000);
     }
 
+    private cleanMeta(meta: any): any {
+        let desc = meta?.description || '';
+
+        desc = desc.replace(/\[url=[^\]]+\](\[img\].*?\[\/img\])\[\/url\]/gi, '$1');
+        desc = desc.replace(/\[url\](\[img\].*?\[\/img\])\[\/url\]/gi, '$1');
+
+        const footprints = [
+            /Transferred by.*?/gi,
+            /Uploaded by.*?/gi,
+            /Reposted from.*?/gi,
+            /\[quote\].*?Internal.*?\[\/quote\]/gis,
+            /This torrent was uploaded by.*/gi,
+            /Originally uploaded by.*/gi
+        ];
+        footprints.forEach((regex) => {
+            desc = desc.replace(regex, '');
+        });
+
+        desc = desc.replace(/\[quote\]Thanks to.*?\[\/quote\]/gis, '');
+        desc = desc.replace(/\[quote\]\s*\[\/quote\]/g, '');
+        desc = desc.replace(/\n\s*\n\s*\n/g, '\n\n');
+
+        return {
+            ...meta,
+            description: String(desc || '').trim()
+        };
+    }
+
     private isUploadLikePage(url: string): boolean {
         return !!url.match(/upload|offer|torrents\/create|torrents\/upload|torrent\/upload|torrents\/add|upload\.php|p_torrent\/video_upload|#\/torrent\/add|\/torrent\/add/i);
     }
@@ -578,12 +246,24 @@ export class SiteManager {
         const path = u.pathname || '';
         const qs = u.search || '';
 
+        // TTG legacy detail path: /t/{id}
+        if (adapter.siteName === 'TTG') {
+            return /\/t\/\d+/i.test(path) || (/details\.php/i.test(path) && /id=\d+/i.test(qs));
+        }
         // PTP: only when a specific torrent is targeted (torrentid present).
         if (adapter.siteName === 'PTP') {
             return path.includes('torrents.php') && /torrentid=\d+/i.test(qs);
         }
+        // Gazelle movie/music details (GPW/RED/OPS/DIC/SC/etc): torrents.php?id=...&torrentid=...
+        if (['GPW', 'RED', 'OPS', 'DIC'].includes(adapter.siteName)) {
+            return path.includes('torrents.php') && /torrentid=\d+/i.test(qs);
+        }
         // HDB / CHDBits: details.php?id=...
         if (adapter.siteName === 'HDB' || adapter.siteName === 'CHDBits') {
+            return /details\.php/i.test(path) && /id=\d+/i.test(qs);
+        }
+        // OpenCD source detail pages (new + old layouts)
+        if (adapter.siteName === 'OpenCD') {
             return /details\.php/i.test(path) && /id=\d+/i.test(qs);
         }
         // Default fallback
@@ -611,22 +291,205 @@ export class SiteManager {
         return false;
     }
 
-    private applyDefaultAnonymous(enable: boolean) {
-        // Best-effort across common PT upload forms.
-        const selectors = [
-            'input[type="checkbox"][name="anonymous"]',
-            'input[type="checkbox"][name="anon"]',
-            'input[type="checkbox"]#anonymous',
-            'input[type="checkbox"]#anon',
-            'input[type="checkbox"][name="anony"]'
-        ];
-        for (const sel of selectors) {
-            const el = document.querySelector(sel) as HTMLInputElement | null;
-            if (!el) continue;
-            el.checked = enable;
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-            el.dispatchEvent(new Event('click', { bubbles: true }));
-            break;
-        }
+    private applyDefaultAnonymousOnce(enable: boolean): { applied: boolean; verified: boolean } {
+        const attempt = (): { applied: boolean; verified: boolean } => {
+            // Some sites use select-based anonymity.
+            try {
+                const sel = document.querySelector('select[name="anonymity"]') as HTMLSelectElement | null;
+                if (sel) {
+                    const want = enable ? 'yes' : 'no';
+                    const opt = Array.from(sel.options).find((o) => (o.value || '').toLowerCase() === want);
+                    if (opt) {
+                        sel.value = opt.value;
+                        sel.dispatchEvent(new Event('change', { bubbles: true }));
+                        sel.dispatchEvent(new Event('input', { bubbles: true }));
+                        return { applied: true, verified: (sel.value || '') === opt.value };
+                    }
+                }
+            } catch {}
+
+            // Some Nexus variants use `uplver` as radio group or checkbox.
+            try {
+                const uplver = Array.from(document.querySelectorAll('input[name="uplver"]')) as HTMLInputElement[];
+                if (uplver.length) {
+                    const anyRadio = uplver.some((e) => (e.type || '').toLowerCase() === 'radio');
+                    if (anyRadio) {
+                        const yes = uplver.find((e) => (e.value || '').match(/^(yes|1|true|on)$/i)) || uplver[0];
+                        const no =
+                            uplver.find((e) => (e.value || '').match(/^(no|0|false|off)$/i)) ||
+                            uplver[1] ||
+                            uplver[0];
+                        const target = enable ? yes : no;
+                        if (!target.disabled) {
+                            try {
+                                target.click();
+                            } catch {
+                                target.checked = true;
+                            }
+                        }
+                        target.dispatchEvent(new Event('change', { bubbles: true }));
+                        target.dispatchEvent(new Event('input', { bubbles: true }));
+                        return { applied: true, verified: !!target.checked };
+                    }
+                    // Checkbox-like: set all matches (some pages duplicate it).
+                    let verifiedAny = false;
+                    uplver.forEach((el) => {
+                        if (!el.disabled) {
+                            try {
+                                if (el.checked !== enable) el.click();
+                            } catch {
+                                el.checked = enable;
+                            }
+                        }
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                        el.dispatchEvent(new Event('input', { bubbles: true }));
+                        if (el.checked === enable) verifiedAny = true;
+                    });
+                    return { applied: true, verified: verifiedAny };
+                }
+            } catch {}
+
+            // Generic radio-group anonymity (some sites use `anonymous` as radio with [No, Yes]).
+            try {
+                const names = ['anonymous', 'anon', 'anony', 'is_anonymous'];
+                for (const n of names) {
+                    const els = Array.from(document.querySelectorAll(`input[name="${n}"]`)) as HTMLInputElement[];
+                    if (!els.length) continue;
+                    const anyRadio = els.some((e) => (e.type || '').toLowerCase() === 'radio');
+                    if (!anyRadio) continue;
+                    const yes = els.find((e) => (e.value || '').match(/^(yes|1|true|on)$/i)) || els[1] || els[0];
+                    const no = els.find((e) => (e.value || '').match(/^(no|0|false|off)$/i)) || els[0];
+                    const target = enable ? yes : no;
+                    if (!target.disabled) {
+                        try {
+                            target.click();
+                        } catch {
+                            target.checked = true;
+                        }
+                    }
+                    target.dispatchEvent(new Event('change', { bubbles: true }));
+                    target.dispatchEvent(new Event('input', { bubbles: true }));
+                    return { applied: true, verified: !!target.checked };
+                }
+            } catch {}
+
+            // Best-effort across common PT upload forms (legacy parity: `uplver`).
+            const selectors = [
+                'input[type="checkbox"][name="uplver"]',
+                'input[type="checkbox"]#uplver',
+                'input[type="checkbox"][name="anonymous"]',
+                'input[type="checkbox"][name="anon"]',
+                'input[type="checkbox"]#anonymous',
+                'input[type="checkbox"]#anon',
+                'input[type="checkbox"][name="anony"]',
+                'input[type="checkbox"][name="is_anonymous"]',
+                // Unit3D-like variants
+                'input[type="checkbox"][name="anonymous_upload"]',
+                'input[type="checkbox"][name="upload_anonymous"]',
+                'input[type="checkbox"][name="upload_anonymously"]',
+                'input[type="checkbox"]#anonymous_upload'
+            ];
+            let applied = false;
+            let verified = false;
+            for (const sel of selectors) {
+                const el = document.querySelector(sel) as HTMLInputElement | null;
+                if (!el) continue;
+                applied = true;
+                if (!el.disabled) {
+                    try {
+                        if (el.checked !== enable) el.click();
+                    } catch {
+                        el.checked = enable;
+                    }
+                }
+                el.dispatchEvent(new Event('change', { bubbles: true }));
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+                verified = el.checked === enable;
+                if (verified) return { applied, verified };
+            }
+
+            // Label-driven anonymity toggles (Unit3D and some modern forms).
+            // Legacy parity: match by visible label text and click it if needed.
+            try {
+                const patterns = [/匿名上传/i, /Anonymous\\s*Upload/i, /^Anonymous$/i];
+                const labels = Array.from(document.querySelectorAll('label')) as HTMLLabelElement[];
+                for (const lab of labels) {
+                    const text = (lab.textContent || '').replace(/\\s+/g, ' ').trim();
+                    if (!text) continue;
+                    if (!patterns.some((re) => re.test(text))) continue;
+
+                    const forId = (lab.getAttribute('for') || '').trim();
+                    const byFor = forId ? (document.getElementById(forId) as HTMLInputElement | null) : null;
+                    const byChild = (lab.querySelector('input') as HTMLInputElement | null) || null;
+                    const input = byFor || byChild;
+
+                    // Avoid blind-clicking labels without an actual input: it can toggle twice under retries.
+                    if (!input) continue;
+
+                    const t = (input.type || '').toLowerCase();
+                    if (t === 'checkbox') {
+                        if (input.checked === enable) return { applied: true, verified: true };
+                        applied = true;
+                        if (!input.disabled) {
+                            try {
+                                lab.click();
+                            } catch {
+                                input.checked = enable;
+                            }
+                        } else {
+                            input.checked = enable;
+                        }
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        return { applied: true, verified: input.checked === enable };
+                    }
+                    if (t === 'radio') {
+                        if (!enable) continue; // For radio groups, we only attempt to enable.
+                        if (input.checked) return { applied: true, verified: true };
+                        applied = true;
+                        if (!input.disabled) {
+                            try {
+                                lab.click();
+                            } catch {
+                                input.checked = true;
+                            }
+                        } else {
+                            input.checked = true;
+                        }
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        return { applied: true, verified: !!input.checked };
+                    }
+                }
+            } catch {}
+            return { applied, verified };
+        };
+        return attempt();
+    }
+
+    private applyDefaultAnonymousWithRetry(enable: boolean, timeoutMs = 12_000, intervalMs = 450) {
+        try {
+            const startedAt = Date.now();
+            let lastAppliedAt = 0;
+            let verifiedStreak = 0;
+
+            const tick = () => {
+                const now = Date.now();
+                if (now - lastAppliedAt < Math.max(200, Math.floor(intervalMs / 2))) return;
+                lastAppliedAt = now;
+
+                const r = this.applyDefaultAnonymousOnce(enable);
+                if (r.verified) verifiedStreak++;
+                if (verifiedStreak >= 2) return true;
+                if (now - startedAt > timeoutMs) return true;
+                return false;
+            };
+
+            // Immediate attempt + interval retries (for SPA/delayed forms).
+            if (tick()) return;
+            const timer = window.setInterval(() => {
+                if (tick()) window.clearInterval(timer);
+            }, intervalMs);
+        } catch {}
     }
 }

@@ -38,9 +38,8 @@ export async function parseGazelle(config: SiteConfig, currentUrl: string): Prom
     meta.type = '音乐';
 
     // If URL contains torrentid, try to parse torrent row details
-    const torrentIdMatch = currentUrl.match(/torrentid=(\d+)/);
-    if (torrentIdMatch) {
-        const torrentId = torrentIdMatch[1];
+    const torrentId = currentUrl.match(/torrentid=(\d+)/)?.[1] || '';
+    if (torrentId) {
         const row = document.getElementById(`torrent_${torrentId}`) || document.getElementById(`torrent${torrentId}`);
         if (row) {
             const rowText = (row as HTMLElement).innerText;
