@@ -1,0 +1,105 @@
+// @require      https://unpkg.com/@popperjs/core@2/dist/umd/popper.min.js
+// @require      https://unpkg.com/tippy.js@6/dist/tippy-bundle.umd.js
+    20220726：支持MP4/MKV视频文件获取mediainfo+截图。功能待测试(已取消)...https://unpkg.com/auto-feed-media@1.0.1/index.js
+        background-color:transparent;
+    if (name.match(/(KJNU|tomorrow505|KG|BMDru|BobDobbs|Dusictv|AFKI)$/i)) {
+      return name.match(/(KJNU|tomorrow505|KG|BMDru|BobDobbs|Dusictv|AFKI)$/i)[1];
+    $(this).find('td').css({ "border-top": "2px solid darkgrey" });
+  'KG': { 'url': 'https://karagarga.in/', 'enable': 1 },
+  '樱花': { 'url': 'http://pt.ying.us.kg/', 'enable': 1 },
+  `<a href="https://karagarga.in/browse.php?search={imdbid}&search_type=imdb" target="_blank">KG</a>`,
+  'KG': 'https://karagarga.in/',
+const kg_intro_base_content = `[img]{poster}[/img]
+const kg_dvd_base_content = `DVD label: {label}
+const kg_bluray_base_content = `Blu-Ray label: {label}
+  const ver = ['AUS', 'CAN', 'CEE', 'CZE', 'ESP', 'EUR', 'FRA', 'GBR', 'GER', 'HKG', 'ITA', 'JPN', 'KOR', 'NOR', 'NLD', 'RUS', 'TWN', 'USA'];
+      $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({ "backgroundColor": "#262626" });
+ouban_button,#ptgen_button,#search_button,#download_pngs').css({ "border": "1px solid #2F3546", "color": "#FFFFFF", "backgroundColor": "#2F3546" });
+ouban_button,#ptgen_button,#search_button,#download_pngs').css({ "border": "1px solid #0D8ED9", "color": "#FFFFFF", "backgroundColor": "#292929" });
+#douban_button,#ptgen_button,#search_button,#download_pngs').css({ "border": "1px solid green", "color": "#FFFFFF", "backgroundColor": "#292929" });
+    textarea.style.backgroundColor = '#4d5656';
+    input_box.style.backgroundColor = '#4d5656';
+            background: rgba(0, 0, 0, 0.3);
+            background: white;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.3);
+            background: white;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            background: #e6f0ff;   /* 基础色 */
+                background: #d4e6ff;
+            background-color: #4CAF50; /* Green background for success/info */
+            background-color: #2c3e50; /* Darker, modern primary color */
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out; /* Smooth transitions */
+            background-color: #34495e;
+            background-color: #34495e; /* Slightly different shade for submenu */
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            background-color: #4a6781; /* Distinct hover for submenu */
+          } else if (key == 'KG') {
+          } else if (key == 'KG') {
+    "    background-image: url(data:image/gif;base64,R0lGODlhFQAJAIAAAP///////yH5BAEAAAEALAAAAAAVAAkAAAIXjI+AywnaYnhUMoqt3gZXPmVg94yJV
+    "    background-position: center right;",
+    "    background-repeat: no-repeat;",
+    "    background-image: url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjI8Bya2wnINUMopZAQA7);",
+    "    background-image: url(data:image/gif;base64,R0lGODlhFQAEAIAAAP///////yH5BAEAAAEALAAAAAAVAAQAAAINjB+gC+jP2ptn0WskLQA7);",
+    "    background-image: none;",
+    "    color: darkgreen;",
+          $(this).parent().css('background', 'linear-gradient(rgba(0,0,153,0.2), rgba(188,202,214,0.5), rgba(0,0,153,0.2))');
+          $(this).parent().css('background', 'linear-gradient(rgba(0,153,0,0.2), rgba(188,202,214,0.5), rgba(0,153,0,0.2))');
+          $(this).parent().css('background', 'linear-gradient(rgba(153,0,0,0.2), rgba(188,202,214,0.5), rgba(153,0,0,0.2))');
+          $(this).parent().css('background', 'linear-gradient(rgba(102,102,102,0.4), rgba(188,202,214,0.5), rgba(102,102,102,0.4))');
+  const showblankgroups = true;
+      else if (showblankgroups) {
+                    background-color: #41be57;
+                    background: #ffffff;
+                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAADAFBMVEUgKDAAAAAcJS7+gQBAu/MA4VT6fQAEBQgA3VAdJCxCxf07uPAdHSMHCQv8/fwAVVUbIikiGy0TG
+        $(this).css({ backgroundImage: "url(pic/down2.png)" }).next("div.menu_body").slideToggle(300).siblings("div.menu_body").slideUp("slow");
+      $('#ksave_setting').css({ 'color': 'white', 'background': 'url(https://springsunday.net/styles/Maya/images/btn_submit_bg.gif) repeat left top', 'border': '1px black' });
+      log_in(['KG'], 'a[class="customtab1"]');
+      $('#save_setting, #select_all, #unselect_all').css({ 'color': 'white', 'background': 'url(https://springsunday.net/styles/Maya/images/btn_submit_bg.gif) repeat left top', 'border': '1px black' });
+              var descr = kg_intro_base_content.split('Screenshots here')[0].trim();
+  $('#rehost').append(`<td style="width:100%; border: none; background-color:rgba(72,101,131,0.7); padding: 6px" valign="top" align="left" id="rehostimg"></td>`);
+    $('#go_rehost').css({ 'color': 'white', 'background': 'url(https://springsunday.net/styles/Maya/images/btn_submit_bg.gif) repeat left top', 'border': '1px black' });
+                                background-color: #41be57;
+                                background: #ffffff;
+                                <table id="mytable" style="background-color: #F1FAFA; margin-left:10%; margin-top:3%"></table>
+    if (origin_site == 'KG') {
+子认领', '簡介', '简介', '操作', 'Action', 'Tagline', 'Tools:', '设备'].indexOf(tds[i].textContent.trim()) > -1 && origin_site != 'KG') {
+      if (origin_site == 'KG') {
+    if (origin_site == 'KG') {
+                if (['PTP', 'KG', 'BTN', 'GPW', 'SC', 'avz', 'PHD', 'CNZ', 'ANT', 'NBL', 'HDCity'].indexOf(key) < 0) {
+      else if (site == 'KG') {
+        GM_setValue('kg_info', JSON.stringify(raw_info));
+        if (['PTP', 'SC', 'TVV', 'avz', 'PHD', 'CNZ', 'HDCity', 'BTN', 'ANT', 'GPW', 'KG'].indexOf(this.id) > -1) {
+        if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'SC', 'avz', 'PHD', 'CNZ', 'TVV'].indexOf(_id) < 0) {
+        if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'common_link', 'SC', 'avz', 'PHD', 'CNZ', 'TVV', 'ANT', 'NBL', 'CarPt'].indexOf(this.i
+                background-color: rgba(0, 0, 0, 0.7); /* 半透明黑色背景 */
+                transition: background-color 0.3s ease; /* 过渡效果 */
+                background-color: rgba(255, 255, 255, 0.2); /* 鼠标悬停时背景颜色变浅 */
+      $('#clear').css({ 'color': 'white', 'background-color': 'red', 'height': '22px' });
+            $('.fill_number').css({ 'backgroundColor': 'rgb(239, 239, 239)' });
+            $table.find('td').css({ 'backgroundColor': 'rgb(198, 227, 198)' });
+quote|quote=.+?|hide=.+?)\]/ig, '<fieldset style="font-family: Consolas,sans-serif"><legend><span style="color:white;background-color:black">&nbsp;引用&nbsp;</span></legend>');
+      $('#clear').css({ 'color': 'white', 'background-color': 'red', 'border': '1px black' });
+            $('.fill_number').css({ 'backgroundColor': 'rgb(70, 77, 96)' });
+            $table.find('td').css({ 'backgroundColor': 'rgb(38, 38, 50)' });
+      const ver = ['AUS', 'CAN', 'CEE', 'CZE', 'ESP', 'EUR', 'FRA', 'GBR', 'GER', 'HKG', 'ITA', 'JPN', 'KOR', 'NOR', 'NLD', 'RUS', 'TWN', 'USA'];
+            $('.fill_number').css({ 'backgroundColor': 'rgb(70, 77, 96)' });
+            $table.find('td').css({ 'backgroundColor': 'rgb(62, 59, 100)' });
+              $table.find('td').css({ 'backgroundColor': 'rgb(255, 254, 240)' });
+          $('.fill_number').css({ 'backgroundColor': 'rgb(70, 77, 96)' });
+          $table.find('td').css({ 'backgroundColor': 'rgb(62, 59, 100)' });
+d="noimg" style="display:none"><br><br><font color="red">简介中没有合适的截图，请提交到ptp图床，一行一个地址 (不要缩略图)：</font><textarea style="background-color:black; color:grey" class="long" rows='10' id="t1"></textarea><input type="button" value="go-ptp" id="goptp">
+<textarea class='long' rows='10' style="background-color:black;color:grey" id="t2"></textarea></div>`);
+              $('.fill_number').css({ 'backgroundColor': 'rgb(70, 77, 96)' });
+              $table.find('td').css({ 'backgroundColor': 'rgb(62, 59, 100)' });
+  } else if (judge_if_the_site_as_source() == 4) { //KG
+    if (GM_getValue('kg_info') !== undefined) {
+      raw_info = JSON.parse(GM_getValue('kg_info'));
+      raw_info = fill_raw_info(raw_info, 'KG');
+      var descr = kg_intro_base_content;
+        var bluray_info = kg_bluray_base_content;
+        var dvd_info = kg_dvd_base_content;
+        addTorrent(raw_info.torrent_url, raw_info.torrent_name, 'KG', announce);
+        GM_deleteValue('kg_info');
+                  "KG": "Kyrgyzstan",

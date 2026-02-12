@@ -26,3 +26,6 @@ scripts/dev-full.js
 scripts/generate-loader.js
 scripts/postbuild-copy.js
 scripts/verify-torrent-service.ts
+
+# Legacy extraction outputs (safe to delete/re-generate)
+legacy_extract/out/

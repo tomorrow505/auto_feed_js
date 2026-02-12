@@ -1,0 +1,5 @@
+  'mam': 'https://www.myanonamouse.net',
+var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'MTeam', 'HHClub', 'SportsCult'];
+    if (origin_site == 'mam') {
+    } else if (origin_site == 'bib' || origin_site == 'mam' || origin_site == 'SportsCult') {
+          if (origin_site != 'mam') {

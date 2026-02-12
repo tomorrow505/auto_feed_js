@@ -1,0 +1,8 @@
+if (site_url == 'https://npupt.com/upload.php') {
+  'NPUPT': { 'url': 'https://npupt.com/', 'enable': 1 },
+    } else if (n.nodeName == 'DIV' && site_url.match(/npupt/) && n.className == 'well small') {
+    } else if (n.nodeName == '#text' && site_url.match(/npupt/)) {
+      } else if (origin_site == 'NPUPT') {
+    if (origin_site == 'NPUPT') {
+        if (['NanYang', 'CMCT', 'iTS', 'NPUPT', 'xthor'].indexOf(forward_site) > -1) {
+    else if (forward_site == 'NPUPT') {

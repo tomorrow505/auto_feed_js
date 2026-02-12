@@ -1,0 +1,10 @@
+// @match        https://bluebird-hd.org/*
+if (site_url.match(/^.{3,30}userdetail/i) && !site_url.match(/bluebird-hd/)) {
+  'BlueBird': 'https://bluebird-hd.org/',
+if (site_url.match(/^https:\/\/bluebird-hd.org\/.*/)) {
+    getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/bluebird_rules.html', null, function (doc) {
+    getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/bluebird_faq.html', null, function (doc) {
+    getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/bluebird_bonus.html', null, function (doc) {
+      log_in(['BlueBird'], 'a[href*="browse.php"]');
+    if (origin_site == 'BlueBird') {
+        } else if (['IN', 'digitalcore', 'BlueBird', 'bwtorrents', 'HOU', 'BLU', 'Tik', 'Aither', 'DarkLand', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(origin_site) >= 0)

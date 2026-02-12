@@ -1,0 +1,15 @@
+    20221128：适配DTR/HONE转出。
+  'DTR': 'https://torrent.desi/',
+    if (['BHD', 'BLU', 'Tik', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX', 'IN'].indexOf(site) > -1) {
+  if (['PTP', 'xthor', 'HDF', 'BHD', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(site) > -1) {
+              if (e == 'DTR') {
+      log_in(['DTR', 'ZHUQUE'], 'nav[class="container mx-auto"]');
+    if (['ACM', 'HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
+      if (origin_site == 'DTR') {
+      if (['BHD', 'ACM', 'HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
+    if (['ACM', 'HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
+      if (mediainfo_lack && (origin_site == 'Monika' || origin_site == 'DTR')) {
+            if (origin_site == 'DTR') {
+        if (['PHD', 'avz', 'CNZ', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'BHD', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'OMG'].indexOf(origin_site) > -1) {
+        "soundtrack": "原声(OST)",
+        '3': 'Soundtrack',

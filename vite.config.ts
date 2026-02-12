@@ -1,11 +1,41 @@
 import { defineConfig } from 'vite';
 import monkey, { cdn } from 'vite-plugin-monkey';
 import preact from '@preact/preset-vite';
+import { webcrypto as nodeWebcrypto } from 'node:crypto';
 import pkg from './package.json' assert { type: 'json' };
+
+const localUserscriptUrl = (process.env.AUTOFEED_USERSCRIPT_URL || '').trim();
+const userscriptSelfUrl =
+    localUserscriptUrl ||
+    'https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js';
+
+// Node 16 doesn't expose Web Crypto on globalThis by default, but Vite uses `crypto.getRandomValues`.
+// This keeps `npm run dev` working without requiring users to upgrade Node.
+try {
+    const g = globalThis as any;
+    if (!g.crypto || typeof g.crypto.getRandomValues !== 'function') {
+        g.crypto = nodeWebcrypto as any;
+    }
+} catch { }
 
 export default defineConfig({
     plugins: [
         preact(),
+        // Dev-only: keep a stable local install URL for Tampermonkey.
+        // `vite-plugin-monkey` serves the userscript at `/auto_feed.user.js` (see build.fileName).
+        {
+            name: 'autofeed-userscript-alias',
+            configureServer(server) {
+                server.middlewares.use((req, _res, next) => {
+                    const u = req.url || '';
+                    const [path, qs] = u.split('?', 2);
+                    if (path === '/auto-feed-refactor.user.js') {
+                        req.url = '/__vite-plugin-monkey.install.user.js' + (qs ? `?${qs}` : '');
+                    }
+                    next();
+                });
+            }
+        },
         monkey({
             entry: 'src/main.ts',
             userscript: {
@@ -17,15 +47,13 @@ export default defineConfig({
                 license: 'GPL-3.0 License',
                 homepageURL: 'https://github.com/Gawain12/auto_feed_js',
                 supportURL: 'https://github.com/Gawain12/auto_feed_js/issues',
-                // Refactor branch publishes a rolling dev build as a pre-release tag `dev`.
-                // Stable releases should use tag `v*` which are handled by release.yml.
-                downloadURL: 'https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js',
-                updateURL: 'https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js',
+                // For local development you can override with:
+                // AUTOFEED_USERSCRIPT_URL=http://127.0.0.1:5174/auto-feed.user.js
+                downloadURL: userscriptSelfUrl,
+                updateURL: userscriptSelfUrl,
                 icon: 'https://kp.m-team.cc/favicon.ico',
                 'run-at': 'document-end',
                 'inject-into': 'content',
-                thanks: '感谢宝大、86大佬、贝壳等大佬提供邀请码;感谢宝大、86大佬提供友情赞助;感谢86大佬、手大、kmeng、黑白、甘蔗等大佬赠予PTP积分.',
-                contributor: 'daoshuailx/hollips/kmeng/wyyqyl/shmt86/sauterne',
                 match: [
                     'https://kp.m-team.cc/detail/*',
                     'https://kp.m-team.cc/upload*',
@@ -39,6 +67,7 @@ export default defineConfig({
                     'https://beyond-hd.me/*',
                     'https://hdbits.org/*',
                     'https://totheglory.im/*',
+                    'https://open.cd/*',
                     'https://pterclub.net/*',
                     'https://chdbits.co/*',
                     'https://ptchdbits.co/*',
@@ -53,13 +82,16 @@ export default defineConfig({
                     'https://movie.douban.com/subject/*',
                     'https://www.imdb.com/title/tt*',
                     'http*://*/*index.php?page=torrent-details*',
-                    'https://GreatPosterWall.com/torrents.php*',
+                    'https://GreatPosterWall.com/*',
+                    'https://greatposterwall.com/*',
                     'https://broadcasthe.net/*.php*',
                     'https://backup.landof.tv/*.php*',
                     'https://uhdbits.org/torrents.php*',
                     'https://filelist.io/*',
                     'https://iptorrents.com/torrent.php?id=*',
                     'https://redacted.ch/*',
+                    'https://redacted.sh/*',
+                    'https://orpheus.network/*',
                     'https://dicmusic.com/*',
                     'http*://*/*' // Catch-all for other PT sites
                 ],
@@ -82,12 +114,16 @@ export default defineConfig({
                 connect: ['*']
             },
             build: {
-                // Keep a stable userscript filename so Safari/production installs can always target the same path.
                 fileName: 'auto_feed.user.js',
-                externalGlobals: {
-                    jquery: cdn.jsdelivr('jQuery', 'dist/jquery.min.js'),
-                },
             },
         }),
     ],
+    build: {
+        rollupOptions: {
+            inlineDynamicImports: true,
+            output: {
+                format: 'iife',
+            },
+        },
+    },
 });

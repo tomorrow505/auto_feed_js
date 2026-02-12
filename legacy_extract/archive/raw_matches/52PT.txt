@@ -1,0 +1,4 @@
+  '52PT': { 'url': 'https://52pt.site/', 'enable': 1 },
+$('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['52PT'].url + 'bakatest.php'}" target="_blank"><b>52PT</b></a></div>`);
+        case '52PT':
+    else if (forward_site == '52PT') {

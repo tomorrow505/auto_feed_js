@@ -1,0 +1,7 @@
+// @match        https://omgwtfnzbs.org/details*
+  'OMG': 'https://omgwtfnzbs.org/',
+  if (site_url.match(/^https:\/\/nzbs.in\/releases\/.{36}|^https:\/\/house-of-usenet.*|https:\/\/omgwtfnzbs.org.*/)) {
+    var unsupported_sites = ['digitalcore', 'HD-Only', 'HOU', 'OMG', 'TorrentLeech', 'MTeam', 'UBits', 'PigGo'];
+    if (origin_site == 'OMG') {
+HD', 'avz', 'CNZ', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'BHD', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'OMG'].indexOf(origin_site) > -1) {
+      if (raw_info.origin_site == 'HOU' || raw_info.origin_site == 'OMG') {

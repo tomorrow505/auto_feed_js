@@ -1,0 +1,12 @@
+// @match        https://www.yemapt.org/*
+    20240526：适配新架构站点YemaPT(by lorentz)。
+if (site_url.match(/^https:\/\/www.yemapt.org/) && !site_url.match(/add\?/)) {
+  'YemaPT': { 'url': 'https://www.yemapt.org/', 'enable': 1 },
+  'YemaPT': 'https://www.yemapt.org/',
+  if (site_url.match(/^https:\/\/www.yemapt.org\/#\/torrent\/add\?/i)) {
+      if (site_url.split('#separator#')[0].match(reg) || site_url.match(/https:\/\/www.yemapt.org\/#\/torrent\/add\?/)) {
+        } else if (key == 'YemaPT') {
+  } else if (forward_site == 'YemaPT') {
+else if (origin_site == 'YemaPT') {
+      'ZHUQUE', 'MTeam', 'FNP', 'OnlyEncodes', 'YemaPT', 'DarkLand', '影', 'PTLGS', 'ReelFliX', 'RouSi'].indexOf(forward_site) < 0) {
+    else if (forward_site == 'YemaPT') {

@@ -1,0 +1,416 @@
+// ==UserScript==
+// @match        https://*/usercp.php?action=personal*
+// @require      https://greasyfork.org/scripts/453166-jquery/code/jquery.js?version=1105525
+// @require      https://greasyfork.org/scripts/28502-jquery-ui-v1-11-4/code/jQuery%20UI%20-%20v1114.js?version=187735
+// @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
+// @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
+// @version      2.1.0.5
+// ==/UserScript==
+    20230511：适配转入 RS (西电睿思)。
+    var poster = 'https:' + $('#bangumiInfo', doc).find('img:first').attr('src');
+        return $(e).find('span.tip').text() + ': ' + $(e).find('a[href*=person]').text();
+        return $(e).find('a[href*=character]').text().trim() + ': ' + $(e).find('a[href*=person]').text();
+    var number = parseInt($('tr.TableTorrent-rowDetail').length / 2);
+          var torrent_td = $(e).find('table[class="TableTorrentFileList Table"]').find('tr:first').find('td:first');
+    'Diverse': 'Other',
+    $('div.visible-desktop:first').find('span:first').append(`<br><br><input type="button" value="拉取图片" id="add_images"/>`);
+  var imgs_64 = GM_getValue('64imgs') !== undefined ? JSON.parse(GM_getValue('64imgs')) : [];
+      var byteCharacters = atob(b64Data);
+      for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+        var slice = byteCharacters.slice(offset, offset + sliceSize);
+        var byteNumbers = new Array(slice.length);
+          byteNumbers[i] = slice.charCodeAt(i);
+        var byteArray = new Uint8Array(byteNumbers);
+      $('div.visible-desktop:first').find('span:first').append(`<br><br><input type="button" value="拉取BASE64图片" id="add_64images"/>`);
+  menu_html = menu_html.replace(/Acteurs\/Réal\/Product/g, 'Actors/Real/Product');
+  menu_html = menu_html.replace(/Journaux/g, 'Newspapers');
+  menu_html = menu_html.replace(/Membres/g, 'Members');
+      text = text.replace('ans', 'years').replace('mois', 'month').replace('heure', 'hour').replace('jour', 'day').replace('semaine', 'week').replace('1 an', '
+    text = text.replace('ans', 'years').replace('mois', 'month').replace('heure', 'hour').replace('jour', 'day').replace('semaine', 'week').replace('1 an', '
+  $('#ft_basic_link').find('font:first').text('Basic');
+  $('#ft_basic_text').find('font:first').text('Basic');
+        var response = JSON.parse(res.responseText);
+  var user_page = 'https://www.morethantv.me' + $('#nav_userinfo').find('a:first').attr('href');
+  var user_page = $('#nav_userinfo').find('a:first').attr('href');
+  var user_page = $('#nav_userinfo').find('a:first').attr('href');
+var used_tl_rss_key = GM_getValue('used_tl_rss_key') === undefined ? '' : GM_getValue('used_tl_rss_key');
+var remote_server = GM_getValue('remote_server') === undefined ? null : JSON.parse(GM_getValue('remote_server'));
+var extra_settings = GM_getValue('extra_settings') === undefined ? default_extra_settings : JSON.parse(GM_getValue('extra_settings'));
+  'WT-Sakura': { 'url': 'https://wintersakura.net/', 'enable': 1 },
+  'RS': { 'url': 'https://resource.xidian.edu.cn/', 'enable': 1 },
+var site_order = GM_getValue('site_order') === undefined ? Object.keys(default_site_info).sort() : JSON.parse(GM_getValue('site_order')).split(',');
+  used_site_info = JSON.parse(used_site_info);
+var used_search_list = GM_getValue('used_search_list') === undefined ? default_search_list : JSON.parse(GM_getValue('used_search_list')).split(',');
+var used_common_sites = GM_getValue('used_common_sites') === undefined ? default_common_sites : JSON.parse(GM_getValue('used_common_sites')).split(',');
+var used_signin_sites = GM_getValue('used_signin_sites') === undefined ? default_common_sites : JSON.parse(GM_getValue('used_signin_sites')).split(',');
+var show_search_urls = GM_getValue('show_search_urls') === undefined ? default_show_search_urls : JSON.parse(GM_getValue('show_search_urls'));
+    格式形如：https://(站点域名)/usercp.php?action=personal
+  if (host_link.match(/https?:\/\/.*?\/usercp\.php\?action=personal/)) {
+var used_rehost_img_info = GM_getValue('used_rehost_img_info') === undefined ? default_rehost_img_info : JSON.parse(GM_getValue('used_rehost_img_info'));
+Directors: {director}
+Creators: {creator}
+Actors: {cast}
+  'version_info': '', //用于海豹
+      headers: {
+            const result = JSON.parse(response.responseText);
+      "headers": {
+      headers: {
+            var imgResultList = JSON.parse(data[2]).images;
+  var brs = '</br></br>';
+    div_style = ''; font_color = 'green'; text = ''; brs = '</br>';
+    div_style = ''; brs = '</br>';
+    div_style = ''; font_color = 'green'; text = ''; brs = '';
+      const zhuquejson = JSON.parse('{"page":1,"size":20,"type":"title","sorter":"id","order":"desc","keyword":"PTer","tags":[],"category":[],"medium":[],
+    brs = '';
+  container.append(`${brs}<div ${div_style} class="search_urls"><font ${font_size} color=${font_color}>${text}${site_search_lists}</font></div>`)
+      a += chnNumChar[parseInt(str[i])];
+      walkDOM(n.firstChild);
+      walk_cmct(n.firstChild);
+      walk_ptp(n.firstChild);
+  if (site_url.match(/^https?:\/\/.*\/.*(upload|create|offer|viewoffers).*?(php)?#separator#/i)) {
+function blurayVersion(name) {
+      sub_str = ' *第' + numToChinese(parseInt(sub_str[1])) + '季 第' + parseInt(sub_str[2]) + '集*';
+      sub_str = ' *第' + numToChinese(parseInt(sub_str[1])) + '季';
+        sub_str += ' 全' + parseInt(descr.match(/◎集.{1,10}数.*?(\d+)/)[1]) + '集*'
+            var response = JSON.parse(res.responseText);
+      var color_tmp = parseInt(data[iii]).toString(16);
+    } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?MPEG Video[\s\S]{1,10}Format Version.*?Version 4/i)) {
+    } else if (raw_info.descr.match(/Video[\s\S]*?Format.*?MPEG Video[\s\S]{1,10}Format Version.*?Version 2/i)) {
+      textarea.style.width = `${parseInt(width) + 90}px`;
+      textarea.style.width = `${parseInt(width) + 35}px`;
+      textarea.style.width = `${parseInt(width) + 55}px`;
+    const headers = {
+      headers,
+          const newSessionId = res.responseHeaders.match(/X-Transmission-Session-Id:\s*(.+)/i);
+            headers: {
+              ...headers,
+              let result = JSON.parse(res2.responseText);
+          resolve(JSON.parse(res.responseText));
+function qbittorrentRequest(host, path, parameters) {
+  var data = null, headers = {}, info = '添加种子';
+    headers = { "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8" };
+    data = new URLSearchParams(parameters).toString();
+    data = parameters;
+      headers: headers,
+            cursor: pointer;
+            cursor: pointer;
+            transform: translate(-50%, -50%); /* Centers the element perfectly */
+        #sidebar ul li:first-child a {
+      size_ = parseInt(size) / 1024 / 1024 / 1024;
+      size_ = parseInt(descr.match(/size[^\d]{0,20}(\d+\.\d+).+GiB/i)[1]);
+    'headers': {
+      "Content-Type": 'application/x-www-form-urlencoded; charset=UTF-8',
+        let doc = page_parser(responseDetail.responseText);
+function page_parser(responseText) {
+  return (new DOMParser()).parseFromString(responseText, 'text/html');
+        let response = JSON.parse(responseDetail.responseText);
+  pt_icos = JSON.parse(decodeURIComponent(escape(atob(pt_icos))));
+        try { raw_data.year = parseInt($('#content>h1>span.year', html).text().slice(1, -1)); } catch (e) { raw_data.year = '' }
+        try { raw_data.average = parseFloat($('#interest_sectl', html).find('[property="v:average"]').text()); } catch (e) { raw_data.average = '' }
+        try { raw_data.votes = parseInt($('#interest_sectl', html).find('[property="v:votes"]').text()); } catch (e) { raw_data.votes = '' }
+    try { raw_data.year = parseInt($('#content>h1>span.year', html).text().slice(1, -1)); } catch (e) { raw_data.year = '' }
+    try { raw_data.average = parseFloat($('#interest_sectl', html).find('[property="v:average"]').text()); } catch (e) { raw_data.average = '' }
+    try { raw_data.votes = parseInt($('#interest_sectl', html).find('[property="v:votes"]').text()); } catch (e) { raw_data.votes = '' }
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+              data = JSON.parse(response.responseText).data;
+              data = JSON.parse(response.responseText).image;
+              data = JSON.parse(response.responseText).image;
+    if (r.match(/value="firsttime"/)) {
+        var length = parseInt(r.match(/4:name(\d+):/)[1]);
+        var index = parseInt(r.search('4:name'));
+        var new_date = parseInt(date) + 600 + parseInt(Math.random() * (600), 10);
+    overrideMimeType: "text/plain; charset=x-user-defined",
+  $('#searchbars').find('li').each(function () {
+  $('#userssearch').val('Users').attr('onfocus', "if (this.value == 'Users') { this.value = ''; }").attr('onblur', "if (this.value == '') { this.value = 'Users'; }").attr('placeholder', "Users")
+      "Fichiers": "Files",
+      "ans": "years",
+    $('#rip_specifics').find('td:eq(0)').text('Filters :');
+                                     <div><strong>评分:</strong> ${data_1.vote_average} / 10 From ${data_1.vote_count} Users</div>
+    'ans': 'years',
+    'Personnels': 'Personal',
+    'Affiches des torrents': 'Torrent posters',
+    'Voir les affiches annexes': 'Show the accompanying posters',
+    'Affiches des collections': 'Collection posters',
+    'Télécharger les .torrent en fichiers .txt': 'Download .torrent files as .txt files',
+    'Lister en premier les messages non lus': 'List unread messages first',
+    'Sélectionnez ce que vous souhaitez dévoiler aux autres membres.': 'Select what you want to reveal to other members.',
+                            <li>at least 8 characters,</li>
+        var name = $(this).find('td:eq(2)').find('a').first().text();
+          var number = parseInt(name.match(/S(\d+)/i)[1]);
+    $('#coverstable').find('tr:gt(0)').each(function () {
+        var name = $(this).find('td:eq(1)').find('a').first().text();
+          var number = parseInt(name.match(/S(\d+)/i)[1]);
+    "    cursor: pointer;",
+    ".tablesorter-default thead .headerSortUp,",
+    ".tablesorter-default thead .tablesorter-headerSortUp,",
+    ".tablesorter-default thead .headerSortDown,",
+    ".tablesorter-default thead .tablesorter-headerSortDown,",
+    "    cursor: default;",
+      var search_name = $container.find('span.basic-movie-list__movie__title-row:eq(0)').find('a').first().text();
+        div.insertBefore(new_div, div.firstElementChild);
+      rates = (parseFloat(rates) * 2).toFixed(1);
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB7F3FFAAABAHRSTlP+Aff/////K//P////R/8Djf8XsQID//8EkW8C/yn/U////2r//xv/c/+l////2v///wH//////////wVA/////wL//4n/////LUz//zv/////////////
+      $('h2').first().prepend(`<a  target='_blank' href="https://movie.douban.com/subject/${data.id}">[${data.title.split(' ')[0]}] </a>`)
+      $('h2').first().find('a:eq(1)').prepend(`<a  target='_blank' href="https://movie.douban.com/subject/${data.id}">[${data.title.split(
+                            <td colspan="2" id="actors"></td>
+      $('div.collapsable:contains("About this film (from IMDB)")').parent().find('img').first().css({ "width": "250px", "max-height": "660px" });
+      var search_name = $container.find('a').first().text();
+    var name = $td.find('a').first().text();
+          var number = parseInt(name.match(/S(\d+)/i)[1]);
+    var name = $td.find('a').first().text();
+          var number = parseInt(name.match(/S(\d+)/i)[1]);
+    navbar_html = navbar_html.replace(/Auteurs/g, 'Authors');
+    navbar_html = navbar_html.replace(/Acteurs/g, 'Actors');
+    navbar_html = navbar_html.replace(/Mes Flux RSS/g, 'My RSS Feeds');
+    origin_html = origin_html.replace(`Le fait de mettre un lien vers une API permet de lier le torrent à la médiàthèque et de générer une prez si vous la laissez vide pour les torrents fil
+    origin_html = origin_html.replace(`pour afficher le lien vers la vidéo dans les détails du Torrent`, '链接将在种子详细信息中心显示指向视频的链接');
+      $("#firstpanel p.menu_head").click(function () {
+    origin_html = origin_html.replace(`Votre annonce URL personnelle pour créer votre .torrent (activez l'option "Torrent Privé") :`, '您的个人Announce URL用于创建种子文件，请重新制作种子！');
+    replace_text($('td:contains(Année)').first(), 'Année', 'Year');
+    replace_text($(`p:contains(Si vous êtes un re-posteur, respectez le travail des releasers en mettant la bonne source et le tag.)`), `Si vous êtes un re-posteur, respectez le travail des releasers en mettant la
+ bonne source et le tag.`, 'If you are a reposter, respect the work of the releasers by putting the correct source and tag.');
+    replace_text($(`span:contains(VO (Version Originale, non française))`).last(), `VO (Version Originale, non française)`, 'VO (Original Version, not French)');
+    replace_text($(`span:contains(VOF (Version Originale Française (France et Belgique)))`).last(), `(Version Originale Française (France et Belgique))`, '(Original French Version (France and Belgium))');
+    replace_text($(`span:contains(VOQ (Version Originale Québecoise)`).last(), `(Version Originale Québecoise)`, '(Original Quebec version)');
+    replace_text($(`span:contains(VF? (Version Française, origine du doublage inconnue))`).last(), `(Version Française, origine du doublage inconnue)`, '(French version, origin of dubbing not specified)');
+    replace_text($(`span:contains(VFI (Version Française Internationale = 1 seul doublage français existant))`).last(), `(Version Française Internationale = 1 seul
+ doublage français existant)`, '(French International Version = only 1 existing French dubbing)');
+    replace_text($(`span:contains((Cocher quelle version VF est incluse en plus de multi (VFF, VFQ)`).last(), `(Cocher quelle version VF est incluse en plus de multi (VFF, V
+FQ)`, '(Check which VF version is included in addition to multi(vff,vfq)');
+  var table_html = $('table.fblock').first().html();
+  $('table.fblock').first().html(table_html);
+  } else if (site_url.match(/getrss.php/)) {
+    td_html = $('td:contains(Тип ссылки в RSS)').last().html();
+    $('td:contains(Тип ссылки в RSS)').last().html(td_html);
+    repTxt('td', 'Тип ссылки в RSS', 'RSS link type');
+    repTxt('button', 'Сгенерировать RSS ссылку', 'Generate RSS link');
+    $('input[value="Подтвердить пользователей"]').val('Verify Users');
+            <br>Welcome to our project for connoisseurs of quality audio and video content. Please read these rules carefully and <a class="altlink" href="faq.php">FAQ</a>.<br
+      var varsString = "";
+      ajax.sendAJAX(varsString);
+      $('#ajax').find('table').first().html($('#transfer', doc).html().replace(searchRegExp, current_coin).replace('hourly_coin', hourly_bonus));
+if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#mediainfo|#dealimg|#signin)/)) {
+          headers: {
+            "Sec-Fetch-Mode": 'cors',
+          headers: {
+            var jsonData = JSON.parse(fileContent);
+    $('#setting').append(`<label><b>TorrentLeech的rsskey(<a href="https://wiki.torrentleech.org/doku.php/rss_-_how_to_automatically_download_torrents_with_utorrent" target="_blank"><font color="red">依照教程</font></a>进行设置):</b></l
+abel><input type="text" name="tl_rss_key" style="width: 300px; margin-left:5px" value=${used_tl_rss_key}><br><br>`);
+      GM_setValue('used_tl_rss_key', $(`input[name="tl_rss_key"]`).val());
+              const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
+              var creators = await getFullCredits(raw_info.url);
+              descr = descr.format({ 'creator': creators });
+              var actors = Array.from($('div.title-cast__grid', doc).find('a[data-testid="title-cast-item__actor"]:lt(8)')).map(function (e) {
+              descr = descr.format({ 'cast': actors });
+      var start = parseInt($('#start').val() ? $('#start').val() : 1);
+      var encode_index = parseInt($('#number').val());
+      var step = parseInt($('#step').val());
+            <td colspan="2" id="actors"></td>
+          let doc = page_parser(responseDetail.responseText);
+          var creators = Array.from($('#writer', doc).next().find('td.name').map((i, e) => {
+          resolve(creators);
+  return parseInt($('#content>h1>span.year', doc).text().slice(1, -1));
+    return parseInt($('#info span.pl:contains("集数")', doc)[0].nextSibling.textContent.trim());
+  const ratingAverage = parseFloat(
+  const ratingVotes = parseInt($interest.find('[property="v:votes"]').text());
+      'Douban Users': {
+        demographic: 'Douban Users',
+function getWriters(doc) {
+        headers: {
+            const e = JSON.parse(x.responseText.slice(16, -1));
+          year: parseInt($title.find('.year').text().match(/\d+/)[0]),
+            name: $(e).find('li:first-of-type').text().trim(),
+  directors = getDirector(doc);
+  writers = getWriters(doc);
+    directors: directors,
+    writers: writers,
+core.rating) ? `◎IMDb评分  ${Number(info.IMDbScore.rating).toFixed(1)}/10 from ${addComma(info.IMDbScore.ratingCount)} users\n` : '') +
+re && info.DoubanScore.rating) ? `◎豆瓣评分　${info.DoubanScore.rating}/10 from ${addComma(info.DoubanScore.ratingCount)} users\n` : '') +
+      headers: {
+          resolve(JSON.parse(res.responseText).show_url);
+      if (!location.href.match(/usercp.php\?action=persona|pter.*upload.php|piggo.me.*upload.php|^https:\/\/.*.douban.com|^https?:\/\/\d+.\d+.\d+.\d+.*5678/)) {
+  $('input[name=url]:first').after(`<input type="button" value="获取简介" class="get_descr" data="url" />`);
+    var ch_name = $('h1').find('span:first').text().split(' ')[0];
+        walk_Dom(n.firstChild);
+    info += '\n◎豆瓣评分：' + `${$('strong.rating_num').text()}/10 from ${$('div.rating_sum').text().match(/\d+/)[0]} users`;
+    var introduction = $('#link-report').find('div.intro:first');
+        raw_info.torrent_name = $('a[href*="download.php"]:first').text();
+      raw_info.ptp_poster = $('#covers').find('img').first().attr("src");
+          overrideMimeType: "text/plain; charset=x-user-defined",
+              var length = parseInt(r.match(/4:name(\d+):/)[1]);
+              var index = parseInt(r.search('4:name'));
+      raw_info.name = $('div[id*=files_]').find('tr:eq(0)').find('td:first').text().replace(/\//g, '');
+      tbody = $('#mcol').find('table:first').find('table:contains("Info Hash")')[0];
+      raw_info.name = $(tbody).find('td:contains("Name"):first').next().text();
+      raw_info.name = $('h5:first').text().trim();
+      raw_info.name = $('div.bbWrapper').find("span:first").text().trim();
+      raw_info.name = $('torrent').find('a').first().text().trim();
+      raw_info.name = $('#highlighted').find('a[href*=download]').first().text().split('/').pop().trim();
+      raw_info.name = $('td.detail:contains("Torrent"):first').next().text();
+        raw_info.descr += '[img]' + $('td.detail:contains("Poster"):first').next().find('img').attr('src') + '[/img]\n';
+        var show_url = $('td.detail:contains("URL"):first').next().find('a').attr('href').split('url=').pop().replace(/%2F/g, '/').replace(/%3A/, ':');
+      $('td.detail:contains("Screenshots"):first').next().find('a').map((index, e) => {
+        $('h4').first().click();
+      raw_info.name = $('span[class="torrent-category badge-extra"]:first').text().replace(/\(|\)/g, '').replace(/English-/, '-');
+            $('h2:first').prepend(`<a href="${douban_prex}${data.id}" target="_blank">[${data.title.split(' ')[0]}]</a> `);
+            var $div = $('div.torrent_description').find('div.body').find('div').first();
+            $('td>h2:first').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank">${data.data.title.split(' ')[0]}[${s
+            $('h2:first').parent().find('i:eq(-1)').text(`${data.data.summary.replace(/ 　　/g, '')}`);
+            $('h2:first').parent().find('i:eq(-1)').append($a);
+      raw_info.name = $('div.ant-card-body:eq(0)').find('span:first').text();
+          r = parseInt(a.substr(0, 2), 16);
+            c = parseInt(a.substr(j, 2), 16) ^ r;
+          $('h4:first').after('<h4 style="margin-left:5px;"><font color="red"><--Mediainfo/BDinfo加载成功！！！--></font></h4>');
+            $('img[src="/styles/images/starbig.png"]').first().parent().append(` | 豆：${data.data.average}`);
+      raw_info.name = $('td.header:contains("Name"):first').next().text();
+        raw_info.torrentName = $('#bookmark0').parent().find('a:first').text();
+          var authors = ['lolihouse', 'jsum', 'Raws', 'KoushinRip', 'ANK', 'VCB-Studio', 'VCB', 'LittlePox', 'LittleBakas', 'ANE', 'Reinforce
+          authors.forEach((item) => {
+          headers: {
+            "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+      raw_info.version_info = $(`#group_torrent_header_${torrent_id}`).find('#PermaLinkedTorrentToggler').text();
+                                <div><strong>评分:</strong> ${data_1.vote_average} / 10 From ${data_1.vote_count} Users</div>
+                return parseInt(size / 1024 / 1024);
+                return parseFloat((size / 1024 / 1024 / 1024).toFixed(2));
+                var length = parseInt(t.match(/4:name(\d+):/)[1]);
+                var index = parseInt(t.search('4:name'));
+                      var name_length = parseInt(e.match(/pathl(\d+)/)[1]);
+                      var name_index = parseInt(e.search('4:path'));
+      raw_info.name = $('h2:first').text().split('[')[0];
+      raw_info.descr = raw_info.descr.replace('[img]https://hdts.ru/avatars/kralimarko.png[/img]', '');
+            if (info.match(/Overall bit rate|Stream size|Format version/)) {
+      if (used_tl_rss_key) {
+        raw_info.torrent_url = `https://www.torrentleech.org/rss/download/${torrent_id}/${used_tl_rss_key}/${torrent_name}`;
+            ob_url = $(e).find('a:first').attr('href');
+            tr = $('td:contains(标签)').first().parent();
+            var number = parseInt(raw_info.name.match(/S(\d+)/i)[1]);
+    if (upload_site.match(/offers?.php/)) {
+      const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
+            let data = JSON.parse(response.responseText);
+            let parser = new DOMParser();
+            let doc = parser.parseFromString(response.responseText, "text/html");
+                let parser = new DOMParser();
+                let doc = parser.parseFromString(response2.responseText, "text/html");
+                info = JSON.parse(info);
+            let data = JSON.parse(response.responseText);
+        upload_site = upload_site.replace('offers.php', 'offers.php?add_offer=1');
+        upload_site = upload_site.replace('viewoffers.php', 'offer.php');
+        upload_site = upload_site.replace('upload.php', 'offers.php?add_offer=1');
+      if (blurayVersion(raw_info.name) && raw_info.small_descr.indexOf(blurayVersion(raw_info.name).replace(/【|】/g, '')) < 0) {
+        raw_info.small_descr = raw_info.small_descr + '    ' + blurayVersion(raw_info.name);
+          raw_info.small_descr = raw_info.small_descr + ` [第${parseInt(s1)}-${parseInt(s2)}季]`;
+          raw_info.small_descr = raw_info.small_descr + ` [第${parseInt(season)}季]`;
+            raw_info.small_descr = raw_info.small_descr + `[${parseInt(number)}集全]`;
+          raw_info.small_descr = raw_info.small_descr + ` [第${parseInt(ep1)}-${parseInt(ep2)}集]`;
+          raw_info.small_descr = raw_info.small_descr + ` [第${parseInt(episode)}集]`;
+        raw_info.json = JSON.parse(raw_info.json);
+          $(e).find('td:first').css({ "border-left": "none" });
+        var data = JSON.parse(raw_info.json);
+        var categoryJSON = parseInt(releaseJSON.response.group.categoryId);
+              { 'name': 'composers', 'index': 2 },
+              var releaseTypeIndexJSON = parseInt(releaseJSON.response.group.releaseType);
+        var data = JSON.parse(raw_info.json);
+        case 'RS':
+            if (parseFloat(frame_rate) >= 50.0) {
+            $('span:contains("請選擇國家/地區")').first().parent().parent().parent().parent().after(`<p id="region_tips">当前资源的来源国家/地区为：${region}</p>`);
+              data.results = data.results.sort(compare('first_air_date'));
+                $td1 = $(`<td style='width:150px;'>${e.first_air_date}</td>`);
+      $('textarea:first').val(raw_info.descr);
+          $div.find('table').first().slideDown(1000);
+              data.results = data.results.sort(compare('first_air_date'));
+                $td1 = $(`<td>${e.first_air_date}</td>`);
+      $('#userSearch').attr('id', 'search');
+        year = parseInt(year);
+        var years = [2011, 2001, 1981, 1961, 1941, 1921, 1901, 1851, 1800];
+        years.forEach((item, index) => {
+        year = parseInt(year);
+        var years = [2011, 2001, 1981, 1961, 1941, 1921, 1901, 1851, 1800];
+        years.forEach((item, index) => {
+        try { $('#season_number').val(parseInt(raw_info.name.match(/S(\d+)/i)[1])) } catch (err) { $('#season_number').val("1") }
+        try { $('#episode_number').val(parseInt(raw_info.name.match(/E(\d+)/i)[1])) } catch (err) { }
+            try { $('#season_number').val(parseInt(raw_info.name.match(/S(\d+)/i)[1])) } catch (err) { $('#season_number').val("1") }
+            try { $('#episode_number').val(parseInt(raw_info.name.match(/E(\d+)/i)[1])) } catch (err) { }
+              data.results = data.results.sort(compare('first_air_date'));
+                $td1 = $(`<td>${e.first_air_date}</td>`);
+          var size = parseFloat(get_size_from_descr(raw_info.descr));
+                subtitle_info = subtitle_info.split(/FILES:|CHAPTERS:/i)[0].trim();
+            descr = descr.format({ 'runtime': parseInt(duration[0]) * 60 + parseInt(duration[1]) });
+            const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
+              runtime = parseInt(runtime[1]) * 60 + parseInt(runtime[2])
+        try { $('#season_number').val(parseInt(raw_info.name.match(/S(\d+)/i)[1])) } catch (err) { $('#season_number').val("1") }
+        try { $('#episode_number').val(parseInt(raw_info.name.match(/E(\d+)/i)[1])) } catch (err) { $('#episode_number').val(0) }
+              data.results = data.results.sort(compare('first_air_date'));
+              $td1 = $(`<td>${e.first_air_date}</td>`);
+            try { $('#season').val(parseInt(raw_info.name.match(/S(\d+)/i)[1])); } catch (err) { }
+              $('#image').val($('a[href*=tt_ov_i]', doc).first().parent().find('img').attr('src').split('_V1_')[0] + '_V1_.jpg');
+            $('input#country').val($('li.ipc-metadata-list__item:contains("Countr")', doc).find('a').first().text().replace('United States', 'USA').replace('United Kingdom', 'UK'));
+                $('input[name="image"]').val($('a[href*=tt_ov_i]', doc).first().parent().find('img').attr('src').split('_V1_')[0] + '_V1_.jpg');
+        for (var i = 0; i < res.directors.length; i++) {
+          artists.push([res.directors[i], 1]);
+        for (var i = 0; i < res.writers.length; i++) {
+          artists.push([res.writers[i], 2]);
+        for (var i = 0; i < res.producers.length; i++) {
+          artists.push([res.producers[i], 3]);
+        for (var i = 0; i < res.composers.length; i++) {
+          artists.push([res.composers[i], 4]);
+        for (var i = 0; i < res.actors.length; i++) {
+          artists.push([res.actors[i], 5]);
+        for (var i = 0; i < res.cinematographers.length; i++) {
+          artists.push([res.cinematographers[i], 6]);
+            var res = JSON.parse(d);
+                $('textarea[name="mediainfo[]"]').first().val(infos.mediainfo);
+                var start = parseInt($('#start').val() ? $('#start').val() : 1);
+                var end = parseInt($('#end').val() ? $('#end').val() : raw_info.images.length);
+                var start = parseInt($('#start').val() ? $('#start').val() : 1);
+                var end = parseInt($('#end').val() ? $('#end').val() : raw_info.images.length);
+      if (raw_info.version_info) {
+        if (raw_info.version_info.match(/scene/i)) {
+        console.log(raw_info.version_info)
+          'Masters of Cinema': 'masters_of_cinema',
+          if (raw_info.version_info.includes(item)) {
+        if (raw_info.version_info.includes('4K Remaster')) {
+        } else if (raw_info.version_info.includes('Remaster')) {
+        if (labels.db || raw_info.small_descr.match(/杜比|dolby version/i)) {
+                data.results = data.results.sort(compare('first_air_date'));
+                  $td1 = $(`<td style="width: 120px">${data.results[i].first_air_date}</td>`);
+                  var year = fr_data.first_air_date ? fr_data.first_air_date : fr_data.release_date;
+        $('label[for="vof"]').text('VOF (Original French Version = film in French language)');
+        $('label[for="vo"]').text('VO (Original Version, not French)');
+        $('label[for="vf"]').text('VF? (French version, origin of dubbing not specified)');
+        $('label[for="vff"]').text('VFF (French version of France)');
+        $('label[for="vfq"]').text('VFQ (French version of Quebec)');
+        $('label[for="vfi"]').text('VFI (French International Version = only 1 existing French dubbing)');
+g-top:5px">原标题：<font color="red">${raw_info.name}</font><br> 禁发布：<font color="red">Ozlem, RARBG, FGT (Trumpable), STUTTERSHIT, LiGaS, DDR, Zeus, TBS, aXXo, CrEwSaDe, DNL, EVO (WEB-DLs are permitted), FaNGDiNG0, HD2DVD, HDTime, iPlanet, KiNGDO
+        $('#upload_table').find('tbody:first').prepend(`<tr><td style="text-align:right">Genres</td><td id="genres"></td></tr>`)
+        $('#upload_table').find('tbody:first').prepend(`<tr><td style="text-align:right">IMDB</td><td><a href=${raw_info.url} target="_blank">${raw_info.url}</a></
+      $('#upload_table').find('tbody:first').prepend(`<tr><td style="text-align:right">Full Name</td><td>${raw_info.name}</td></tr>`);
+          $('#image').val($('a[href*=tt_ov_i]', doc).first().parent().find('img').attr('src').split('_V1_')[0] + '_V1_.jpg');
+          title += `Season ${parseInt(show_info.match(/S(\d+)/)[1])}`;
+      $('.create_form').find('tbody').first().prepend(`<tr><td style="text-align:right"><b>Name:</b></td><td>${raw_info.name}</td></tr>`);
+    else if (forward_site == 'RS') {
+      raw_info = JSON.parse(GM_getValue('hdcity_info'));
+          if (selItem == $(this).find('option:first').val()) {
+      raw_info = JSON.parse(GM_getValue('kg_info'));
+    var page = parseInt(title.split(' ').pop());
+        const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
+        var creators = await getFullCredits(raw_info.url);
+        descr = descr.format({ 'creator': creators });
+        var actors = Array.from($('div.title-cast__grid', doc).find('a[data-testid="title-cast-item__actor"]:lt(8)')).map(function (e) {
+        descr = descr.format({ 'cast': actors });
+      raw_info = JSON.parse(GM_getValue('btn_info'));
+        $('#content').find('table').first().hide();
+                info = info.format({ 's': parseInt(name.match(/S(\d+)/)[1]) });
+                info = info.format({ 'e': parseInt(name.match(/E(\d+)/)[1]) });
+        $('#content').find('table').first().hide();
+      raw_info = JSON.parse(GM_getValue('avz_info'));
+    $('input[name=anon_upload]:first').attr('checked', true);
+      raw_info = JSON.parse(GM_getValue('task_info'));
+            $('#season').val(parseInt(season_episode[1]));
+            $('#episode').val(parseInt(season_episode[2].replace(/e/i, '')));
+      $('#tvdb_parse_title').click((e) => {
+      if (raw_info.name.match(/Masters of Cinema/i) || raw_info.small_descr.match(/Masters of Cinema/i)) {
+        addedition('Masters of Cinema')
+      if (labels.db || raw_info.small_descr.match(/杜比|dolby version/i)) {

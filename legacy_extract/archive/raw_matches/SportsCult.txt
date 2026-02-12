@@ -1,0 +1,9 @@
+// @match        https://sportscult.org/*
+  'SportsCult': 'https://sportscult.org/'
+ban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'MTeam', 'HHClub', 'SportsCult'];
+  if (site_url.match(/^http(s*):\/\/sportscult.org\/.*torrent-details/i)) {
+    if (origin_site == 'SportsCult') {
+      raw_info.torrent_url = 'https://sportscult.org/' + $('a[href^="download.php"]').attr('href');
+      raw_info.small_descr = '转自SportsCult'
+    if (remote_server !== null && origin_site !== 'SportsCult') {
+    } else if (origin_site == 'bib' || origin_site == 'mam' || origin_site == 'SportsCult') {

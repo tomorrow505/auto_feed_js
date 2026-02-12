@@ -2,9 +2,9 @@
 import { h } from 'preact';
 import { useState, useEffect } from 'preact/hooks';
 import { SettingsService, AppSettings } from '../services/SettingsService';
-import { DEFAULT_QUICK_SEARCH_TEMPLATES } from '../services/QuickSearchTemplateService';
+import { DEFAULT_QUICK_SEARCH_TEMPLATES } from '../common/quickSearch';
 import { SiteCatalogService } from '../services/SiteCatalogService';
-import { RemoteServerTestService } from '../services/RemoteServerTestService';
+import { RemoteDownloadService } from '../services/RemoteDownloadService';
 import { i18n, SupportedLang } from './i18n';
 
 export const App = () => {
@@ -17,11 +17,10 @@ export const App = () => {
         pixhostApiKey: '',
         freeimageApiKey: '',
         gifyuApiKey: '',
-        hdbImgApiKey: '',
-        hdbImgEndpoint: 'https://hdbimg.com/api/1/upload',
         doubanCookie: '',
         tmdbApiKey: '',
         chdBaseUrl: 'https://chdbits.co/',
+        tlBaseUrl: 'https://www.torrentleech.org/',
         ptpShowDouban: true,
         ptpShowGroupName: true,
         ptpNameLocation: 1,
@@ -30,6 +29,7 @@ export const App = () => {
         showQuickSearchOnDouban: true,
         showQuickSearchOnImdb: true,
         defaultAnonymous: false,
+        autoDownloadAfterUpload: true,
         remoteSidebarOpacity: 0.92,
         settingsPanelOpacity: 0.95,
         popupOpacity: 0.96,
@@ -53,6 +53,7 @@ export const App = () => {
         },
         uiLanguage: 'zh'
     });
+    const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
     const [remoteModalOpen, setRemoteModalOpen] = useState(false);
     const [remoteForm, setRemoteForm] = useState<{
@@ -76,7 +77,12 @@ export const App = () => {
     const [quickPresetInput, setQuickPresetInput] = useState('');
 
     const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
-    const getPanelSize = () => ({ w: 720, h: 560 }); // Slightly taller for reordered content
+    const getPanelSize = () => {
+        // Keep it compact, but still wide enough to show >= 8 site tiles per row.
+        const w = Math.min(880, Math.min(980, window.innerWidth - 24));
+        const h = Math.min(760, window.innerHeight - 24);
+        return { w: Math.max(660, w), h: Math.max(540, h) };
+    };
 
     useEffect(() => {
         const handleKey = (e: KeyboardEvent) => {
@@ -85,6 +91,12 @@ export const App = () => {
             }
         };
         window.addEventListener('keydown', handleKey);
+
+        const openSettings = () => {
+            setIsOpen(true);
+            setActiveTab('dashboard');
+        };
+        window.addEventListener('autofeed:open-settings', openSettings as any);
 
         SettingsService.load().then((loaded) => {
             setSettings(loaded);
@@ -95,7 +107,10 @@ export const App = () => {
             }
         });
 
-        return () => window.removeEventListener('keydown', handleKey);
+        return () => {
+            window.removeEventListener('keydown', handleKey);
+            window.removeEventListener('autofeed:open-settings', openSettings as any);
+        };
     }, []);
 
     useEffect(() => {
@@ -152,7 +167,15 @@ export const App = () => {
     }, [drag]);
 
     const handleSaveSettings = async () => {
-        await SettingsService.save(settings);
+        setSaveState('saving');
+        try {
+            await SettingsService.save(settings);
+            setSaveState('saved');
+            window.setTimeout(() => setSaveState('idle'), 1500);
+        } catch {
+            setSaveState('error');
+            window.setTimeout(() => setSaveState('idle'), 1800);
+        }
     };
 
     const setAndPersist = (next: AppSettings) => {
@@ -160,37 +183,43 @@ export const App = () => {
         SettingsService.save(next).catch(() => { });
     };
 
+    const applyRemoteSidebarOpacity = (value: number) => {
+        const sidebar = document.getElementById('autofeed-remote-sidebar') as HTMLElement | null;
+        if (!sidebar) return;
+        const opacity = clamp(Number(value) || 0.92, 0.3, 1);
+        sidebar.style.opacity = String(opacity);
+    };
+
     const toggleLanguage = () => {
         const next = settings.uiLanguage === 'zh' ? 'en' : 'zh';
         setAndPersist({ ...settings, uiLanguage: next as any });
     };
 
-    const allSites = SiteCatalogService.getAllSites();
+    const allSites = SiteCatalogService.getSupportedSites();
     const t = i18n[settings.uiLanguage as SupportedLang] || i18n.en;
 
-    // Group sites following legacy wiki taxonomy: NP (NexusPHP), Unit3D, GZ (Gazelle), plus "Other".
-    // This only affects how they are shown in settings, not runtime matching/engines.
-    const groupLabel = (site: any): string => {
-        const type = site.type as string;
-        if (['NexusPHP', 'MTeam', 'CHDBits'].includes(type)) return 'NP';
-        if (['Unit3D', 'Unit3DClassic', 'BHD'].includes(type)) return 'Unit3D';
-        if (['Gazelle', 'PTP', 'HDB', 'KG'].includes(type)) return 'GZ';
-        if (['Avistaz'].includes(type)) return 'AVZ';
-        return 'Other';
+    const sortSites = (sites: any[]) => sites.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    const getSiteFavicon = (site: any) => {
+        try {
+            const base =
+                site.baseUrl ||
+                (site.keywords && site.keywords.length
+                    ? `https://${String(site.keywords.find((k: string) => k.includes('.') && !k.includes('/')) || site.keywords[0]).replace(/^https?:\/\//, '').replace(/\/.*$/, '')}/`
+                    : '');
+            if (!base) return '';
+            return new URL('/favicon.ico', base).href;
+        } catch {
+            return '';
+        }
     };
-
-    const groupSites = (sites: any[]) => {
-        const groups: Record<string, any[]> = { NP: [], Unit3D: [], GZ: [], AVZ: [], Other: [] };
-        for (const s of sites) {
-            const g = groupLabel(s);
-            if (!groups[g]) groups[g] = [];
-            groups[g].push(s);
+    const getSiteAbbr = (name: string) => {
+        const n = String(name || '').trim();
+        if (!n) return '';
+        if (/[A-Za-z0-9]/.test(n)) {
+            const s = n.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+            return (s.slice(0, 4) || n.slice(0, 4)).toUpperCase();
         }
-        const order = ['NP', 'Unit3D', 'GZ', 'AVZ', 'Other'];
-        for (const k of Object.keys(groups)) {
-            groups[k] = groups[k].slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
-        }
-        return order.map((k) => ({ key: k, items: groups[k] || [] })).filter((g) => g.items.length);
+        return n.slice(0, 2);
     };
 
     const getQuickSearchPresetLabel = (line: string) => {
@@ -213,17 +242,22 @@ export const App = () => {
     const toggleSite = (name: string) => {
         const set = new Set(settings.enabledSites || []);
         if (set.has(name)) set.delete(name); else set.add(name);
-        setSettings({ ...settings, enabledSites: Array.from(set) });
+        const enabledSites = Array.from(set);
+        // Keep favorites as a subset of enabled sites to reduce clutter.
+        const favoriteSites = (settings.favoriteSites || []).filter((x) => enabledSites.includes(x));
+        setAndPersist({ ...settings, enabledSites, favoriteSites });
     };
 
     const toggleFavoriteSite = (name: string) => {
+        // Favorites should only come from enabled sites.
+        if (!(settings.enabledSites || []).includes(name)) return;
         const set = new Set(settings.favoriteSites || []);
         if (set.has(name)) set.delete(name); else set.add(name);
-        setSettings({ ...settings, favoriteSites: Array.from(set) });
+        setAndPersist({ ...settings, favoriteSites: Array.from(set) });
     };
 
-    const selectAllSites = () => setSettings({ ...settings, enabledSites: SiteCatalogService.getAllSiteNames() });
-    const clearAllSites = () => setSettings({ ...settings, enabledSites: [] });
+    const selectAllSites = () => setAndPersist({ ...settings, enabledSites: SiteCatalogService.getSupportedSiteNames() });
+    const clearAllSites = () => setAndPersist({ ...settings, enabledSites: [], favoriteSites: [] });
 
     // Components
     const CheckboxRow = ({ label, checked, onChange, desc }: { label: string, checked: boolean, onChange: () => void, desc?: string }) => (
@@ -247,7 +281,7 @@ export const App = () => {
             </div>
             <input
                 className="af-input"
-                style={{ width: '200px' }}
+                style={{ width: '340px', maxWidth: '100%' }}
                 type="text"
                 value={value}
                 onInput={(e) => onInput(e.currentTarget.value)}
@@ -256,38 +290,8 @@ export const App = () => {
         </div>
     );
 
-    if (!isOpen) {
-        return (
-            <div
-                style={{
-                    position: 'fixed',
-                    bottom: '24px',
-                    right: '24px',
-                    zIndex: 99999,
-                    background: 'rgba(255,255,255,0.8)',
-                    backdropFilter: 'blur(10px)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-                    padding: '8px',
-                    borderRadius: '16px',
-                    cursor: 'pointer',
-                    width: '48px',
-                    height: '48px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    transition: 'transform 0.2s',
-                    border: '1px solid rgba(255,255,255,0.4)',
-                    color: '#333'
-                }}
-                onClick={() => setIsOpen(true)}
-                title="Auto-Feed Settings"
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-                <span style={{ fontSize: '24px' }}>⚙️</span>
-            </div>
-        );
-    }
+    // Avoid fixed overlay controls that can block site UI; open via embedded entry or Alt+S.
+    if (!isOpen) return null;
 
     const { w: panelW, h: panelH } = getPanelSize();
     const pos = panelPos || { x: 20, y: 20 };
@@ -328,7 +332,9 @@ export const App = () => {
                     </button>
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button type="button" className="af-btn af-btn-primary" onClick={handleSaveSettings}>{t.save}</button>
+                    <button type="button" className="af-btn af-btn-primary" onClick={handleSaveSettings}>
+                        {saveState === 'saving' ? t.saving : saveState === 'saved' ? t.saved : saveState === 'error' ? t.saveFailed : t.save}
+                    </button>
                     <button
                         type="button"
                         className="af-close-btn"
@@ -401,22 +407,6 @@ export const App = () => {
                                 </div>
                                 <div className="af-row">
                                     <div className="af-label">
-                                        <div>{t.remoteSidebarOpacity}</div>
-                                        <div className="af-label-desc">0.30 - 1.00</div>
-                                    </div>
-                                    <input
-                                        className="af-input"
-                                        style={{ width: '200px' }}
-                                        type="range"
-                                        min="0.3"
-                                        max="1"
-                                        step="0.01"
-                                        value={String(settings.remoteSidebarOpacity ?? 0.92)}
-                                        onInput={(e) => setAndPersist({ ...settings, remoteSidebarOpacity: Number(e.currentTarget.value) })}
-                                    />
-                                </div>
-                                <div className="af-row">
-                                    <div className="af-label">
                                         <div>{t.popupOpacity}</div>
                                         <div className="af-label-desc">0.30 - 1.00</div>
                                     </div>
@@ -476,8 +466,16 @@ export const App = () => {
                             {/* 1. Page Features (Most frequent) */}
                             <div className="af-card">
                                 <div className="af-card-header">{t.pageFeatures}</div>
-                                <CheckboxRow label={t.ptpShowDouban} checked={!!settings.ptpShowDouban} onChange={() => setSettings({ ...settings, ptpShowDouban: !settings.ptpShowDouban })} />
-                                <CheckboxRow label={t.ptpShowGroupName} checked={!!settings.ptpShowGroupName} onChange={() => setSettings({ ...settings, ptpShowGroupName: !settings.ptpShowGroupName })} />
+                                <div className="af-two-col">
+                                    <CheckboxRow label={t.ptpShowDouban} checked={!!settings.ptpShowDouban} onChange={() => setSettings({ ...settings, ptpShowDouban: !settings.ptpShowDouban })} />
+                                    <CheckboxRow label={t.ptpShowGroupName} checked={!!settings.ptpShowGroupName} onChange={() => setSettings({ ...settings, ptpShowGroupName: !settings.ptpShowGroupName })} />
+                                    <CheckboxRow label={t.hdbShowDouban} checked={!!settings.hdbShowDouban} onChange={() => setSettings({ ...settings, hdbShowDouban: !settings.hdbShowDouban })} />
+                                    <CheckboxRow label={t.hdbCollapseDouban} checked={!!settings.hdbHideDouban} onChange={() => setSettings({ ...settings, hdbHideDouban: !settings.hdbHideDouban })} />
+                                    <CheckboxRow label={t.doubanQuickSearch} checked={!!settings.showQuickSearchOnDouban} onChange={() => setSettings({ ...settings, showQuickSearchOnDouban: !settings.showQuickSearchOnDouban })} />
+                                    <CheckboxRow label={t.imdbQuickSearch} checked={!!settings.showQuickSearchOnImdb} onChange={() => setSettings({ ...settings, showQuickSearchOnImdb: !settings.showQuickSearchOnImdb })} />
+                                    <CheckboxRow label={t.defaultAnonymous} checked={!!settings.defaultAnonymous} onChange={() => setSettings({ ...settings, defaultAnonymous: !settings.defaultAnonymous })} />
+                                    <CheckboxRow label={t.autoDownloadAfterUpload} checked={!!settings.autoDownloadAfterUpload} onChange={() => setSettings({ ...settings, autoDownloadAfterUpload: !settings.autoDownloadAfterUpload })} />
+                                </div>
                                 <div className="af-row">
                                     <span className="af-label">{t.ptpGroupNamePos}</span>
                                     <div className="af-segmented">
@@ -492,11 +490,6 @@ export const App = () => {
                                         ))}
                                     </div>
                                 </div>
-                                <CheckboxRow label={t.hdbShowDouban} checked={!!settings.hdbShowDouban} onChange={() => setSettings({ ...settings, hdbShowDouban: !settings.hdbShowDouban })} />
-                                <CheckboxRow label={t.hdbCollapseDouban} checked={!!settings.hdbHideDouban} onChange={() => setSettings({ ...settings, hdbHideDouban: !settings.hdbHideDouban })} />
-                                <CheckboxRow label={t.doubanQuickSearch} checked={!!settings.showQuickSearchOnDouban} onChange={() => setSettings({ ...settings, showQuickSearchOnDouban: !settings.showQuickSearchOnDouban })} />
-                                <CheckboxRow label={t.imdbQuickSearch} checked={!!settings.showQuickSearchOnImdb} onChange={() => setSettings({ ...settings, showQuickSearchOnImdb: !settings.showQuickSearchOnImdb })} />
-                                <CheckboxRow label={t.defaultAnonymous} checked={!!settings.defaultAnonymous} onChange={() => setSettings({ ...settings, defaultAnonymous: !settings.defaultAnonymous })} />
                             </div>
 
                             {/* 2. External Sources */}
@@ -522,13 +515,26 @@ export const App = () => {
                                     <span className="af-label">{t.chdDomain}</span>
                                     <select
                                         className="af-input"
+                                        style={{ width: '340px', maxWidth: '100%' }}
                                         value={settings.chdBaseUrl}
-                                        onChange={(e) => setSettings({ ...settings, chdBaseUrl: e.currentTarget.value.endsWith('/') ? e.currentTarget.value : e.currentTarget.value + '/' })}
+                                        onChange={(e) => setAndPersist({ ...settings, chdBaseUrl: e.currentTarget.value.endsWith('/') ? e.currentTarget.value : e.currentTarget.value + '/' })}
                                     >
                                         <option value="https://chdbits.co/">chdbits.co</option>
                                         <option value="https://ptchdbits.co/">ptchdbits.co</option>
                                         <option value="https://ptchdbits.org/">ptchdbits.org</option>
                                         <option value="https://chddiy.xyz/">chddiy.xyz</option>
+                                    </select>
+                                </div>
+                                <div className="af-row">
+                                    <span className="af-label">{t.tlDomain}</span>
+                                    <select
+                                        className="af-input"
+                                        style={{ width: '340px', maxWidth: '100%' }}
+                                        value={settings.tlBaseUrl}
+                                        onChange={(e) => setAndPersist({ ...settings, tlBaseUrl: e.currentTarget.value.endsWith('/') ? e.currentTarget.value : e.currentTarget.value + '/' })}
+                                    >
+                                        <option value="https://www.torrentleech.org/">torrentleech.org</option>
+                                        <option value="https://www.torrentleech.cc/">torrentleech.cc</option>
                                     </select>
                                 </div>
                             </div>
@@ -545,14 +551,14 @@ export const App = () => {
                                             if (!quickPreset) return;
                                             const set = new Set(settings.quickSearchList || []);
                                             set.add(quickPreset);
-                                            setSettings({ ...settings, quickSearchList: Array.from(set) });
+                                            setAndPersist({ ...settings, quickSearchList: Array.from(set) });
                                         }}>{t.add}</button>
                                     </div>
                                     <textarea
                                         className="af-input"
                                         style={{ width: '100%', height: '150px', fontFamily: 'monospace' }}
                                         value={(settings.quickSearchList || []).join('\n')}
-                                        onInput={e => setSettings({ ...settings, quickSearchList: e.currentTarget.value.split('\n').filter(Boolean) })}
+                                        onInput={e => setAndPersist({ ...settings, quickSearchList: e.currentTarget.value.split('\n').filter(Boolean) })}
                                     />
                                 </div>
                             </div>
@@ -560,12 +566,10 @@ export const App = () => {
                             {/* 4. API Keys (Least frequent) */}
                             <div className="af-card">
                                 <div className="af-card-header">{t.servicesApiKeys}</div>
-                                <InputRow label="PtpImg API Key" value={settings.ptpImgApiKey} onInput={v => setSettings({ ...settings, ptpImgApiKey: v })} />
-                                <InputRow label="Pixhost API Key" value={settings.pixhostApiKey} onInput={v => setSettings({ ...settings, pixhostApiKey: v })} />
-                                <InputRow label="Freeimage API Key" value={settings.freeimageApiKey} onInput={v => setSettings({ ...settings, freeimageApiKey: v })} />
-                                <InputRow label="Gifyu API Key" value={settings.gifyuApiKey} onInput={v => setSettings({ ...settings, gifyuApiKey: v })} />
-                                <InputRow label="HDBImg API Key" value={settings.hdbImgApiKey} onInput={v => setSettings({ ...settings, hdbImgApiKey: v })} desc="Optional" />
-                                <InputRow label="HDBImg Endpoint" value={settings.hdbImgEndpoint} onInput={v => setSettings({ ...settings, hdbImgEndpoint: v })} />
+                                <InputRow label="PtpImg API Key" value={settings.ptpImgApiKey} onInput={v => setAndPersist({ ...settings, ptpImgApiKey: v })} />
+                                <InputRow label="Pixhost API Key" value={settings.pixhostApiKey} onInput={v => setAndPersist({ ...settings, pixhostApiKey: v })} />
+                                <InputRow label="Freeimage API Key" value={settings.freeimageApiKey} onInput={v => setAndPersist({ ...settings, freeimageApiKey: v })} />
+                                <InputRow label="Gifyu API Key" value={settings.gifyuApiKey} onInput={v => setAndPersist({ ...settings, gifyuApiKey: v })} />
                             </div>
                         </div>
                     )}
@@ -580,61 +584,77 @@ export const App = () => {
 
                             <div className="af-card">
                                 <div className="af-card-header">{t.enabledSites}</div>
-                                {groupSites(allSites).map((g) => (
-                                    <div key={'en-' + g.key} style={{ padding: '0 16px 16px' }}>
-                                        <div style={{ fontSize: '12px', fontWeight: 700, opacity: 0.75, margin: '10px 0 8px' }}>
-                                            {g.key}
-                                        </div>
-                                        <div className="af-grid">
-                                            {g.items.map((site: any) => (
-                                                <div
-                                                    key={site.name}
-                                                    className="af-checkbox-card"
-                                                    onClick={() => toggleSite(site.name)}
-                                                    style={{ background: (settings.enabledSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
-                                                >
-                                                    <input type="checkbox" checked={(settings.enabledSites || []).includes(site.name)} readOnly />
-                                                    <span style={{ fontSize: '12px' }}>{site.name}</span>
+                                <div style={{ padding: '0 10px 10px' }}>
+                                    <div className="af-grid">
+                                        {sortSites(allSites).map((site: any) => (
+                                            <div
+                                                key={site.name}
+                                                className="af-site-tile"
+                                                onClick={() => toggleSite(site.name)}
+                                                style={{ background: (settings.enabledSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
+                                                title={site.name}
+                                            >
+                                                <input className="af-site-check" type="checkbox" checked={(settings.enabledSites || []).includes(site.name)} readOnly />
+                                                <div className="af-site-icon">
+                                                    <span>{getSiteAbbr(site.name).slice(0, 1)}</span>
+                                                    {getSiteFavicon(site) ? (
+                                                        <img
+                                                            src={getSiteFavicon(site)}
+                                                            onError={(e) => {
+                                                                const img = e.currentTarget as HTMLImageElement;
+                                                                img.style.display = 'none';
+                                                            }}
+                                                        />
+                                                    ) : null}
                                                 </div>
-                                            ))}
-                                        </div>
+                                                <div className="af-site-label">{getSiteAbbr(site.name)}</div>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                </div>
                             </div>
 
                             <div className="af-card">
                                 <div className="af-card-header">{t.favoriteSites}</div>
-                                {groupSites(allSites).map((g) => (
-                                    <div key={'fav-' + g.key} style={{ padding: '0 16px 16px' }}>
-                                        <div style={{ fontSize: '12px', fontWeight: 700, opacity: 0.75, margin: '10px 0 8px' }}>
-                                            {g.key}
-                                        </div>
-                                        <div className="af-grid">
-                                            {g.items.map((site: any) => (
-                                                <div
-                                                    key={'fav-' + site.name}
-                                                    className="af-checkbox-card"
-                                                    onClick={() => toggleFavoriteSite(site.name)}
-                                                    style={{ background: (settings.favoriteSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
-                                                >
-                                                    <input type="checkbox" checked={(settings.favoriteSites || []).includes(site.name)} readOnly />
-                                                    <span style={{ fontSize: '12px' }}>{site.name}</span>
+                                <div style={{ padding: '0 10px 10px' }}>
+                                    <div className="af-grid">
+                                        {sortSites(allSites.filter((s: any) => (settings.enabledSites || []).includes(s.name))).map((site: any) => (
+                                            <div
+                                                key={'fav-' + site.name}
+                                                className="af-site-tile"
+                                                onClick={() => toggleFavoriteSite(site.name)}
+                                                style={{ background: (settings.favoriteSites || []).includes(site.name) ? 'rgba(0,113,227,0.1)' : undefined }}
+                                                title={site.name}
+                                            >
+                                                <input className="af-site-check" type="checkbox" checked={(settings.favoriteSites || []).includes(site.name)} readOnly />
+                                                <div className="af-site-icon">
+                                                    <span>{getSiteAbbr(site.name).slice(0, 1)}</span>
+                                                    {getSiteFavicon(site) ? (
+                                                        <img
+                                                            src={getSiteFavicon(site)}
+                                                            onError={(e) => {
+                                                                const img = e.currentTarget as HTMLImageElement;
+                                                                img.style.display = 'none';
+                                                            }}
+                                                        />
+                                                    ) : null}
                                                 </div>
-                                            ))}
-                                        </div>
+                                                <div className="af-site-label">{getSiteAbbr(site.name)}</div>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                </div>
                             </div>
 
                             <div className="af-card">
                                 <div className="af-card-header">{t.listPageQuickSearch}</div>
-                                <div style={{ padding: '0 16px' }}>
+                                <div style={{ padding: '0 10px' }}>
                                     {(['PTP', 'HDB', 'HDT', 'UHD'] as const).map(key => (
                                         <CheckboxRow
                                             key={key}
                                             label={key}
                                             checked={!!settings.showSearchOnList?.[key]}
-                                            onChange={() => setSettings({
+                                            onChange={() => setAndPersist({
                                                 ...settings,
                                                 showSearchOnList: { ...settings.showSearchOnList, [key]: !settings.showSearchOnList?.[key] }
                                             })}
@@ -653,6 +673,26 @@ export const App = () => {
                                 <CheckboxRow label={t.enableSidebar} checked={!!settings.enableRemoteSidebar} onChange={() => setAndPersist({ ...settings, enableRemoteSidebar: !settings.enableRemoteSidebar })} />
                                 <CheckboxRow label={t.skipCheckingDefault} checked={!!settings.remoteSkipCheckingDefault} onChange={() => setAndPersist({ ...settings, remoteSkipCheckingDefault: !settings.remoteSkipCheckingDefault })} />
                                 <CheckboxRow label={t.askConfirmBeforePush} checked={!!settings.remoteAskSkipConfirm} onChange={() => setAndPersist({ ...settings, remoteAskSkipConfirm: !settings.remoteAskSkipConfirm })} />
+                                <div className="af-row">
+                                    <div className="af-label">
+                                        <div>{t.remoteSidebarOpacity}</div>
+                                        <div className="af-label-desc">0.30 - 1.00</div>
+                                    </div>
+                                    <input
+                                        className="af-input"
+                                        style={{ width: '200px' }}
+                                        type="range"
+                                        min="0.3"
+                                        max="1"
+                                        step="0.01"
+                                        value={String(settings.remoteSidebarOpacity ?? 0.92)}
+                                        onInput={(e) => {
+                                            const value = Number(e.currentTarget.value);
+                                            applyRemoteSidebarOpacity(value);
+                                            setAndPersist({ ...settings, remoteSidebarOpacity: value });
+                                        }}
+                                    />
+                                </div>
                             </div>
 
                             <div className="af-card">
@@ -702,7 +742,7 @@ export const App = () => {
                                                     </div>
                                                     <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
                                                         <button type="button" className="af-btn" onClick={async () => {
-                                                            const r = await RemoteServerTestService.testQbittorrent({ url: conf.url, username: conf.username, password: conf.password });
+                                                            const r = await RemoteDownloadService.testQbittorrent({ url: conf.url, username: conf.username, password: conf.password });
                                                             alert(r.ok ? `${t.testSuccess}: ${r.message}` : `${t.testFailed}: ${r.message}`);
                                                         }}>{t.testConnection}</button>
                                                         <button type="button" className="af-btn" onClick={() => {
@@ -738,7 +778,7 @@ export const App = () => {
                                                     </div>
                                                     <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
                                                         <button type="button" className="af-btn" onClick={async () => {
-                                                            const r = await RemoteServerTestService.testTransmission({ url: conf.url, username: conf.username, password: conf.password });
+                                                            const r = await RemoteDownloadService.testTransmission({ url: conf.url, username: conf.username, password: conf.password });
                                                             alert(r.ok ? `${t.testSuccess}: ${r.message}` : `${t.testFailed}: ${r.message}`);
                                                         }}>{t.testConnection}</button>
                                                         <button type="button" className="af-btn" onClick={() => {
@@ -774,7 +814,7 @@ export const App = () => {
                                                     </div>
                                                     <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
                                                         <button type="button" className="af-btn" onClick={async () => {
-                                                            const r = await RemoteServerTestService.testDeluge({ url: conf.url, password: conf.password });
+                                                            const r = await RemoteDownloadService.testDeluge({ url: conf.url, password: conf.password });
                                                             alert(r.ok ? `${t.testSuccess}: ${r.message}` : `${t.testFailed}: ${r.message}`);
                                                         }}>{t.testConnection}</button>
                                                         <button type="button" className="af-btn" onClick={() => {
@@ -870,9 +910,9 @@ export const App = () => {
                                 try {
                                     const { type, url, username, password } = remoteForm;
                                     let res = { ok: false, message: '' };
-                                    if (type === 'qb') res = await RemoteServerTestService.testQbittorrent({ url, username, password });
-                                    else if (type === 'tr') res = await RemoteServerTestService.testTransmission({ url, username, password });
-                                    else res = await RemoteServerTestService.testDeluge({ url, password });
+                                    if (type === 'qb') res = await RemoteDownloadService.testQbittorrent({ url, username, password });
+                                    else if (type === 'tr') res = await RemoteDownloadService.testTransmission({ url, username, password });
+                                    else res = await RemoteDownloadService.testDeluge({ url, password });
 
                                     alert(res.ok ? `${t.testSuccess}: ${res.message}` : `${t.testFailed}: ${res.message}`);
                                 } catch (err: any) {

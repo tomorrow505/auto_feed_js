@@ -1,0 +1,43 @@
+  'TTG': { 'url': 'https://totheglory.im/', 'enable': 1 },
+  `<a href="https://totheglory.im/browse.php?search_field=imdb{imdbno}&c=M" target="_blank">TTG</a>`,
+const default_common_sites = ['TTG', 'CMCT', 'HUDBT', 'PTer'];
+const default_signin_sites = ['TTG', 'CMCT', 'HUDBT', 'PTer'];
+  'TTG': /-(WiKi|DoA|.*TTG|NGB|ARiN)/i,
+//下面两个函数用来为字符串赋予format方法：例如——'thank you {site}'.format({'site':'ttg'}) => 'thank you ttg'
+  if (name.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i) && my_string.match(/mpls/i)) {
+  $('#url_vimages').after(`<a href="" id="get_full_size" style="color: red" title="点击获取原图,目前支持imgbox，pixhost，pter，ttg，瓷器，img4k">获取原图</a>`);
+name="screenshots"]').after(`<br><a href="" id="get_full_size" style="color: red" title="点击获取原图,目前支持imgbox，pixhost，pter，ttg，瓷器，img4k">获取原图</a>`);
+  if (['PHD', 'avz', 'CNZ', 'FileList', 'TTG', 'PTP'].indexOf(site) > -1) {
+  if (['HDB', 'PHD', 'avz', 'CNZ', 'FileList', 'TTG'].indexOf(site) > -1) {
+          if (key == 'TTG') {
+          if (key == 'TTG') {
+      alert("TTG提示：频率太快，600秒后再来！");
+      if (used_signin_sites.indexOf('TTG') > -1) {
+              $(`input[kname=TTG]`).parent().find('a').css({ "color": "blue" });
+              console.log(`开始登录TTG：`, '失败！！！');
+                    $(`input[kname=TTG]`).parent().find('a').css({ "color": "DarkOrange" });
+                    console.log(`开始登录TTG：`, '成功！！！');
+                    $(`input[kname=TTG]`).parent().find('a').css({ "color": "red" });
+                    console.log(`开始签到TTG：`, rep);
+    $('#dealimg').append(`<font color="red">获取大图目前支持imgbox，pixhost，pter，ttg，瓷器，img4k，其余的可以尝试字符串替换。</font><a href="https://github.com/tomorrow505/auto_feed_js/wiki/%E5%9B%BE%E7%89%87%E5%A4%84%E7%9
+      if (origin_site == 'TTG' || origin_site == 'PuTao' || origin_site == 'OpenCD' || origin_site == 'HDArea') {
+      if (origin_site == 'TTG') {
+      if (origin_site == 'TTG') {
+          if (origin_site == 'TTG') {
+      } else if (origin_site == 'TTG') {
+              if (origin_site == 'TTG') {
+          if (origin_site == 'TTG' && info_text == 'BluRay原盘') {
+          if (origin_site != 'TTG') {
+    if (origin_site == 'TTG') {
+        if (origin_site != 'UHD' && origin_site != 'TTG') {
+        if (this.id == "影" && ['CMCT', 'TTG', 'UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) < 0) {
+    } else if (origin_site == 'TTG') {
+      if (origin_site == 'TTG') {
+      } else if (forward_site == "TTG") {
+      } else if (raw_info.type == '电影' && ['HUDBT', 'MTeam', 'TLFbits', 'PuTao', 'TJUPT', 'NanYang', 'BYR', 'TTG'].indexOf(forward_site) < 0) {
+        } else if (forward_site == 'TTG') {
+        if (forward_site == 'TTG' && raw_info.dburl) {
+    if (forward_site == 'TTG') {
+    if (forward_site == 'TTG') {
+    else if (forward_site == 'TTG') {
+                      if (raw_info.origin_site == 'TTG' && raw_info.name.match(/wiki$/i)) {

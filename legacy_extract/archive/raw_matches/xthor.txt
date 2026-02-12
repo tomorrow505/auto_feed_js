@@ -1,0 +1,23 @@
+// @match        https://xthor.tk/*
+  'xthor': { 'url': 'https://xthor.tk/', 'enable': 1 },
+  `<a href="https://xthor.tk/browse.php?sch={search_name}" target="_blank">xTHOR</a>`,
+  'xthor': 'https://xthor.tk/',
+  if (site_url.match(/^http(s*):\/\/xthor.tk\/details.php/i)) {
+  if (['PTP', 'xthor', 'HDF', 'BHD', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'FNP', 'On
+  if (['BHD', 'BLU', 'Tik', 'ACM', 'HDSpace', 'xthor', 'Monika', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX'].indexOf(forward_site) > -1) {
+if (site_url.match(/^https:\/\/xthor.tk\/.*/)) {
+    origin_html = origin_html.replace(`ou sur Xthor`, '或者xthor上');
+    getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/xthor_rules.html', null, function (doc) {
+    getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/xthor_faq.html', null, function (doc) {
+      log_in(['xthor'], '#navbar');
+    if (origin_site.match(/xthor/i)) {
+      if (download.innerHTML.match(/https:\/\/xthor.tk\/pic\/bannieres\/info_film.png/i)) {
+      } else if (download.innerHTML.match(/https:\/\/xthor.tk\/pic\/bannieres\/info_serie.png/i)) {
+      raw_info.torrent_url = `https://xthor.tk/` + $('a[href^="download.php"]').attr('href');
+      if (origin_site == 'xthor' || origin_site == 'FileList' || origin_site == 'HDB' || origin_site == 'HDRoute') {
+        if (origin_site == 'FileList' || origin_site == 'xthor' || origin_site == 'HDB') {
+        if (['NanYang', 'CMCT', 'iTS', 'NPUPT', 'xthor'].indexOf(forward_site) > -1) {
+      'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED', 'Tik', 'Aither', 'SugoiMusic', 'CG',
+      } else if (forward_site != 'xthor') {
+      } else if (forward_site == 'xthor') {
+    else if (forward_site == 'xthor') {

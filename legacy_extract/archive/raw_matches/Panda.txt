@@ -1,0 +1,9 @@
+  'Panda': { 'url': 'https://pandapt.net/', 'enable': 1 },
+  'Panda': /AilMWeb|-PANDA|@Panda/i,
+    if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
+      if ((name.match(/PSY|LCHD/) && e.innerText == 'CHD') || (name.match(/PandaMoon/) && e.innerText == 'Panda') || e.innerText == 'DIY' || e.innerText == 'REMUX') {
+        'CyanBug', '杏林', '海棠', 'Panda', 'KuFei', 'PTCafe', 'GTK', 'HHClub', '麒麟', 'AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', '唐门', '天枢', '财神', 'DevTraker',
+        } else if (forward_site == 'Panda') {
+        case 'Panda':
+        if (raw_info.name.match(reg_team_name[key]) && !raw_info.name.match(/PandaMoon|HDSpace|HDClub|LCHD/i)) {
+    else if (forward_site == 'Panda') {

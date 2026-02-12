@@ -1,0 +1,15 @@
+  'NBL': { 'url': 'https://nebulance.io/', 'enable': 1 },
+  'NBL': 'https://nebulance.io/',
+          } else if (key == 'NBL') {
+          } else if (key == 'NBL') {
+  } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'OPS', 'RED', 'SugoiMusic'].indexOf(forward_site) > -1) {
+  $('#requestssearch').val('Requests').attr('onfocus', "if (this.value == 'Requests') { this.value = ''; }").attr('onblur', "if (this.value == '') { this.value = 'Requests'; }").attr('placeholder', "Requests");
+  $('#userssearch').val('Users').attr('onfocus', "if (this.value == 'Users') { this.value = ''; }").attr('onblur', "if (this.value == '') { this.value = 'Users'; }").attr('placeholder', "Users");
+  $('.mainblockcontenttt tr').each(function () {
+      log_in(['NBL'], '#mainnav');
+    if (origin_site == 'NBL') {
+        if (origin_site == 'NBL' || origin_site == 'IPT' || origin_site == 'torrentseeds' || origin_site == 'HONE') {
+                if (['PTP', 'KG', 'BTN', 'GPW', 'SC', 'avz', 'PHD', 'CNZ', 'ANT', 'NBL', 'HDCity'].indexOf(key) < 0) {
+        if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'common_link', 'SC', 'avz', 'PHD', 'CNZ', 'TVV', 'ANT', 'NBL', 'CarPt'].indexOf(this.id) > -1) {
+      'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED', 'Tik', 'Aither', 'SugoiMusic', 'CG',
+    else if (forward_site == 'NBL') {

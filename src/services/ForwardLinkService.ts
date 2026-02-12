@@ -2,10 +2,12 @@ import $ from 'jquery';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { SiteCatalogService } from './SiteCatalogService';
 import { SiteConfig, SiteType } from '../types/SiteConfig';
-import { getSearchName } from '../common/legacy/search';
+import { extractDoubanId, extractImdbId, extractTmdbId, matchLink } from '../common/rules/links';
+import { getSearchName } from '../common/rules/search';
 
 export interface ForwardLinkOptions {
     chdBaseUrl?: string;
+    tlBaseUrl?: string;
     lang?: 'zh' | 'en';
 }
 
@@ -26,6 +28,9 @@ const resolveBaseUrl = (site: SiteConfig, options?: ForwardLinkOptions) => {
     if (site.type === SiteType.CHDBits && options?.chdBaseUrl) {
         return normalizeBaseUrl(options.chdBaseUrl);
     }
+    if ((site.name === 'TorrentLeech' || site.name === 'TL') && options?.tlBaseUrl) {
+        return normalizeBaseUrl(options.tlBaseUrl);
+    }
     return normalizeBaseUrl(site.baseUrl);
 };
 
@@ -40,6 +45,8 @@ const buildUploadUrl = (site: SiteConfig, options?: ForwardLinkOptions): string 
     if (!base) return '#';
     if (site.name === 'BHD') return joinUrl(base, 'upload');
     if (site.name === 'MTeam') return joinUrl(base, 'upload');
+    // OpenCD uses a dedicated upload plugin page.
+    if (site.name === 'OpenCD') return joinUrl(base, 'plugin_upload.php');
     if (site.type === SiteType.Unit3D || site.type === SiteType.Unit3DClassic) return joinUrl(base, 'torrents/create');
     if (site.type === SiteType.Gazelle) return joinUrl(base, 'upload.php');
     if (site.type === SiteType.NexusPHP || site.type === SiteType.CHDBits) return joinUrl(base, 'upload.php');
@@ -49,7 +56,7 @@ const buildUploadUrl = (site: SiteConfig, options?: ForwardLinkOptions): string 
 const buildSearchUrl = (site: SiteConfig, meta: TorrentMeta, options?: ForwardLinkOptions): string => {
     const base = resolveBaseUrl(site, options);
     if (!base) return '#';
-    const imdbId = meta.imdbId || meta.imdbUrl?.match(/tt\d+/)?.[0] || '';
+    const imdbId = meta.imdbId || extractImdbId(meta.imdbUrl || '') || '';
     const imdbNo = imdbId.replace(/^tt/i, '');
     const searchName = encodeURIComponent(getSearchName(meta.title || '', meta.type) || meta.title || '');
 
@@ -60,7 +67,8 @@ const buildSearchUrl = (site: SiteConfig, meta: TorrentMeta, options?: ForwardLi
         DarkLand: () => imdbId ? joinUrl(base, `torrents?imdbId=${imdbId}#page/1`) : joinUrl(base, `torrents?search=${searchName}`),
         ACM: () => imdbNo ? joinUrl(base, `torrents?imdb=${imdbNo}#page/1`) : joinUrl(base, `torrents?search=${searchName}`),
         TTG: () => imdbNo ? joinUrl(base, `browse.php?search_field=imdb${imdbNo}&c=M`) : joinUrl(base, `browse.php?search_field=${searchName}`),
-        MTeam: () => joinUrl(base, `browse?keyword=${encodeURIComponent(imdbId || meta.title || '')}`),
+        // Legacy parity: MTeam browse keyword is title-based, not IMDb id.
+        MTeam: () => joinUrl(base, `browse?keyword=${searchName}`),
         PTP: () => imdbId ? joinUrl(base, `torrents.php?searchstr=${imdbId}`) : joinUrl(base, `torrents.php?searchstr=${searchName}`),
         HDB: () => joinUrl(base, `browse.php?search=${imdbId || searchName}`),
         KG: () => imdbId ? joinUrl(base, `browse.php?search=${imdbId}&search_type=imdb`) : joinUrl(base, `browse.php?search=${searchName}`)
@@ -75,12 +83,22 @@ const buildSearchUrl = (site: SiteConfig, meta: TorrentMeta, options?: ForwardLi
         return joinUrl(base, `torrents.php?searchstr=${imdbId || searchName}`);
     }
     if (site.type === SiteType.NexusPHP || site.type === SiteType.CHDBits) {
-        return joinUrl(base, `torrents.php?search=${imdbId || searchName}`);
+        // Legacy parity:
+        // - When IMDb exists, search by IMDb (search_area=4) instead of using `search=` as plain title.
+        // - Otherwise fall back to title search (search_area=0).
+        if (imdbId) {
+            return joinUrl(base, `torrents.php?incldead=0&spstate=0&inclbookmarked=0&search=${encodeURIComponent(imdbId)}&search_area=4&search_mode=0`);
+        }
+        return joinUrl(base, `torrents.php?incldead=0&spstate=0&inclbookmarked=0&search=${searchName}&search_area=0&search_mode=0`);
     }
     return joinUrl(base, `torrents.php?search=${imdbId || searchName}`);
 };
 
 export class ForwardLinkService {
+    static getUploadUrl(site: SiteConfig, options?: ForwardLinkOptions): string {
+        return buildUploadUrl(site, options);
+    }
+
     static getSearchUrl(site: SiteConfig, meta: TorrentMeta, options?: ForwardLinkOptions): string {
         return buildSearchUrl(site, meta, options);
     }
@@ -124,7 +142,7 @@ export class ForwardLinkService {
         };
         const isExclusive = detectExclusive(meta);
 
-        const allSites = SiteCatalogService.getAllSites().filter((s) => s.baseUrl);
+        const allSites = SiteCatalogService.getSupportedSites().filter((s) => s.baseUrl);
         // If settings provides an array (even empty), treat it as the source of truth.
         // Empty means "show nothing" rather than "show all".
         const enabledSet = Array.isArray(enabledSites) ? new Set(enabledSites) : null;
@@ -217,6 +235,45 @@ export class ForwardLinkService {
                         (async () => {
                             try {
                                 const metaToSave: any = { ...meta };
+
+                                // Legacy parity: users may paste IMDb/Douban/TMDB into the embedded input box.
+                                // Persist it so the forward target (Unit3D/Nexus/etc.) can fill IDs/links.
+                                try {
+                                    const input = document.querySelector('#input_box') as HTMLInputElement | null;
+                                    const v = (input?.value || '').trim();
+                                    if (v) {
+                                        const imdbUrl = matchLink('imdb', v);
+                                        const imdbId = extractImdbId(v);
+                                        if (imdbUrl) {
+                                            metaToSave.imdbUrl = imdbUrl;
+                                            metaToSave.imdbId = extractImdbId(imdbUrl) || metaToSave.imdbId;
+                                        } else if (imdbId) {
+                                            metaToSave.imdbId = metaToSave.imdbId || imdbId;
+                                            metaToSave.imdbUrl = metaToSave.imdbUrl || `https://www.imdb.com/title/${metaToSave.imdbId}/`;
+                                        }
+
+                                        const doubanUrl = matchLink('douban', v);
+                                        const doubanId = extractDoubanId(v);
+                                        if (doubanUrl) {
+                                            metaToSave.doubanUrl = doubanUrl;
+                                            metaToSave.doubanId = extractDoubanId(doubanUrl) || metaToSave.doubanId;
+                                        } else if (doubanId) {
+                                            metaToSave.doubanId = metaToSave.doubanId || doubanId;
+                                            metaToSave.doubanUrl = metaToSave.doubanUrl || `https://movie.douban.com/subject/${metaToSave.doubanId}/`;
+                                        }
+
+                                        const tmdbUrl = matchLink('tmdb', v);
+                                        const tmdbId = extractTmdbId(v);
+                                        if (tmdbUrl) {
+                                            metaToSave.tmdbUrl = tmdbUrl.endsWith('/') ? tmdbUrl : `${tmdbUrl}/`;
+                                            metaToSave.tmdbId = tmdbId || metaToSave.tmdbId;
+                                        } else if (tmdbId) {
+                                            metaToSave.tmdbId = metaToSave.tmdbId || tmdbId;
+                                            // Cannot infer tv/movie reliably from id alone; leave tmdbUrl empty.
+                                        }
+                                    }
+                                } catch {}
+
                                 // Download torrent only if we have a URL and no cached base64 yet.
                                 if (metaToSave.torrentUrl && !metaToSave.torrentBase64) {
                                     span.text(lang === 'zh' ? '下载种子...' : 'Downloading...');

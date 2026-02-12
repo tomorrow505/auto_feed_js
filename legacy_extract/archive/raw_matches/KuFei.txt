@@ -1,0 +1,5 @@
+  'KuFei': { 'url': 'https://kufei.org/', 'enable': 1 },
+        'CyanBug', '杏林', '海棠', 'Panda', 'KuFei', 'PTCafe', 'GTK', 'HHClub', '麒麟', 'AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', '唐门', '天枢', '财神', 'DevTraker',
+      if (allinput[i].name == 'custom_fields[4][1]' && forward_site == 'KuFei') {
+        case 'KuFei':
+    else if (forward_site == 'KuFei') {

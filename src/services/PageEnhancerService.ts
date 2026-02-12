@@ -1,7 +1,12 @@
 import $ from 'jquery';
 import { SettingsService } from './SettingsService';
 import { DoubanService } from './DoubanService';
-import { LetterboxdService } from './LetterboxdService';
+import { TorrentMeta } from '../types/TorrentMeta';
+import { ImageHostService } from './ImageHostService';
+import { GMAdapter } from './GMAdapter';
+import { renderQuickSearchHtml, resolveQuickSearchSetting } from '../common/quickSearch';
+import { getGroupName } from '../common/rules/groupName';
+import { extractImdbId } from '../common/rules/links';
 
 export class PageEnhancerService {
     static async tryEnhance() {
@@ -52,6 +57,7 @@ export class PageEnhancerService {
             if (!groupname || groupname === 'Null') return;
             let color = true;
             const $target = $(target);
+            if ($target.find('.autofeed-group-name').length || $target.closest('a').find('.autofeed-group-name').length) return;
             const parent = $target.parent();
             if (parent.find('.golden-popcorn-character').length) color = false;
             if (parent.find('.torrent-info__download-modifier--free').length) color = false;
@@ -60,63 +66,10 @@ export class PageEnhancerService {
             if (parent.find('.torrent-info-link--user-downloaded').length) color = false;
 
             if (locationFlag === 1) {
-                $target.append(delimiter).append(formatText(groupname, color));
+                $target.append(`<span class="autofeed-group-split">${delimiter}</span>`).append(`<span class="autofeed-group-name">${formatText(groupname, color)}</span>`);
             } else {
-                $target.prepend(formatText(groupname, color)).prepend(delimiter);
+                $target.prepend(`<span class="autofeed-group-name">${formatText(groupname, color)}</span>`).prepend(`<span class="autofeed-group-split">${delimiter}</span>`);
             }
-        };
-
-        const getGroupName = (name: string, torrentInfo = ''): string => {
-            if (typeof name !== 'string') return 'Null';
-            try {
-                name = name.replace(/\[.*?\]|web-dl|dts-hd|Blu-ray|MPEG-2|MPEG-4/ig, '');
-                name = name.split(/\.mkv|\.mp4|\.iso|\.avi/)[0];
-                const special = name.match(/(KJNU|tomorrow505|KG|BMDru|BobDobbs|Dusictv|AFKI)$/i);
-                if (special) return special[1];
-                let tmpName = name.match(/-(.*)/)?.[1].split(/-/).pop() || '';
-                if (tmpName.match(/AC3|[\. ]DD[\. \+p]|AAC|x264|x265|h.264|h.265|NTSC|PAL|DVD9|DVD5/i)) {
-                    if (torrentInfo.match(/Scene/)) {
-                        name = name.split('-')[0];
-                    } else {
-                        const parts = tmpName.split(/AC3|[\. ]DD[\. \+p]|AAC|x264|x265|h.264|h.265|NTSC|PAL|DVD9|DVD5/i);
-                        if (parts.length > 1) {
-                            name = parts.pop() || 'Null';
-                        } else {
-                            name = 'Null';
-                        }
-                    }
-                } else {
-                    name = tmpName;
-                }
-            } catch {
-                const parts = name.split(/AC3|[\. ]DD[\. \+p]|AAC|x264|x265|h.264|h.265|NTSC|PAL|DVDRip|DVD9|DVD5/i);
-                name = parts.length > 1 ? (parts.pop() || 'Null') : 'Null';
-            }
-            name = name.trim();
-            if (!name || name.match(/\)|^\d\d/)) name = 'Null';
-            if (name === 'Z0N3') name = 'D-Z0N3';
-            if (name === 'AVC.ZONE') name = 'ZONE';
-            if (name.match(/CultFilms/)) name = 'CultFilms™';
-            if (name.match(/™/) && !name.match(/CultFilms/)) name = 'Null';
-            if (name.includes('.nfo')) name = name.replace('.nfo', '');
-            if (name.match(/[_\.! ]/) || name.match(/Extras/i)) name = 'Null';
-            if (name.length === 1 || name.match(/^\d+$/)) name = 'Null';
-            return name;
-        };
-
-        const applyForTable = () => {
-            $('table#torrent-table a.torrent-info-link').each(function () {
-                const $link = $(this);
-                if ($link.data('autofeed-group') === 1) return;
-                const $row = $link.closest('tr');
-                let groupname = ($row.data('releasegroup') as string) || '';
-                if (!groupname) {
-                    const releaseName = ($row.data('releasename') as string) || '';
-                    groupname = getGroupName(releaseName, $row.text());
-                }
-                setGroupName(groupname, this);
-                $link.data('autofeed-group', 1);
-            });
         };
 
         const applyForBrowse = () => {
@@ -134,18 +87,90 @@ export class PageEnhancerService {
                     });
                 });
             });
-            $('tbody a.torrent-info-link').each(function () {
-                const href = (this as HTMLAnchorElement).href;
-                const id = href.match(/\btorrentid=(\d+)\b/)?.[1];
-                if (!id) return;
-                const groupname = releases[parseInt(id, 10)] || '';
-                if (groupname) setGroupName(groupname, this);
-            });
+            const applyTo = (scope?: JQuery) => {
+                const root = scope || $('body');
+                root.find('tbody a.torrent-info-link[href*="torrentid="]').each(function () {
+                    const href = (this as HTMLAnchorElement).href || '';
+                    const id = href.match(/\btorrentid=(\d+)\b/)?.[1];
+                    if (!id) return;
+                    const groupname = releases[parseInt(id, 10)] || '';
+                    if (groupname) setGroupName(groupname, this);
+                });
+            };
+            applyTo();
+
+            // Legacy parity: some PTP browse variants append/replace rows later.
+            try {
+                if (pageData.ClosedGroups == 1) {
+                    const targetNodes = $('tbody');
+                    const MutationObserverCtor = window.MutationObserver || (window as any).WebKitMutationObserver;
+                    const observer = new MutationObserverCtor((mutationRecords: any[]) => {
+                        mutationRecords.forEach((mutation) => {
+                            if (!mutation?.addedNodes?.length) return;
+                            applyTo($(mutation.addedNodes));
+                        });
+                    });
+                    targetNodes.each((_i, node) => {
+                        observer.observe(node, { childList: true, subtree: false });
+                    });
+                }
+            } catch {}
+
             return true;
         };
 
+        const applyForUploadList = () => {
+            let hit = false;
+            $('.torrent-info-link').each(function () {
+                const $link = $(this);
+                if ($link.find('.autofeed-group-name').length) return;
+                const title = ($link.attr('title') || '').trim();
+                if (!title) return;
+                const groupname = getGroupName(title, '');
+                if (!groupname || groupname === 'Null') return;
+                setGroupName(groupname, this);
+                hit = true;
+            });
+            return hit;
+        };
+
+        const applyForDetailsTable = () => {
+            let hit = false;
+            $('table#torrent-table a.torrent-info-link').each(function () {
+                const $link = $(this);
+                if ($link.find('.autofeed-group-name').length) return;
+                const $row = $link.closest('tr');
+                let groupname = ($row.data('releasegroup') as string) || '';
+                if (!groupname) {
+                    const releaseName = ($row.data('releasename') as string) || '';
+                    groupname = getGroupName(releaseName, $row.text());
+                }
+                if (groupname) setGroupName(groupname, this);
+                hit = true;
+            });
+            return hit;
+        };
+
+        const applyGenericListFallback = () => {
+            let hit = false;
+            $('tbody a.torrent-info-link[href*="torrentid="]').each(function () {
+                const $link = $(this);
+                if ($link.find('.autofeed-group-name').length) return;
+                const text = ($link.attr('title') || $link.text() || '').trim();
+                const groupname = getGroupName(text, $link.closest('tr').text());
+                if (!groupname || groupname === 'Null') return;
+                setGroupName(groupname, this);
+                hit = true;
+            });
+            return hit;
+        };
+
         const appliedBrowse = applyForBrowse();
-        if (!appliedBrowse) applyForTable();
+        if (!appliedBrowse) {
+            const byUpload = applyForUploadList();
+            const byDetails = applyForDetailsTable();
+            if (!byUpload && !byDetails) applyGenericListFallback();
+        }
 
         document.body.dataset.autofeedPtpGroup = '1';
     }
@@ -155,7 +180,7 @@ export class PageEnhancerService {
 
         const imdbLink =
             ($('#imdb-title-link').attr('href') || $('a:contains("IMDB")').attr('href') || '').toString();
-        const imdbId = imdbLink.match(/tt\d+/)?.[0];
+        const imdbId = extractImdbId(imdbLink);
         if (!imdbId) return;
 
         const data = await DoubanService.getByImdb(imdbId);
@@ -245,13 +270,19 @@ export class PageEnhancerService {
         `);
 
         try {
-            const lb = await LetterboxdService.getRatingByImdb(imdbId);
+            const lb = await DoubanService.getLetterboxdRatingByImdb(imdbId);
             if (lb) {
-                $('#ptp_rating_td').prev().before(`
+                const $row = $('#movie-ratings-table tr').first();
+                if (!$row.length || $row.find('#letterboxd_rating_td').length) return;
+                $row.append(`
                     <td colspan="1" style="width: 128px;" id="letterboxd_rating_td">
                         <center>
                             <a target="_blank" class="rating" id="letterboxd-title-link" href="${lb.url}" rel="noreferrer">
-                            <img src="data:image/png;base64,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" style="height:64px;width:64px;" title="LetterBoxd"></a>
+                                <img src="https://letterboxd.com/favicon.ico"
+                                    style="height:64px;width:64px;"
+                                    title="Letterboxd"
+                                    onerror="this.onerror=null;this.src='https://s.ltrbxd.com/static/img/icons/favicon.ico';" />
+                            </a>
                         </center>
                     </td>
                     <td style="width: 150px;">
@@ -275,7 +306,7 @@ export class PageEnhancerService {
         }
 
         const imdbHref = (links[0] as HTMLAnchorElement).href || '';
-        const imdbId = imdbHref.match(/tt\d+/)?.[0];
+        const imdbId = extractImdbId(imdbHref);
         if (!imdbId) return;
 
         const data = await DoubanService.getByImdb(imdbId);
@@ -288,42 +319,67 @@ export class PageEnhancerService {
             data.director = data.director.split('/').slice(0, 8).join('/');
         }
 
+        const poster = (data.image || '').replace(
+            /^.+(p\d+).+$/i,
+            (_m, p1) => `https://img9.doubanio.com/view/photo/l_ratio_poster/public/${p1}.jpg`
+        );
+
         const label = hideByDefault ? '+ ' : '- ';
         const status = hideByDefault ? 'none' : 'block';
 
-        $('#details > tbody > tr').eq(1).after(`
+        const html = `
             <tr id="autofeed-hdb-douban"><td>
-            <div id="l20201117" class="label collapsable" onclick="showHideEl(20201117)"><span class="plusminus">${label}</span>关于本片 (豆瓣信息)</div>
-            <div id="c20201117" class="hideablecontent" style="display: ${status};">
-                <table class="contentlayout" cellspacing="0" style="width:100%; table-layout: fixed;"><tbody>
-                    <tr>
-                        <td rowspan="3" width="2"><img src="${data.image || ''}" style="max-width:250px;border:0px;" alt></td>
-                        <td colspan="2"><h1><a href="https://movie.douban.com/subject/${data.id}" target="_blank">${data.title}</a> (${data.year || ''})</h1><h3>${data.aka || ''}</h3></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 320px; vertical-align: top;">
-                        <table class="content" cellspacing="0" id="imdbinfo" style="white-space: normal; word-break: break-word; overflow-wrap: anywhere;"><tbody>
-                            <tr><th>评分</th><td>${data.average || '暂无评分'} (${data.votes || 0}人评价)</td></tr>
-                            <tr><th>类型</th><td>${data.genre || ''}</td></tr>
-                            <tr><th>国家/地区</th><td>${data.region || ''}</td></tr>
-                            <tr><th>导演</th><td>${(data.director || '').replace(/\//g, '<br>    ')}</td></tr>
-                            <tr><th>语言</th><td>${data.language || ''}</td></tr>
-                            <tr><th>上映日期</th><td>${(data.releaseDate || '').replace(/\//g, '<br>    ')}</td></tr>
-                            <tr><th>片长</th><td>${data.runtime || ''}</td></tr>
-                            <tr><th>演员</th><td>${(data.cast || '').replace(/\//g, '<br>    ')}</td></tr>
-                        </tbody></table></td>
-                        <td id="plotcell" style="vertical-align: top; overflow-wrap:anywhere;">
-                        <table class="content" cellspacing="0" style="width:100%; table-layout: fixed;"><tbody>
-                            <tr><th>简介</th></tr><tr><td>${data.summary ? '　　' + data.summary.replace(/ 　　/g, '<br>　　') : '本片暂无简介'}</td></tr>
-                        </tbody></table></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" id="actors"></td>
-                    </tr>
-                </tbody></table>
-            </div>
+                <div id="l20201117" class="label collapsable" onclick="showHideEl(20201117)"><span class="plusminus">${label}</span>关于本片 (豆瓣信息)</div>
+                <div id="c20201117" class="hideablecontent" style="display: ${status};">
+                    <div style="display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap;">
+                        <div style="flex: 0 0 250px; max-width: 250px;">
+                            <img src="${poster}" referrerpolicy="no-referrer" style="width: 250px; max-width: 250px; height: auto; border: 0;" alt="">
+                        </div>
+                        <div style="flex: 1 1 520px; min-width: 280px;">
+                            <h1 style="margin: 0; font-size: 20px; line-height: 1.2;">
+                                <a href="https://movie.douban.com/subject/${data.id}" target="_blank" rel="noreferrer">${data.title}</a>
+                                <span style="opacity: .85;">(${data.year || ''})</span>
+                            </h1>
+                            <div style="margin: 6px 0 10px 0; font-weight: normal; opacity: .9; white-space: normal; overflow-wrap: anywhere; word-break: break-word;">
+                                ${data.aka || ''}
+                            </div>
+
+                            <div style="display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap;">
+                                <div style="flex: 0 0 360px; min-width: 280px;">
+                                    <table class="content" cellspacing="0" id="imdbinfo" style="width: 100%; table-layout: fixed;">
+                                        <tbody style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">
+                                            <tr><th style="width: 80px;">评分</th><td style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">${data.average || '暂无评分'} (${data.votes || 0}人评价)</td></tr>
+                                            <tr><th>类型</th><td style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">${data.genre || ''}</td></tr>
+                                            <tr><th>国家/地区</th><td style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">${data.region || ''}</td></tr>
+                                            <tr><th>导演</th><td style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">${(data.director || '').replace(/\//g, '<br>')}</td></tr>
+                                            <tr><th>语言</th><td style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">${data.language || ''}</td></tr>
+                                            <tr><th>上映日期</th><td style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">${(data.releaseDate || '').replace(/\//g, '<br>')}</td></tr>
+                                            <tr><th>片长</th><td style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">${data.runtime || ''}</td></tr>
+                                            <tr><th>演员</th><td style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">${(data.cast || '').replace(/\//g, '<br>')}</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div style="flex: 1 1 380px; min-width: 280px;">
+                                    <div style="font-weight: bold; margin: 2px 0 6px 0;">简介</div>
+                                    <div style="white-space: normal; overflow-wrap: anywhere; word-break: break-word;">
+                                        ${data.summary ? '　　' + data.summary.replace(/ 　　/g, '<br>　　') : '本片暂无简介'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </td></tr>
-        `);
+        `;
+
+        // More robust anchor than `#details tr:eq(1)` because our legacy embed may insert rows into #details.
+        const aboutImdb = $('div.collapsable:contains("About this film (from IMDB)")').first();
+        const anchorTr = aboutImdb.closest('tr');
+        if (anchorTr.length) {
+            anchorTr.after(html);
+        } else {
+            $('#details > tbody > tr').eq(1).after(html);
+        }
 
         $('div.collapsable:contains("About this film (from IMDB)")')
             .parent()
@@ -334,5 +390,272 @@ export class PageEnhancerService {
         if (!hideByDefault) {
             $('div.collapsable:contains("About this film (from IMDB)")').click();
         }
+    }
+}
+
+type QuickSearchSetting = ReturnType<typeof resolveQuickSearchSetting>;
+
+export class QuickSearchService {
+    private static async injectQuickSearch(
+        container: JQuery,
+        meta: Partial<TorrentMeta>,
+        marginTopPx = 4,
+        opts?: QuickSearchSetting
+    ) {
+        if (!container.length) return;
+        if (container.find('.autofeed-search-links, .search_urls').length) return;
+        const resolved = opts || resolveQuickSearchSetting(await SettingsService.load());
+        const html = renderQuickSearchHtml(
+            meta,
+            resolved.quickSearchList,
+            resolved.quickSearchPresets,
+            {
+                lang: resolved.lang,
+                className: 'search_urls autofeed-search-links',
+                alignCenter: true,
+                bordered: true,
+                fontColor: 'red'
+            }
+        );
+        if (!html) return;
+        const row = $(html);
+        row.css('margin-top', `${marginTopPx}px`);
+        container.append(row);
+    }
+
+    static async tryInject() {
+        const url = window.location.href;
+        const settings = await SettingsService.load();
+
+        if (url.match(/^https?:\/\/movie\.douban\.com\/subject\/\d+/i) && settings.showQuickSearchOnDouban) {
+            this.injectDoubanTools(settings);
+        }
+
+        if (url.match(/^https?:\/\/www\.imdb\.com\/title\/tt\d+/i) && settings.showQuickSearchOnImdb) {
+            this.injectImdbTools(settings);
+        }
+    }
+
+    static async tryInjectList() {
+        const url = window.location.href;
+        const settings = await SettingsService.load();
+        const quickSearchOpts = resolveQuickSearchSetting(settings);
+
+        const addGroupName = (container: JQuery, groupname: string, locationFlag = 1) => {
+            const g = String(groupname || '').trim();
+            if (!container.length || !g || g === 'Null') return;
+            if (container.find('.autofeed-group-name').length) return;
+            const node = $(`<span class="autofeed-group-name" style="font-weight:bold; color:#20B2AA;">${g}</span>`);
+            const delimiter = $('<span class="autofeed-group-split"> / </span>');
+            if (locationFlag === 0) {
+                container.prepend(node).prepend(delimiter);
+            } else {
+                container.append(delimiter).append(node);
+            }
+        };
+
+        const injectSearch = async (container: JQuery, meta: Partial<TorrentMeta>) => {
+            await this.injectQuickSearch(container, meta, 4, quickSearchOpts);
+        };
+
+        const buildPtpMaps = () => {
+            const groupMap: Record<string, string> = {};
+            const imdbMap: Record<string, string> = {};
+            const titleMap: Record<string, string> = {};
+            try {
+                const pageData = (window as any).PageData;
+                if (!pageData?.Movies) return { groupMap, imdbMap, titleMap };
+                pageData.Movies.forEach((movie: any) => {
+                    const imdbId = extractImdbId(String(movie?.ImdbId || ''));
+                    const movieTitle = String(movie?.Title || movie?.Name || movie?.GroupName || '').trim();
+                    movie.GroupingQualities?.forEach((group: any) => {
+                        group.Torrents?.forEach((torrent: any) => {
+                            const tid = String(torrent?.TorrentId || '');
+                            if (!tid) return;
+                            const groupname = torrent.ReleaseGroup || getGroupName(torrent.ReleaseName || '', '');
+                            if (groupname && groupname !== 'Null') groupMap[tid] = groupname;
+                            if (imdbId) imdbMap[tid] = imdbId;
+                            if (movieTitle) titleMap[tid] = movieTitle;
+                        });
+                    });
+                });
+            } catch { }
+            return { groupMap, imdbMap, titleMap };
+        };
+
+        if (url.match(/^https:\/\/hdbits\.org\/browse/i) && settings.showSearchOnList?.HDB) {
+            $('#torrent-list').find('tr').each((_, row) => {
+                const html = $(row).html() || '';
+                const imdbId = extractImdbId(html);
+                if (!imdbId) return;
+                const $cell = $(row).find('td:eq(2)');
+                const name = $cell.find('a').first().text().trim();
+                if (!name) return;
+                injectSearch($cell, { title: name, imdbId }).catch(() => {});
+                addGroupName($cell, getGroupName(name, $(row).text()));
+            });
+        }
+
+        if (url.match(/^https:\/\/passthepopcorn\.me\/torrents\.php/i) && settings.showSearchOnList?.PTP) {
+            const { groupMap, imdbMap, titleMap } = buildPtpMaps();
+            $('tbody tr.basic-movie-list__details-row').each((_, row) => {
+                const html = $(row).html() || '';
+                const $row = $(row);
+                const tid =
+                    $row.find('a[href*="torrentid="]').first().attr('href')?.match(/torrentid=(\d+)/i)?.[1] || '';
+                const imdbId =
+                    extractImdbId(html) ||
+                    (tid ? imdbMap[tid] : '');
+                if (!imdbId) return;
+                const $titleRow = $row.find('span.basic-movie-list__movie__title-row').first();
+                const name = $titleRow.find('a').first().text().trim() || (tid ? titleMap[tid] : '');
+                const $container = $titleRow.length ? $titleRow : $row.find('td:eq(1)');
+                injectSearch($container, { title: name, imdbId }).catch(() => {});
+
+                if (settings.ptpShowGroupName) {
+                    const groupFromMap = tid ? groupMap[tid] : '';
+                    const groupname = groupFromMap || getGroupName(name, $row.text());
+                    addGroupName($container, groupname, settings.ptpNameLocation || 1);
+                }
+            });
+
+            // Legacy-like fallback: target each torrent link by strict `torrentid`, works on uploaded/search variants.
+            $('tbody a.torrent-info-link[href*="torrentid="]').each((_, link) => {
+                const $link = $(link);
+                const href = ($link.attr('href') || '') as string;
+                const tid = href.match(/torrentid=(\d+)/i)?.[1] || '';
+                if (!tid) return;
+                if (settings.ptpShowGroupName) {
+                    const groupname = groupMap[tid] || getGroupName($link.attr('title') || '', $link.closest('tr').text());
+                    addGroupName($link, groupname, settings.ptpNameLocation || 1);
+                }
+                const imdbId = imdbMap[tid];
+                if (!imdbId) return;
+                const title = titleMap[tid] || $link.closest('tr').find('span.basic-movie-list__movie__title-row a').first().text().trim();
+                const $cell = $link.closest('td').length ? $link.closest('td') : $link.parent();
+                injectSearch($cell, { title, imdbId }).catch(() => {});
+            });
+        }
+
+        if (url.match(/^https:\/\/uhdbits\.org\/torrents\.php/i) && settings.showSearchOnList?.UHD) {
+            $('#torrent_table td.big_info').each((_, cell) => {
+                const html = $(cell).html() || '';
+                const imdbId = extractImdbId(html);
+                if (!imdbId) return;
+                const $container = $(cell).find('div:eq(0)');
+                const name = $container.find('a').first().text().trim();
+                if (!name) return;
+                injectSearch($container, { title: name, imdbId }).catch(() => {});
+                addGroupName($container, getGroupName(name, $(cell).text()));
+            });
+        }
+
+        if (url.match(/^https:\/\/hd-torrents\.org\/torrents/i) && settings.showSearchOnList?.HDT) {
+            $('.mainblockcontenttt tr').each((_, row) => {
+                const $td = $(row).find('td:eq(2)');
+                const name = $td.find('a').first().text().trim();
+                if (!name) return;
+                const imdbId = extractImdbId($td.html() || '');
+                if (!imdbId) return;
+                injectSearch($td, { title: name, imdbId }).catch(() => {});
+                addGroupName($td, getGroupName(name, $td.text()));
+            });
+
+            $('.hdblock:eq(1) tr').each((_, row) => {
+                const $td = $(row).find('td:eq(1)');
+                const name = $td.find('a').first().text().trim();
+                if (!name) return;
+                const imdbId = extractImdbId($td.html() || '');
+                if (!imdbId) return;
+                injectSearch($td, { title: name, imdbId }).catch(() => {});
+                addGroupName($td, getGroupName(name, $td.text()));
+            });
+        }
+    }
+
+    private static injectDoubanTools(settings?: Awaited<ReturnType<typeof SettingsService.load>>) {
+        if (document.body.dataset.autofeedDouban === '1') return;
+        const $info = $('#info');
+        const $title = $('h1').first();
+        if (!$info.length) return;
+
+        const imdbId = extractImdbId($info.html() || '');
+        const imdbUrl = imdbId ? `https://www.imdb.com/title/${imdbId}/` : '';
+
+        if (imdbId && !$info.find('a[href*="imdb.com/title"]').length) {
+            const imdbSpan = $info.find("span.pl:contains('IMDb')");
+            if (imdbSpan.length) {
+                try {
+                    const el = imdbSpan.get(0) as HTMLElement | undefined;
+                    if (el && el.nextSibling) {
+                        (el.nextSibling as Text).textContent = '';
+                    }
+                    imdbSpan.after(`<a href="${imdbUrl}" target="_blank"> ${imdbId}</a>`);
+                } catch {}
+            }
+        }
+
+        const posterImg = $('#mainpic img').first().attr('src') || '';
+        const poster = posterImg.replace(/^.+(p\d+).+$/, (_, p1) => `https://img9.doubanio.com/view/photo/l_ratio_poster/public/${p1}.jpg`);
+
+        $('#mainpic').append(`<br><a href="#" id="autofeed-rehost-poster">海报转存</a>`);
+        $('#autofeed-rehost-poster').on('click', async (e) => {
+            e.preventDefault();
+            if (!poster) return;
+            const settings = await SettingsService.load();
+            try {
+                let result: string[] = [];
+                if (settings.ptpImgApiKey) {
+                    result = await ImageHostService.uploadToPtpImg([poster], settings.ptpImgApiKey);
+                } else if (settings.pixhostApiKey || !settings.freeimageApiKey) {
+                    result = await ImageHostService.uploadToPixhost([poster]);
+                } else if (settings.freeimageApiKey) {
+                    result = await ImageHostService.uploadToFreeimage([poster], settings.freeimageApiKey);
+                } else if (settings.gifyuApiKey) {
+                    result = await ImageHostService.uploadToGifyu([poster], settings.gifyuApiKey);
+                }
+                if (result.length) {
+                    await GMAdapter.setClipboard(result[0]);
+                    alert('海报已转存并复制到剪贴板');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('海报转存失败');
+            }
+        });
+
+        const searchName =
+            ($title.text().trim().match(/[a-z ]{2,200}/i)?.[0] || $title.text().trim()).replace(/season/i, '');
+
+        const quickSearchOpts = settings ? resolveQuickSearchSetting(settings) : undefined;
+        this.injectQuickSearch(
+            $title,
+            { title: searchName, imdbId },
+            6,
+            quickSearchOpts
+        ).catch(() => {});
+        document.body.dataset.autofeedDouban = '1';
+    }
+
+    private static injectImdbTools(settings?: Awaited<ReturnType<typeof SettingsService.load>>) {
+        if (document.body.dataset.autofeedImdb === '1') return;
+        const imdbId = extractImdbId(window.location.href);
+        const searchName = $('title')
+            .text()
+            .trim()
+            .split(/ \(\d+\) - /)[0]
+            .replace(/season/i, '');
+
+        const $container = $('h1[data-testid*=pageTitle]').first();
+        if ($container.length) {
+            const quickSearchOpts = settings ? resolveQuickSearchSetting(settings) : undefined;
+            this.injectQuickSearch(
+                $container,
+                { title: searchName, imdbId },
+                6,
+                quickSearchOpts
+            ).catch(() => {});
+        }
+        document.body.dataset.autofeedImdb = '1';
     }
 }

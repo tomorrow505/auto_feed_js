@@ -1,0 +1,20 @@
+// @match        https://jpopsuki.eu/torrents.php*
+  'jpop': 'https://jpopsuki.eu/',
+var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'MTeam', 'HHClub', 'SportsCult'];
+  if (site_url.match(/^http(s*):\/\/jpopsuki.eu\/torrents.php\?id=\d+&torrentid=\d+/i)) {
+      log_in(['BTN', 'SC', 'MTV', 'UHD', 'HDSpace', 'TVV', 'HDF', 'RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'bit-hdtv', 'SugoiMusic'], '#menu');
+if (site_url.match(/jpopsuki.eu.*torrents.php\?id=/)) {
+    $(e).after(` | <a href="https://jpopsuki.eu/torrents.php?id=${site_url.match(/id=(\d+)/)[1]}&torrentid=${$(e).attr('href').match(/id=(\d+)/)[1]}">PL</a>`);
+    if (origin_site == 'jpop') {
+        var cover = '[img]' + 'https://jpopsuki.eu/' + cover_box.getElementsByTagName('img')[0].getAttribute('src') + '[/img]\n\n';
+      raw_info.torrent_url = `https://jpopsuki.eu/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+      if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic'].indexOf(origin_site) > -1) {
+        if (tds[i].innerHTML.match(`torrent_(torrent_|detail_)?${torrent_id}`) || (['BTN', 'jpop', 'TVV', 'SugoiMusic'].indexOf(origin_site) > -1 && tds[i].parentNode.innerHTML.match('id=' + torrent_id))) {
+    if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic', 'HHClub'].indexOf(origin_site) > -1) {
+    if (['RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'SugoiMusic'].indexOf(raw_info.origin_site) > -1) {
+      if (['RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'SugoiMusic'].indexOf(raw_info.origin_site) > -1) {
+          "RED": 'Redacted', 'OPS': 'Orpheus', 'jpop': 'Jpopsuki', 'DICMusic': 'DICMusic', 'lztr': 'LzTr', 'SugoiMusic': 'SugoiMusic'
+      if (raw_info.origin_site == 'jpop') {
+        if (['RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'SugoiMusic'].indexOf(raw_info.origin_site) > -1) {
+        if (forward_site == 'OPS' && raw_info.origin_site == 'jpop') {
+            } else if (raw_info.labels.match(/日韩|korean|japan|jpop/i)) {

@@ -1,0 +1,20 @@
+  'MTV': { 'url': 'https://www.morethantv.me/', 'enable': 1 },
+  'MTV': 'https://www.morethantv.me/',
+}][img]https://i.ibb.co/cDSgzxm/rt-logo.png[/img][/url] {rt_score}%[/size]  [*] [url={tmdb_url}][img]https://i.ibb.co/VWMtVnN/0fa9aceda3e5.png[/img][/url] [size=3]{tmdb_score}%[/size]
+    if (site == 'MTV') {
+          if (key == 'MTV' && raw_info.url) {
+          } else if (key == 'MTV') {
+          } else if (key == 'MTV') {
+  } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'OPS', 'RED', 'SugoiMusic'].indexOf(forward_site) > -1) {
+      log_in(['BTN', 'SC', 'MTV', 'UHD', 'HDSpace', 'TVV', 'HDF', 'RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'bit-hdtv', 'SugoiMusic'], '#menu');
+    if (origin_site == 'MTV') {
+          raw_info.descr = raw_info.descr.replace('[img]https://i.ibb.co/VWMtVnN/0fa9aceda3e5.png[/img]', '');
+      if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic'].in
+        } else if (origin_site == 'BTN' || origin_site == 'MTV' || origin_site == 'TVV') {
+            if (origin_site != 'MTV') {
+    if (origin_site == 'MTV') {
+    if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic', 'H
+      if (origin_site == 'MTV') { forward_r.colSpan = "6"; forward_l.colSpan = "6"; }
+    if (origin_site == 'MTV') {
+      'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED', 'Tik', 'Aither', 'SugoiMusic', 'C
+    else if (forward_site == 'MTV') {

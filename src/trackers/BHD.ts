@@ -2,11 +2,11 @@ import $ from 'jquery';
 import { Unit3DEngine } from '../templates/unit3d';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { SiteConfig } from '../types/SiteConfig';
-import { getLabel, getType } from '../common/legacy/text';
-import { getMediainfoPictureFromDescr } from '../common/legacy/media';
-import { dealImg350, getSizeFromDescr } from '../common/legacy/helpers';
-import { matchLink } from '../common/legacy/links';
-import { dealWithTitle } from '../common/legacy/title';
+import { getLabel, getType } from '../common/rules/text';
+import { getMediainfoPictureFromDescr } from '../common/rules/media';
+import { dealImg350, getSizeFromDescr } from '../common/rules/helpers';
+import { extractImdbId, matchLink } from '../common/rules/links';
+import { dealWithTitle } from '../common/rules/title';
 
 export class BHDEngine extends Unit3DEngine {
     constructor(config: SiteConfig, url: string) {
@@ -64,7 +64,7 @@ export class BHDEngine extends Unit3DEngine {
             const imdbUrl = matchLink('imdb', document.body.innerHTML);
             if (imdbUrl) {
                 meta.imdbUrl = imdbUrl;
-                meta.imdbId = imdbUrl.match(/tt\d+/)?.[0];
+                meta.imdbId = extractImdbId(imdbUrl);
             }
         } catch {}
 

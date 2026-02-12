@@ -1,0 +1,44 @@
+  'PTer': { 'url': 'https://pterclub.net/', 'enable': 1 },
+const default_common_sites = ['TTG', 'CMCT', 'HUDBT', 'PTer'];
+const default_signin_sites = ['TTG', 'CMCT', 'HUDBT', 'PTer'];
+      const zhuquejson = JSON.parse('{"page":1,"size":20,"type":"title","sorter":"id","order":"desc","keyword":"PTer","tags":[],"category":[],"medium":[],"videoCoding":[],"audioCoding":[],"resolution":[],"group":[],"more":false}');
+  'PTer': /-(Pter|.*Pter)/i,
+  if (name.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i) && my_string.match(/mpls/i)) {
+      } else if (item.match(/shewang.net|pterclub.net|img4k.net|img.hdhome.org|img.hdchina.org/)) {
+  $('#url_vimages').after(`<a href="" id="get_full_size" style="color: red" title="点击获取原图,目前支持imgbox，pixhost，pter，ttg，瓷器，img4k">获取原图</a>`);
+area[name="screenshots"]').after(`<br><a href="" id="get_full_size" style="color: red" title="点击获取原图,目前支持imgbox，pixhost，pter，ttg，瓷器，img4k">获取原图</a>`);
+  '[img]https://img.pterclub.net/images/2022/03/24/58ef34eb1c04aa6f87442e439d103b29.png[/img]',
+  '[img]https://img.pterclub.net/images/2021/07/14/78c58ee6b3e092d0c5a7fa02f3a1905e.png[/img]',
+  '[img]https://pterclub.net/pic/CS.png[/img]',
+  '[img]https://pterclub.net/pic/GDJT.png[/img]',
+  '[img]http://img.pterclub.net/images/CS.png[/img]',
+  '[img]https://img.pterclub.net/images/GDJT.png[/img]',
+  '[img]https://img.pterclub.net/images/CS.png[/img]',
+  '[img]https://img.pterclub.net/images/2022/10/19/1.gif[/img]',
+.descr = raw_info.descr.replace(/\n\n+/g, '\n\n').replace('https://dbimg.audiences.me/?', '').replace('https://imgproxy.pterclub.net/douban/?t=', '');
+  if (!raw_info.codec_sel || forward_site == 'PTer') {
+      if (used_signin_sites.indexOf('PTer') > -1) {
+        getJson('https://pterclub.net/attendance-ajax.php', null, function (data) {
+            $(`input[kname=PTer]`).parent().find('a').css({ "color": "red" });
+            $(`input[kname=PTer]`).parent().find('a').css({ "color": "blue" });
+    $('#dealimg').append(`<font color="red">获取大图目前支持imgbox，pixhost，pter，ttg，瓷器，img4k，其余的可以尝试字符串替换。</font><a href="https://github.com/tomorrow505/auto_feed_js/wiki/%E5%9B%BE%E7%89%87%E5%A4%84%
+      if (!location.href.match(/usercp.php\?action=persona|pter.*upload.php|piggo.me.*upload.php|^https:\/\/.*.douban.com|^https?:\/\/\d+.\d+.\d+.\d+.*5678/)) {
+      } else if (site_url.match(/pter.*upload.php|piggo.*upload.php|^https?:\/\/\d+.\d+.\d+.\d+.*5678/)) {
+if (site_url.match(/^https:\/\/pterclub.net\/upload.php/)) {
+        if ((origin_site == 'PTer' || origin_site == 'FRDS' || origin_site == 'Audiences') && descr.getElementsByTagName('table').length) {
+    if (origin_site == 'PTer') {
+      raw_info.descr = raw_info.descr.replace(/https:\/\/pterclub.net\/link.php\?sign=.*?&target=/ig, '');
+      case 'PTer':
+      if (['PTer', 'PThome', 'HDHome', 'HDDolby'].indexOf(origin_site) > -1) {
+.descr = raw_info.descr.replace(/\n\n+/g, '\n\n').replace('https://dbimg.audiences.me/?', '').replace('https://imgproxy.pterclub.net/douban/?t=', '');
+    if (origin_site == 'PTer') {
+    } else if (origin_site == 'PTer' && $('#kdescr').parent().parent().parent().find('a[href*="tag_exclusive=yes"]').length) {
+      if (forward_site == 'PTer') {
+    if (forward_site == 'PTer' || forward_site == 'Dragon' || forward_site == 'QingWa' || forward_site == 'MTeam') {
+        if (forward_site == 'PTer') {
+        case 'PTer':
+    if (forward_site == 'PTer') {
+          if (key == 'Pter') key = 'PterClub';
+                subtitle_info = subtitle_info.split(/FILES:|CHAPTERS:/i)[0].trim();
+            if (img_url.match(/img.pterclub.net/)) {
+        } else if (item.match(/shewang.net|pterclub.net|img4k.net|img.hdhome.org|img.hdchina.org/)) {

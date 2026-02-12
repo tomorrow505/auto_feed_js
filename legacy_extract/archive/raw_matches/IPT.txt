@@ -1,0 +1,123 @@
+// ==UserScript==
+// @description  PT一键转种脚本
+// @namespace    https://greasyfork.org/zh-CN/scripts/424132-auto-feed
+// @updateURL    https://greasyfork.org/zh-CN/scripts/424132-auto-feed
+// @match        https://iptorrents.com/torrent.php?id=*
+// @require      https://greasyfork.org/scripts/453166-jquery/code/jquery.js?version=1105525
+// @require      https://greasyfork.org/scripts/28502-jquery-ui-v1-11-4/code/jQuery%20UI%20-%20v1114.js?version=187735
+// @require      https://greasyfork.org/scripts/430180-imgcheckbox2/code/imgCheckbox2.js?version=956211
+// @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
+// ==/UserScript==
+  $('select[name="searchin"]').find('option:eq(0)').text('Name and Description');
+  $('select[name="searchin"]').find('option:eq(2)').text('Description');
+  menu_html = menu_html.replace(/Abonnements/g, 'Subscriptions');
+  'IPT': 'https://iptorrents.com/',
+    } else if (n.nodeName == 'SCRIPT') {
+  if (site_url.match(/^http(s*):\/\/iptorrents.com\/torrent.php\?id=*/i)) {
+            forward_url = used_site_info[key].url + 'browse.php?descriptions=0&season_packs=0&from=&to=&imdbgt=0&imdblt=10&imdb=&primary_language=&country=&yeargt=&yearlt=&tagsearchtype=or&sea
+    'subscriptions': 'Subscriptions',
+          var tmdb_url = $('div.torrent_description', data).find('a[href*="themovieDB"]').attr('href').replace(/\n/, '');
+    $('.setting_description').html(`
+            <div class="setting_description">
+        a.href = "javascript:void(0);";
+  table_html = table_html.replace(/По описаниям/g, 'According descriptions');
+    table_html = table_html.replace(/Описание/g, `Description`);
+          $('p.meta__description').text(data.data.summary.replace(/ 　　/g, ''));
+      log_in(['IPT'], 'div[class="stats"]');
+    $('#setting').append(`<b>&nbsp;&nbsp;&nbsp;更新地址：</b><a href="https://greasyfork.org/zh-CN/scripts/424132-auto-feed/", target="_blank"><font color="red">→跳转←</font></a>`);
+              const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
+              descr = descr.format({ 'en_descr': imdb_json.description });
+function getDescription(doc) {
+    description = getDescription(doc);
+    description: description,
+    (info.description ? '◎简　　介　\n' + info.description.replace(/^|\n/g, '\n　　') + '\n\n' : '◎简　　介　\n\n　　暂无相关剧情介绍') +
+          descr = document.getElementById("kdescription");
+    if (origin_site == 'IPT') {
+      raw_info.torrent_url = 'https://iptorrents.com/' + $('a[href*="download.php"]').attr('href');
+        if ($(e).text() == "Description") {
+      var descr_td = $('td:contains(Description)').next();
+      raw_info.descr += '[size=3][b]Description[/b][/size]\n\n';
+      $('#description').find('p').map((index, e) => {
+      $('#description').find('li').map((index, e) => {
+      raw_info.descr += '[size=3][b]Description[/b][/size]\n\n';
+      $('.panel__heading:contains("Description")').parent().next().find('img').map((index, e) => {
+            $('p.meta__description,span.movie-overview').text(data.data.summary.replace(/ 　　/g, ''));
+      $('.torrent-description').find('a').has('img').map((index, e) => {
+      var imdb_box = document.getElementsByClassName('torrent_description')[0];
+            $('table#torrent_details').before($('div.torrent_description'));
+            $('div.torrent_description').find('font').prepend(
+            var $div = $('div.torrent_description').find('div.body').find('div').first();
+            $('div.torrent_description').find('div.body').html(``);
+            $('div.torrent_description').find('div.body').append($div);
+            $('div.torrent_description >.body').append(`<br><br>${data.summary.replace(/ 　　/g, '')}`);
+      var mediainfo = document.getElementsByClassName('torrent_description')[0].getElementsByClassName('body')[0];
+      var mediainfo = $('div.torrent_description').find('div.body');
+      var mediainfo = $('div.torrent_description').find('div:eq(1)');
+      var mediainfo = $('div.torrent_description').find('div:eq(1)');
+        var description = document.getElementsByTagName('center')[0];
+        var imgs = Array.from(description.getElementsByTagName('img'));
+      $('td:contains("Description")').next().contents().each(function () {
+        } else if (tds[i].textContent == 'Description') {
+        } else if (tds[i].textContent == 'Description') {
+      if (['副标题', '副標題', '副标题', 'Small Description'].indexOf(tds[i].textContent) > -1 && !raw_info.small_descr) {
+        if (tds[i].textContent == 'Description') {
+        } else if (tds[i].textContent == 'Description') {
+      // https://github.com/lfkid/fuzzy-enigma/blob/master/ECMAScript/使Promise.all()不会rejected从而并行处理多个fetch.md
+      var tmdb_url = $('div.torrent_description').find('a[href*="themovieDB"]').attr('href').replace(/\n/, '');
+        var description_box = document.getElementById('files_' + torrent_id);
+        raw_info.name = description_box.getElementsByTagName('tr')[1].getElementsByTagName('td')[0].textContent;
+          raw_info.name = description_box.getElementsByTagName('tr')[0].textContent.match(/\/(.*)\//)[1];
+          description_box = description_box.nextSibling;
+          if (description_box.nodeName == 'DIV') {
+        var spans = description_box.getElementsByTagName('span');
+        var imgs = description_box.getElementsByTagName('img');
+        var picture_info = $('h2.panel__heading:contains("Description"), h2.panel__heading:contains("描述")').parent().next()[0].getElementsByTagName('img');
+              $('p.meta__description').text(data.data.summary.replace(/ 　　/g, ''));
+        if (tmp_str.trim().match(/Description|描述/)) {
+        if (origin_site == 'NBL' || origin_site == 'IPT' || origin_site == 'torrentseeds' || origin_site == 'HONE') {
+        forward_l.parentNode.setAttribute('class', 'ant-descriptions-row');
+        forward_l.setAttribute('class', 'ant-descriptions-item-label');
+        forward_r.setAttribute('class', 'ant-descriptions-item-content');
+      const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
+                var info = $('script[type="application/ld+json"]', doc).text();
+            $('#release_desc').val(torrent.description.replace(/&emsp;/g, ' '));
+              albumDescJSON = albumDescJSON.replace(/<strong>(.+?)<\/strong>: <a href="javascript:void\(0\);" onclick="BBCode\.spoiler\(this\);">Show<\/a><blockquote class="hidden spoiler">(.+?)<\/blockquote>/g,
+              albumDescJSON = albumDescJSON.replace(/<strong>Hidden text<\/strong>: <a href="javascript:void\(0\);" onclick="BBCode\.spoiler\(this\);">Show<\/a><blockquote class="hidden spoiler">(.+?)<\/blockquote>/g,
+              alert('No album description is included in the JSON!');
+            var relDescJSON = releaseJSON.response.torrent.description;
+        $('#upload-form-description').val(pic_info);
+        $('#upload-form-description').parent().after(`<div style="margin-bottom:5px"><a id="img350" style="margin-left:5px" href="#">IMG350</a>
+          var text = $('#upload-form-description').val();
+          var textarea = document.getElementById('upload-form-description');
+              $('#upload-form-description').val(text.replace(chosen_value, chosen_value.replace(/\[img\]/g, '[img=350]')));
+              $('#upload-form-description').val(text.replace(/\[img\]/g, '[img=350x350]'));
+        case 'IPTV': medium_box.options[7].selected = true; break;
+            const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
+            var text = $('#bbcode-description').val();
+            var textarea = document.getElementById('bbcode-description');
+                $('#bbcode-description').val(text.replace(chosen_value, chosen_value.replace(/\[img\]/g, '[img=350]')));
+                $('#bbcode-description').val(text.replace(/\[img\]/g, '[img=350]'));
+          $('#upload-form-description').val(pic_info);
+          $('#bbcode-description').val(pic_info);
+          try { $('#upload-form-description')[0].dispatchEvent(event); } catch (err) { }
+          try { $('#bbcode-description')[0].dispatchEvent(event); } catch (err) { }
+            const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
+            descr = descr.format({ 'en_descr': imdb_json.description });
+            $('#bbcode-description').val(descr);
+            $('#bbcode-description').css('height', '400px');
+            $('#bbcode-description')[0].dispatchEvent(event);
+          $('#bbcode-description').val(descr);
+          $('#bbcode-description')[0].dispatchEvent(event);
+        $('#bbcode-description').val(infos.pic_info);
+        $('#bbcode-description')[0].dispatchEvent(event);
+          var text = $('#bbcode-description').val();
+          var textarea = document.getElementById('bbcode-description');
+              $('#bbcode-description').val(text.replace(chosen_value, chosen_value.replace(/\[img\]/g, '[img=350]')));
+              $('#bbcode-description').val(text.replace(/\[img\]/g, '[img=350]'));
+        $('#upload-form-description').css({ 'height': '600px' });
+          var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+            $('#description-container').next().find('td:eq(1)').append(`<a href="#" id="go_imgbox">辅助转存原始图：转至PIXHOST</a>`);
+            $('#description-container').next().find('td:eq(1)').append(`<div style="color:yellow">辅助设置对比图：
+            $('#description-container').next().find('td:eq(1)').append(`<div style="color:yellow">辅助缩略转大图：
+        const imdb_json = JSON.parse($('script[type="application/ld+json"]', doc).text());
+        descr = descr.format({ 'en_descr': imdb_json.description });

@@ -1,0 +1,4 @@
+  'CyanBug': { 'url': 'https://cyanbug.net/', 'enable': 1 },
+        'CyanBug', '杏林', '海棠', 'Panda', 'KuFei', 'PTCafe', 'GTK', 'HHClub', '麒麟', 'AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', '唐门', '天枢', 
+        case 'CyanBug':
+    else if (forward_site == 'CyanBug') {

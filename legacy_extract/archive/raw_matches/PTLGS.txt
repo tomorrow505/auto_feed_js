@@ -1,0 +1,13 @@
+  'PTLGS': { 'url': 'https://ptlgs.org/', 'enable': 1 },
+  'PTLGS': /(-PTLGS|.*@PTLGS)/i,
+if (site_url.match(/https:\/\/(springsunday.net|www.hddolby.com|ptlgs.org)\/upload.php/)) {
+      var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice', 'OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
+        if (!descr && origin_site == 'PTLGS') {
+    if (origin_site == 'PTLGS') {
+            } else if ((origin_site == 'OurBits' || origin_site == 'FRDS' || origin_site == 'PTLGS') && douban_button_needed) {
+      'ZHUQUE', 'MTeam', 'FNP', 'OnlyEncodes', 'YemaPT', 'DarkLand', '影', 'PTLGS', 'ReelFliX', 'RouSi'].indexOf(forward_site) < 0) {
+      } else if (forward_site == '影' || forward_site == 'PTLGS') {
+          if (forward_site == 'HDDolby' || forward_site == 'PTLGS') {
+        if (forward_site != 'PTLGS') {
+        case 'PTLGS':
+    else if (forward_site == 'PTLGS') {

@@ -1,0 +1,4 @@
+  '唐门': { 'url': 'https://tmpt.top/', 'enable': 1 },
+   'CyanBug', '杏林', '海棠', 'Panda', 'KuFei', 'PTCafe', 'GTK', 'HHClub', '麒麟', 'AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', '唐门', '天枢', '财神', 'DevTraker',
+        case '唐门':
+    else if (forward_site == '唐门') {

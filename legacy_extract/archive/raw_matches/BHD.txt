@@ -1,0 +1,25 @@
+  'BHD': { 'url': 'https://beyond-hd.me/', 'enable': 1 },
+  `<a href="https://beyond-hd.me/torrents?imdb={imdbid}" target="_blank">BHD</a>`,
+  'BHD': 'https://beyond-hd.me/',
+  } else if (site == 'PHD' || site == 'avz' || site == 'BHD' || site == 'CNZ') {
+    if (['BHD', 'BLU', 'Tik', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX', 'IN'].
+    if (site == 'BHD') {
+  if (['PTP', 'xthor', 'HDF', 'BHD', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'FNP', 'OnlyEncodes', 'R
+        } else if (key == 'HDCity' || key == 'BHD' || key == 'HDB') {
+          } else if (key == 'BHD') {
+  if (['BHD', 'BLU', 'Tik', 'ACM', 'HDSpace', 'xthor', 'Monika', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX'].indexOf(fo
+          $('h1.bhd-title-h1').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank" style="display: inline; widt
+      log_in(['BHD'], 'div[class="beta-table"]');
+    if (origin_site == 'BHD') {
+      if (['BHD', 'ACM', 'HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
+    if (origin_site == 'BHD') {
+            $('h1.bhd-title-h1').append(`<span> | </span><a href="${douban_prex}${data.data.id}" target="_blank" style="display: inline; widt
+        if (['PHD', 'avz', 'CNZ', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'BHD', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'OMG'].indexOf(origin_site) > -1) {
+    } else if (origin_site == 'BHD') {
+    } else if (origin_site == 'BHD') {
+    if (raw_info.origin_site == 'BHD' && raw_info.name.match(/-FraMeSToR/)) {
+          if (['BHD'].indexOf(forward_site) > -1) {
+        if (forward_site == 'BHD') {
+    } else if (['BLU', 'Tik', 'Aither', 'BHD', 'iTS', 'PTP', 'ACM', 'Monika', 'DarkLand'].indexOf(forward_site) < 0) {
+      } else if (forward_site == 'BHD') {
+    else if (forward_site == 'BHD') {

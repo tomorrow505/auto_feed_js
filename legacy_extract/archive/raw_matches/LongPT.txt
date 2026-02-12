@@ -1,0 +1,4 @@
+  'LongPT': { 'url': 'https://longpt.org/', 'enable': 1 },
+        'CDFile', '柠檬不甜', 'ALing', 'LongPT', 'BaoZi'
+        case 'LongPT':
+    else if (forward_site == 'LongPT') {

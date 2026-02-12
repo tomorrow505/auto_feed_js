@@ -32,23 +32,6 @@
 ### 图片处理工具
 ![图片处理工具](docs/images/image_tools.png)
 
-## 功能预览
-
-### 站点配置
-![站点配置](docs/images/sites.png)
-
-设置转发来源、常用目标站点、列表页快速搜索开关。其他嵌入模式 / 快速查询保持一致。
-
-### 设置面板
-![设置面板](docs/images/settings.png)
-
-页面增强、数据源选择、快速搜索模板编辑等。
-
-### 图片处理
-![图片处理](docs/images/image_tools.png)
-
-多图床转存（PTPIMG / Pixhost / Imgbox / HDBits / Hostik）、获取大图、缩略图、链接提取。
-
 ## 安装（Release）
 1. 安装 Tampermonkey。
 2. 安装脚本：

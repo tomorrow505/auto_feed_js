@@ -1,0 +1,11 @@
+  'UBits': { 'url': 'https://ubits.club/', 'enable': 1 },
+  'UBits': /@UBits|-UBits|-UBWEB/i,
+    var unsupported_sites = ['digitalcore', 'HD-Only', 'HOU', 'OMG', 'TorrentLeech', 'MTeam', 'UBits', 'PigGo'];
+$('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['UBits'].url}" target="_blank"><b>UBits</b></a></div>`);
+        'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'HITPT', 'ITZMX', 'OurBits', 'UBits'];
+    if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$|UBits$|HHWEB$|-beAst$|-beAstTV$/i)) {
+      if (raw_info.name.match(/UBits$/i)) {
+        if (forward_site == 'UBits') {
+        case 'UBits':
+      const team_dict = ['OurBits', 'BtsHD', 'BtsTV', 'HDChina', 'CMCT', 'HHWEB', 'FRDS', 'MTeam', 'QHstudio', 'UBits'];
+    else if (forward_site == 'UBits') {

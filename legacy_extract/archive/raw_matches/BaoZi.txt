@@ -1,0 +1,4 @@
+  'BaoZi': { 'url': 'https://p.t-baozi.cc/', 'enable': 1 }
+        'CDFile', '柠檬不甜', 'ALing', 'LongPT', 'BaoZi'
+        case 'BaoZi':
+    else if (forward_site == 'BaoZi') {

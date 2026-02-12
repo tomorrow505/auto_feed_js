@@ -1,0 +1,19 @@
+    20220708：适配支持TVV转出。
+  'TVV': { 'url': 'http://tv-vault.me/', 'enable': 1 },
+  'TVV': 'http://tv-vault.me/',
+          } else if (key == 'TVV') {
+          } else if (key == 'TVV') {
+  } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'OPS', 'RED', 'SugoiMusic'].indexOf(forward_site) > -1) {
+      log_in(['BTN', 'SC', 'MTV', 'UHD', 'HDSpace', 'TVV', 'HDF', 'RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'bit-hdtv', 'SugoiMusic'], '#menu');
+    if (origin_site == 'TVV') {
+      raw_info.torrent_url = used_site_info.TVV.url + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+      if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic'].indexOf(origin_site) > -1) {
+        } else if (origin_site == 'BTN' || origin_site == 'MTV' || origin_site == 'TVV') {
+        if (tds[i].innerHTML.match(`torrent_(torrent_|detail_)?${torrent_id}`) || (['BTN', 'jpop', 'TVV', 'SugoiMusic'].indexOf(origin_site) > -1 && tds[i].parentNode.innerHTML.match('id=' + torrent_id))) {
+    if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic', 'HHClub'].indexOf(origin_site) > -1) {
+      else if (site == 'TVV') {
+        if (['PTP', 'SC', 'TVV', 'avz', 'PHD', 'CNZ', 'HDCity', 'BTN', 'ANT', 'GPW', 'KG'].indexOf(this.id) > -1) {
+        if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'SC', 'avz', 'PHD', 'CNZ', 'TVV'].indexOf(_id) < 0) {
+        if (['KG', 'PTP', 'HDCity', 'BTN', 'GPW', 'common_link', 'SC', 'avz', 'PHD', 'CNZ', 'TVV', 'ANT', 'NBL', 'CarPt'].indexOf(this.id) > -1) {
+      'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED', 'Tik', 'Aither', 'SugoiMusic', 'CG',
+    else if (forward_site == 'TVV') {

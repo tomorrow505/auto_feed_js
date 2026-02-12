@@ -1,0 +1,5 @@
+// @match        https://speedapp.io/browse/*
+  'SpeedApp': 'https://speedapp.io/',
+  if (site_url.match(/^https:\/\/speedapp.io\/browse\/\d+\/t/)) {
+    if (origin_site == 'SpeedApp') {
+      raw_info.torrent_url = 'https://speedapp.io' + $('a[href*="/torrents/"]').attr('href');

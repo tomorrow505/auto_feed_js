@@ -1,0 +1,26 @@
+// @match        http*://www.torrentleech.org/torrent/*
+// @match        http*://www.torrentleech.me/torrent/*
+// @match        http*://www.torrentleech.cc/torrent/*
+  'TorrentLeech': 'https://www.torrentleech.org/',
+  o_site_info.TorrentLeech = 'https://www.torrentleech.org/';
+  o_site_info.TorrentLeech = 'https://www.torrentleech.me/';
+  o_site_info.TorrentLeech = 'https://www.torrentleech.cc/';
+  o_site_info.TorrentLeech = 'https://www.tlgetin.cc/';
+  if (site_url.match(/^http(s*):\/\/www\.(torrentleech|tlgetin)\..*?\/torrent\/*/i)) {
+  if (site == 'TorrentLeech') {
+    } else if (site == 'TorrentLeech') {
+  if (['PTP', 'xthor', 'HDF', 'BHD', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(site) > -1) {
+  if (site == 'TorrentLeech' && $('#off').css('display') == 'none') {
+    var unsupported_sites = ['digitalcore', 'HD-Only', 'HOU', 'OMG', 'TorrentLeech', 'MTeam', 'UBits', 'PigGo'];
+      log_in(['TorrentLeech'], 'span[class="div-menu-item logout-menu-item"]');
+    $('#setting').append(`<b>选择TorrentLeech的默认域名：</b>`);
+    $('#setting').append(`<input type="radio" name="tldomain" value="0">torrentleech.org`);
+    $('#setting').append(`<input type="radio" name="tldomain" value="1">torrentleech.me`);
+    $('#setting').append(`<input type="radio" name="tldomain" value="2">torrentleech.cc`);
+    $('#setting').append(`<label><b>TorrentLeech的rsskey(<a href="https://wiki.torrentleech.org/doku.php/rss_-_how_to_automatically_download_torrents_with_utorrent" target="_blank"><font color="red">依照教程</font><
+    if (origin_site == 'TorrentLeech') {
+      if (origin_site == 'TorrentLeech') {
+    if (origin_site == 'TorrentLeech') {
+      raw_info.torrent_url = o_site_info.TorrentLeech.slice(0, -1) + $('#detailsDownloadButton').attr('href');
+        raw_info.torrent_url = `https://www.torrentleech.org/rss/download/${torrent_id}/${used_tl_rss_key}/${torrent_name}`;
+        if (['PHD', 'avz', 'CNZ', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'BHD', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'OMG'].indexOf(origin_site) > -1) {

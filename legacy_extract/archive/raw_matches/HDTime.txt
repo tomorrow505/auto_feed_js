@@ -1,0 +1,6 @@
+  'HDTime': { 'url': 'https://hdtime.org/', 'enable': 1 },
+        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
+    if (['CMCT', 'PTsbao', 'HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HDTime', 'HD-Only', 'HDfans',
+        case "HDTime":
+    else if (forward_site == 'HDTime') {
+T (Trumpable), STUTTERSHIT, LiGaS, DDR, Zeus, TBS, aXXo, CrEwSaDe, DNL, EVO (WEB-DLs are permitted), FaNGDiNG0, HD2DVD, HDTime, iPlanet, KiNGDOM, NhaNc3, PRoDJi, SANTi, ViSiON, WAF, YIFY, YTS, MkvCage, mSD</font></div>`);

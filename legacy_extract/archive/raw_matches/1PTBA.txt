@@ -1,0 +1,5 @@
+    20220802：支持转入ITZMX、HDPt(明教)，修复1PTBA部分bug。(by shmt86)
+  '1PTBA': { 'url': 'https://1ptba.com/', 'enable': 1 },
+        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
+        case '1PTBA':
+    else if (forward_site == '1PTBA') {

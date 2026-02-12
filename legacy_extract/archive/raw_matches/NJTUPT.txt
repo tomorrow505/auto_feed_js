@@ -1,0 +1,4 @@
+  'NJTUPT': { 'url': 'https://njtupt.top/', 'enable': 1 },
+        if (forward_site == 'NJTUPT') {
+        case 'NJTUPT':
+    else if (forward_site == 'NJTUPT') {

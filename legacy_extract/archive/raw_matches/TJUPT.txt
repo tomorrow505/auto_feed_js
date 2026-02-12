@@ -1,0 +1,25 @@
+  'TJUPT': { 'url': 'https://www.tjupt.org/', 'enable': 1 },
+if (site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd|pthome.net)\//)) {
+  var site_domain = site_url.match(/^http(s)?:\/\/(www.)?(tjupt.org|open.cd|pthome.net)\//)[0];
+  if (site_domain.match(/tjupt/)) {
+    used_site_info.TJUPT.url = site_domain;
+  'TJUPT': /TJUPT$/,
+      } else if (site_url.match(/http(s*):\/\/.*tjupt.org\/details.php.*/i)) {
+    } else if (n.nodeName == 'DIV' && site_url.match(/pthome|audiences|tjupt/i) && n.className == 'codemain') {
+      } else if (site_url.match(/tjupt/i)) {
+    } else if (n.nodeName == 'DIV' && site_url.match(/tjupt/i) && n.id == 'formatMediainfo') {
+$('#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['TJUPT'].url + 'attendance.php'}" target="_blank"><b>TJUPT</b></a></div>`);
+      log_in(['TJUPT'], '#info_block');
+      if (tds[i].innerHTML == '详细信息' && origin_site == 'TJUPT') {
+    if (origin_site == 'CMCT' || origin_site == 'OurBits' || origin_site == 'TJUPT' || origin_site == 'bit-hdtv' || origin_site == 'MTeam' || origin_site == '影') {
+      if (origin_site == 'TJUPT') {
+    } else if (origin_site == 'TJUPT' && ($('#tag').find('.tag-exclusive').length)) {
+        if (this.id == "影" && ['CMCT', 'TTG', 'UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) < 0) {
+    if (['UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) > -1) {
+        if (origin_site == 'TJUPT' || origin_site == 'PTsbao') {
+      } else if (origin_site == 'TJUPT' || origin_site == 'PTsbao') {
+      } else if (raw_info.type == '电影' && ['HUDBT', 'MTeam', 'TLFbits', 'PuTao', 'TJUPT', 'NanYang', 'BYR', 'TTG'].indexOf(forward_site) < 0) {
+      if (['TJUPT'].indexOf(forward_site) > -1 && allinput[i].name == 'external_url') {
+        } else if (forward_site == 'Audiences' || forward_site == 'TJUPT' || forward_site == 'NexusHD') {
+                if (forward_site == 'TJUPT') {
+    else if (forward_site == 'TJUPT') {

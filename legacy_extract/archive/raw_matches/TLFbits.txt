@@ -1,0 +1,5 @@
+  'TLFbits': { 'url': 'http://pt.eastgame.org/', 'enable': 1 },
+  'TLFbits': /-tlf/i,
+      var np_sites = ['CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', 'HDSky', 'ITZMX',
+      } else if (raw_info.type == '电影' && ['HUDBT', 'MTeam', 'TLFbits', 'PuTao', 'TJUPT', 'NanYang', 'BYR', 'TTG'].indexOf(forward_site) < 0) {
+    else if (forward_site == 'TLFbits') {

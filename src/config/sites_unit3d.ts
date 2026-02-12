@@ -17,41 +17,6 @@ export const Unit3DSites: SiteConfig[] = [
         description: 'Cinematik (Tik)'
     },
     {
-        name: 'Aither',
-        type: SiteType.Unit3DClassic,
-        keywords: ['aither.cc'],
-        baseUrl: 'https://aither.cc/',
-        description: 'Aither'
-    },
-    {
-        name: 'FNP',
-        type: SiteType.Unit3DClassic,
-        keywords: ['fearnopeer.com'],
-        baseUrl: 'https://fearnopeer.com/',
-        description: 'FearNoPeer'
-    },
-    {
-        name: 'OnlyEncodes',
-        type: SiteType.Unit3DClassic,
-        keywords: ['onlyencodes.cc'],
-        baseUrl: 'https://onlyencodes.cc/',
-        description: 'OnlyEncodes'
-    },
-    {
-        name: 'DarkLand',
-        type: SiteType.Unit3DClassic,
-        keywords: ['darkland.top'],
-        baseUrl: 'https://darkland.top/',
-        description: 'DarkLand'
-    },
-    {
-        name: 'ReelFliX',
-        type: SiteType.Unit3DClassic,
-        keywords: ['reelflix.xyz'],
-        baseUrl: 'https://reelflix.xyz/',
-        description: 'ReelFliX'
-    },
-    {
         name: 'ACM',
         type: SiteType.Unit3DClassic,
         keywords: ['eiga.moi'],
@@ -64,27 +29,6 @@ export const Unit3DSites: SiteConfig[] = [
         keywords: ['monikadesign.uk'],
         baseUrl: 'https://monikadesign.uk/',
         description: 'Monika'
-    },
-    {
-        name: 'DTR',
-        type: SiteType.Unit3DClassic,
-        keywords: ['torrent.desi'],
-        baseUrl: 'https://torrent.desi/',
-        description: 'DTR'
-    },
-    {
-        name: 'HDOli',
-        type: SiteType.Unit3DClassic,
-        keywords: ['hd-olimpo.club'],
-        baseUrl: 'https://hd-olimpo.club/',
-        description: 'HDOli'
-    },
-    {
-        name: 'HONE',
-        type: SiteType.Unit3DClassic,
-        keywords: ['hawke.uno'],
-        baseUrl: 'https://hawke.uno/',
-        description: 'HONE'
     },
     {
         name: 'BHD',

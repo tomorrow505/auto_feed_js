@@ -1,0 +1,6 @@
+  'HaiDan': { 'url': 'https://www.haidan.video/', 'enable': 1 },
+      log_in(['HaiDan'], 'div[class="navbar special-border"]');
+      } else if (forward_site != 'HaiDan') {
+        case 'HaiDan':
+        case 'HaiDan':
+    else if (forward_site == 'HaiDan') {

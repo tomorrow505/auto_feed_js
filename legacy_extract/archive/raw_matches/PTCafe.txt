@@ -1,0 +1,5 @@
+  'PTCafe': { 'url': 'https://ptcafe.club/', 'enable': 1 },
+  'PTCafe': /CafeWEB|CafeTV|DIY@PTCafe/i,
+        'CyanBug', '杏林', '海棠', 'Panda', 'KuFei', 'PTCafe', 'GTK', 'HHClub', '麒麟', 'AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', '唐门', '天枢', '财神', 'DevTraker',
+        case 'PTCafe':
+    else if (forward_site == 'PTCafe') {

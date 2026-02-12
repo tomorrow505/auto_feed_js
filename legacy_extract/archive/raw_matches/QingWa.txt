@@ -1,0 +1,12 @@
+  'QingWa': { 'url': 'https://qingwapt.com/', 'enable': 1 },
+    } else if (default_site_info[key].url != used_site_info[key].url && ['AGSV', 'QingWa', 'MTeam'].indexOf(key) < 0) {
+if (site_url.match(/^https?:\/\/(www.)?qingwapt.org\/.*/)) {
+  used_site_info.QingWa.url = 'https://www.qingwapt.org/';
+} else if (site_url.match(/^https?:\/\/qingwapt.com\/.*/)) {
+  used_site_info.QingWa.url = 'https://qingwapt.com/';
+  'QingWa': /(FROG|FROGE|FROGWeb)$/i,
+        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
+      if (origin_site == 'QingWa') {
+    if (forward_site == 'PTer' || forward_site == 'Dragon' || forward_site == 'QingWa' || forward_site == 'MTeam') {
+        case 'QingWa':
+    else if (forward_site == 'QingWa') {

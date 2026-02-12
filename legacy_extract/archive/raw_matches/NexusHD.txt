@@ -1,0 +1,8 @@
+  'NexusHD': { 'url': 'https://www.nexushd.org/', 'enable': 1 },
+  default_site_info.NexusHD.url = `https://v6.nexushd.org/`;
+        } else if (site_url.match(/nexushd/i) && n.className == 'mediainfotabletable') {
+    } else if (n.nodeName == 'DIV' && site_url.match(/nexushd/i) && n.className == 'spoiler') {
+    $('#setting').append(`<input type="checkbox" name="nhd_use_v6_url" value="yes">是否使用NexusHD IPv6网址，如果勾选将采用 IPv6 域名（校内使用一般不勾选）。<br><br>`);
+    if (origin_site == 'NexusHD') {
+        } else if (forward_site == 'Audiences' || forward_site == 'TJUPT' || forward_site == 'NexusHD') {
+    else if (forward_site == 'NexusHD') {

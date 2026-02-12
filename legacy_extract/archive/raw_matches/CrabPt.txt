@@ -1,0 +1,5 @@
+  'CrabPt': { 'url': 'https://crabpt.vip/', 'enable': 1 },
+  'CrabPt': /XHBWeb$/i,
+        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
+        case 'CrabPt':
+    else if (forward_site == 'CrabPt') {

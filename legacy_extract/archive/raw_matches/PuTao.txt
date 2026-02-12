@@ -1,0 +1,7 @@
+  'PuTao': { 'url': 'https://pt.sjtu.edu.cn/', 'enable': 1 },
+  'PuTao': /-putao/i,
+      log_in(['PuTao'], '#userbar');
+      if (origin_site == 'TTG' || origin_site == 'PuTao' || origin_site == 'OpenCD' || origin_site == 'HDArea') {
+      } else if (raw_info.type == '电影' && ['HUDBT', 'MTeam', 'TLFbits', 'PuTao', 'TJUPT', 'NanYang', 'BYR', 'TTG'].indexOf(forward_site) < 0) {
+        } else if (forward_site == 'PuTao') {
+    else if (forward_site == 'PuTao') {

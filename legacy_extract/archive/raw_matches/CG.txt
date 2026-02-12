@@ -1,0 +1,15 @@
+    20220920：支持HDT备用域名，支持CG转入，待测试。修复部分bug。
+  'CG': { 'url': 'http://cinemageddon.net/', 'enable': 1 },
+  `<a href="http://cinemageddon.net/browse.php?search={imdbid}&proj=0&descr=1" target="_blank">CG</a>`,
+  'CG': 'http://cinemageddon.net/',
+uoYA59AAD3eEJwGfl9IKmzwDIG1vGruJF+i4CpxgPoVsZRoAj83QSdkzRFpNMnHdjmdpKziIFcIASaTEnsD0FHptkkyx083FadbMK5pNYh4AFeOuNZNKmCC6cg3FRcBZUbpxy0Dt10nk01IKQzKyj4oXF5fb28SfM9D677vV7/mtYkDUzrOzutOStYZrCkAX9Jc4wVQY0YBMGStvFUOxJe8r2i+uKy/govlpe+2mqrvlxrTMHa
+      log_in(['CG'], 'a[href*="userdetails.php"]');
+    if (origin_site == 'CG') {
+            if (origin_site == 'HDT' || origin_site == 'CG') {
+      if (origin_site == 'CG') {
+    if (origin_site == 'CG') {
+    if (origin_site == 'CG') {
+V', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED', 'Tik', 'Aither', 'SugoiMusic', 'CG',
+        case 'OCG': audiocodec_box.val(5); break;
+    else if (forward_site == 'CG') {
+                  "CG": "Congo",

@@ -1,0 +1,5 @@
+  'UltraHD': { 'url': 'https://ultrahd.net/', 'enable': 1 },
+  } else if (result.match(/(UHD|UltraHD)/i) && !result.match(/Encode/i)) {
+      var attendance_sites = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice', 'OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
+        case 'UltraHD':
+    else if (forward_site == 'UltraHD') {

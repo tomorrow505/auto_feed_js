@@ -1,0 +1,3 @@
+  'JoyHD': { 'url': 'https://www.joyhd.net/', 'enable': 1 },
+        'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'HITPT', 'ITZMX', 'OurBits', 'UBits'];
+    else if (forward_site == 'JoyHD') {

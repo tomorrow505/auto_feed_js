@@ -1,0 +1,5 @@
+    20220608：适配PTChina。
+  'PTChina': { 'url': 'https://ptchina.org/', 'enable': 1 },
+tes = ['PThome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice', 'OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
+        case 'PTChina':
+    else if (forward_site == 'PTChina') {

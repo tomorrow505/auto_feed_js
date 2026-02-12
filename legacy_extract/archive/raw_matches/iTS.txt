@@ -1,0 +1,122 @@
+// @match        https://img.hdbits.org/
+// @match        https://hdbits.org/upload*
+// @match        https://hdbits.org/browse*
+// @match        https://uhdbits.org/torrents.php*
+// @match        https://hdbits.org/details.php?id=*
+if (site_url.match(/^https?:\/\/hdbits.org\/details.php\?id=.*/)) {
+    getDoc('https://hdbits.org/my.php', null, function (doc) {
+if (site_url.match(/^https?:\/\/.*(imgbox.com|imagebam.co|pixhost.to|img.hdbits.org).?$/)) {
+        if (item.match(/t.hdbits.org/)) {
+          item = item.replace('t.hdbits.org', 'i.hdbits.org').replace('jpg', 'png');
+  if (site_url.match(/pixhost.to|img.hdbits.org/)) {
+        if (item.match(/t.hdbits.org/)) {
+          item = item.replace('t.hdbits.org', 'i.hdbits.org').replace('jpg', 'png');
+if (site_url.match(/^https:\/\/uhdbits.org\/torrents.php\?id=\d+#separator#/)) {
+if (site_url.match(/^https:\/\/hdbits.org\/details.php\?id=\d+&uploaded=1/)) {
+  'CHDBits': { 'url': "https://ptchdbits.co/", 'enable': 1 },
+  'HDB': { 'url': 'https://hdbits.org/', 'enable': 1 },
+  'iTS': { 'url': 'https://shadowthein.net/', 'enable': 1 },
+  'OurBits': { 'url': 'https://ourbits.club/', 'enable': 1 },
+  'TLFbits': { 'url': 'http://pt.eastgame.org/', 'enable': 1 },
+  'UHD': { 'url': 'https://uhdbits.org/', 'enable': 1 },
+  'UBits': { 'url': 'https://ubits.club/', 'enable': 1 },
+    default_site_info.CHDBits.url = `https://${region_code}.chddiy.xyz/`;
+  `<a href="https://hdbits.org/browse.php?search={imdbid}" target="_blank">HDB</a>`,
+  `<a href="https://uhdbits.org/torrents.php?searchstr={imdbid}" target="_blank">UHD</a>`,
+  'UHD': 'https://uhdbits.org/',
+  'HDB': 'https://hdbits.org/',
+  'iTS': 'https://shadowthein.net/',
+//iTS的简介模板，用于获取数据替换后填充
+const its_base_content = `
+  'youtube_url': '', //用于发布iTS
+  'ptp_poster': '',  //用于发布iTS
+      if (key == 'HDB' && url.match(/uhdbits\.org/)) {
+  if (url.match(/^https:\/\/.{0,4}?chddiy.xyz\//) || url.match(/^https:\/\/ptchdbits.co\//)) {
+    return 'CHDBits';
+  'CHDBits': /-(CHD|.*@CHDBits)|@CHDWEB/i,
+  'OurBits': /(-Ao|-.*OurBits|-FLTTH|-IloveTV|OurTV|-IloveHD|OurPad|-MGs)$/i,
+  'TLFbits': /-tlf/i,
+  'UBits': /@UBits|-UBits|-UBWEB/i,
+        if (site_url.match(/http(s*):\/\/ptchdbits.co\/details.php.*/i)) {
+      if (site_url.match(/u2.dmhy.org|ourbits.club|hd-space.org|totheglory.im|blutopia.cc|star-space.net|torrent.desi|hudbt|fearnopeer.com|darkland.top|onlyencodes.c
+      if (site_url.match(/http(s*):\/\/ptchdbits.co\/details.php.*/i)) {
+  if (site_url.match(/^https:\/\/hdbits\.org\/details\.php\?id=.*/i)) {
+  if (site_url.match(/^http(s*):\/\/uhdbits.org\/torrents.php\?id=\d+&torrentid=\d+/i)) {
+  if (name.match(/DIY|-.*?@(MTeam|CHDBits|HDHome|OurBits|HDChina|Language|TTG|Pter|HDSky|Audies|CMCT|Dream|Audies)/i) && my_string.match(/mpls/i)) {
+  '[img]https://ourbits.club/pic/Ourbits_info.png[/img]',
+  '[img]https://ourbits.club/pic/Ourbits_MoreScreens.png[/img]',
+  if (raw_info.origin_site == 'OurBits') {
+          window.open('https://img.hdbits.org/', '_blank');
+        const siteUpLimits = {
+        if (siteUpLimits[raw_info.origin_site]) {
+          formData.append('upLimit', siteUpLimits[raw_info.origin_site]);
+          } else if (key == 'iTS') {
+          } else if (key == 'iTS') {
+  } else if (forward_site == 'CHDBits') {
+    'Réduits': 'Folding',
+if (site_url.match(/^https:\/\/hdbits\.org\/browse.*/) && show_search_urls['HDB']) {
+if (site_url.match(/^https?:\/\/hdbits.org\/browse.php*/)) {
+if (site_url.match(/^https?:\/\/hdbits.org\/details.php\?id=.*/) && extra_settings.hdb_show_douban.enable) {
+if (site_url.match(/^https:\/\/uhdbits\.org\/torrents\.php.*/i) && show_search_urls['UHD']) {
+    var unsupported_sites = ['digitalcore', 'HD-Only', 'HOU', 'OMG', 'TorrentLeech', 'MTeam', 'UBits', 'PigGo'];
+signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['CHDBits'].url + 'bakatest.php'}" target="_blank"><b>CHDBits</b></a></div>`);
+signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['OurBits'].url + 'attendance.php'}" target="_blank"><b>OurBits</b></a></div>`);
+'#signin').append(` | <div style="display:inline-block; margin-left:5px; margin-right:5px"><a href="${used_site_info['UBits'].url}" target="_blank"><b>UBits</b></a></div>`);
+      var np_sites = ['CHDBits', 'CMCT', 'FRDS', 'TLFbits', 'TCCF', 'PTsbao', 'OpenCD', 'HUDBT', 'HDSky', 'ITZMX',
+        'NanYang', 'DiscFan', 'Dragon', 'U2', 'YDY', 'JoyHD', 'HITPT', 'ITZMX', 'OurBits', 'UBits'];
+      log_in(['iTS'], 'table[class="menubar"');
+              var creators = await getFullCredits(raw_info.url);
+    $('#dealimg').append(`<input type="button" id="send_hdbits" value="转HDBits" style="margin-bottom:5px;margin-left:5px">`);
+    $('#send_hdbits').click((e) => {
+        window.open('https://img.hdbits.org/', '_blank');
+        if (images[0].match(/t.hdbits.org/)) {
+async function getFullCredits(url) {
+      url: 'https://www.imdb.com/title/{imdbid}/fullcredits?ref_=tt_ov_wr'.format({ 'imdbid': url.match(/tt\d+/)[0] }),
+      if (origin_site == 'PThome' || origin_site == 'Audiences' || origin_site == 'OurBits') {
+          if (origin_site != 'OurBits') {
+          if (!e.innerHTML.match(/<table>/) && (origin_site != 'OurBits' || !$(e).find("fieldset").length)) {
+      raw_info.descr = raw_info.descr.replace(/\[img\]https:\/\/ourbits.club\/pic\/(Ourbits_MoreScreens|Ourbits_info).png\[\/img\]/g, '');
+      //ourbits没有简介的话补充简介
+      if (origin_site == 'OurBits') {
+    if (origin_site == 'iTS') {
+      if (origin_site == 'iTS') {
+            } else if ((origin_site == 'OurBits' || origin_site == 'FRDS' || origin_site == 'PTLGS') && douban_button_needed) {
+      raw_info.torrent_url = `https://hdbits.org/` + $('a[href*="/download.php"]').attr('href');
+          if (raw_info.descr.match(/https:\/\/t.hdbits.org\/.*jpg/)) {
+            var url = 'https://hdbits.org' + $('a[href*=mediainfo]').attr("href");
+      raw_info.torrent_url = `https://uhdbits.org/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+    if (origin_site == 'HDHome' || origin_site == 'MTeam' || origin_site == 'HDRoute' || origin_site == 'OurBits') {
+      case 'OurBits':
+        var search_url = `https://ourbits.club/torrents.php?search=${raw_info.small_descr}&search_area=0&search_mode=0`;
+    if (origin_site == 'CMCT' || origin_site == 'NanYang' || origin_site == 'CHDBits') {
+    if (origin_site == 'CMCT' || origin_site == 'OurBits' || origin_site == 'TJUPT' || origin_site == 'bit-hdtv' || origin_site == 'MTeam' || origin_site == '影') {
+    } else if (origin_site == 'iTS') {
+    } else if (origin_site == 'CHDBits') {
+    if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$|UBits$|HHWEB$|-beAst$|-beAstTV$/i)) {
+      if (raw_info.name.match(/UBits$/i)) {
+          if (['CMCT', 'OurBits', 'HDSky'].indexOf(e.target.id) > -1) {
+        } else if (this.id == 'OurBits' && (raw_info.medium_sel == 'Remux' || raw_info.name.medium_sel() == 'Remux')) {
+    if (raw_info.origin_site == 'OurBits') {
+      } else if (raw_info.type == '电影' && ['HUDBT', 'MTeam', 'TLFbits', 'PuTao', 'TJUPT', 'NanYang', 'BYR', 'TTG'].indexOf(forward_site) < 0) {
+        if (['NanYang', 'CMCT', 'iTS', 'NPUPT', 'xthor'].indexOf(forward_site) > -1) {
+        if (forward_site == 'UBits') {
+        if (forward_site == 'OurBits' && raw_info.url == '') {
+    if (['CMCT', 'PTsbao', 'HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HDTime', 'HD-Only', 'HDfans',
+        case 'CHDBits':
+        case 'OurBits':
+        case 'UBits':
+    } else if (['BLU', 'Tik', 'Aither', 'BHD', 'iTS', 'PTP', 'ACM', 'Monika', 'DarkLand'].indexOf(forward_site) < 0) {
+      if (forward_site == 'CHDBits') {
+      const team_dict = ['OurBits', 'BtsHD', 'BtsTV', 'HDChina', 'CMCT', 'HHWEB', 'FRDS', 'MTeam', 'QHstudio', 'UBits'];
+    else if (forward_site == 'OurBits') {
+    else if (forward_site == 'CHDBits') {
+    else if (forward_site == 'TLFbits') {
+      var user_page = 'https://hdbits.org' + $('a[href*="userdetails"]').attr('href');
+        var announce = 'http://tracker.hdbits.org/announce.php?passkey=' + $('td:contains(Passkey):last', doc).next().text();
+    else if (forward_site == 'UBits') {
+    else if (forward_site == 'iTS') {
+          prompt('请前往安装iTS Upload Helper', "https://github.com/tomorrow505/auto_feed_js/blob/master/iTS%20Upload%20Helper.js");
+          window.open('https://github.com/tomorrow505/auto_feed_js/blob/master/iTS%20Upload%20Helper.js', target = "_blank");
+            if (raw_info.name.match(/@OurBits/)) {
+        var creators = await getFullCredits(raw_info.url);
+      var announce = 'http://tracker.hdbits.org/announce.php';

@@ -1,0 +1,227 @@
+  '影': { 'url': 'https://star-space.net/', 'enable': 1 },
+  'type': '',  //type:可取值——电影/纪录/体育/剧集/动画/综艺……
+    alert('当前影视没有IMDB信息！！');
+  '影': /Ying(WEB|DIY|TV|MV|MUSIC)?$/i,
+  if (result.match(/(Movie|电影|UHD原盘|films|電影|剧场)/i)) {
+    result = '电影';
+  } else if (result.match(/(TV.*Series|影劇|剧|TV-PACK|TV-Episode|TV)/i)) {
+  if (raw_info.type == '电影') {
+        } else if (key == 'BYR' && (raw_info.type == '电影')) {
+        } else if ((key == 'avz' || key == 'CNZ' || key == 'PHD') && (raw_info.type == '电影' || raw_info.type == '纪录')) {
+        } else if (key == '影') {
+          var type_dict = { '电影': 1, '剧集': 2, '动漫': 2, '综艺': 2, '纪录': 2, '音乐': 3, '体育': 2, 'MV': 3 };
+          } else if ((key == 'avz' || key == 'CNZ' || key == 'PHD') && (raw_info.type == '电影' || raw_info.type == '纪录')) {
+                                        <strong>影视介绍</strong>
+                <div class="panel__heading"><span class="panel__heading__title">电影信息</span></div>
+                <div class="head"><span><strong>电影信息</strong></span></div>
+                <div class="head"><span><strong>电影信息</strong></span></div>
+      '对于电影、影视和动画，填写对应IMDB或TMDB的链接使您可以将种子绑定到对应库，并生成描述文本');
+      log_in(['影'], '#nav_menu');
+    $('#setting').append(`<label><b>TMDB影库对应apikey(<a href="https://www.themoviedb.org/settings/api" target="_blank"><font color="red">登录官网</font></a>自行申请):</b><
+        $('#info').append(`<br><span class="pl">影视名称:</span> ${name}<br>`);
+      $('#info').append(`<br><span class="pl">影视名称:</span> ${name}<br>`);
+      if (origin_site != 'BYR' && origin_site != '影') {
+      if (origin_site == '影') {
+      if (origin_site == '影') {
+      } else if (origin_site == '影') {
+      raw_info.type = "电影";
+      raw_info.type = "电影";
+      raw_info.type = "电影";
+      raw_info.type = "电影";
+        raw_info.type = '电影';
+        raw_info.type = '电影';
+        raw_info.type = '电影';
+              raw_info.type = '电影';
+              raw_info.type = '电影';
+      raw_info.type = '电影';
+          raw_info.type = '电影';
+            raw_info.type = '电影';
+            raw_info.type = '电影';
+          raw_info.type = '电影';
+              raw_info.type = '电影';
+          if (tds[i + 1].innerHTML.match(/Movie|电影|Películas/i)) {
+            raw_info.type = '电影';
+            raw_info.type = '电影';
+              } else if (origin_site == '影') {
+        } else if (origin_site == '影') {
+      if (['标题'].indexOf(tds[i].textContent) > -1 && !raw_info.name && origin_site == '影') {
+            raw_info.type = '电影';
+          } else if (origin_site == '影') {
+            raw_info.type = '电影';
+        raw_info.type = '电影';
+      if (raw_info.type == "电影") {
+                                <strong>影视介绍</strong>
+        raw_info.type = '电影';
+      } else if (origin_site == '影') {
+n_site == 'OurBits' || origin_site == 'TJUPT' || origin_site == 'bit-hdtv' || origin_site == 'MTeam' || origin_site == '影') {
+      } else if (origin_site == '影') {
+        if (raw_info.type != '电影' || (raw_info.name + raw_info.small_descr).match(/DIY|@/)) {
+          if (!confirm('该资源可能不是电影或者属于DIY资源，确定发布？')) {
+        if (raw_info.type != '电影' || (raw_info.name + raw_info.small_descr).match(/DIY|@/)) {
+          if (!confirm('该资源可能不是电影或者属于DIY资源，确定发布？')) {
+          if (raw_info.type != '电影' && raw_info.type != '纪录') {
+          if (raw_info.type != '电影') {
+        if (this.id == "影" && ['CMCT', 'TTG', 'UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) < 0) {
+          if (_id == "影") {
+            if (used_common_sites[key] == "影") {
+            raw_info.type = '电影';
+              textarea.value = `搜索的影视名称为：${raw_info.name}\n`;
+          if (raw_info.type == '电影' && raw_info.url) {
+      } else if (raw_info.type == '电影' && ['HUDBT', 'MTeam', 'TLFbits', 'PuTao', 'TJUPT', 'NanYang', 'BYR', 'TTG'].indexOf(forward_site) < 0) {
+        raw_info.descr = raw_info.descr.split(/\[b\]\[color=green\]\[size=3\]本站提供的所有影视/)[0].trim();
+      'ZHUQUE', 'MTeam', 'FNP', 'OnlyEncodes', 'YemaPT', 'DarkLand', '影', 'PTLGS', 'ReelFliX', 'RouSi'].indexOf(forward_site) < 0) {
+    if ($('textarea[name="technical_info"]').length || forward_site == '影' || forward_site == 'LemonHD' || forward_site == 'HDDolby' || forward_site == 'MTeam' || forward_site == 'RouSi') {
+      } else if (forward_site == '影' || forward_site == 'PTLGS') {
+        if (forward_site == '影') {
+        if (forward_site == '影') {
+          if (raw_info.type == '电影') { check_label(document.getElementsByName('tags[4][]'), '23'); }
+        case '影':
+        '电影': 401, '剧集': 404, '动漫': 403, '综艺': 405, '音乐': 406, '纪录': 402,
+      var type_code = '電影/HD';
+        case '电影':
+            type_code = '電影/Blu-Ray';
+            type_code = '電影/Remux';
+            type_code = '電影/DVDiSo';
+              type_code = '電影/HD';
+              type_code = '電影/SD';
+            type_code = '影劇/綜藝/BD';
+            type_code = '影劇/綜藝/DVDiSo';
+              type_code = '影劇/綜藝/HD';
+              type_code = '影劇/綜藝/SD';
+        '电影': 501, '剧集': 502, '综艺': 505, '音乐': 508, '纪录': 503, '有声小说': 510,
+    else if (forward_site == '影') {
+      var type_dict = { '电影': "mo", '剧集': "tv", '动漫': "an", '综艺': "ot", '纪录': "do", '体育': "sp", 'MV': "mv" };
+          '电影': '电影', '剧集': '剧集', '动漫': '动画', '综艺': '节目', '音乐': '其它', '纪录': '其它',
+        case '电影': case '剧集': case '综艺': case '动漫': case '体育': case '短剧': case '软件': case '游戏': case '书籍': case '音乐':
+        case '电影':
+        case '电影':
+          '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+          '电影': 401, '剧集': 402, '动漫': 409, '综艺': 403, '音乐': 408, '纪录': 406,
+        case '电影':
+          case '电影': browsecat.options[1].selected = true; break;
+          '电影': 1,
+        case '电影':
+        '电影': 1, '剧集': 2, '动漫': 3, '综艺': 4, '音乐': 7, '纪录': 6,
+        case '电影':
+        '电影': 1, '剧集': 2, '动漫': 4, '综艺': 3, '音乐': 8, '纪录': 5,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        } else if (raw_info.type == '电影') {
+        '电影': 4, '剧集': 5, '动漫': 1, '综艺': 5, '音乐': 3, '纪录': 5,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+      if (raw_info.type == '电影' && raw_info.medium_sel == 'Blu-ray') {
+          case '电影':
+        '电影': 1, '剧集': 2, '动漫': 3, '纪录': 4, '综艺': 5, '软件': 6,
+          case '电影': set_selected_option_by_value('browsecat', '401'); break;
+          //地区填写，针对电影
+          if (raw_info.type == '电影' || raw_info.type == '综艺') {
+        '电影': 101, '剧集': 102, '综艺': 103, '纪录': 104, '动漫': 105, '体育': 106,
+        case '电影': $('#browsecat').val('401'); break;
+      if (raw_info.type == '电影') {
+        case '电影':
+          case '电影': set_selected_option_by_value('browsecat', '622'); break;
+        case '电影': set_selected_option_by_value('browsecat', '401'); break;
+        case '电影':
+        '电影': 2, '剧集': 4, '动漫': 3, '综艺': 5, '音乐': 9, '纪录': 1,
+        '电影': 401, '剧集': 402, '动漫': 417, '综艺': 416, '音乐': 406, '纪录': 403,
+        '电影': 401, '剧集': 402, '动漫': 405, '纪录': 404, '综艺': 403, '体育': 407,
+      var type_dict = { '电影': 401, '剧集': 402, '纪录': 404 };
+        '电影': 1, '剧集': 3, '动漫': 4, '综艺': 9, '音乐': 8, '纪录': 2,
+          $('span.upload-title-hint:contains(电影名)').last().after(`<a style="text-decoration : none" href="#" id="get_name">=>替换名称</a><font color="red"> 提示：如果名称出错点击此处替换
+      var type_dict = { '电影': 1, '剧集': 2, '纪录': 2, '综艺': 2 };
+        } else if (raw_info.type == '电影') {
+        '电影': 1, '剧集': 2, '动漫': 5, '综艺': 3, '音乐': 8, '纪录': 4,
+        case '电影': browsecat.options[1].selected = true; break;
+        case '电影': browsecat.options[1].selected = true; break;
+        '电影': 1, '剧集': 4, '动漫': 3, '综艺': 5, 'MV': 6, '纪录': 2,
+      if (raw_info.type == '电影') {
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 415, '纪录': 404,
+          if (key == '影') key = 'Ying';
+        case '电影':
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+      var type_dict = { '电影': 'movie', '剧集': 'tv', '动漫': 'animation', '综艺': 'variety', '音乐': 'music', '纪录': 'documentary', '体育': 'sports', '软件': 's
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+      var type_dict = { '': 409, '音乐': 408, 'MV': 406, '体育': 407, '纪录': 404, '动漫': 405, '综艺': 403, '剧集': 402, '电影': 401 };
+        '电影': 401, '剧集': 402, '动漫': 417, '综艺': 403, '音乐': 423, '纪录': 422,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 420, '音乐': 408, '纪录': 404, '体育': 407, '软件': 411, '学习': 419, '': 409, '游戏': 412, 'MV'
+        '电影': 401, '剧集': 402, '动漫': 403, '综艺': 405, '音乐': 406, '纪录': 404,
+        '电影': 1, '剧集': 2, '动漫': 4, '综艺': 3, '音乐': 5, '纪录': 7,
+        case '电影':
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 404, '动漫': 415, '综艺': 405, '音乐': 407, '纪录': 406,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 406, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 406, '纪录': 404,
+      var type_dict = { '音乐': 409, '体育': 407, 'MV': 406, '综艺': 403, '剧集': 402, '动漫': 405, '纪录': 404, '电影': 401, };
+      var type_dict = { '音乐': 422, '体育': 407, 'MV': 406, '综艺': 403, '剧集': 402, '动漫': 405, '纪录': 404, '电影': 401, '游戏': 425, '学习': 415 };
+        raw_info.type = '电影';
+          raw_info.type = '电影';
+        case '电影':
+        } else if (raw_info.type == '电影') {
+        } else if (raw_info.type == '电影') {
+        if (raw_info.type == '电影') {
+        case '电影': $('#type_category').val("1"); break;
+        '电影': 401, '纪录': 404, '动漫': 405, '剧集': 402, '综艺': 403, '音乐': 408, '体育': 407, '': 409,
+      var type_dict = { '电影': 401, '纪录': 404, '动漫': 405, '剧集': 402, '综艺': 402, 'MV': 404 };
+      var type_dict = { '电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406, '体育': 407, '有声书': 410 }
+        '电影': 401, '纪录': 405, '动漫': 403, '剧集': 406, '综艺': 407, '音乐': 408, '体育': 407, '': 409,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+      var browsecat_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '纪录': 404, '体育': 407, 'MV': 406, '短剧': 408 };
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, 'MV': 406, '有声小说': 409, '纪录': 413 };
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '纪录': 404, '音乐': 408, 'MV': 406, '体育': 407, '有声小说': 408 };
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 409, '纪录': 404,
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 411, '纪录': 404, 'MV': 406 };
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, 'MV': 410 };
+      var type_dict = { '音乐': 408, '体育': 407, 'MV': 406, '综艺': 403, '剧集': 402, '动漫': 405, '纪录': 404, '电影': 401 };
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 409, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 414, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 404, 'MV': 406, '音乐': 407, '纪录': 403, '体育': 408 };
+        '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+        '电影': 401, '剧集': 402, '动漫': 413, '综艺': 418, '音乐': 408, '纪录': 410,
+        '电影': 401, '纪录': 413, '动漫': 405, '剧集': 402, '综艺': 416, '体育': 407, 'MV': 415, '': 0,
+        '电影': 401, '剧集': 402, '动漫': 431, '综艺': 403, '音乐': 408, '纪录': 404,
+        if (raw_info.type == "电影" && ['1080p', '720p', '4K', '8K'].indexOf(raw_info.standard_sel) > -1) {
+        } else if (raw_info.type == "电影") {
+        if (raw_info.type == "电影") {
+          } else if (raw_info.type == '电影') {
+                if (raw_info.type == '电影') {
+      $('.alert-info').append(`<p style="font-size:14px">请上传亚洲影视（包括：南亚，东南亚，东亚）到 <a id="avz" class="other" href="#" style="color:yellow;text-decoration: underline;">AVZ</a>；
+                上传欧洲（除了英国和爱尔兰）、南美和非洲以及50年前的影视到 <a id="CNZ" href="#" class="other" style="color:yellow;text-decoration: underline;">CNZ</a>；
+          if (raw_info.type != '电影' && raw_info.type != '纪录') {
+          if (raw_info.type == '电影') {
+      if (raw_info.type == '电影') {
+      if (raw_info.type == '电影') {
+        case '电影': $('#browsecat').val('401'); break;
+        '电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,
+        '电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,
+      var type_dict = { '电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406, '体育': 407, '音乐': 411, '学习': 417, '游戏': 413, '软件': 412, '书
+      var type_dict = { '电影': 404, '动漫': 407, '短剧': 401, '剧集': 405, '综艺': 409, '音乐': 408, '游戏': 403, '短剧': 419, '纪录': 406, '学习': 406, '': 406 };
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, '体育': 407, 'MV': 406, '游戏': 409, '学习': 409, '软件': 409, '短
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 409, '纪录': 404, '体育': 407, 'MV': 406, '游戏': 410, '学习': 410, '软件': 410, '短
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 409, '纪录': 404, '体育': 407, 'MV': 406, '游戏': 414, '学习': 414, '软件': 414, '短
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, '体育': 407, 'MV': 406 };
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 410, '音乐': 408, '纪录': 411, '体育': 412, 'MV': 406, '游戏': 409, '学习': 409, '软件': 409, '短
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '纪录': 404 };
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, '体育': 407, 'MV': 406, '游戏': 409, '学习': 409, '软件': 409, '短
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, '体育': 407, 'MV': 406, '游戏': 409, '学习': 409, '软件': 409, '短
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, '体育': 407, 'MV': 406, '学习': 410 };
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404, '体育': 407, 'MV': 406, '游戏': 409, '学习': 409, '软件': 409, '短
+      var type_dict = { '电影': 0, '剧集': 0, '动漫': 0, '综艺': 0, '音乐': 0, '纪录': 406, '体育': 0, 'MV': 0, '游戏': 0, '学习': 406, '软件': 0, '短剧': 0, '': 0 };
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 405, '综艺': 409, '音乐': 408, '纪录': 409, '体育': 409, 'MV': 406, '游戏': 409, '学习': 409, '软件': 409, '短
+      var type_dict = { '电影': 401, '剧集': 402, '动漫': 404, '综艺': 407, '音乐': 409, '纪录': 408, '体育': 0, 'MV': 407, '游戏': 0, '学习': 410, '软件': 0, '短剧': 40
+        '电影': 401, '剧集': 402, '综艺': 403, '纪录': 404, '动漫': 405, 'MV': 406,
+        '电影': 401, '剧集': 402, '动漫': 405, '纪录': 404, '综艺': 430, '体育': 402, '音乐': 408, 'MV': 410, '软件': 413, '学习': 409, '游戏': 412
+          '电影': 1, '剧集': 2, '动漫': 4, '综艺': 5, '音乐': 8, '纪录': 3, 'MV': 6,
+        case '电影': $('#type_category').val("1"); break;
+        case '电影':
+          alert('HDChina发布影视需要豆瓣信息');

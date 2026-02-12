@@ -1,0 +1,7 @@
+  'bit-hdtv': 'https://www.bit-hdtv.com/',
+      log_in(['BTN', 'SC', 'MTV', 'UHD', 'HDSpace', 'TVV', 'HDF', 'RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'bit-hdtv', 'SugoiMusic'], '#menu');
+    if (origin_site == 'bit-hdtv') {
+      raw_info.torrent_url = 'https://www.bit-hdtv.com/' + $('a[href^="download.php"]').attr('href');
+          } else if (origin_site == 'bit-hdtv') {
+    if (origin_site == 'CMCT' || origin_site == 'OurBits' || origin_site == 'TJUPT' || origin_site == 'bit-hdtv' || origin_site == 'MTeam' || origin_site == '影') {
+      if (douban_button_needed || origin_site == 'bit-hdtv') {

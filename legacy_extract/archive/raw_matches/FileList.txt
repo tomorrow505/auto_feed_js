@@ -1,0 +1,33 @@
+// @match        https://filelist.io/*
+// @match        https://filelist.io/browse.php*
+        $(e).find('table[class="TableTorrentFileList Table"]').wait(function () {
+          var torrent_td = $(e).find('table[class="TableTorrentFileList Table"]').find('tr:first').find('td:first');
+if (site_url.match(/^https:\/\/filelist.io\/browse.php/)) {
+  `<a href="https://filelist.io/browse.php?search={imdbid}" target="_blank">FileList</a>`,
+  'FileList': 'https://filelist.io/',
+  'FileList': /Play(HD|SD|WEB|TV)$/i,
+  if (['PHD', 'avz', 'CNZ', 'FileList', 'TTG', 'PTP'].indexOf(site) > -1) {
+  if (['HDB', 'PHD', 'avz', 'CNZ', 'FileList', 'TTG'].indexOf(site) > -1) {
+    } else if (site == 'FileList') {
+    $('#fileList').wait(function () {
+      ant_form_instance?.context?.setFieldsValue({ 'fileList': [...container.files].map(f => { f.originFileObj = f; return f }) }); //files要转为数组，并且添加originFileObj属性为自身
+if (site_url.match(/^https:\/\/filelist.io\/.*/)) {
+      log_in(['FileList'], '#navigation');
+    if (origin_site == 'FileList') {
+      var filelist_tmdb = match_link('tmdb', mydiv.innerHTML);
+      if (filelist_tmdb && $('#descr').length) {
+      var mediainfo_url = 'https://filelist.io/mediainfo.php?' + torrentid;
+          raw_info.descr += '\n\n' + img_urls.replace(/https:\/\/filelist.io\/redir.php\?/g, '');
+      raw_info.torrent_url = 'https://filelist.io/' + $('a[href^="download.php"]').attr('href');
+          } else if (origin_site != 'FileList') {
+        raw_info.name = $(torrent_box).find('table.filelist_table').find('tr:eq(1)').find('td:eq(0)').text().replace(/\[|\]|\(|\)|mkv$|mp4$/g, '').trim();
+      var filelist_path = file_box.getElementsByClassName('filelist_path')[0];
+      if (filelist_path.innerHTML) {
+        raw_info.name = filelist_path.innerHTML.replace(/\//g, '').trim();
+      if (origin_site == 'xthor' || origin_site == 'FileList' || origin_site == 'HDB' || origin_site == 'HDRoute') {
+        if (origin_site == 'FileList' || origin_site == 'xthor' || origin_site == 'HDB') {
+    if (origin_site == 'FileList' && !$('#descr').length) {
+    if (origin_site == 'FileList') {
+      if (!filelist_tmdb) {
+        if (this.id == "影" && ['CMCT', 'TTG', 'UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) < 0) {
+    if (['UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) > -1) {

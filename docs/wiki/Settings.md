@@ -1,28 +1,28 @@
 # Settings
 
 ## 打开方式
-- 默认快捷键：`Alt+S`
-- 设置面板为可拖拽浮层，支持中/英文切换。
+- 快捷键：`Alt + S`
+- 面板顶部 `Save` 会显示 `Saving / Saved / Save Failed` 状态反馈。
 
-## 常用设置项
-站点：
-- `启用转发 (来源)`：控制转发面板里显示哪些站点
-- `常用站点 (目标)`：控制“常用”分组里显示哪些站点
+## 主要分区
+- `Dashboard`
+  - 面板透明度、弹窗透明度、遮罩透明度、Toast 透明度
+- `Settings`
+  - 页面增强：PTP/HDB 豆瓣、PTP 组名显示、豆瓣/IMDb 快搜
+  - 发布行为：默认匿名、发布后自动下载
+  - 外部数据源：IMDb->豆瓣方式、PTGen 来源
+  - 域名别名：CHD 域名、TorrentLeech 域名
+  - 快搜模板编辑器
+  - 图床 API Key：PTPImg / Pixhost / Freeimage / Gifyu
+- `Sites`
+  - 启用站点
+  - 常用站点（收藏）
+  - 列表页快搜开关（PTP/HDB/HDT/UHD）
+- `Remote`
+  - 远程侧边栏开关
+  - 默认跳检、推送前确认
+  - qB / TR / Deluge 客户端配置与测试
 
-数据源：
-- `IMDb -> 豆瓣 获取方式`：API 或爬取
-- `PTGen 来源`：不同 API 节点或页面爬取（按实现情况持续补齐）
-
-页面增强：
-- 豆瓣/IMDb 快速搜索开关
-- PTP/HDB 等页面增强相关开关（按实现情况持续补齐）
-
-图床：
-- PTPIMG / Freeimage / Gifyu 等 API Key
-
-远程推送：
-- 是否启用侧边栏
-- 客户端配置（qB/TR/Deluge 等，见 `docs/wiki/Remote-Download.md`）
-
-## 注意
-- 本分支的设置项仍在迁移中，字段含义以 UI 文案为准。
+## 说明
+- 所有配置持久化在油猴存储（`auto_feed_settings`）。
+- 站点启用状态受 `src/config/*` 与 `SiteCatalogService` 控制。

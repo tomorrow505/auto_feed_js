@@ -1,0 +1,8 @@
+  'bib': 'https://bibliotik.me/',
+var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'MTeam', 'HHClub', 'SportsCult'];
+  if (site_url.match(/^https:\/\/bibliotik.me\/torrents\/\d+/)) {
+      log_in(['bib'], '#header_nav');
+    if (origin_site == 'bib') {
+      raw_info.torrent_url = 'https://bibliotik.me' + $('a[title="Download"]').attr('href');
+      raw_info.descr += '[img]' + $('#sidebar').find('a').has('img').attr('href').replace('imagecache.bibliotik.me/?url=ssl%3A', '') + '[/img]\n\n';
+    } else if (origin_site == 'bib' || origin_site == 'mam' || origin_site == 'SportsCult') {

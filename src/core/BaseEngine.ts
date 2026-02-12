@@ -1,6 +1,6 @@
 import { TorrentMeta } from '../types/TorrentMeta';
 import { SiteConfig } from '../types/SiteConfig';
-import { MediaInfoParser, MediaInfoResult } from '../services/MediaInfoParser';
+import { parseMediaInfoFromDescription, type MediaInfoResult } from '../common/rules/media';
 
 export abstract class BaseEngine {
     constructor(
@@ -54,6 +54,6 @@ export abstract class BaseEngine {
     }
 
     protected parseMediaInfo(description: string): MediaInfoResult {
-        return MediaInfoParser.parse(description);
+        return parseMediaInfoFromDescription(description);
     }
 }

@@ -7,7 +7,7 @@ import $ from 'jquery';
 (window as any).$ = (window as any).jQuery = $;
 
 (async function () {
-    console.log('[Auto-Feed] v3.1.5 initializing...');
+    console.log('[Auto-Feed] v4.0.0 initializing...');
 
     mountUI();
 

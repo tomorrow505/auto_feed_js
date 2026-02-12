@@ -1,0 +1,153 @@
+// @match        http*://*redacted.sh/upload.php*
+// @match        http*://*redacted.sh/requests.php*
+// @match        http*://*redacted.sh/torrents.php*
+    20220816：适配OPS/RED从GZ音乐站转入。修复部分bug。
+  menu_html = menu_html.replace(/Requis/g, 'Required');
+    $(this).html(`<font color='red'>${$(this).html()}</font>`);
+  'RED': { 'url': 'https://redacted.sh/', 'enable': 1 },
+  'RED': 'https://redacted.sh/',
+- All credit goes to the original uploader.
+var no_need_douban_button_sites = ['RED', 'OpenCD', 'lztr', 'DICMusic', 'OPS', 'jpop', 'bib', 'mam', 'SugoiMusic', 'MTeam', 'HHClub', 'SportsCult'];
+  var font_color = 'red';
+  if (site_url.match(/^http(s*):\/\/(redacted.sh|lztr.me|dicmusic.com|orpheus.network)\/torrents.php\?id=\d+&torrentid=\d+/i)) {
+  $('#url_vimages').after(`<a href="" id="get_full_size" style="color: red" title="点击获取原图,目前支持imgbox，pixhost，pter，ttg，瓷器，img4k">获取原图</a>`);
+  $('textarea[name="screenshots"]').after(`<br><a href="" id="get_full_size" style="color: red" title="点击获取原图,目前支持imgbox，pixhost，pter，ttg，瓷器，img4k">获取原图</a>`);
+    name = name.replace(/REMASTERED/i, "Remastered");
+          if (['OpenCD', 'OPS', 'RED'].indexOf(key) >= 0) {
+          } else if (key == 'RED') {
+  } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'OPS', 'RED', 'SugoiMusic'].indexOf(forward_site) > -1) {
+  $('#content').find('div.linkbox:eq(0)').prepend(`<font size="5px" color="red">${name}</font><br>
+    'useredit': 'Profile',
+    'Inscrit depuis': 'Registered since',
+    'Ratio requis': 'Required ratio',
+    "    color: darkred;    ",
+  const coloredfont = true;
+    if (coloredfont && color) style.push(`color:${groupnamecolor}`);
+    $(this).css('color', 'red');
+    repTxt('td', 'Зарегистрирован', 'Registered');
+    $('#signin').append(`&nbsp;&nbsp;&nbsp;<a href="#" id="s_all" style="color:red">全选</a>&nbsp;&nbsp;&nbsp;<a href="#" id="u_all" style="color:red">全不选</a>
+                            &nbsp;&nbsp;&nbsp;<a href="#" id="s_fail" style="color:red">保留失败站点</a>
+                            &nbsp;&nbsp;&nbsp;<a href="#" id="u_fail" style="color:red">去掉失败站点</a>
+                            &nbsp;&nbsp;&nbsp;<a href="#" id="hide_unselected" style="color:red">隐藏未选择(默认)</a>
+                            &nbsp;&nbsp;&nbsp;<a href="#" id="show_all" style="color:red">全部显示</a>`);
+    $('#signin').append(`<b>&nbsp;&nbsp;&nbsp;</b><a href="#", target="_blank" id="begin_sign"><font color="red"><b>→开始签到←</b></font></a>`);
+    $('#signin').append(`<br><br><font color="red">暂不支持的站点列表：</font><div id="unsupported_sites" style="display:inline-block; margin-left:3px"></div>`);
+    $('#signin').append(`<br><font color="red">手动获取魔力的站点：</font>`);
+              $(`input[kname=${e}]`).parent().find('a').css({ "color": "red" });
+              $(`input[kname=${e}]`).parent().find('a').css({ "color": "red" });
+              $(`input[kname=${e}]`).parent().find('a').css({ "color": "red" });
+              $(`input[kname=${e}]`).parent().find('a').css({ "color": "red" });
+              $(`input[kname=${e}]`).parent().find('a').css({ "color": "red" });
+            $(`input[kname=HDArea]`).parent().find('a').css({ "color": "red" });
+            $(`input[kname=PTer]`).parent().find('a').css({ "color": "red" });
+              $(`input[kname=HDU]`).parent().find('a').css({ "color": "red" });
+                    $(`input[kname=TTG]`).parent().find('a').css({ "color": "red" });
+            $(`input[kname=BTSchool]`).parent().find('a').css({ "color": "red" });
+              $(`input[kname=HDCity]`).parent().find('a').css({ "color": "red" });
+      log_in(['BTN', 'SC', 'MTV', 'UHD', 'HDSpace', 'TVV', 'HDF', 'RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'bit-hdtv', 'SugoiMusic'], '#menu');
+ng').append(`<b>使用教程：</b><a href="https://gitee.com/tomorrow505/auto_feed_js/wikis/pages", target="_blank"><font color="red">→跳转←</font></a>`);
+bsp;&nbsp;&nbsp;更新地址：</b><a href="https://greasyfork.org/zh-CN/scripts/424132-auto-feed/", target="_blank"><font color="red">→跳转←</font></a>`);
+nd(`<b>&nbsp;&nbsp;&nbsp;项目托管1：</b><a href="https://github.com/tomorrow505/auto_feed_js/", target="_blank"><font color="red">→GitHub←</font></a>`);
+end(`<b>&nbsp;&nbsp;&nbsp;项目托管2：</b><a href="https://gitee.com/tomorrow505/auto_feed_js/", target="_blank"><font color="red">→Gitee←</font></a>`);
+            <font color="red">范例</font></a></b></br>`);
+ed_js/wikis/4.%E5%85%B6%E4%BB%96%E5%8A%9F%E8%83%BD/qb%E8%BF%9C%E7%A8%8B%E6%8E%A8%E9%80%81" target="_blank"><font color="red">->配置方式请点击<-</font></a>></b>
+tting').append(`<label><b>TMDB影库对应apikey(<a href="https://www.themoviedb.org/settings/api" target="_blank"><font color="red">登录官网</font></a>自行申请):</b></label><input type="text" name="tmdb_key" style="width: 300px;  margin-left:5px" value=${use
+    $('#setting').append(`<label><b>PTPimg对应的apikey(<a href="https://ptpimg.me/" target="_blank"><font color="red">打开首页</font></a>即可获取):</b></label><input type="text" name="ptp_img_key" style="width: 300px; margin-left:5px" value=${u
+ $('#setting').append(`<label><b>${key}对应apikey(<a href="${used_rehost_img_info[key].url}" target="_blank"><font color="red">登录站点</font></a>即可获取):</b></label><input type="text" name="${key}_key" style="width: 300px; margin-left:5px" value=${us
+wiki.torrentleech.org/doku.php/rss_-_how_to_automatically_download_torrents_with_utorrent" target="_blank"><font color="red">依照教程</font></a>进行设置):</b></label><input type="text" name="tl_rss_key" style="width: 300px; margin-left:5px" value=${us
+              var creators = await getFullCredits(raw_info.url);
+    $('#dealimg').append(`<font color="red">获取大图目前支持imgbox，pixhost，pter，ttg，瓷器，img4k，其余的可以尝试字符串替换。</font><a href="https://github.com/tomorrow505/auto_feed_js/wiki
+    $('#dealimg').append(`<div>结果展示 <a href="#" id="up_text" style="color:red;">↑将结果移入输入框</a><br><textarea id="result" style="width:700px;" rows="15"></textarea></div>`);
+async function getFullCredits(url) {
+      url: 'https://www.imdb.com/title/{imdbid}/fullcredits?ref_=tt_ov_wr'.format({ 'imdbid': url.match(/tt\d+/)[0] }),
+  $('#rehostimg').append(`<input style="vertical-align:middle;margin-left:160px;color:red;width:20px;" type="button" name="close_panel" value="&times;">`);
+if (site_url.match(/https:\/\/redacted.sh\/upload.php#separator#/)) {
+    if (origin_site == 'RED') {
+      getJson(`https://redacted.sh/ajax.php?action=torrent&id=${torrent_id}`, null, function (data) {
+      raw_info.torrent_url = `https://redacted.sh/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+        $('#cover_div_0').append(`<b style="margin-left:15px; color:red">转载前请进行封面转存！</b><br><a id="transfer_pixhost" target="_blank" href="#" style="margin-left:15px; color: yellow">转存Pixhost
+          $('h4:first').after('<h4 style="margin-left:5px;"><font color="red"><--Mediainfo/BDinfo加载成功！！！--></font></h4>');
+          raw_info.descr += '\n\n' + img_urls.replace(/https:\/\/filelist.io\/redir.php\?/g, '');
+            $container.find('div').prepend(`<a href="${douban_prex}${data.data.id}" target="_blank"><font color="red">${data.data.title.split(' ')[0]}</font></a> [${data.data.region}-${data.data.year}]`)
+            img_urls = img_urls.replace(/https:\/\/shadowthein.net\/redir.php\?/g, '');
+      if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic'].indexOf(origin_site) > 
+          } else if (origin_site == 'RED') {
+    if (origin_site == 'RED') {
+      raw_info.descr = raw_info.descr.replace(/\n+\t+\n/ig, '\n').replace('Powered by BYRBT Info Clone', '');
+      let searchIndex = raw_info.descr.search(/\[quote\]\[color=red\]\[size=2\]\[font=Tahoma\] 本站列出的文件并没有保存在本站的服务器上/);
+    if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic', 'HHClub'].indexOf(origi
+    wiki.style.color = 'red';
+          $('#top').append(`<br><b><span id="checking"><font color="red">[禁转判断中……]</font></span></b>`);
+                $('#checking').html('<font color="red">[独占资源]</font>');
+                $('#checking').html('<font color="red">[限转资源]</font>');
+                $('#checking').html('<font color="red">[一般资源]</font>');
+              $('#checking').html('<font color="red">[查找失败, 自己检查]</font>');
+          $('#top').append(`<br><b><span id="checking"><font color="red">[缺少IMDB请自查]</font></span></b>`);
+        $('#top').append(`<br><b><span id="checking"><font color="red">[一般资源]</font></span></b>`);
+        $('#top').append(`<br><b><span id="checking"><font color="red">[禁转判断中……]</font></span></b>`);
+              $('#checking').html('<font color="red">[限转资源]</font>');
+              $('#checking').html('<font color="red">[禁转资源]</font>');
+              $('#checking').html('<font color="red">[一般资源]</font>');
+            $('#checking').html('<font color="red">[查找失败, 自己检查]</font>');
+        $('#top').append(`<br><b><span id="checking"><font color="red">[缺少IMDB请自查]</font></span></b>`);
+        if (this.id == "影" && ['CMCT', 'TTG', 'UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) < 0) {
+    if (['UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) > -1) {
+    if (['RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'SugoiMusic'].indexOf(raw_info.origin_site) > -1) {
+      if (['RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'SugoiMusic'].indexOf(raw_info.origin_site) > -1) {
+        if (raw_info.origin_site == 'RED') {
+          "RED": 'Redacted', 'OPS': 'Orpheus', 'jpop': 'Jpopsuki', 'DICMusic': 'DICMusic', 'lztr': 'LzTr', 'SugoiMusic': 'SugoiMusic'
+        if (['RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'SugoiMusic'].indexOf(raw_info.origin_site) > -1) {
+              $('#descr').parent().append(`<a style="text-decoration:none;" href="#" id="file2descr"><font color="red">从简介导入</font></a>`);
+textarea[name=track_list]').parent().append(`<a style="text-decoration:none;" href="#" id="file2tracklist"><font color="red">从文件列表导入</font></a>`);
+    if (forward_site == 'RED') {
+            var edition = releaseJSON.response.torrent.remastered;
+      'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED', 'Tik', 'Aither', 'SugoiMusic', 'CG',
+t class="beta-form-main" type="file" accept=".torrent" name="torrent" id="torrent" style="width: 100% !important;" required="">';
+ent 文件</label><input class="upload-form-file form__file" type="file" accept=".torrent" name="torrent" id="torrent" required="">';
+t File</label><input class="upload-form-file form__file" type="file" accept=".torrent" name="torrent" id="torrent" required="">';
+                <font style="margin-left:5px" color="red">选中要转换的bbcode图片部分点击即可。</font></td></tr>`);
+      $('#clear').css({ 'color': 'white', 'background-color': 'red', 'height': '22px' });
+          $('#qr').parent().append('<font color="red" style="margin-left:5px"><b> 疑似动画，确认是否剧集并勾选标签。</b></font>')
+        var $table = $(`<table style="width: 80%" class="table table-condensed table-bordered table-striped table-hover"></table>`);
+      $('#clear').css({ 'color': 'white', 'background-color': 'red', 'border': '1px black' });
+name:contains(资源描述)').last().append(` <a href="#" style="text-decoration : none" id="copy_intro">=>复制描述</a><font color="red"> 提示：如果描述填写失败请复制之后转换源码手动填写再预览。</font>`);
+name:contains(资源描述)').last().append(` <a href="#" style="text-decoration : none" id="copy_intro">=>复制描述</a><font color="red"> 提示：如果描述填写失败请复制之后转换源码手动填写再预览。</font>`);
+itle-hint:contains(电影名)').last().after(`<a style="text-decoration : none" href="#" id="get_name">=>替换名称</a><font color="red"> 提示：如果名称出错点击此处替换。</font>`);
+itle-hint:contains(该处)').last().after(`<a style="text-decoration : none" href="#" id="get_intro">=>替换简介</a><font color="red"> 提示：如果简介出错点击此处替换。</font>`);
+tle-hint:contains(禁止)').last().after(`<a style="text-decoration : none" href="#" id="get_poster">=>替换海报</a><font color="red"> 提示：如果海报出错点击此处替换。</font>`);
+adding-top:5px"><b><span>#获取豆瓣:</span><a style="text-decoration : none" href="#" id="get_douban">=>点击获取</a><font color="red"> 提示：如果页面简介或海报填写有误差可以获取豆瓣信息后替换对应信息。</font></b></div>`)
+                    <font style="margin-left:5px" color="red">选中要转换的bbcode图片部分点击即可。</font></div>
+          if (key == '红叶') key = 'Red Leaves';
+        var $table = $(`<table style="width: 100%" class="table table-condensed table-bordered table-striped table-hover"></table>`);
+            color = 'red';
+            pic_info = '[CODE]This release contains a derived Dolby Vision profile 8 layer. Comparisons not required as DV and HDR are from same provider.[/CODE]\n\n' + pic_info;
+                        <font style="margin-left:5px" color="red">选中要转换的bbcode图片部分点击即可。</font></div>
+        var $table = $(`<table style="width: 100%" class="table table-condensed table-bordered table-striped table-hover"></table>`);
+                    <font style="margin-left:5px" color="red">选中要转换的bbcode图片部分点击即可。</font></div>
+      $('#remaster').parent().prepend(`<font color="red">这里脚本默认勾选了版本信息，如果没有特殊版本信息请记得取消勾选。</font><br>`);
+      $('#preview_button').before(`<font color="red">由于PTP预览可以自动勾选字幕并且看图床是否正确显示，请先勾选预览后返回发布。<br><br></font>`);
+                <br><br><font color="red">如果IMDB的海报不能使用，或许可以检查后转存简介的第一张图片到PTP(需要apikey)。</font>`);
+      $('p:contains(announce url)').append(`<br><font color="red">1.请注意：制作种子区块小于或等于8M，上传种子后点击auto fill</fonr>`);
+")').after(`<input type="button" value="go-ptp" id="ptp"><input type="button" value="preview" id="preview"><font color="red">2.请检查是否是封面图！！！</font>`);
+      $('#desc').after(`<div id="noimg" style="display:none"><br><br><font color="red">简介中没有合适的截图，请提交到ptp图床，一行一个地址 (不要缩略图)：</font><textarea style="background-color:black; color:grey" class="long" rows='10'
+          $('#title').parent().append(`<button href="#" id="rename"><font color="red">rename title</font></button>`);
+ter(`<input type="button" value="fill-info" id="fill_info"><input type="button" value="search" id="search"><font color="red">3.加载种子后依次点击fill-info, search按钮, 后者会同时打开多个搜索页面，请<a style="text-decoration: underline;color:red" href="https://support.g
+              raw_info.extra_text = raw_info.extra_text.replace(/color=blue/, 'color=red');
+              raw_info.extra_text = raw_info.extra_text.replace(/color=royalblue/, 'color=red');
+          var $table = $(`<table class="table table-condensed table-bordered table-striped table-hover"></table>`);
+                    <a href="http://predb.me/" target="_blank">PreDB</a>.`);
+          $('#tvmaze>td:last').append(`</br></br><font color="red" size="1">请点击对应剧照填充id:</font></br>`);
+                                                    <a href=${item.url} target="_blank">${item.name} [${item.premiered.match(/\d{4}/)[0]}]</a>
+      $('#releasegroup').parent().append(`<div style="padding-top:5px">原标题：<font color="red">${raw_info.name}</font><br> 禁发布：<font color="red">Ozlem, RARBG, FGT (Trumpable), STUTTERSHIT, LiGaS, DDR, Zeus, TBS, a
+        $(`<input type=button value=Go id="name_search" style="margin-left:5px; margin-right:5px"/><font color="red">点击跳转获取单集名称</font>`).insertAfter($('#title'));
+      $('input[name=url]').after(`<br><font color="red">IMDB不好用的时候试试：</font><input type="button" id="getTMDB" value="IMDB获取TMDB" /><font color="red">或者</font><input type="but
+        var creators = await getFullCredits(raw_info.url);
+        $('#scenename').after(`<div id='remind_scenename' style="display:inline-block; margin-left:5px"><font color="red">请点击辅助发布后检查！！</font></div>`);
+          $('#tags').after(`<div id='remind_tags' style="display:inline-block; margin-left:5px"><font color="red">请选择对应的标签！！</font></div>`);
+          $('#fill').after(`<div id='remind_desc'><font color='red'>请先将mediainfo补充完整后点击辅助发布！！</font></div>`)
+              info = `[b]Episode Name: [/b]\n[b]Season: {s} [/b]\n[b]Episode: {e} [/b]\n[b]Aired: [/b]\n\n[b]Episode Overview: [/b]`;
+                            <div style="display:inline-block;margin-left:5px" id="country_selected"><font color="red">请选择剧集对应的国家！！</font></div>
+            if ($('table.table-bordered', doc).find('td').length > 3) {
+              $('table.table-bordered', doc).find('td').map((index, e) => {
+                    <td><font color="red">剧名以<a href="https://thetvdb.com/search?query=${search_name}" target="_blank">TVDB(点击跳转搜索)</a>为准,
+      $('#file').parent().append(`<a id="remove_file" href="#" style="color:red; margin-left: 100px;">取消种子文件</a>`);

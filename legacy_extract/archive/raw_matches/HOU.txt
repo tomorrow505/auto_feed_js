@@ -1,0 +1,20 @@
+// @match        https://house-of-usenet.com/threads/*
+      text = text.replace('ans', 'years').replace('mois', 'month').replace('heure', 'hour').replace('jour', 'day').replace('semaine', 'week').replace('1 an', '1 year');
+    text = text.replace('ans', 'years').replace('mois', 'month').replace('heure', 'hour').replace('jour', 'day').replace('semaine', 'week').replace('1 an', '1 year');
+  'HOU': 'https://house-of-usenet.com/',
+  if (site_url.match(/^https:\/\/nzbs.in\/releases\/.{36}|^https:\/\/house-of-usenet.*|https:\/\/omgwtfnzbs.org.*/)) {
+      "heure": "hour",
+    'heure': 'hour',
+      var hourly_bonus = $('#ajax').html().match(/Мои монетки \((.*?) монет .* наличии \/ (.*?) единиц в час\)/)[2];
+      $('#ajax').find('table').first().html($('#transfer', doc).html().replace(searchRegExp, current_coin).replace('hourly_coin', hourly_bonus));
+    var unsupported_sites = ['digitalcore', 'HD-Only', 'HOU', 'OMG', 'TorrentLeech', 'MTeam', 'UBits', 'PigGo'];
+    if (origin_site == 'HOU') {
+        div_box = document.getElementsByClassName('shoutbox')[0];
+          var authors = ['lolihouse', 'jsum', 'Raws', 'KoushinRip', 'ANK', 'VCB-Studio', 'VCB', 'LittlePox', 'LittleBakas', 'ANE', 'Reinforce', 'SweetDre
+      var picture_boxes = document.getElementsByClassName('panel panel-chat shoutbox');
+      var picture_info = document.getElementsByClassName('panel panel-chat shoutbox')[1];
+        } else if (['IN', 'digitalcore', 'BlueBird', 'bwtorrents', 'HOU', 'BLU', 'Tik', 'Aither', 'DarkLand', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(origin_site) >= 0) {
+        "garage.house": "汽车(garage)", "garage.rock": "汽车(garage)",
+              var runtime = $('li.ipc-metadata-list__item:contains("Runtime")', doc).text().match(/(\d+) hour (\d+) minutes/);
+        $('p.min_padding:contains("Merci de ne mettre")').text('Please only put the name in French, without adding any resolution, language or codec etc.');
+      if (raw_info.origin_site == 'HOU' || raw_info.origin_site == 'OMG') {

@@ -1,0 +1,4 @@
+  'ALing': { 'url': 'https://pt.aling.de/', 'enable': 1 },
+        'CDFile', '柠檬不甜', 'ALing', 'LongPT', 'BaoZi'
+        case 'ALing':
+    else if (forward_site == 'ALing') {

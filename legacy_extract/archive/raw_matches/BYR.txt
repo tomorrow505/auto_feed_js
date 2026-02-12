@@ -1,0 +1,18 @@
+  'BYR': { 'url': 'https://byr.pt/', 'enable': 1 },
+  'BYR': 'https://byr.pt/',
+    if (key != 'FRDS' && key != 'BYR' && key != 'U2') {
+        } else if (key == 'BYR' && (raw_info.type == '电影')) {
+        } else if (key == 'BYR' && (raw_info.type == '剧集')) {
+        } else if (key == 'BYR' && (raw_info.type == '综艺')) {
+        } else if (key == 'BYR' && (raw_info.type == '音乐')) {
+        } else if (key == 'BYR' && (raw_info.type == '动漫')) {
+        } else if (key == 'BYR' && (raw_info.type == '纪录')) {
+      log_in(['BYR'], '#pagemenu');
+if (origin_site == 'BYR') {
+      } else if (origin_site == 'BYR') {
+      if (origin_site != 'BYR' && origin_site != '影') {
+    if (origin_site == 'BYR') {
+      raw_info.descr = raw_info.descr.replace(/\n+\t+\n/ig, '\n').replace('Powered by BYRBT Info Clone', '');
+      } else if (raw_info.type == '电影' && ['HUDBT', 'MTeam', 'TLFbits', 'PuTao', 'TJUPT', 'NanYang', 'BYR', 'TTG'].indexOf(forward_site) < 0) {
+    if (['CMCT', 'PTsbao', 'HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HDTime', 'HD-Only', 'HDfans',
+    else if (forward_site == 'BYR') {

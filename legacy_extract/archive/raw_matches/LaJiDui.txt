@@ -1,0 +1,4 @@
+  'LaJiDui': { 'url': 'https://pt.lajidui.top/', 'enable': 1 },
+  if (forward_site == 'LaJiDui') {
+        case 'LaJiDui':
+    else if (forward_site == 'LaJiDui') {

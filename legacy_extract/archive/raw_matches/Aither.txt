@@ -1,0 +1,21 @@
+if (site_url.match(/(blutopia.cc|darkland.top|eiga.moi|hd-olimpo.club|aither.cc|cinematik.net)\/torrents\?imdb(id)?=.*/)) {
+  'Aither': { 'url': 'https://aither.cc/', 'enable': 1 },
+  'Aither': 'https://aither.cc/',
+  if (site_url.match(/^https:\/\/(www.)?(darkland.top|eiga.moi|hd-olimpo.club|fearnopeer.com|onlyencodes.cc|blutopia.cc|aither.cc|torrent.desi|monikadesign.uk|hawke.uno|cinematik.net|reelflix.xyz)\/torrents\/\d+$/)) {
+    if (['BHD', 'BLU', 'Tik', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX', 'IN'].indexOf(site) > -1) {
+    } else if (site == 'BLU' || site == 'Tik' || site == 'Aither') {
+  if (['PTP', 'xthor', 'HDF', 'BHD', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(site) 
+        } else if (key == 'Aither' || key == 'FNP' || key == 'OnlyEncodes' || key == 'DarkLand' || key == 'ReelFliX') {
+          } else if (key == 'DarkLand' || key == 'ACM' || key == 'BLU' || key == 'Monika' || key == 'Tik' || key == 'Aither' || key == 'FNP' || key == 'OnlyEncodes' || key == 'ReelFliX') {
+  if (['BHD', 'BLU', 'Tik', 'ACM', 'HDSpace', 'xthor', 'Monika', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX'].indexOf(forward_site) > -1) {
+      log_in(['BLU', 'HDOli', 'Monika', 'Tik', 'Aither', 'FNP', 'OnlyEncodes', 'DarkLand', 'ReelFliX'], 'nav[class="top-nav"]');
+    if (origin_site == 'Tik' || origin_site == 'Aither') {
+    if (origin_site == 'BLU' || origin_site == 'Tik' || origin_site == 'Aither') {
+        if (['PHD', 'avz', 'CNZ', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'BHD', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'OMG'].indexOf(origin_site) > -1) {
+        } else if (['IN', 'digitalcore', 'BlueBird', 'bwtorrents', 'HOU', 'BLU', 'Tik', 'Aither', 'DarkLand', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(origin_site) >= 0) {
+    if (forward_site == 'BLU' || forward_site == 'Audiences' || forward_site == 'Tik' || forward_site == 'Aither') {
+      'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED', 'Tik', 'Aither', 'SugoiMusic', 'CG',
+    } else if (['BLU', 'Tik', 'Aither', 'BHD', 'iTS', 'PTP', 'ACM', 'Monika', 'DarkLand'].indexOf(forward_site) < 0) {
+      } else if (forward_site == 'BLU' || forward_site == 'Tik' || forward_site == 'Aither') {
+    else if (['BLU', 'ACM', 'Monika', 'Tik', 'Aither', 'FNP', 'OnlyEncodes', 'ReelFliX'].indexOf(forward_site) > -1) {
+            if (forward_site == 'Aither') {

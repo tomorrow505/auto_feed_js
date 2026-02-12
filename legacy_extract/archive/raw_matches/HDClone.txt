@@ -1,0 +1,4 @@
+  'HDClone': { 'url': 'https://pt.hdclone.top/', 'enable': 1 },
+ome', 'HDHome', 'HDDolby', 'Audiences', 'PTLGS', 'SoulVoice', 'OKPT', 'UltraHD', 'CarPt', 'ECUST', 'iloli', 'PTChina', 'HDClone',
+        case 'HDClone':
+    else if (forward_site == 'HDClone') {

@@ -1,0 +1,4 @@
+  'CDFile': { 'url': 'https://pt.cdfile.org/', 'enable': 1 },
+        'CDFile', '柠檬不甜', 'ALing', 'LongPT', 'BaoZi'
+        case 'CDFile':
+    else if (forward_site == 'CDFile') {

@@ -1,0 +1,4 @@
+  '天枢': { 'url': 'https://dubhe.site/', 'enable': 1 },
+anBug', '杏林', '海棠', 'Panda', 'KuFei', 'PTCafe', 'GTK', 'HHClub', '麒麟', 'AGSV', 'Oshen', 'PTFans', 'PTzone', '雨', '唐门', '天枢', '财神', 'DevTraker',
+        case '天枢':
+    else if (forward_site == '天枢') {

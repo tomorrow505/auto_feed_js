@@ -1,0 +1,30 @@
+// @match        https://hdf.world/*
+// @match        https://hdf.world/torrents.php*
+if (site_url.match(/^https:\/\/hdf\.world\/.*/)) {
+//用于修改hdf的显示样式，不喜欢可以删除或者注释掉
+if (site_url.match(/^https:\/\/hdf\.world\/torrents\.php/i) && !site_url.match(/torrentid/i)) {
+  'HDF': { 'url': 'https://hdf.world/', 'enable': 1 },
+  'HDfans': { 'url': 'http://hdfans.org/', 'enable': 1 },
+  `<a href="https://hdf.world/torrents.php?searchstr={search_name}" target="_blank">HDF</a>`,
+  'HDF': 'https://hdf.world/',
+  'HDfans': /HDFans/i,
+  if (site_url.match(/^http(s*):\/\/hdf.world\/torrents.php\?id=\d+&torrentid=\d+/i)) {
+  if (['PTP', 'xthor', 'HDF', 'BHD', 'BLU', 'Tik', 'Aither', 'TorrentLeech', 'DarkLand', 'ACM', 'HDOli', 'Monika', 'DTR', 'HONE', 'FNP', 'OnlyEncod
+  } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'OPS', 'RED', 'SugoiMusic'].indexOf(forward_site) > -1) {
+if (site_url.match(/^https:\/\/hdf.world\/.*/)) {
+    getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/hdf_rules.html', null, function (doc) {
+    getDoc('https://raw.githubusercontent.com/tomorrow505/auto_feed_js/master/hdf_faq.html', null, function (doc) {
+        'HDVideo', 'HDTime', 'FreeFarm', 'HDfans', 'PTT', 'ZMPT', 'OKPT', 'CrabPt', 'QingWa', 'ICC', 'LemonHD', '1PTBA', 'HDBAO', 'AFUN', '星陨阁',
+      log_in(['BTN', 'SC', 'MTV', 'UHD', 'HDSpace', 'TVV', 'HDF', 'RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'bit-hdtv', 'SugoiMusic'], '#menu');
+if (origin_site == "HDF" || origin_site == 'PigGo') {
+    if (origin_site == 'HDF') {
+      if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic'].indexOf(origin_s
+          if (origin_site == 'HDF' || origin_site == 'UHD') {
+    if (origin_site == 'HDF') {
+      raw_info.torrent_url = `https://hdf.world/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+    if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic', 'HHClub'].indexO
+    if (['CMCT', 'PTsbao', 'HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HDTime', 'HD-Only', 'HDfans',
+      'SC', 'MTV', 'NBL', 'avz', 'PHD', 'CNZ', 'ANT', 'TVV', 'xthor', 'HDF', 'OpenCD', 'PigGo', 'RED', 'Tik', 'Aither', 'SugoiMusic', 'CG',
+        case 'HDfans':
+    else if (forward_site == 'HDfans') {
+    else if (forward_site == 'HDF') {

@@ -1,0 +1,12 @@
+  'BTSchool': { 'url': 'https://pt.btschool.club/', 'enable': 1 },
+      if (used_signin_sites.indexOf('BTSchool') > -1) {
+        var signin_url = used_site_info['BTSchool'].url + 'index.php?action=addbonus';
+              console.log(`开始签到BTSchool：`, $('font:contains("今天签到您获得"):last', doc).text().trim());
+              console.log(`开始签到BTSchool：`, '重复签到！！');
+            $(`input[kname=BTSchool]`).parent().find('a').css({ "color": "red" });
+            console.log(`开始签到BTSchool：`, '失败！！！');
+            $(`input[kname=BTSchool]`).parent().find('a').css({ "color": "blue" });
+      if (forward_site == 'BTSchool' && allinput[i].name == 'imdbid' && raw_info.url) {
+      if (forward_site == 'BTSchool' && allinput[i].name == 'doubanid' && raw_info.dburl) {
+        case 'BTSchool':
+    else if (forward_site == 'BTSchool') {

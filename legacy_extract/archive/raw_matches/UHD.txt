@@ -1,0 +1,211 @@
+// @match        https://uhdbits.org/torrents.php*
+if (site_url.match(/^https:\/\/uhdbits.org\/torrents.php\?id=\d+#separator#/)) {
+  'UHD': { 'url': 'https://uhdbits.org/', 'enable': 1 },
+  `<a href="https://uhdbits.org/torrents.php?searchstr={imdbid}" target="_blank">UHD</a>`,
+//是否在PTP/HDB/HDT/UHD种子列表显示搜索跳转功能，1表示显示，0表示隐藏
+  'UHD': 0,
+  'UHD': 'https://uhdbits.org/',
+      if (key == 'HDB' && url.match(/uhdbits\.org/)) {
+        return 'UHD';
+  if (site_url.match(/^http(s*):\/\/uhdbits.org\/torrents.php\?id=\d+&torrentid=\d+/i)) {
+  } else if (result.match(/(UHDTV)/i)) {
+    result = 'UHDTV';
+  } else if (result.match(/(UHD|UltraHD)/i) && !result.match(/Encode/i)) {
+    result = 'UHD';
+  if (result.match(/(Movie|电影|UHD原盘|films|電影|剧场)/i)) {
+  if (descr.match(/Ultra HD|UHD/i)) {
+    temp_title = "UHD ";
+  } else if (name.match(/BLURAY|UHD.BLURAY/)) {
+    if (descr.match(/DISC INFO:|.MPLS|Video Codec|Disc Label/i) && (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'BluRay')) {
+  if (raw_info.medium_sel == 'Blu-ray' && (raw_info.name.match(/UHD|2160P/i) || raw_info.descr.match(/2160p/))) {
+    raw_info.medium_sel = 'UHD';
+          } else if (key == 'UHD') {
+  } else if (['GPW', 'UHD', 'PTP', 'SC', 'MTV', 'NBL', 'ANT', 'TVV', 'HDF', 'BTN', 'OPS', 'RED', 'SugoiMusic'].indexOf(forward_site) > -1) {
+if (site_url.match(/^https:\/\/uhdbits\.org\/torrents\.php.*/i) && show_search_urls['UHD']) {
+      log_in(['BTN', 'SC', 'MTV', 'UHD', 'HDSpace', 'TVV', 'HDF', 'RED', 'jpop', 'lztr', 'DICMusic', 'OPS', 'bit-hdtv', 'SugoiMusic'], '#menu');
+    if (origin_site == 'UHD') {
+      uhd_lack_descr = true;
+      if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic'].indexOf(o
+        if (origin_site == 'PTP' || origin_site == 'UHD' || origin_site == 'GPW' || origin_site == 'SC' || origin_site == 'ANT') {
+          if (origin_site == 'HDF' || origin_site == 'UHD') {
+    if (origin_site == 'UHD') {
+      raw_info.torrent_url = `https://uhdbits.org/` + $(`a[href*="download&id=${torrent_id}"]`).attr('href');
+    if (['PTP', 'MTV', 'UHD', 'HDF', 'RED', 'BTN', 'jpop', 'GPW', 'HD-Only', 'SC', 'ANT', 'lztr', 'DICMusic', 'OPS', 'TVV', 'SugoiMusic', 'HHClub']
+        if (origin_site != 'UHD' && origin_site != 'TTG') {
+        if (this.id == "影" && ['CMCT', 'TTG', 'UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) < 0) {
+    if (['UHD', 'FileList', 'RED', 'TJUPT', 'HDB', 'PTsbao', 'HD-Only'].indexOf(origin_site) > -1) {
+        if (origin_site == 'UHD' && uhd_lack_descr) {
+          uhd_lack_descr = false;
+    if (['CMCT', 'PTsbao', 'HDCity', 'BLU', 'UHD', 'HDSpace', 'HDB', 'iTS', 'PTP', 'BYR', 'GPW', 'HDTime', 'HD-Only', 'HDfans',
+    } else if (forward_site == 'UHD') {
+        case 'UHD': source_box.val(1); break;
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+        case 'UHD': case 'Blu-ray': medium_box.val(1); break;
+        case 'UHD':
+                } else if (value == 'UHD Blu-ray') {
+          case 'UHD':
+              medium_sel = 'UHD Blu-ray DIY';
+              medium_sel = 'UHD Blu-ray';
+          medium_sel = 'UHDTV';
+        case 'UHD': medium_code = 'Blu-rayUHD'; break;
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          } else if (raw_info.medium_sel == 'UHD') {
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+        case 'UHD': $("select[name='medium_sel']").val('12'); break;
+        case 'UHD':
+          } else if (raw_info.medium_sel == 'UHD') {
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          } else if (raw_info.medium_sel == 'UHD') {
+          } else if (raw_info.medium_sel == 'UHD') {
+        case 'UHD': source_box.options[1].selected = true; break;
+          if (raw_info.name.match(/UHD/) || raw_info.standard_sel == '4K') {
+      } else if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray') {
+        case 'UHD': medium_box.options[1].selected = true; break;
+        var medium_dict = { 'UHD': 1, 'Blu-ray': 3, 'Encode': 6, 'HDTV': 7, 'WEB-DL': 12, 'Remux': 5, 'CD': 9 };
+          case 'UHD':
+        var medium_dict = { 'UHD': 2, 'Blu-ray': 1, 'Encode': 4, 'HDTV': 5, 'WEB-DL': 6, 'Remux': 3, 'CD': 7 };
+          case 'UHD':
+      var medium_dict = { 'UHD': 2, 'Blu-ray': 3, 'Encode': 1, 'HDTV': 6, 'WEB-DL': 5, 'Remux': 4, 'DVD': 7, '': 9, 'CD': 8 };
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': case 'Blu-ray': medium_box.val(1); break;
+            if (raw_info.medium_sel == 'UHD') {
+          case 'UHD': case 'Blu-ray': medium_box.options[1].selected = true; break;
+        case 'UHD': medium_box.options[2].selected = true; break;
+        case 'UHD': case 'Blu-ray': $('#torrent_name_field2').val('BluRay'); break;
+            case 'UHD': case 'Blu-ray': case 'Remux': case 'Encode': $('#record_medium').val('BluRay'); break;
+          case 'UHD': medium_box.options[1].selected = true; break;
+            case 'UHD': case 'Blu-ray': source_box.val(55); break;
+        case 'UHD': medium_box.val(10); break;
+      } else if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray') {
+        case 'UHD': medium_box.options[1].selected = true; break;
+        case 'UHD':
+      var medium_dict = { 'Blu-ray': 1, 'UHD': 11, 'DVD': 2, 'Remux': 3, 'HDTV': 5, 'WEB-DL': 10, 'Encode': 7, '': 12, 'CD': 8 }
+        case 'UHD':
+        case 'UHD': medium_box.options[1].selected = true; break;
+        case 'Remux': case 'UHD': case 'Blu-ray': case 'Encode': autosource.options[1].selected = true; break;
+      if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          if (raw_info.medium_sel == 'UHD') {
+        case 'UHD': medium_box.options[2].selected = true; break;
+        case 'UHD': medium_box.options[1].selected = true; break;
+        case 'UHD': medium_box.options[2].selected = true; break;
+        case 'UHD':
+          if (raw_info.name.match(/uhd/i)) {
+        if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+        if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+        case 'UHD': source_box.options[1].selected = true; break;
+        case 'UHD': medium_box.options[1].selected = true; break;
+      if (raw_info.medium_sel == 'UHD') {
+        case 'UHD': source_box.val(2); break;
+        case 'UHD': source_box.val(1); break;
+        case 'UHD': medium_box.val(11); break;
+        case 'UHD': r_source = 'UHD Blu-ray'; break;
+        case 'UHD': medium_box.val(8); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(10); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': case 'Blu-ray':
+        case 'UHD': medium_box.val(24); break;
+        case 'UHD': medium_box.val(8); break;
+            case 'UHD': case 'Blu-ray': medium_box.options[5].selected = true; break;
+        case 'UHD': case 'Blu-ray': medium_box.val(1); break;
+      if (raw_info.medium_sel == 'UHD') {
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': case 'Blu-ray': medium_box.val(6); break;
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+        case 'UHD': medium_box.val(10); break;
+        case 'UHD': case 'Blu-ray': medium_box.val(1); break;
+        case 'Blu-ray': case 'UHD': medium_box.val(14); break;
+        case 'UHD': case 'Blu-ray': medium_box.val(9); break;
+            case 'UHD': category_box.val('70'); break;
+              if (raw_info.name.match(/uhd/i)) {
+            case 'UHD': category_box.val('72'); break;
+              if (raw_info.name.match(/uhd/i)) {
+      if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          case 'UHD':
+        } else if (raw_info.descr.match(/mpls/i) && (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD')) {
+          case 'UHD': source_box.options[4].selected = true; break;
+          case 'UHD': source_box.options[1].selected = true; break;
+        if (raw_info.descr.match(/MPLS/) && (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD')) {
+        case 'UHD': source_box.options[1].selected = true; break;
+    else if (forward_site == 'UHD') {
+            case 'UHD': source_box.options[1].selected = true; break;
+      if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray') {
+        case 'UHD': case 'Blu-ray': case 'DVD': $('#type_medium').val("1"); break;
+      if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'DVD') {
+        case 'UHD':
+        case 'UHD': medium_box.val(16); break;
+      } else if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray') {
+      var medium_dict = { 'Blu-ray': 1, 'UHD': 1, 'DVD': 6, 'Remux': 3, 'HDTV': 4, 'WEB-DL': 5, 'Encode': 7, '': 8 }
+        case 'UHD': medium_box.val(2); break;
+      var medium_dict = { 'Blu-ray': 1, 'UHD': 6, 'DVD': 8, 'Remux': 3, 'HDTV': 5, 'WEB-DL': 4, 'Encode': 2, '': 10, 'CD': 9 }
+        case 'UHD': medium_box.val(2); break;
+          case 'Blu-ray': case 'UHD': medium_box.val(1); break;
+        case 'Blu-ray': case 'UHD': medium_box.val(1); break;
+        case 'Blu-ray': case 'UHD': medium_box.val(1); break;
+        case 'UHD': source_box.val(23); break;
+          if (raw_info.name.match(/UHD/) || raw_info.standard_sel == '4K') {
+        case 'UHD': medium_box.val(10); break;
+        case 'UHD': medium_box.val(10); break;
+        case 'UHD': medium_box.val(11); break;
+        case 'UHD': medium_box.val(3); break;
+        case 'UHD': medium_box.val(9); break;
+        case 'UHD': case 'Blu-ray': medium_box.val(1); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(2); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(10); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD':
+        case 'UHD': source_box.val(11); break;
+        case 'UHD': case 'Blu-ray': case 'Encode': case 'Remux': $('#source').val('Blu-ray'); break;
+      if ((raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') && raw_info.descr.match(/mpls/i)) {
+        case 'UHD': case 'Blu-ray': $('#media').val('BDMV'); break;
+        case 'UHD': case 'Blu-ray': case 'Encode': case 'Remux':
+          } else if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          case 'UHD': source_box.val('Blu-ray 4K'); break;
+        case 'UHD': case 'Blu-ray': case 'Encode': case 'Remux': $('select[name=media]').val('Blu-ray'); break;
+        case 'UHD': case 'Blu-ray': case 'Encode': case 'Remux': $('select[name=media]').val('Blu-ray'); break;
+        } else if (raw_info.standard_sel == '4K' && (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD')) {
+        } else if (raw_info.standard_sel == '1080p' && (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD')) {
+        if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+        case 'UHD': case 'Blu-ray': $('select[name=media]').val('Blu-Ray Original'); break;
+        case 'UHD': case 'Blu-ray': $('select[name="source"]').val('Other'); break;
+      if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray') {
+        case 'UHD': medium_box.val(0); break;
+        case 'UHD':
+          if (raw_info.name.match(/UHD/i)) {
+        case 'UHD': medium_box.val(10); break;
+        case 'UHD': medium_box.val(11); break;
+        case 'Blu-ray': case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(10); break;
+        case 'UHD': medium_box.val(10); break;
+        case 'UHD': labels.diy ? medium_box.val(12) : medium_box.val(11); break;
+        case 'UHD': medium_box.val(10); break;
+        case 'UHD': medium_box.val(4); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD': medium_box.val(1); break;
+        case 'UHD':
+        case 'UHD':
+        case 'UHD': medium_box.val(2); break;
+        case 'UHD': medium_box.val(9); break;
+        case 'Blu-ray': case 'UHD': medium_box.val(1); break;
+      var medium_dict = { 'Blu-ray': 1, 'DVD': 2, 'UHD': 14, 'Remux': 3, 'HDTV': 5, 'WEB-DL': 12, 'Encode': 7, 'CD': 8 };
+          case 'UHD': case 'Blu-ray':
+        case 'UHD': case 'Blu-ray': case 'Encode': case 'Remux': $('select[name=source]').val('Blu-ray'); break;
+      if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+        case 'UHD': case 'Blu-ray': case 'Encode': case 'Remux': $('#source').val('Blu-ray'); break;
+        case 'UHD': case 'Blu-ray': case 'DVD': $('#type_medium').val("1"); break;
+        if (raw_info.medium_sel == 'UHD' || raw_info.medium_sel == 'Blu-ray' || raw_info.descr.match(/mpls/i)) {
+          if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
+          case 'UHD': case 'Blu-ray':

@@ -84,14 +84,31 @@ export class TorrentService {
      * Download torrent as binary string (for tracker cleaning / rebuild).
      */
     static async downloadBinaryString(url: string): Promise<string> {
+        // Legacy parity: prefer `arraybuffer` and convert bytes -> binary string.
+        // Using `overrideMimeType` + responseText is fragile (can corrupt bytes or return HTML).
         const response = await GMAdapter.xmlHttpRequest({
             method: 'GET',
             url,
-            overrideMimeType: 'text/plain; charset=x-user-defined'
+            responseType: 'arraybuffer'
         });
-        const text = (response && (response.responseText || response.response)) as string;
-        if (!text) throw new Error('Empty torrent response');
-        return text;
+        const buf = (response && response.response) as ArrayBuffer;
+        if (!buf || !(buf instanceof ArrayBuffer) || buf.byteLength === 0) {
+            throw new Error('Empty torrent response');
+        }
+        const u8 = new Uint8Array(buf);
+        // latin1 keeps bytes 0-255 mapped 1:1 to JS string code units.
+        try {
+            return new TextDecoder('latin1').decode(u8);
+        } catch {
+            // Fallback (should rarely happen): chunked conversion.
+            let out = '';
+            const chunk = 0x2000;
+            for (let i = 0; i < u8.length; i += chunk) {
+                const sub = u8.subarray(i, i + chunk);
+                out += String.fromCharCode.apply(null, Array.from(sub) as any);
+            }
+            return out;
+        }
     }
 
     static base64ToBinaryString(base64DataUrl: string): string {
@@ -131,12 +148,13 @@ export class TorrentService {
         forwardAnnounce?: string | null
     ): { binary: string; name?: string } {
         if (!forwardSite || forwardSite === 'hdb-task') return { binary };
-        if (binary.match(/value="firsttime"/)) {
-            throw new Error('种子下载失败：请先在源站手动下载一次。');
+        const head = (binary || '').slice(0, 2048).toLowerCase();
+        if (head.includes('<!doctype') || head.includes('<html') || head.includes('<head') || head.includes('<body')) {
+            throw new Error('种子下载失败：疑似返回了 HTML（未登录/权限不足/被重定向）。');
         }
-        if (binary.match(/Request frequency limit/)) {
-            throw new Error('种子下载频率过快，请稍后再试。');
-        }
+        if (binary.match(/value="firsttime"/)) throw new Error('种子下载失败：请先在源站手动下载一次。');
+        if (binary.match(/Request frequency limit/)) throw new Error('种子下载频率过快，请稍后再试。');
+        if (!binary.match(/4:info/)) throw new Error('种子格式错误：缺少 info 字段。');
 
         let name = '';
         if (
@@ -153,9 +171,7 @@ export class TorrentService {
         const announceMatch = announce.match(/https?:\/\/[^\s"'<>]+/);
         if (announceMatch) announce = announceMatch[0];
 
-        if (!binary.match(/8:announce\d+:/)) {
-            return { binary, name: name || undefined };
-        }
+        if (!binary.match(/8:announce\d+:/)) throw new Error('种子文件加载失败：未找到 announce 字段。');
 
         let newTorrent = 'd';
         newTorrent += `8:announce${announce.length}:${announce}`;
@@ -172,24 +188,18 @@ export class TorrentService {
 
         newTorrent += '8:encoding5:UTF-8';
 
-        let info = '';
-        let endToken = 'ee';
+        // Legacy logic: rely on `private` flag as an anchor inside the info dict.
         const infoPrivate = binary.match(/4:info[\s\S]*?privatei\de/);
-        if (infoPrivate) {
-            info = infoPrivate[0].replace('privatei0e', 'privatei1e');
-        } else {
-            const infoAny = binary.match(/4:info[\s\S]*?e/);
-            if (infoAny) {
-                info = infoAny[0];
-                endToken = 'e';
-            }
+        if (!infoPrivate) {
+            throw new Error('种子格式不支持：未找到 info/private（无法安全重构）。');
         }
-        if (!info) return { binary, name: name || undefined };
+        const info = infoPrivate[0].replace('privatei0e', 'privatei1e');
 
         newTorrent += info;
         const source = `6:source${forwardSite.length}:${forwardSite.toUpperCase()}`;
         newTorrent += source;
-        newTorrent += endToken;
+        // Close: info dict + root dict
+        newTorrent += 'ee';
 
         return { binary: newTorrent, name: name || undefined };
     }
@@ -213,6 +223,15 @@ export class TorrentService {
         }
 
         if (!binary) return null;
+
+        // Validate before rebuilding; otherwise we might upload an HTML error page as a ".torrent".
+        const head = binary.slice(0, 2048).toLowerCase();
+        if (head.includes('<!doctype') || head.includes('<html') || head.includes('<head') || head.includes('<body')) {
+            throw new Error('种子下载失败：疑似返回了 HTML（未登录/权限不足/被重定向）。');
+        }
+        if (!binary.startsWith('d') || !binary.includes('4:info')) {
+            throw new Error('种子格式错误：不是有效的 .torrent 文件。');
+        }
 
         const rebuilt = this.rebuildTorrentBinary(binary, forwardSite, forwardAnnounce);
         const rawNameFromTorrent = rebuilt.name || '';
@@ -267,6 +286,24 @@ export class TorrentService {
                 input.dispatchEvent(new Event('change', { bubbles: true }));
                 const fileEl = document.getElementById('file') as HTMLInputElement | null;
                 if (fileEl) fileEl.dispatchEvent(new Event('change', { bubbles: true }));
+                return true;
+            }
+        }
+
+        if (['GPW', 'RED', 'OPS', 'DIC'].includes(forwardSite)) {
+            const input =
+                (document.querySelector('input[name="file_input"]') as HTMLInputElement | null) ||
+                (document.querySelector('input[name="file"]') as HTMLInputElement | null) ||
+                (document.querySelector('#file') as HTMLInputElement | null);
+            if (input) {
+                input.files = makeTransfer();
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                const fileEl = document.getElementById('file') as HTMLInputElement | null;
+                if (fileEl && fileEl !== input) {
+                    fileEl.dispatchEvent(new Event('change', { bubbles: true }));
+                    fileEl.dispatchEvent(new Event('input', { bubbles: true }));
+                }
                 return true;
             }
         }
