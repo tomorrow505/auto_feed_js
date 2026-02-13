@@ -49,7 +49,7 @@ export class UploadMetaFetchService {
             btn.prop('disabled', true);
             try {
                 const settings = await SettingsService.load();
-                const base = (await StorageService.load()) || ({
+                const base = ({
                     title: '',
                     description: '',
                     sourceSite: adapter.siteName,

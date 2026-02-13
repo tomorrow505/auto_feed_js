@@ -74,7 +74,8 @@ export class SiteManager {
             AutoDownloadAfterUploadService.tryAutoDownload(adapter, this.isUploadLikePage(window.location.href)).catch(() => {});
         } catch {}
 
-        if (this.isUploadLikePage(window.location.href)) {
+        const uploadLikePage = this.isUploadLikePage(window.location.href);
+        if (uploadLikePage) {
             try {
                 await UploadMetaFetchService.tryInject(adapter);
             } catch (e) {
@@ -89,24 +90,19 @@ export class SiteManager {
             this.injectEmbeddedUI(adapter).catch(err => console.error('[Auto-Feed] Injection Error:', err));
         }
 
-        // 2. CHECK STORAGE (Target Mode)
-        // This can run in background
+        // 2. CHECK FOR FORWARD HANDOFF (Target Mode)
         try {
-            const storedMeta = await StorageService.load();
-            if (storedMeta) {
-                if (this.isUploadLikePage(window.location.href)) {
-                    this.injectFillButton(adapter, storedMeta);
-                }
-                if (!storedMeta.title && !storedMeta.description) {
-                    this.showStatusToast('缓存存在但内容为空，可能解析失败。');
-                }
-            } else {
-                if (this.isUploadLikePage(window.location.href)) {
-                    this.showStatusToast('未检测到转发缓存，无法预填。');
+            if (uploadLikePage) {
+                const hasToken = !!StorageService.getHandoffTokenFromUrl();
+                const handoffMeta = await StorageService.consumeHandoffFromCurrentUrl();
+                if (handoffMeta) {
+                    this.injectFillButton(adapter, handoffMeta);
+                } else if (hasToken) {
+                    this.showStatusToast('转发缓存已过期，请返回源站重新点击转发链接。');
                 }
             }
         } catch (e) {
-            console.error('[Auto-Feed] Storage Load Error:', e);
+            console.error('[Auto-Feed] Handoff Load Error:', e);
         }
     }
 

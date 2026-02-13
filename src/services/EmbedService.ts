@@ -317,7 +317,7 @@ export class EmbedService {
         style.appendChild(document.createTextNode(`
             .round_icon{ width: 12px; height: 12px; border-radius: 90%; margin-right: 2px; vertical-align: -2px; }
             #douban_button { outline: none; }
-            .search_urls a.disabled { pointer-events: none; opacity: 0.55; }
+            .autofeed-search-links a.disabled { pointer-events: none; opacity: 0.55; }
             [data-autofeed-embed-root="1"] a { text-decoration: none; }
         `));
         (document.head || document.documentElement).appendChild(style);
@@ -870,7 +870,8 @@ export class EmbedService {
                 e.preventDefault();
                 e.stopPropagation();
 
-                const targetUrl = a.dataset.uploadHref || a.href;
+                const baseUploadUrl = a.dataset.uploadHref || a.href;
+                let targetUrl = baseUploadUrl;
                 const win = window.open('about:blank', '_blank');
                 const go = () => {
                     try {
@@ -889,6 +890,9 @@ export class EmbedService {
                             const base64 = await TorrentService.download(metaToSave.torrentUrl);
                             metaToSave.torrentBase64 = base64;
                         }
+                        const token = StorageService.generateHandoffToken();
+                        targetUrl = StorageService.attachHandoffToken(baseUploadUrl, token);
+                        await StorageService.saveHandoff(metaToSave, token);
                         await StorageService.save(metaToSave);
                     } catch {
                         // best-effort
@@ -988,7 +992,7 @@ export class EmbedService {
             quickSearchSetting.quickSearchPresets,
             {
                 lang: quickSearchSetting.lang,
-                className: 'search_urls autofeed-search-links',
+                className: 'autofeed-search-links',
                 alignCenter: true,
                 bordered: true,
                 fontColor: 'red'
@@ -999,7 +1003,7 @@ export class EmbedService {
         container.append(html);
         // Keep the legacy "no imdb" alert behavior: if none of the generated links has usable params, warn.
         if (!imdbId) {
-            container.find('.search_urls a').on('click', (e) => {
+            container.find('.autofeed-search-links a').on('click', (e) => {
                 const href = (e.currentTarget as HTMLAnchorElement).href || '';
                 // Best-effort heuristic: block obvious imdb-id searches when imdb is missing.
                 if (href.match(/imdb/i) || extractImdbId(href)) {

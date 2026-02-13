@@ -4,7 +4,7 @@ import { DoubanService } from './DoubanService';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { ImageHostService } from './ImageHostService';
 import { GMAdapter } from './GMAdapter';
-import { renderQuickSearchHtml, resolveQuickSearchSetting } from '../common/quickSearch';
+import { renderQuickSearchHtml, resolveQuickSearchSetting, QuickSearchRenderOptions } from '../common/quickSearch';
 import { getGroupName } from '../common/rules/groupName';
 import { extractImdbId } from '../common/rules/links';
 
@@ -400,10 +400,11 @@ export class QuickSearchService {
         container: JQuery,
         meta: Partial<TorrentMeta>,
         marginTopPx = 4,
-        opts?: QuickSearchSetting
+        opts?: QuickSearchSetting,
+        renderOpts?: QuickSearchRenderOptions
     ) {
         if (!container.length) return;
-        if (container.find('.autofeed-search-links, .search_urls').length) return;
+        if (container.find('.autofeed-search-links').length) return;
         const resolved = opts || resolveQuickSearchSetting(await SettingsService.load());
         const html = renderQuickSearchHtml(
             meta,
@@ -411,10 +412,11 @@ export class QuickSearchService {
             resolved.quickSearchPresets,
             {
                 lang: resolved.lang,
-                className: 'search_urls autofeed-search-links',
+                className: 'autofeed-search-links',
                 alignCenter: true,
                 bordered: true,
-                fontColor: 'red'
+                fontColor: 'red',
+                ...renderOpts
             }
         );
         if (!html) return;
@@ -632,7 +634,15 @@ export class QuickSearchService {
             $title,
             { title: searchName, imdbId },
             6,
-            quickSearchOpts
+            quickSearchOpts,
+            {
+                className: 'autofeed-search-links autofeed-search-links--douban',
+                alignCenter: false,
+                bordered: false,
+                fontColor: 'red',
+                labelText: '',
+                fontSize: '12px'
+            }
         ).catch(() => {});
         document.body.dataset.autofeedDouban = '1';
     }
@@ -653,7 +663,16 @@ export class QuickSearchService {
                 $container,
                 { title: searchName, imdbId },
                 6,
-                quickSearchOpts
+                quickSearchOpts,
+                {
+                    className: 'autofeed-search-links autofeed-search-links--imdb',
+                    alignCenter: false,
+                    bordered: false,
+                    fontColor: 'green',
+                    labelText: '',
+                    fontSize: '12px',
+                    linkColor: 'yellow'
+                }
             ).catch(() => {});
         }
         document.body.dataset.autofeedImdb = '1';
