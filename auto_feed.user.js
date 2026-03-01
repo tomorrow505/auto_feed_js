@@ -100,7 +100,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.1.0.5
+// @version      2.1.0.6
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1402,7 +1402,7 @@ const o_site_info = {
     'SpeedApp': 'https://speedapp.io/',
     'MTeam': used_site_info.MTeam.url,
     'ReelFliX': 'https://reelflix.xyz/',
-    'HHClub': 'https://hhanclub.top/',
+    'HHClub': 'https://hhanclub.net/',
     'SportsCult': 'https://sportscult.org/'
 };
 
@@ -1419,8 +1419,8 @@ if (tldomain == 0) {
 if (site_url.match(/^https:\/\/hhan.club\/.*/)) {
     o_site_info.HHClub = 'https://hhan.club/';
     GM_setValue('o_site_info', JSON.stringify(o_site_info));
-} else if (site_url.match(/^https:\/\/hhanclub.top\/.*/)) {
-    o_site_info.HHClub = 'https://hhanclub.top/';
+} else if (site_url.match(/^https:\/\/hhanclub.net\/.*/)) {
+    o_site_info.HHClub = 'https://hhanclub.net/';
     GM_setValue('o_site_info', JSON.stringify(o_site_info));
 }
 
@@ -2004,7 +2004,7 @@ function walkDOM(n) {
                     n.innerHTML = '[quote]' + n.innerHTML + '[/quote]';
                 }
             }
-            if (site_url.match(/hhanclub.top|hhan.club/)) {
+            if (site_url.match(/hhanclub.net|hhan.club/)) {
                 n.innerHTML = n.innerHTML + '\n';
             }
         } else if (n.nodeName == 'FIELDSET' || n.nodeName == 'BLOCKQUOTE') {
@@ -4792,6 +4792,10 @@ function check_team(raw_info, s_name, forward_site) {
     }
     $(`select[name="${s_name}"]>option`).map(function(index,e){
         var name = raw_info.name.split(/(19|20)\d{2}/).pop();
+        console.log(forward_site)
+        if (forward_site == '慕雪阁') {
+            name = raw_info.name.split(/Blu-ray/i).pop();
+        }
         if (name.toLowerCase().match(e.innerText.toLowerCase())) {
             if ((name.match(/PSY|LCHD/) && e.innerText == 'CHD') || (name.match(/PandaMoon/) && e.innerText == 'Panda') || e.innerText == 'DIY' || e.innerText == 'REMUX') {
                 console.log('小组名貌似会产生误判');
@@ -7897,6 +7901,7 @@ function full_bdinfo2summary(descr) {
     }
     var summary = {
         'Disc Title': '',
+        'Disc Label': '',
         'Disc Size': '',
         'Protection': '',
         'BD-Java': '',
@@ -7912,6 +7917,9 @@ function full_bdinfo2summary(descr) {
 
     if (descr.match(/Disc.*?Title:(.*)/i)) {
         summary['Disc Title'] = descr.match(/Disc.*?Title:(.*)/i)[1].trim();
+    }
+    if (descr.match(/Disc.*?Label:(.*)/i)) {
+        summary['Disc Label'] = descr.match(/Disc.*?Label:(.*)/i)[1].trim();
     }
     if (descr.match(/Disc.*?Size:(.*)/i)) {
         summary['Disc Size'] = descr.match(/Disc.*?Size:(.*)/i)[1].trim();
@@ -15584,6 +15592,8 @@ function auto_feed() {
             label_str += $('textarea[name="technical_info"]').val();
         } else if ($('textarea[name="mediainfo"]').length) {
             label_str += $('textarea[name="mediainfo"]').val();
+        } else if ($('textarea[name="media_info"]').length) {
+            label_str += $('textarea[name="media_info"]').val();
         }
         if ($('textarea[name="tr_nfo"]').length) {
             label_str += $('textarea[name="tr_nfo"]').val();
@@ -16429,6 +16439,7 @@ function auto_feed() {
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
                     if (labels.hdr10) { check_label(document.getElementsByName('tags[4][]'), '14');}
                     if (labels.hdr10plus) { check_label(document.getElementsByName('tags[4][]'), '15'); }
+                    if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '13'); }
                     if (raw_info.type == 'MV') {
                         check_label(document.getElementsByName('tags[4][]'), '18');
                     }
@@ -16571,6 +16582,7 @@ function auto_feed() {
                         check_label(document.getElementsByName('tags[4][]'), '27');
                     }
                     if (labels.db) { check_label(document.getElementsByName('tags[4][]'), '25'); }
+                    if (raw_info.descr.match(/Dolby Atmos/)) { check_label(document.getElementsByName('tags[4][]'), '35'); }
                     break;
                 case 'YHPP':
                     if (labels.diy){ check_label(document.getElementsByName('tags[4][]'), '4'); }
@@ -17404,7 +17416,7 @@ function auto_feed() {
             if (source_dict.hasOwnProperty(raw_info.source_sel)){
                 source_code = source_dict[raw_info.source_sel];
             }
-            const europeanCountries = ["阿尔巴尼亚","安道尔","奥地利","白俄罗斯","比利时","波斯尼亚和黑塞哥维那","保加利亚","克罗地亚","塞浦路斯","捷克","丹麦","爱沙尼亚","芬兰","法国","德国","希腊","匈牙利","冰岛","爱尔兰","意大利","科索沃","拉脱维亚","列支敦士登","立陶宛","卢森堡","马耳他","摩尔多瓦","摩纳哥","黑山","荷兰","北马其顿","挪威","波兰","葡萄牙","罗马尼亚","俄罗斯","圣马力诺","塞尔维亚","斯洛伐克","斯洛文尼亚","西班牙","瑞典","瑞士","乌克兰","英国","梵蒂冈","挪威"];
+            const europeanCountries = ["阿尔巴尼亚","安道尔","奥地利","白俄罗斯","比利时","波斯尼亚和黑塞哥维那","保加利亚","克罗地亚","塞浦路斯","捷克","丹麦","爱沙尼亚","芬兰","法国","德国","希腊","匈牙利","冰岛","爱尔兰","意大利","科索沃","拉脱维亚","列支敦士登","立陶宛","卢森堡","马耳他","摩尔多瓦","摩纳哥","黑山","荷兰","北马其顿","挪威","波兰","葡萄牙","罗马尼亚","俄罗斯","圣马力诺","塞尔维亚","斯洛伐克","斯洛文尼亚","西班牙","瑞典","瑞士","乌克兰","英国","梵蒂冈","挪威","西德"];
             if (raw_info.source_sel == '欧美') {
                 var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                 if (reg_region) {
@@ -22581,17 +22593,24 @@ function auto_feed() {
                 $('#autocat').val("2");
                 try { $('#season_number').val(parseInt(raw_info.name.match(/S(\d+)/i)[1])) } catch (err) {$('#season_number').val("1")}
                 try { $('#episode_number').val(parseInt(raw_info.name.match(/E(\d+)/i)[1])) } catch (err) {}
+                if (raw_info.type == '纪录' && !raw_info.name.match(/[^T]S\d+|E\d+/)) {
+                    $('#autocat').val("1");
+                    $('#season_number').val("");
+                    $('#episode_number').val("");
+                }
             }
+            var imdb_id = raw_info.url.match(/tt(\d+)/) ? raw_info.url.match(/tt(\d+)/)[1] : '';
+
             $('#autocat').on('change', function(){
                 if (this.value == '1') {
-                    var tid = $('#autoimdb').val();
                     setTimeout(function(){
-                        $('#autoimdb').val(tid);
+                        $('#autoimdb').val(imdb_id);
+                        $('#season_number').val("");
+                        $('#episode_number').val("");
                     }, 1000);
                 } else if (this.value == '2') {
-                    var tid = $('#autoimdb').val();
                     setTimeout(function(){
-                        $('#autoimdb').val(tid);
+                        $('#autoimdb').val(imdb_id);
                         try { $('#season_number').val(parseInt(raw_info.name.match(/S(\d+)/i)[1])) } catch (err) {$('#season_number').val("1")}
                         try { $('#episode_number').val(parseInt(raw_info.name.match(/E(\d+)/i)[1])) } catch (err) {}
                     }, 1000);
@@ -22715,6 +22734,8 @@ function auto_feed() {
                 standard_dict = {'4K': 1, '1080p': 2, '1080i': 3, '720p': 5, 'SD': 0, '': 0, '8K': 11};
             } else if (forward_site == 'Monika') {
                 standard_dict = {'4K': 2, '1080p': 3, '1080i': 4, '720p': 5, 'SD': 10, '': 10, '8K': 1};
+            } else if (forward_site == 'FNP') {
+                standard_dict = {'4K': 2, '1080p': 3, '1080i': 11, '720p': 5, 'SD': 10, '': 10, '8K': 1};
             }
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
@@ -22854,13 +22875,13 @@ function auto_feed() {
                         $('#auto_tmdb_movie').val(data.movie_results[0].id);
                         $('#autotmdb').val(data.movie_results[0].id);
                     } else if (data.tv_results.length) {
-                        $('#auto_tmdb_movie').val(data.tv_results[0].id);
+                        $('#auto_tmdb_tv').val(data.tv_results[0].id);
                         $('#autotmdb').val(data.movie_results[0].id);
                     } else if (data.tv_episode_results.length) {
-                        $('#auto_tmdb_movie').val(data.tv_episode_results[0].show_id);
+                        $('#auto_tmdb_tv').val(data.tv_episode_results[0].show_id);
                         $('#autotmdb').val(data.movie_results[0].id);
                     }
-                    if (!$('#auto_tmdb_movie').val() && !$('#autotmdb').val()) {
+                    if (!$('#auto_tmdb_movie').val() && !$('#autotmdb').val() && !$('#auto_tmdb_tv').val()) {
                         search_by_name(search_name);
                     }
                 });
@@ -23243,12 +23264,16 @@ function auto_feed() {
                     });
                     $('.fill_number').css({'backgroundColor': 'rgb(70, 77, 96)'});
                     $('.fill_number').click(function(){
-                        $('#auto_tmdb_movie').val($(this).attr('name'));
+                        if (raw_info.type == '电影') {
+                            $('#auto_tmdb_movie').val($(this).attr('name'));
+                        } else {
+                            $('#auto_tmdb_tv').val($(this).attr('name'));
+                        }
                         $table.slideUp(500);
                         window.scrollTo(0, 500);
                     });
 
-                    $('#auto_tmdb_movie').change(function(){
+                    $('#auto_tmdb_movie, #auto_tmdb_tv').change(function(){
                         if (!$(this).val()){
                             $table.slideDown(1000);
                         }
@@ -23268,11 +23293,11 @@ function auto_feed() {
                     if (data.movie_results.length) {
                         $('#auto_tmdb_movie').val(data.movie_results[0].id);
                     } else if (data.tv_results.length) {
-                        $('#auto_tmdb_movie').val(data.tv_results[0].id);
+                        $('#auto_tmdb_tv').val(data.tv_results[0].id);
                     } else if (data.tv_episode_results.length) {
-                        $('#auto_tmdb_movie').val(data.tv_episode_results[0].show_id);
+                        $('#auto_tmdb_tv').val(data.tv_episode_results[0].show_id);
                     }
-                    if (!$('#auto_tmdb_movie').val()) {
+                    if (!$('#auto_tmdb_movie').val() && !$('#auto_tmdb_tv').val()){
                         search_by_name(search_name);
                     }
                 });
@@ -23328,9 +23353,15 @@ function auto_feed() {
             try {
                 var genre = raw_info.descr.match(/◎类.*?别(.*)/)[1].trim();
                 genre = genre.split('/')[0].trim();
+                console.log(genre)
                 $(`select[name="type_id"]>option`).map(function(index,e){
                     if (e.innerText.includes(genre)) {
                         $(`select[name^="type_id"]>option:eq(${index})`).attr('selected', true);
+                    }
+                });
+                $(`select[name="category_id"]>option`).map(function(index,e){
+                    if (e.innerText.includes(genre)) {
+                        $(`select[name^="category_id"]>option:eq(${index})`).attr('selected', true);
                     }
                 });
             } catch (Err) {
@@ -24019,6 +24050,7 @@ function auto_feed() {
             }
             // 区域
             var source_box = $('select[name="processing_sel[4]"]');
+            source_box.val(7);
             switch (raw_info.source_sel){
                 case '大陆': case '香港': case '台湾': source_box.val(1); break;
                 case '日本': source_box.val(2); break;
@@ -26865,20 +26897,18 @@ function auto_feed() {
             //音频编码
             var audiocodec_box = $('select[name=audioformat]');
             switch (raw_info.audiocodec_sel){
-                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS':
-                    audiocodec_box.val('DTS'); break;
-                case 'TrueHD': case 'Atmos':
-                    audiocodec_box.val('True-HD'); break;
-                case 'LPCM':
-                    audiocodec_box.val('PCM'); break;
+                case 'DTS-HD': case 'DTS-HDMA:X 7.1': case 'DTS-HDMA': case 'DTS': audiocodec_box.val('DTS'); break;
+                case 'TrueHD': case 'Atmos': audiocodec_box.val('True-HD'); break;
+                case 'LPCM': audiocodec_box.val('PCM'); break;
                 case 'AC3':
-                    audiocodec_box.val('AC3'); break;
-                case 'AAC': case 'DD':
-                    audiocodec_box.val('AAC'); break;
-                case 'Flac':
-                    audiocodec_box.val('FLAC'); break;
-                case 'MP3':
-                    audiocodec_box.val('MP3'); break;
+                    audiocodec_box.val('AC3');
+                    if (raw_info.descr.match(/E-AC-3/)) {
+                        audiocodec_box.val('EAC3');
+                    }
+                    break;
+                case 'AAC': audiocodec_box.val('AAC'); break;
+                case 'Flac': audiocodec_box.val('FLAC'); break;
+                case 'MP3': audiocodec_box.val('MP3'); break;
             }
             if (raw_info.name.match(/Atmos/i)){
                 $('input[value=Atmos]').attr('checked', true);
@@ -28101,11 +28131,7 @@ function auto_feed() {
                     break;
                 case 'LPCM': audiocodec_box.val(19); break;
                 case 'TrueHD': audiocodec_box.val(12); break;
-                case 'Atmos':
-                    audiocodec_box.val(9);
-                    if (raw_info.name.match(/DD[\+P]/i)) {
-                        audiocodec_box.val(10);
-                    }
+                case 'Atmos': audiocodec_box.val(9); break;
                 case 'DTS:X': audiocodec_box.val(15); break;
                 case 'DTS-HDMA': case 'DTS-HDHR': audiocodec_box.val(16); break;
                 case 'DTS': audiocodec_box.val(14); break;
@@ -28557,7 +28583,7 @@ function auto_feed() {
 
             //分辨率
             var standard_box = $('select[name="standard_sel[4]"]');
-            var standard_dict = {'8K': 0, '4K': 5, '2K': 0, '1080p': 1, '1080i': 2, '720p': 3, '720i': 3,'SD': 4, '': 0};
+            var standard_dict = {'8K': 0, '4K': 5, '2K': 0, '1080p': 1, '1080i': 1, '720p': 3, '720i': 3,'SD': 4, '': 0};
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.val(index);
@@ -28565,7 +28591,7 @@ function auto_feed() {
 
             //制作组
             $('select[name="team_sel[4]"]').val(5);
-            check_team(raw_info, 'team_sel[4]');
+            check_team(raw_info, 'team_sel[4]', '慕雪阁');
         }
 
         else if (forward_site == '天枢') {
@@ -28738,7 +28764,7 @@ function auto_feed() {
                 var index = team_dict[raw_info.source_sel];
                 team_box.val(index);
             }
-            const europeanCountries = ["阿尔巴尼亚","安道尔","奥地利","白俄罗斯","比利时","波斯尼亚和黑塞哥维那","保加利亚","克罗地亚","塞浦路斯","捷克","丹麦","爱沙尼亚","芬兰","法国","德国","希腊","匈牙利","冰岛","爱尔兰","意大利","科索沃","拉脱维亚","列支敦士登","立陶宛","卢森堡","马耳他","摩尔多瓦","摩纳哥","黑山","荷兰","北马其顿","挪威","波兰","葡萄牙","罗马尼亚","俄罗斯","圣马力诺","塞尔维亚","斯洛伐克","斯洛文尼亚","西班牙","瑞典","瑞士","乌克兰","英国","梵蒂冈","挪威"];
+            const europeanCountries = ["阿尔巴尼亚","安道尔","奥地利","白俄罗斯","比利时","波斯尼亚和黑塞哥维那","保加利亚","克罗地亚","塞浦路斯","捷克","丹麦","爱沙尼亚","芬兰","法国","德国","希腊","匈牙利","冰岛","爱尔兰","意大利","科索沃","拉脱维亚","列支敦士登","立陶宛","卢森堡","马耳他","摩尔多瓦","摩纳哥","黑山","荷兰","北马其顿","挪威","波兰","葡萄牙","罗马尼亚","俄罗斯","圣马力诺","塞尔维亚","斯洛伐克","斯洛文尼亚","西班牙","瑞典","瑞士","乌克兰","英国","梵蒂冈","挪威","西德"];
             if (raw_info.source_sel == '欧美') {
                 var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                 if (reg_region) {
