@@ -29,7 +29,7 @@ jobs:
       - name: Resolve version/tag
         id: meta
         run: |
-          version="$(node -p "require('./package.json').version")"
+          version="$(node -p 'require(\"./package.json\").version' | tr -d '\n')"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
 
           if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then

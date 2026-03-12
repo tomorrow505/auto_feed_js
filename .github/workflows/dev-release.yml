@@ -25,7 +25,7 @@ jobs:
 
       - name: Read version
         id: pkg
-        run: echo "version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(node -p 'require(\"./package.json\").version' | tr -d '\n')" >> "$GITHUB_OUTPUT"
 
       - name: Install
         run: npm ci
