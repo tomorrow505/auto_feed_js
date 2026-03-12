@@ -105,11 +105,21 @@ export class UploadMetaFetchService {
         const next = { ...meta };
         const rawInputs = Array.from(document.querySelectorAll('input')) as HTMLInputElement[];
         const rawTextareas = Array.from(document.querySelectorAll('textarea')) as HTMLTextAreaElement[];
+        const currentDescr =
+            (document.querySelector('textarea[name="descr"]') as HTMLTextAreaElement | null)?.value ||
+            (document.querySelector('textarea[name="description"]') as HTMLTextAreaElement | null)?.value ||
+            (document.getElementById('descr') as HTMLTextAreaElement | null)?.value ||
+            (document.getElementById('description') as HTMLTextAreaElement | null)?.value ||
+            '';
         const values = [
             ...rawInputs.map((input) => input.value || ''),
             // Legacy parity: users often paste IMDb/Douban links into the description textarea.
             ...rawTextareas.map((ta) => ta.value || '')
         ].filter(Boolean);
+
+        if (currentDescr.trim()) {
+            next.description = currentDescr;
+        }
 
         const imdbLink = values.map((v) => matchLink('imdb', v)).find(Boolean) || '';
         const doubanLink = values.map((v) => matchLink('douban', v)).find(Boolean) || '';

@@ -4,6 +4,26 @@ import { GMAdapter } from './GMAdapter';
 export class TorrentService {
     private static DEFAULT_ANNOUNCE = 'https://hudbt.hust.edu.cn/announce.php';
 
+    private static getPageFileCtor(): typeof File {
+        try {
+            const ctor = (window as any)?.File;
+            if (typeof ctor === 'function') return ctor as typeof File;
+        } catch {}
+        return File;
+    }
+
+    private static getPageDataTransfer(): DataTransfer | null {
+        try {
+            const Ctor = (window as any)?.DataTransfer;
+            if (typeof Ctor === 'function') return new Ctor();
+        } catch {}
+        try {
+            const ev = new ClipboardEvent('');
+            if (ev.clipboardData) return ev.clipboardData as unknown as DataTransfer;
+        } catch {}
+        return null;
+    }
+
     /**
      * Downloads a torrent file from a URL and converts it to a Base64 string.
      * @param url The URL of the torrent file.
@@ -59,7 +79,8 @@ export class TorrentService {
             u8arr[n] = bstr.charCodeAt(n);
         }
 
-        return new File([u8arr], filename, { type: mime });
+        const PageFile = this.getPageFileCtor();
+        return new PageFile([u8arr], filename, { type: mime });
     }
 
     /**
@@ -68,9 +89,25 @@ export class TorrentService {
      * @param file The File object to inject.
      */
     static injectFileIntoInput(fileInput: HTMLInputElement, file: File) {
-        const dataTransfer = new DataTransfer();
+        const dataTransfer = this.getPageDataTransfer();
+        if (!dataTransfer) return;
         dataTransfer.items.add(file);
-        fileInput.files = dataTransfer.files;
+
+        let assigned = false;
+        try {
+            const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'files')?.set;
+            if (setter) {
+                setter.call(fileInput, dataTransfer.files);
+                assigned = true;
+            }
+        } catch {}
+        if (!assigned) {
+            try {
+                fileInput.files = dataTransfer.files;
+                assigned = true;
+            } catch {}
+        }
+        if (!assigned) return;
 
         // Trigger events to simulate user interaction
         const changeEvent = new Event('change', { bubbles: true });
@@ -119,7 +156,8 @@ export class TorrentService {
     static binaryStringToFile(binary: string, filename: string): File {
         const data = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) data[i] = binary.charCodeAt(i);
-        return new File([data], filename, { type: 'application/x-bittorrent' });
+        const PageFile = this.getPageFileCtor();
+        return new PageFile([data], filename, { type: 'application/x-bittorrent' });
     }
 
     static normalizeTorrentName(name: string): string {
@@ -318,6 +356,17 @@ export class TorrentService {
 
         if (forwardSite === 'BHD') {
             const input = document.querySelector('input#torrent, input[name="torrent"]') as HTMLInputElement | null;
+            if (input) {
+                this.injectFileIntoInput(input, file);
+                return true;
+            }
+        }
+
+        if (forwardSite === 'KG') {
+            const input =
+                (document.querySelector('input[name="file"]') as HTMLInputElement | null) ||
+                (document.querySelector('input[type="file"][name*="file"]') as HTMLInputElement | null) ||
+                (document.querySelector('input[type="file"]') as HTMLInputElement | null);
             if (input) {
                 this.injectFileIntoInput(input, file);
                 return true;

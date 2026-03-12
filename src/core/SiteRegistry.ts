@@ -17,6 +17,7 @@ import { REDEngine } from '../trackers/RED';
 import { OPSEngine } from '../trackers/OPS';
 import { DICEngine } from '../trackers/DIC';
 import { OpenCDEngine } from '../trackers/OpenCD';
+import { TikEngine } from '../trackers/Tik';
 import { NexusSites } from '../config/sites_nexus';
 import { GazelleSites } from '../config/sites_gazelle';
 import { Unit3DSites } from '../config/sites_unit3d';
@@ -50,7 +51,8 @@ const siteEngineMap: Record<string, new (config: SiteConfig, url: string) => Bas
     RED: REDEngine,
     OPS: OPSEngine,
     DIC: DICEngine,
-    OpenCD: OpenCDEngine
+    OpenCD: OpenCDEngine,
+    Tik: TikEngine
 };
 
 export class SiteRegistry {

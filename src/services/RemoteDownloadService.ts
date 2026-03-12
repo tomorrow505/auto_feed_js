@@ -3,10 +3,86 @@ import { SettingsService, RemoteServerConfig } from './SettingsService';
 import { SiteRegistry } from '../core/SiteRegistry';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { GMAdapter } from './GMAdapter';
+import { StorageService } from './StorageService';
 
 export type RemoteTestResult = { ok: boolean; message: string };
 
 export class RemoteDownloadService {
+    private static normalizePathEntries(path: unknown): Array<{ label: string; path: string }> {
+        // Backward compatibility:
+        // - legacy string: "D:\\Downloads"
+        // - modern map: { "movies": "/data/movies" }
+        // - list form: [{label, path}]
+        if (!path) return [{ label: 'default', path: '' }];
+
+        if (typeof path === 'string') {
+            return [{ label: 'default', path }];
+        }
+
+        if (Array.isArray(path)) {
+            const out = path
+                .map((it: any) => ({
+                    label: String(it?.label || '').trim(),
+                    path: String(it?.path || '').trim()
+                }))
+                .filter((it) => it.label || it.path)
+                .map((it, idx) => ({
+                    label: it.label || `path${idx + 1}`,
+                    path: it.path
+                }));
+            return out.length ? out : [{ label: 'default', path: '' }];
+        }
+
+        if (typeof path === 'object') {
+            const entries = Object.entries(path as Record<string, unknown>)
+                .map(([label, value]) => ({ label: String(label || '').trim(), path: String(value ?? '').trim() }))
+                .filter((it) => it.label || it.path)
+                .map((it, idx) => ({
+                    label: it.label || `path${idx + 1}`,
+                    path: it.path
+                }));
+            return entries.length ? entries : [{ label: 'default', path: '' }];
+        }
+
+        return [{ label: 'default', path: '' }];
+    }
+
+    private static buildMenuItem(type: 'qb' | 'tr' | 'de', serverName: string, serverUrl: string) {
+        const menu = $(`<li class="menu-item"></li>`);
+        menu.attr('data-server', serverName);
+        menu.attr('data-type', type);
+
+        const prefix = type.toUpperCase();
+        const link = $(`<a target="_blank"></a>`);
+        link.attr('href', serverUrl || '#');
+        link.text(`${prefix}-${serverName}`);
+
+        const safeId = `${type}-${serverName}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const submenu = $(`<ul class="submenu" id="autofeed-ul-${safeId}"></ul>`);
+
+        menu.append(link);
+        menu.append(submenu);
+        return { menu, submenu };
+    }
+
+    private static appendPathEntry(
+        submenu: JQuery,
+        cls: string,
+        entry: { label: string; path: string }
+    ) {
+        const li = $('<li></li>');
+        const a = $(`<a href="#" class="${cls}"></a>`);
+        a.attr('data-path', entry.path || '');
+        a.attr('data-label', entry.label || 'default');
+        a.attr('title', entry.path || '(client default)');
+        a.html(
+            `<span class="af-remote-path-label">${entry.label || 'default'}</span>` +
+            `<span class="af-remote-path-value">${entry.path || '(client default)'}</span>`
+        );
+        li.append(a);
+        submenu.append(li);
+    }
+
     static async tryInject() {
         const settings = await SettingsService.load();
         if (!settings.enableRemoteSidebar || !settings.remoteServer) return;
@@ -52,10 +128,16 @@ export class RemoteDownloadService {
             return /\/t\/\d+/i.test(path) || (/details\.php/i.test(path) && /id=\d+/i.test(qs));
         }
         if (siteName === 'PTP' || ['GPW', 'RED', 'OPS', 'DIC'].includes(siteName)) {
+            if (siteName === 'PTP') {
+                return path.includes('torrents.php') && (/torrentid=\d+/i.test(qs) || /id=\d+/i.test(qs));
+            }
             return path.includes('torrents.php') && /torrentid=\d+/i.test(qs);
         }
         if (siteName === 'HDB' || siteName === 'CHDBits' || siteName === 'OpenCD') {
             return /details\.php/i.test(path) && /id=\d+/i.test(qs);
+        }
+        if (siteName === 'BHD') {
+            return /\/torrents\/.+/i.test(path) || /\/library\/title\/.+/i.test(path);
         }
         return this.isDetailPage(url);
     }
@@ -69,15 +151,23 @@ export class RemoteDownloadService {
         // Only strict-check sites whose detail pages are identified by `torrentid`.
         if (!['PTP', 'GPW', 'RED', 'OPS', 'DIC'].includes(siteName)) return true;
         const currentTid = this.extractTorrentId(currentUrl);
-        if (!currentTid) return false;
+        if (!currentTid) {
+            // PTP group page can be `torrents.php?id=...` without explicit `torrentid`.
+            if (siteName === 'PTP' && /[?&]id=\d+/i.test(currentUrl)) return true;
+            return false;
+        }
         try {
             const meta = await engine.parse();
             const torrentUrl = String(meta?.torrentUrl || '');
-            if (!torrentUrl) return false;
+            if (!torrentUrl) {
+                // PTP details can fail parse intermittently; keep sidebar visible when URL itself is a strict detail URL.
+                return siteName === 'PTP';
+            }
             const parsedTid = this.extractTorrentId(torrentUrl);
-            return !!parsedTid && parsedTid === currentTid;
+            if (!parsedTid) return siteName === 'PTP';
+            return parsedTid === currentTid;
         } catch {
-            return false;
+            return siteName === 'PTP';
         }
     }
 
@@ -137,26 +227,26 @@ export class RemoteDownloadService {
 
         const $list = $('#autofeed-remote-list');
         Object.keys(qb).forEach((server) => {
-            $list.append(`<li class="menu-item" data-server="${server}" data-type="qb"><a href="${qb[server].url}" target="_blank">Q-${server}</a><ul class="submenu" id="autofeed-ul-${server}"></ul></li>`);
-            const $submenu = $(`#autofeed-ul-${server}`);
-            Object.keys(qb[server].path || {}).forEach((label) => {
-                $submenu.append(`<li><a href="#" class="qb_download" data-path="${qb[server].path[label]}">${label}</a></li>`);
+            const { menu, submenu } = this.buildMenuItem('qb', server, qb[server].url);
+            $list.append(menu);
+            this.normalizePathEntries((qb[server] as any).path).forEach((entry) => {
+                this.appendPathEntry(submenu, 'qb_download', entry);
             });
         });
 
         Object.keys(tr).forEach((server) => {
-            $list.append(`<li class="menu-item" data-server="${server}" data-type="tr"><a href="${tr[server].url}" target="_blank">T-${server}</a><ul class="submenu" id="autofeed-ul-${server}"></ul></li>`);
-            const $submenu = $(`#autofeed-ul-${server}`);
-            Object.keys(tr[server].path || {}).forEach((label) => {
-                $submenu.append(`<li><a href="#" class="tr_download" data-path="${tr[server].path[label]}">${label}</a></li>`);
+            const { menu, submenu } = this.buildMenuItem('tr', server, tr[server].url);
+            $list.append(menu);
+            this.normalizePathEntries((tr[server] as any).path).forEach((entry) => {
+                this.appendPathEntry(submenu, 'tr_download', entry);
             });
         });
 
         Object.keys(de).forEach((server) => {
-            $list.append(`<li class="menu-item" data-server="${server}" data-type="de"><a href="${de[server].url}" target="_blank">D-${server}</a><ul class="submenu" id="autofeed-ul-${server}"></ul></li>`);
-            const $submenu = $(`#autofeed-ul-${server}`);
-            Object.keys(de[server].path || {}).forEach((label) => {
-                $submenu.append(`<li><a href="#" class="de_download" data-path="${de[server].path[label]}">${label}</a></li>`);
+            const { menu, submenu } = this.buildMenuItem('de', server, de[server].url);
+            $list.append(menu);
+            this.normalizePathEntries((de[server] as any).path).forEach((entry) => {
+                this.appendPathEntry(submenu, 'de_download', entry);
             });
         });
 
@@ -194,12 +284,12 @@ export class RemoteDownloadService {
             e.preventDefault();
             const $target = $(e.currentTarget);
             const serverName = $target.closest('.menu-item').data('server');
-            const path = $target.data('path');
-            const label = $target.text();
+            const path = String($target.attr('data-path') || '');
+            const label = String($target.attr('data-label') || $target.find('.af-remote-path-label').text() || 'default');
             const server = qb[serverName];
             if (!server) return;
             const run = (skip: boolean) => {
-                setStatus(`正在推送(QB): ${serverName} / ${label}...`, 'info');
+                setStatus(`正在推送(QB): ${serverName} / ${label}${path ? ` → ${path}` : ''}...`, 'info');
                 this.pushToQb(engine, server, path, label, skip, setStatus);
             };
             if (opts.askConfirm) dialogBox(() => run(true), () => run(false));
@@ -210,12 +300,12 @@ export class RemoteDownloadService {
             e.preventDefault();
             const $target = $(e.currentTarget);
             const serverName = $target.closest('.menu-item').data('server');
-            const path = $target.data('path');
-            const label = $target.text();
+            const path = String($target.attr('data-path') || '');
+            const label = String($target.attr('data-label') || $target.find('.af-remote-path-label').text() || 'default');
             const server = tr[serverName];
             if (!server) return;
             const run = (skip: boolean) => {
-                setStatus(`正在推送(TR): ${serverName} / ${label}...`, 'info');
+                setStatus(`正在推送(TR): ${serverName} / ${label}${path ? ` → ${path}` : ''}...`, 'info');
                 this.pushToTransmission(engine, server, path, label, skip, setStatus);
             };
             if (opts.askConfirm) dialogBox(() => run(true), () => run(false));
@@ -226,12 +316,12 @@ export class RemoteDownloadService {
             e.preventDefault();
             const $target = $(e.currentTarget);
             const serverName = $target.closest('.menu-item').data('server');
-            const path = $target.data('path');
-            const label = $target.text();
+            const path = String($target.attr('data-path') || '');
+            const label = String($target.attr('data-label') || $target.find('.af-remote-path-label').text() || 'default');
             const server = de[serverName];
             if (!server) return;
             const run = (skip: boolean) => {
-                setStatus(`正在推送(DE): ${serverName} / ${label}...`, 'info');
+                setStatus(`正在推送(DE): ${serverName} / ${label}${path ? ` → ${path}` : ''}...`, 'info');
                 this.pushToDeluge(engine, server, path, label, skip, setStatus);
             };
             if (opts.askConfirm) dialogBox(() => run(true), () => run(false));
@@ -258,7 +348,6 @@ export class RemoteDownloadService {
                 let left = (sidebarRect ? sidebarRect.left : rect.left) - w - 8;
                 let top = rect.top;
                 const margin = 6;
-                const vw = window.innerWidth || document.documentElement.clientWidth || 1200;
                 const vh = window.innerHeight || document.documentElement.clientHeight || 800;
                 if (left < margin) left = margin;
                 if (top < margin) top = margin;
@@ -279,6 +368,16 @@ export class RemoteDownloadService {
             item.addEventListener('mouseleave', scheduleHide);
             submenu.addEventListener('mouseenter', show);
             submenu.addEventListener('mouseleave', scheduleHide);
+            item.addEventListener('click', (e) => {
+                const target = e.target as HTMLElement | null;
+                if (target?.closest('.submenu')) return;
+                e.preventDefault();
+                if (submenu.style.display === 'block') {
+                    submenu.style.display = 'none';
+                    return;
+                }
+                show();
+            });
         });
     }
 
@@ -346,14 +445,55 @@ export class RemoteDownloadService {
         });
     }
 
-    private static async getMeta(engine: any): Promise<TorrentMeta | null> {
+    private static extractTorrentDownloadUrlFromPage(currentUrl: string): string {
+        const currentTid = this.extractTorrentId(currentUrl);
+        const candidates = currentTid
+            ? [
+                `a[href*="action=download"][href*="torrentid=${currentTid}"]`,
+                `a[href*="download.php"][href*="torrentid=${currentTid}"]`,
+                `a[href*="download"][href*="torrentid=${currentTid}"]`
+            ]
+            : [];
+        candidates.push('a[href*="action=download"]', 'a[href*="download.php"]', 'a[href*="torrents/download"]');
+
+        for (const sel of candidates) {
+            const a = document.querySelector(sel) as HTMLAnchorElement | null;
+            const href = (a?.getAttribute('href') || '').trim();
+            if (!href) continue;
+            try {
+                return new URL(href, window.location.href).href;
+            } catch {
+                return href;
+            }
+        }
+        return '';
+    }
+
+    private static async getMeta(engine: any, currentUrl: string = window.location.href): Promise<TorrentMeta | null> {
         try {
             const meta = await engine.parse();
-            return meta;
+            if (meta?.torrentUrl) return meta;
         } catch (err) {
             console.error('[Auto-Feed] Parse for remote push failed:', err);
-            return null;
         }
+        try {
+            const cached = await StorageService.load();
+            if (cached?.torrentUrl) return cached;
+        } catch (err) {
+            console.error('[Auto-Feed] Load cached meta for remote push failed:', err);
+        }
+        const fallbackTorrentUrl = this.extractTorrentDownloadUrlFromPage(currentUrl);
+        if (fallbackTorrentUrl) {
+            return {
+                title: document.title || 'autofeed',
+                description: '',
+                sourceSite: String(engine?.siteName || ''),
+                sourceUrl: currentUrl,
+                images: [],
+                torrentUrl: fallbackTorrentUrl
+            };
+        }
+        return null;
     }
 
     private static async pushToQb(
@@ -364,7 +504,7 @@ export class RemoteDownloadService {
         skipChecking: boolean,
         onStatus?: (text: string, kind?: 'info' | 'ok' | 'err', hideAfterMs?: number) => void
     ) {
-        const meta = await this.getMeta(engine);
+        const meta = await this.getMeta(engine, window.location.href);
         if (!meta?.torrentUrl) {
             alert('未找到种子下载链接');
             onStatus?.('推送失败: 未找到种子链接', 'err', 3000);
@@ -418,7 +558,7 @@ export class RemoteDownloadService {
         skipChecking: boolean,
         onStatus?: (text: string, kind?: 'info' | 'ok' | 'err', hideAfterMs?: number) => void
     ) {
-        const meta = await this.getMeta(engine);
+        const meta = await this.getMeta(engine, window.location.href);
         if (!meta?.torrentUrl) {
             alert('未找到种子下载链接');
             onStatus?.('推送失败: 未找到种子链接', 'err', 3000);
@@ -486,7 +626,7 @@ export class RemoteDownloadService {
         skipChecking: boolean,
         onStatus?: (text: string, kind?: 'info' | 'ok' | 'err', hideAfterMs?: number) => void
     ) {
-        const meta = await this.getMeta(engine);
+        const meta = await this.getMeta(engine, window.location.href);
         if (!meta?.torrentUrl) {
             alert('未找到种子下载链接');
             onStatus?.('推送失败: 未找到种子链接', 'err', 3000);
@@ -871,7 +1011,7 @@ export class RemoteDownloadService {
             display: none;
             position: absolute;
             left: -100%;
-            width: 70px;
+            width: 280px;
             background-color: #34495e;
             border-radius: 8px;
             box-shadow: -4px 0 10px rgba(0, 0, 0, 0.15);
@@ -879,8 +1019,23 @@ export class RemoteDownloadService {
         }
         #autofeed-remote-sidebar .submenu li a {
             color: #bdc3c7;
-            padding: 12px 10px;
-            font-size: 13px;
+            padding: 8px 10px;
+            font-size: 12px;
+            align-items: flex-start;
+            justify-content: flex-start;
+            flex-direction: column;
+            gap: 3px;
+            line-height: 1.2;
+        }
+        #autofeed-remote-sidebar .submenu li a .af-remote-path-label {
+            color: #ecf0f1;
+            font-weight: 600;
+        }
+        #autofeed-remote-sidebar .submenu li a .af-remote-path-value {
+            color: #b8c8d8;
+            font-size: 11px;
+            word-break: break-all;
+            white-space: normal;
         }
         #autofeed-remote-sidebar .submenu li a:hover {
             background-color: #4a6781;

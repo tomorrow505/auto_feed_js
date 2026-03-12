@@ -10,6 +10,214 @@ import { TorrentMeta } from '../types/TorrentMeta';
 export class ImageHostService {
     private static IMAGE_QUEUE_KEY = 'HDB_images';
 
+    private static decodeWsrvUrl(url: string): string {
+        try {
+            const u = new URL(url);
+            if (u.hostname === 'wsrv.nl') {
+                const raw = u.searchParams.get('url') || '';
+                if (raw) return decodeURIComponent(raw);
+            }
+        } catch {}
+        return url;
+    }
+
+    private static getPageCoverCandidates(): string[] {
+        const out: string[] = [];
+        try {
+            const og = (document.querySelector('meta[property="og:image"]') as HTMLMetaElement | null)?.content || '';
+            if (og) out.push(og);
+        } catch {}
+        const selectors = [
+            '.sidebar-cover-image',
+            '.torrent__poster img',
+            '.movie__poster img',
+            '.poster img',
+            '#poster img',
+            '#cover_div_0 img',
+            '#covers img',
+            '.thumbnail-container img'
+        ];
+        selectors.forEach((sel) => {
+            document.querySelectorAll(sel).forEach((node) => {
+                const img = node as HTMLImageElement;
+                const src = img.getAttribute('data-src') || img.getAttribute('src') || img.src || '';
+                if (src) out.push(src);
+                const onclick = img.getAttribute('onclick') || '';
+                const m = onclick.match(/https?:\/\/[^\s'"]+\.(?:png|jpe?g|webp|gif)(?:\?[^\s'"]*)?/i);
+                if (m?.[0]) out.push(m[0]);
+            });
+        });
+        return out;
+    }
+
+    private static hasImageExtension(url: string): boolean {
+        return /\.(png|jpe?g|gif|webp)(\?|$)/i.test(url);
+    }
+
+    private static normalizeCoverUrl(url: string): string {
+        return this.getFullSizeUrl(this.decodeWsrvUrl(String(url || '').trim()));
+    }
+
+    private static isHostikStableCoverUrl(url: string): boolean {
+        try {
+            const host = new URL(url).hostname.toLowerCase();
+            return /(?:pixhost\.to|ptpimg\.me|imgbox\.com|hdbits\.org|hdbimg\.com)$/.test(host);
+        } catch {
+            return false;
+        }
+    }
+
+    private static async rehostCoverToPixhost(url: string): Promise<string> {
+        const normalized = this.normalizeCoverUrl(url);
+        if (!normalized) return '';
+        if (this.isHostikStableCoverUrl(normalized)) return normalized;
+        try {
+            const tags = await this.uploadToPixhost([normalized]);
+            const pixUrl = this.extractImageUrlsFromBBCode(tags?.[0] || '')[0] || '';
+            const full = this.normalizeCoverUrl(pixUrl);
+            return full || normalized;
+        } catch {
+            return normalized;
+        }
+    }
+
+    private static pickImageFromJson(obj: any): string {
+        if (!obj) return '';
+        if (typeof obj === 'string') return obj;
+        if (Array.isArray(obj)) {
+            for (const item of obj) {
+                const hit = this.pickImageFromJson(item);
+                if (hit) return hit;
+            }
+            return '';
+        }
+        if (typeof obj === 'object') {
+            const imageField = (obj as any).image;
+            if (typeof imageField === 'string' && imageField) return imageField;
+            if (imageField) {
+                const nested = this.pickImageFromJson(imageField);
+                if (nested) return nested;
+            }
+            if ((obj as any).url && typeof (obj as any).url === 'string' && /(jpg|jpeg|png|webp)/i.test((obj as any).url)) {
+                return (obj as any).url;
+            }
+            const graph = (obj as any)['@graph'];
+            if (graph) {
+                const nested = this.pickImageFromJson(graph);
+                if (nested) return nested;
+            }
+        }
+        return '';
+    }
+
+    private static async fetchImdbPosterUrl(imdbUrl: string): Promise<string> {
+        const u = String(imdbUrl || '').trim();
+        if (!u) return '';
+        try {
+            const res = await GMAdapter.xmlHttpRequest({
+                method: 'GET',
+                url: u,
+                headers: { 'accept-language': 'en-US,en;q=0.9' }
+            });
+            const html = res?.responseText || '';
+            if (!html) return '';
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const scripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
+            for (const s of scripts) {
+                const text = (s.textContent || '').trim();
+                if (!text) continue;
+                try {
+                    const parsed = JSON.parse(text);
+                    const img = this.pickImageFromJson(parsed);
+                    if (img) return this.normalizeCoverUrl(img);
+                } catch {}
+            }
+            const og = (doc.querySelector('meta[property="og:image"]') as HTMLMetaElement | null)?.content || '';
+            if (og) return this.normalizeCoverUrl(og);
+            const quick = html.match(/"image"\s*:\s*"([^"]+)"/i)?.[1] || '';
+            return quick ? this.normalizeCoverUrl(quick.replace(/\\\//g, '/')) : '';
+        } catch {
+            return '';
+        }
+    }
+
+    private static async fetchDoubanPosterUrl(doubanUrl: string): Promise<string> {
+        const u = String(doubanUrl || '').trim();
+        if (!u) return '';
+        try {
+            const res = await GMAdapter.xmlHttpRequest({ method: 'GET', url: u });
+            const html = res?.responseText || '';
+            if (!html) return '';
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+            const img = (doc.querySelector('#mainpic img') as HTMLImageElement | null)?.src || '';
+            if (img) return this.normalizeCoverUrl(img);
+            const og = (doc.querySelector('meta[property="og:image"]') as HTMLMetaElement | null)?.content || '';
+            return og ? this.normalizeCoverUrl(og) : '';
+        } catch {
+            return '';
+        }
+    }
+
+    private static async resolveHostikCoverUrl(meta?: Partial<TorrentMeta>, existing: string[] = []): Promise<string> {
+        const current = Array.from(new Set((existing || []).map((u) => this.getFullSizeUrl(this.decodeWsrvUrl(String(u || '').trim()))).filter(Boolean)));
+        const currentSet = new Set(current);
+        const pageCandidates = Array.from(
+            new Set(
+                this.getPageCoverCandidates()
+                    .map((u) => this.getFullSizeUrl(this.decodeWsrvUrl(String(u || '').trim())))
+                .filter(Boolean)
+            )
+        );
+        const metaCandidates = Array.from(
+            new Set(
+                [
+                    ...(meta?.description ? this.extractImageUrlsFromBBCode(meta.description) : []),
+                    ...(Array.isArray(meta?.images) ? meta!.images : [])
+                ]
+                    .map((u) => this.getFullSizeUrl(this.decodeWsrvUrl(String(u || '').trim())))
+                    .filter(Boolean)
+            )
+        );
+        const candidates = [...pageCandidates, ...metaCandidates];
+
+        for (const candidate of candidates) {
+            if (!candidate || currentSet.has(candidate)) continue;
+            if (this.hasImageExtension(candidate)) {
+                return await this.rehostCoverToPixhost(candidate);
+            }
+        }
+
+        // Fallback to IMDb/Douban poster from meta links when page candidates are missing.
+        const imdbUrl = String(meta?.imdbUrl || '').trim() || (meta?.imdbId ? `https://www.imdb.com/title/${meta.imdbId}/` : '');
+        const imdbPoster = await this.fetchImdbPosterUrl(imdbUrl);
+        if (imdbPoster && !currentSet.has(imdbPoster)) {
+            return await this.rehostCoverToPixhost(imdbPoster);
+        }
+        const doubanPoster = await this.fetchDoubanPosterUrl(String(meta?.doubanUrl || ''));
+        if (doubanPoster && !currentSet.has(doubanPoster)) {
+            return await this.rehostCoverToPixhost(doubanPoster);
+        }
+
+        // Some pages expose poster URLs that are not direct image links.
+        // Rehost one candidate to Pixhost to guarantee Hostik pull can fetch it.
+        for (const candidate of candidates) {
+            if (!candidate || currentSet.has(candidate)) continue;
+            try {
+                const full = await this.rehostCoverToPixhost(candidate);
+                if (full) return full;
+            } catch {}
+        }
+        return '';
+    }
+
+    static async prependCoverForHostik(urls: string[], meta?: Partial<TorrentMeta>): Promise<string[]> {
+        const current = Array.from(new Set((urls || []).map((u) => this.getFullSizeUrl(this.decodeWsrvUrl(String(u || '').trim()))).filter(Boolean)));
+        const cover = await this.resolveHostikCoverUrl(meta, current);
+        if (!cover) return current;
+        if (current.includes(cover)) return current;
+        return [cover, ...current];
+    }
+
     /**
      * Converts thumbnail URLs to full size URLs for known hosts.
      * Matches logic from `get_full_size_picture_urls`
@@ -331,7 +539,7 @@ export class ImageHostService {
         }
 
         const rawUrls = picked.length ? picked : this.extractImageUrlsFromBBCode(meta.description || '');
-        const normalized = Array.from(
+        let normalized = Array.from(
             new Set(
                 rawUrls
                     .map((u) => u.trim())
@@ -339,6 +547,9 @@ export class ImageHostService {
                     .map((u) => this.getFullSizeUrl(u))
             )
         );
+        if (host === 'hostik') {
+            normalized = await this.prependCoverForHostik(normalized, meta);
+        }
         if (!normalized.length) {
             alert('未检测到可转存的图片链接');
             return;
@@ -613,9 +824,16 @@ export class ImageHostService {
     private static async buildImageFiles(urls: string[]): Promise<File[]> {
         const tasks = urls.map(async (raw, index) => {
             const url = this.normalizeImageFetchUrl(raw);
-            const filename = decodeURIComponent(url.split('/').pop() || `image-${index}.jpg`).split('?')[0];
-            if (!filename.match(/\.(png|jpe?g|gif|webp)$/i)) {
-                return new File([new Blob([], { type: this.guessImageMime(filename) })], filename || `image-${index}.jpg`, { type: this.guessImageMime(filename) });
+            const parsedFilename = decodeURIComponent(url.split('/').pop() || `image-${index}.jpg`).split('?')[0];
+            const hasExt = parsedFilename.match(/\.(png|jpe?g|gif|webp)$/i);
+            const filename = hasExt ? parsedFilename : `image-${index}.jpg`;
+            if (!hasExt) {
+                const blob = await this.fetchImageAsBlob(url, filename);
+                if (!blob || (blob as any).size === 0) {
+                    throw new Error(`Image download returned empty blob: ${url}`);
+                }
+                const type = (blob && (blob as any).type) ? (blob as any).type : this.guessImageMime(filename);
+                return new File([blob], filename, { type });
             }
             const blob = await this.fetchImageAsBlob(url, filename || `image-${index}.jpg`);
             if (!blob || (blob as any).size === 0) {

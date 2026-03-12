@@ -9,9 +9,12 @@ import { RemoteDownloadService } from '../services/RemoteDownloadService';
 import { ImageHostService } from '../services/ImageHostService';
 import { UploadMetaFetchService, AutoDownloadAfterUploadService } from '../services/UploadMetaFetchService';
 import { EmbedService } from '../services/EmbedService';
+import { extractImdbId } from '../common/rules/links';
 
 export class SiteManager {
     private activeEngine: BaseEngine | null = null;
+    private readonly KG_CONTINUE_KEY = 'autofeed_kg_continue';
+    private readonly KG_CONTINUE_TTL_MS = 40 * 60 * 1000;
 
     constructor() {
         this.detectSite();
@@ -75,6 +78,9 @@ export class SiteManager {
         } catch {}
 
         const uploadLikePage = this.isUploadLikePage(window.location.href);
+        if (!uploadLikePage && adapter.siteName === 'KG') {
+            try { sessionStorage.removeItem(this.KG_CONTINUE_KEY); } catch {}
+        }
         if (uploadLikePage) {
             try {
                 await UploadMetaFetchService.tryInject(adapter);
@@ -88,15 +94,40 @@ export class SiteManager {
         if (this.isForwardSourcePage(adapter, window.location.href)) {
             // Embedded transfer/search UI injection on source detail pages.
             this.injectEmbeddedUI(adapter).catch(err => console.error('[Auto-Feed] Injection Error:', err));
+            // Some BHD pages hydrate details after document-end; run one delayed retry.
+            if (adapter.siteName === 'BHD') {
+                setTimeout(() => {
+                    this.injectEmbeddedUI(adapter).catch(() => { });
+                }, 1300);
+            }
         }
 
         // 2. CHECK FOR FORWARD HANDOFF (Target Mode)
         try {
             if (uploadLikePage) {
+                if (adapter.siteName === 'KG') {
+                    try {
+                        const { GMAdapter } = await import('../services/GMAdapter');
+                        const raw = await GMAdapter.getValue<string | null>('kg_info', null);
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            const legacyMeta = this.convertKgLegacyInfo(parsed);
+                            if (legacyMeta) {
+                                this.injectFillButton(adapter, legacyMeta);
+                                return;
+                            }
+                        }
+                    } catch {}
+                }
+
                 const hasToken = !!StorageService.getHandoffTokenFromUrl();
                 const handoffMeta = await StorageService.consumeHandoffFromCurrentUrl();
                 if (handoffMeta) {
+                    if (adapter.siteName === 'KG') this.markKgContinue();
                     this.injectFillButton(adapter, handoffMeta);
+                } else if (adapter.siteName === 'KG' && this.shouldContinueKg()) {
+                    const cached = await StorageService.load();
+                    if (cached) this.injectFillButton(adapter, cached);
                 } else if (hasToken) {
                     this.showStatusToast('转发缓存已过期，请返回源站重新点击转发链接。');
                 }
@@ -108,17 +139,41 @@ export class SiteManager {
 
     private async injectEmbeddedUI(adapter: BaseEngine) {
         console.log('[Auto-Feed] Starting injectEmbeddedUI for:', adapter.siteName);
-        try {
-            const { SettingsService } = await import('../services/SettingsService');
-            const settings = await SettingsService.load();
+        const { SettingsService } = await import('../services/SettingsService');
+        const settings = await SettingsService.load();
 
+        let meta: any = null;
+        try {
             // Parse immediately, store, then inject DOM using legacy-ish layout.
-            let meta = await adapter.parse();
+            meta = await adapter.parse();
             const { normalizeMeta } = await import('../common/rules/normalize');
             meta = this.cleanMeta(meta);
             meta = normalizeMeta(meta, adapter.siteName);
             await StorageService.save(meta);
+        } catch (e) {
+            console.error('[Auto-Feed] Parse failed for embed, fallback to cached/minimal meta:', e);
+        }
 
+        if (!meta) {
+            try {
+                const cached = await StorageService.load();
+                if (cached && (cached.sourceUrl === window.location.href || cached.sourceSite === adapter.siteName)) {
+                    meta = cached;
+                }
+            } catch { }
+        }
+        if (!meta) {
+            meta = {
+                title: document.title || '',
+                subtitle: '',
+                description: '',
+                sourceSite: adapter.siteName,
+                sourceUrl: window.location.href,
+                images: []
+            };
+        }
+
+        try {
             await EmbedService.inject(adapter, meta, settings);
         } catch (e) {
             console.error('[Auto-Feed] Embed injection failed:', e);
@@ -233,6 +288,51 @@ export class SiteManager {
         };
     }
 
+    private convertKgLegacyInfo(raw: any): any | null {
+        if (!raw || typeof raw !== 'object') return null;
+        const imdbUrl = String(raw.url || '').trim();
+        return {
+            title: String(raw.name || '').trim(),
+            description: String(raw.descr || '').trim(),
+            fullMediaInfo: String(raw.full_mediainfo || '').trim(),
+            imdbUrl,
+            imdbId: extractImdbId(imdbUrl) || undefined,
+            torrentUrl: String(raw.torrent_url || '').trim(),
+            torrentFilename: String(raw.torrent_name || '').trim(),
+            torrentName: String(raw.torrent_name || '').trim(),
+            mediumSel: String(raw.medium_sel || '').trim(),
+            standardSel: String(raw.standard_sel || '').trim(),
+            audioCodecSel: String(raw.audiocodec_sel || '').trim(),
+            sourceSel: String(raw.source_sel || '').trim(),
+            sourceSite: 'KG',
+            sourceUrl: window.location.href,
+            images: []
+        };
+    }
+
+    private markKgContinue() {
+        try {
+            sessionStorage.setItem(this.KG_CONTINUE_KEY, JSON.stringify({ at: Date.now() }));
+        } catch {}
+    }
+
+    private shouldContinueKg(): boolean {
+        try {
+            const raw = sessionStorage.getItem(this.KG_CONTINUE_KEY);
+            if (!raw) return false;
+            const data = JSON.parse(raw || '{}');
+            const at = Number(data?.at || 0);
+            if (!Number.isFinite(at) || at <= 0) return false;
+            if (Date.now() - at > this.KG_CONTINUE_TTL_MS) {
+                sessionStorage.removeItem(this.KG_CONTINUE_KEY);
+                return false;
+            }
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
     private isUploadLikePage(url: string): boolean {
         return !!url.match(/upload|offer|torrents\/create|torrents\/upload|torrent\/upload|torrents\/add|upload\.php|p_torrent\/video_upload|#\/torrent\/add|\/torrent\/add/i);
     }
@@ -248,7 +348,7 @@ export class SiteManager {
         }
         // PTP: only when a specific torrent is targeted (torrentid present).
         if (adapter.siteName === 'PTP') {
-            return path.includes('torrents.php') && /torrentid=\d+/i.test(qs);
+            return (path.includes('torrents.php') && /torrentid=\d+/i.test(qs)) || (path.includes('torrents.php') && /id=\d+/i.test(qs));
         }
         // Gazelle movie/music details (GPW/RED/OPS/DIC/SC/etc): torrents.php?id=...&torrentid=...
         if (['GPW', 'RED', 'OPS', 'DIC'].includes(adapter.siteName)) {
@@ -261,6 +361,10 @@ export class SiteManager {
         // OpenCD source detail pages (new + old layouts)
         if (adapter.siteName === 'OpenCD') {
             return /details\.php/i.test(path) && /id=\d+/i.test(qs);
+        }
+        // BHD details can be on classic torrent page or library title route.
+        if (adapter.siteName === 'BHD') {
+            return /\/torrents\/.+/i.test(path) || /\/library\/title\/.+/i.test(path);
         }
         // Default fallback
         return !!url.match(/details?(\.php)?|threads|topics|torrents\/\d+|detail\/\d+|detail\//i);
@@ -277,6 +381,8 @@ export class SiteManager {
             'input[name="torrentfile"]',
             'input[type="file"]#torrent',
             'input[name="torrent"]',
+            'input[name="file"]',
+            'input[type="file"][name*="file"]',
             '#torrent-input'
         ];
 

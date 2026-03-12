@@ -53,14 +53,14 @@ export default defineConfig({
                 updateURL: userscriptSelfUrl,
                 icon: 'https://kp.m-team.cc/favicon.ico',
                 'run-at': 'document-end',
-                'inject-into': 'content',
+                'inject-into': 'page',
                 match: [
                     'https://kp.m-team.cc/detail/*',
                     'https://kp.m-team.cc/upload*',
-                    'http*://*/*detail*.php*',
-                    'http*://*/detail*.php*',
-                    'http*://*/upload*php*',
-                    'http*://*/offer*php*',
+                    '*://*/*detail*.php*',
+                    '*://*/detail*.php*',
+                    '*://*/upload*php*',
+                    '*://*/offer*php*',
                     'https://blutopia.cc/torrents?imdb=tt*',
                     'https://blutopia.cc/torrents/create*',
                     'https://passthepopcorn.me/*',
@@ -81,7 +81,7 @@ export default defineConfig({
                     'https://www.douban.com/subject/*',
                     'https://movie.douban.com/subject/*',
                     'https://www.imdb.com/title/tt*',
-                    'http*://*/*index.php?page=torrent-details*',
+                    '*://*/*index.php?page=torrent-details*',
                     'https://GreatPosterWall.com/*',
                     'https://greatposterwall.com/*',
                     'https://broadcasthe.net/*.php*',
@@ -93,9 +93,11 @@ export default defineConfig({
                     'https://redacted.sh/*',
                     'https://orpheus.network/*',
                     'https://dicmusic.com/*',
-                    'http*://*/*' // Catch-all for other PT sites
+                    // Standard userscript catch-all patterns (avoid non-standard `http*://`).
+                    'http://*/*',
+                    'https://*/*'
                 ],
-                exclude: ['http*bitpt.cn*'],
+                exclude: ['*://*bitpt.cn*'],
                 grant: [
                     'GM.xmlHttpRequest',
                     'GM.setValue',
