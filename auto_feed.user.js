@@ -10056,7 +10056,7 @@ function auto_feed() {
             }
         }
 
-        if (['ACM', 'HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
+        if (['HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
             var iii, div_box, imdb_box;
             if (origin_site == 'DTR') {
                 iii = document.getElementsByClassName('torrent-general')[0];
@@ -10068,10 +10068,6 @@ function auto_feed() {
                 div_box = iii.getElementsByClassName('table-responsive')[1];
                 imdb_box = document.getElementsByClassName('movie-details')[0];
                 $('h4').first().click();
-            }
-	    else if (origin_site == 'ACM'){
-                div_box = document.getElementsByClassName('shoutbox')[0];
-                imdb_box = document.getElementsByClassName('movie-details')[0];
             }
             else {
                 iii = document.getElementsByTagName('h4')[0].parentNode.parentNode;
@@ -10171,7 +10167,7 @@ function auto_feed() {
             raw_info.torrent_url = $('.button-block').find('a[href*="torrents/download"]').attr('href');
         }
 
-        if (origin_site == 'BLU') {
+        if (origin_site == 'BLU' || origin_site == 'ACM') {
             var ids = $('ul.meta__ids').html()
             raw_info.url = match_link('imdb', ids);
             raw_info.tmdb_url = match_link('tmdb', ids);
@@ -12439,7 +12435,7 @@ function auto_feed() {
             raw_info.torrent_url = $('a[href*="me/download"][role=button]').attr('href');
         }
 
-        if (origin_site == 'BLU' || origin_site == 'Tik' || origin_site == 'Aither') {
+        if (origin_site == 'BLU' || origin_site == 'Tik' || origin_site == 'Aither' || origin_site == 'ACM') {
             var mediainfo = '';
             try {
                 mediainfo = $('code[x-ref="mediainfo"]').text().trim();
@@ -12504,7 +12500,7 @@ function auto_feed() {
             raw_info.torrent_url = $('a[href*="torrents/download"]').attr('href');
         }
 
-        if (['ACM', 'HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
+        if (['HDOli', 'Monika', 'DTR'].indexOf(origin_site) > -1) {
             var mediainfo_lack = false;
             try {
                 var mediainfo_box = document.getElementsByClassName('slidingDiv')[0];
