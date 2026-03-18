@@ -47,9 +47,7 @@ export const App = () => {
         favoriteSites: [],
         showSearchOnList: {
             PTP: true,
-            HDB: false,
-            HDT: false,
-            UHD: false
+            HDB: false
         },
         uiLanguage: 'zh'
     });
@@ -477,6 +475,26 @@ export const App = () => {
                                     <CheckboxRow label={t.autoDownloadAfterUpload} checked={!!settings.autoDownloadAfterUpload} onChange={() => setSettings({ ...settings, autoDownloadAfterUpload: !settings.autoDownloadAfterUpload })} />
                                 </div>
                                 <div className="af-row">
+                                    <span className="af-label">{t.listPageQuickSearch}</span>
+                                    <div className="af-segmented">
+                                        {(['PTP', 'HDB'] as const).map((key) => (
+                                            <div
+                                                key={key}
+                                                className={`af-segment-opt ${settings.showSearchOnList?.[key] ? 'active' : ''}`}
+                                                onClick={() => setSettings({
+                                                    ...settings,
+                                                    showSearchOnList: {
+                                                        ...settings.showSearchOnList,
+                                                        [key]: !settings.showSearchOnList?.[key]
+                                                    }
+                                                })}
+                                            >
+                                                {key}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="af-row">
                                     <span className="af-label">{t.ptpGroupNamePos}</span>
                                     <div className="af-segmented">
                                         {[0, 1].map(v => (
@@ -646,22 +664,6 @@ export const App = () => {
                                 </div>
                             </div>
 
-                            <div className="af-card">
-                                <div className="af-card-header">{t.listPageQuickSearch}</div>
-                                <div style={{ padding: '0 10px' }}>
-                                    {(['PTP', 'HDB', 'HDT', 'UHD'] as const).map(key => (
-                                        <CheckboxRow
-                                            key={key}
-                                            label={key}
-                                            checked={!!settings.showSearchOnList?.[key]}
-                                            onChange={() => setAndPersist({
-                                                ...settings,
-                                                showSearchOnList: { ...settings.showSearchOnList, [key]: !settings.showSearchOnList?.[key] }
-                                            })}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
                         </div>
                     )}
 

@@ -28,6 +28,9 @@ export interface QuickSearchRenderOptions {
     bordered?: boolean;
     fontColor?: string;
     labelText?: string;
+    fontSize?: string;
+    linkColor?: string;
+    separator?: string;
 }
 
 const extractFromAnchor = (line: string): { name: string; url: string } | null => {
@@ -127,12 +130,15 @@ export const renderQuickSearchHtml = (
     if (!items.length) return '';
 
     const lang = options?.lang || 'zh';
-    const label = options?.labelText || (lang === 'zh' ? '快速搜索：' : 'Quick Search:');
+    const label = options?.labelText ?? (lang === 'zh' ? '快速搜索：' : 'Quick Search:');
     const fontColor = options?.fontColor || 'red';
-    const className = options?.className || 'search_urls autofeed-search-links';
+    const className = options?.className || 'autofeed-search-links';
     const align = options?.alignCenter === false ? '' : ' align="center"';
     const borderCss = options?.bordered === false ? '' : 'border: 1px solid blue;';
-    const style = `${borderCss}`.trim();
-    const links = items.map((it) => `<a href="${it.url}" target="_blank">${it.name}</a>`).join(' | ');
+    const fontSizeCss = options?.fontSize ? `font-size: ${options.fontSize};` : '';
+    const style = `${borderCss} ${fontSizeCss}`.trim();
+    const separator = options?.separator ?? ' | ';
+    const linkStyle = options?.linkColor ? ` style="color:${options.linkColor}"` : '';
+    const links = items.map((it) => `<a href="${it.url}" target="_blank"${linkStyle}>${it.name}</a>`).join(separator);
     return `<div${align} style="${style}" class="${className}"><font color="${fontColor}">${label}${links}</font></div>`;
 };

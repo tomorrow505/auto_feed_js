@@ -2,6 +2,8 @@ name: Release
 
 on:
   push:
+    branches:
+      - master
     tags:
       - "v*"
   workflow_dispatch:
@@ -15,12 +17,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Use Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: 18
           cache: npm
+
+      - name: Resolve version/tag
+        id: meta
+        run: |
+          version="$(node -p 'require(\"./package.json\").version' | tr -d '\n')"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            tag="${GITHUB_REF#refs/tags/}"
+            tag_exists="false"
+          else
+            tag="v${version}"
+            if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+              tag_exists="true"
+            else
+              tag_exists="false"
+            fi
+          fi
+
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "tag_exists=${tag_exists}" >> "$GITHUB_OUTPUT"
+
+      - name: Create version tag
+        if: startsWith(github.ref, 'refs/heads/') && steps.meta.outputs.tag_exists == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.meta.outputs.tag }}" "${GITHUB_SHA}"
+          git push origin "${{ steps.meta.outputs.tag }}"
 
       - name: Install
         run: npm ci
@@ -29,8 +62,11 @@ jobs:
         run: npm run build
 
       - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: Auto-Feed ${{ steps.meta.outputs.tag }}
           fail_on_unmatched_files: true
           files: |
             dist/auto_feed.user.js

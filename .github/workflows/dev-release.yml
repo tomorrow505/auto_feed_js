@@ -23,6 +23,10 @@ jobs:
           node-version: 18
           cache: npm
 
+      - name: Read version
+        id: pkg
+        run: echo "version=$(node -p 'require(\"./package.json\").version' | tr -d '\n')" >> "$GITHUB_OUTPUT"
+
       - name: Install
         run: npm ci
 
@@ -41,7 +45,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: dev
-          name: Dev Build (refactor-dev)
+          name: Dev Build v${{ steps.pkg.outputs.version }} (refactor-dev)
           prerelease: true
           fail_on_unmatched_files: true
           files: |

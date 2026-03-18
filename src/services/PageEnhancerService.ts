@@ -4,9 +4,10 @@ import { DoubanService } from './DoubanService';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { ImageHostService } from './ImageHostService';
 import { GMAdapter } from './GMAdapter';
-import { renderQuickSearchHtml, resolveQuickSearchSetting } from '../common/quickSearch';
+import { renderQuickSearchHtml, resolveQuickSearchSetting, QuickSearchRenderOptions } from '../common/quickSearch';
 import { getGroupName } from '../common/rules/groupName';
 import { extractImdbId } from '../common/rules/links';
+import { getSearchName } from '../common/rules/search';
 
 export class PageEnhancerService {
     static async tryEnhance() {
@@ -396,14 +397,26 @@ export class PageEnhancerService {
 type QuickSearchSetting = ReturnType<typeof resolveQuickSearchSetting>;
 
 export class QuickSearchService {
+    private static normalizeListSearchName(name: string): string {
+        const raw = String(name || '').trim();
+        if (!raw) return '';
+        let searchName = getSearchName(raw) || raw;
+        if (raw.match(/S\d+/i)) {
+            const number = raw.match(/S(\d+)/i)?.[1];
+            if (number) searchName = `${searchName} Season ${parseInt(number, 10)}`;
+        }
+        return searchName.trim();
+    }
+
     private static async injectQuickSearch(
         container: JQuery,
         meta: Partial<TorrentMeta>,
         marginTopPx = 4,
-        opts?: QuickSearchSetting
+        opts?: QuickSearchSetting,
+        renderOpts?: QuickSearchRenderOptions
     ) {
         if (!container.length) return;
-        if (container.find('.autofeed-search-links, .search_urls').length) return;
+        if (container.find('.autofeed-search-links').length) return;
         const resolved = opts || resolveQuickSearchSetting(await SettingsService.load());
         const html = renderQuickSearchHtml(
             meta,
@@ -411,10 +424,11 @@ export class QuickSearchService {
             resolved.quickSearchPresets,
             {
                 lang: resolved.lang,
-                className: 'search_urls autofeed-search-links',
+                className: 'autofeed-search-links',
                 alignCenter: true,
                 bordered: true,
-                fontColor: 'red'
+                fontColor: 'red',
+                ...renderOpts
             }
         );
         if (!html) return;
@@ -441,6 +455,23 @@ export class QuickSearchService {
         const settings = await SettingsService.load();
         const quickSearchOpts = resolveQuickSearchSetting(settings);
 
+        // Legacy parity: some list pages render rows asynchronously after document-end.
+        // Run one delayed retry so PTP/HDB list quick-search can be injected reliably.
+        if (document.body.dataset.autofeedListQuickSearchRetry !== '1') {
+            document.body.dataset.autofeedListQuickSearchRetry = '1';
+            setTimeout(() => {
+                this.tryInjectList().catch(() => {});
+            }, 650);
+        }
+        const listQuickSearchRenderOpts: QuickSearchRenderOptions = {
+            className: 'autofeed-search-links autofeed-search-links--list',
+            alignCenter: false,
+            bordered: false,
+            fontColor: 'green',
+            labelText: '',
+            fontSize: '12px'
+        };
+
         const addGroupName = (container: JQuery, groupname: string, locationFlag = 1) => {
             const g = String(groupname || '').trim();
             if (!container.length || !g || g === 'Null') return;
@@ -455,7 +486,7 @@ export class QuickSearchService {
         };
 
         const injectSearch = async (container: JQuery, meta: Partial<TorrentMeta>) => {
-            await this.injectQuickSearch(container, meta, 4, quickSearchOpts);
+            await this.injectQuickSearch(container, meta, 4, quickSearchOpts, listQuickSearchRenderOpts);
         };
 
         const buildPtpMaps = () => {
@@ -491,7 +522,7 @@ export class QuickSearchService {
                 const $cell = $(row).find('td:eq(2)');
                 const name = $cell.find('a').first().text().trim();
                 if (!name) return;
-                injectSearch($cell, { title: name, imdbId }).catch(() => {});
+                injectSearch($cell, { title: this.normalizeListSearchName(name), imdbId }).catch(() => {});
                 addGroupName($cell, getGroupName(name, $(row).text()));
             });
         }
@@ -510,7 +541,7 @@ export class QuickSearchService {
                 const $titleRow = $row.find('span.basic-movie-list__movie__title-row').first();
                 const name = $titleRow.find('a').first().text().trim() || (tid ? titleMap[tid] : '');
                 const $container = $titleRow.length ? $titleRow : $row.find('td:eq(1)');
-                injectSearch($container, { title: name, imdbId }).catch(() => {});
+                injectSearch($container, { title: this.normalizeListSearchName(name), imdbId }).catch(() => {});
 
                 if (settings.ptpShowGroupName) {
                     const groupFromMap = tid ? groupMap[tid] : '';
@@ -533,44 +564,10 @@ export class QuickSearchService {
                 if (!imdbId) return;
                 const title = titleMap[tid] || $link.closest('tr').find('span.basic-movie-list__movie__title-row a').first().text().trim();
                 const $cell = $link.closest('td').length ? $link.closest('td') : $link.parent();
-                injectSearch($cell, { title, imdbId }).catch(() => {});
+                injectSearch($cell, { title: this.normalizeListSearchName(title), imdbId }).catch(() => {});
             });
         }
 
-        if (url.match(/^https:\/\/uhdbits\.org\/torrents\.php/i) && settings.showSearchOnList?.UHD) {
-            $('#torrent_table td.big_info').each((_, cell) => {
-                const html = $(cell).html() || '';
-                const imdbId = extractImdbId(html);
-                if (!imdbId) return;
-                const $container = $(cell).find('div:eq(0)');
-                const name = $container.find('a').first().text().trim();
-                if (!name) return;
-                injectSearch($container, { title: name, imdbId }).catch(() => {});
-                addGroupName($container, getGroupName(name, $(cell).text()));
-            });
-        }
-
-        if (url.match(/^https:\/\/hd-torrents\.org\/torrents/i) && settings.showSearchOnList?.HDT) {
-            $('.mainblockcontenttt tr').each((_, row) => {
-                const $td = $(row).find('td:eq(2)');
-                const name = $td.find('a').first().text().trim();
-                if (!name) return;
-                const imdbId = extractImdbId($td.html() || '');
-                if (!imdbId) return;
-                injectSearch($td, { title: name, imdbId }).catch(() => {});
-                addGroupName($td, getGroupName(name, $td.text()));
-            });
-
-            $('.hdblock:eq(1) tr').each((_, row) => {
-                const $td = $(row).find('td:eq(1)');
-                const name = $td.find('a').first().text().trim();
-                if (!name) return;
-                const imdbId = extractImdbId($td.html() || '');
-                if (!imdbId) return;
-                injectSearch($td, { title: name, imdbId }).catch(() => {});
-                addGroupName($td, getGroupName(name, $td.text()));
-            });
-        }
     }
 
     private static injectDoubanTools(settings?: Awaited<ReturnType<typeof SettingsService.load>>) {
@@ -632,7 +629,15 @@ export class QuickSearchService {
             $title,
             { title: searchName, imdbId },
             6,
-            quickSearchOpts
+            quickSearchOpts,
+            {
+                className: 'autofeed-search-links autofeed-search-links--douban',
+                alignCenter: false,
+                bordered: false,
+                fontColor: 'red',
+                labelText: '',
+                fontSize: '12px'
+            }
         ).catch(() => {});
         document.body.dataset.autofeedDouban = '1';
     }
@@ -653,7 +658,16 @@ export class QuickSearchService {
                 $container,
                 { title: searchName, imdbId },
                 6,
-                quickSearchOpts
+                quickSearchOpts,
+                {
+                    className: 'autofeed-search-links autofeed-search-links--imdb',
+                    alignCenter: false,
+                    bordered: false,
+                    fontColor: 'green',
+                    labelText: '',
+                    fontSize: '12px',
+                    linkColor: 'yellow'
+                }
             ).catch(() => {});
         }
         document.body.dataset.autofeedImdb = '1';

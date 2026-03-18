@@ -12,7 +12,7 @@ export const Unit3DSites: SiteConfig[] = [
     {
         name: 'Tik',
         type: SiteType.Unit3DClassic,
-        keywords: ['cinematik.net'],
+        keywords: ['cinematik.net', 'cinematik.me', 'cinematik.cc'],
         baseUrl: 'https://cinematik.net/',
         description: 'Cinematik (Tik)'
     },
@@ -33,7 +33,7 @@ export const Unit3DSites: SiteConfig[] = [
     {
         name: 'BHD',
         type: SiteType.BHD,
-        keywords: ['beyond-hd.me'],
+        keywords: ['beyond-hd.me', 'beyond-hd.xyz', 'beyond-hd.site', 'beyond-hd.io', 'beyond-hd.', 'beyondhd.co', 'beyondhd.'],
         baseUrl: 'https://beyond-hd.me/',
         description: 'Beyond-HD',
         features: {

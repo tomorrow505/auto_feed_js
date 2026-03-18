@@ -70,7 +70,7 @@ export const NexusSites: SiteConfig[] = [
     {
         name: 'TTG',
         type: SiteType.NexusPHP,
-        keywords: ['totheglory.im'],
+        keywords: ['totheglory.im', 'totheglory.me', 'totheglory.', 'bwtorrents.tv'],
         baseUrl: 'https://totheglory.im/',
         description: 'TTG (Nexus-like parsing)',
         // TTG detail pages use a different description container (`#kt_d`) and sometimes lack a structured subtitle row.

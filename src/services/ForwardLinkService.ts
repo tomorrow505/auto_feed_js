@@ -218,13 +218,14 @@ export class ForwardLinkService {
                         e.preventDefault();
                         e.stopPropagation();
 
+                        let targetUrl = url;
                         const win = window.open('about:blank', '_blank');
                         const go = () => {
                             try {
-                                if (win) win.location.href = url;
-                                else window.open(url, '_blank');
+                                if (win) win.location.href = targetUrl;
+                                else window.open(targetUrl, '_blank');
                             } catch {
-                                window.open(url, '_blank');
+                                window.open(targetUrl, '_blank');
                             }
                         };
 
@@ -286,6 +287,9 @@ export class ForwardLinkService {
                                     }
                                 }
                                 const { StorageService } = await import('./StorageService');
+                                const token = StorageService.generateHandoffToken();
+                                targetUrl = StorageService.attachHandoffToken(url, token);
+                                await StorageService.saveHandoff(metaToSave, token);
                                 await StorageService.save(metaToSave);
                             } catch {
                                 // best-effort; still navigate

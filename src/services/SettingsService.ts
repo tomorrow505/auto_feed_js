@@ -38,8 +38,6 @@ export interface AppSettings {
     showSearchOnList: {
         PTP: boolean;
         HDB: boolean;
-        HDT: boolean;
-        UHD: boolean;
     };
     uiLanguage: 'zh' | 'en';
 }
@@ -108,9 +106,7 @@ const DEFAULT_SETTINGS: AppSettings = {
         .filter((name) => SiteCatalogService.getSupportedSiteNames().includes(name)),
     showSearchOnList: {
         PTP: true,
-        HDB: false,
-        HDT: false,
-        UHD: false
+        HDB: false
     },
     uiLanguage: 'zh'
 };
@@ -122,9 +118,20 @@ export class SettingsService {
         // Rename site key: `pterclub` -> `PTer` (legacy parity + torrent `source` field correctness).
         const rename = (v: string) => (v === 'pterclub' ? 'PTer' : v);
         const supported = new Set(SiteCatalogService.getSupportedSiteNames());
-        const enabledSites = Array.from(new Set((settings.enabledSites || []).map(rename))).filter((x) => supported.has(x));
-        const favoriteSites = Array.from(new Set((settings.favoriteSites || []).map(rename))).filter((x) => enabledSites.includes(x));
-        return { ...settings, enabledSites, favoriteSites };
+        const enabledSet = new Set((settings.enabledSites || []).map(rename).filter((x) => supported.has(x)));
+        // Legacy parity: KG is a commonly used forwarding target and should be available by default.
+        if (supported.has('KG')) enabledSet.add('KG');
+        const enabledSites = Array.from(enabledSet);
+
+        const favoriteSet = new Set((settings.favoriteSites || []).map(rename).filter((x) => enabledSet.has(x)));
+        if (enabledSet.has('KG')) favoriteSet.add('KG');
+        const favoriteSites = Array.from(favoriteSet);
+        const listQuickSearch = settings.showSearchOnList as any;
+        const showSearchOnList = {
+            PTP: listQuickSearch?.PTP === undefined ? DEFAULT_SETTINGS.showSearchOnList.PTP : !!listQuickSearch.PTP,
+            HDB: listQuickSearch?.HDB === undefined ? DEFAULT_SETTINGS.showSearchOnList.HDB : !!listQuickSearch.HDB
+        };
+        return { ...settings, enabledSites, favoriteSites, showSearchOnList };
     }
 
     static async load(): Promise<AppSettings> {
