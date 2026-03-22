@@ -7,6 +7,8 @@
 - Gazelle（影视）：PTP、GPW
 - Unit3D/Classic：BHD、BLU、Tik、KG、Monika
 
+补充：Monika（MDU）已按上游源码规则对齐修复上传路径与关键表单映射。
+
 ## 音乐站点（持续补齐）
 - RED
 - OPS
@@ -23,6 +25,6 @@
 
 ## 代码位置
 - 站点配置：`src/config/`
-- 站点逻辑：`src/trackers/`
+- 站点逻辑：`src/trackers/`（一站一文件）
 - 框架模板：`src/templates/`
 - 通用规则：`src/common/rules/`

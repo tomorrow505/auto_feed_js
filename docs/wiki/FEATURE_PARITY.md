@@ -1,6 +1,6 @@
 # Auto-Feed Refactor 功能对照表
 
-更新时间：2026-02-12
+更新时间：2026-03-22
 
 本文档对照原版 Wiki（`auto_feed_js.wiki/支持的站点.md`）并同步当前重构进度：
 - 标题 `✅` = 该模块核心能力已可用
@@ -36,7 +36,7 @@
 - ✨ 保存设置状态反馈（Saving / Saved / Failed）
 
 ### 🚧 细节差距
-- **快搜模板编辑体验**: 已有基础编辑，但 **预设管理细节仍可继续打磨**。
+- **快搜模板编辑体验**: 已有基础编辑；默认预设已按 legacy 源码模板对齐（含 `nzbs.in` / 字幕站等独立站点），**编辑交互细节仍可继续打磨**。
 - **站点排序能力**: **未实现**（目前按现有顺序/字母展示）。
 
 ---
@@ -68,7 +68,7 @@
 - **OpenCD**（已实现，**持续完善**）
 
 ### Unit3D / Unit3D Classic 转载
-- ~~BHD / BLU / Tik / Monika~~（已测试）
+- ~~BHD / BLU / Tik / Monika~~（已测试；Monika 已补齐上游 upload/search/form 映射）
 - ~~KG~~ 
 - **ACM / HDF / PrivateHD**（已实现，**待测试**）
 
@@ -85,7 +85,7 @@
 ## 🌐 5. 辅助功能
 
 ### ✅ 图片转存与处理
-- ~~单图转存（PTPIMG / PIXhost / Freeimage / Gifyu）~~
+- ~~单图转存（PTPIMG / PIXhost / Freeimage）~~
 - ~~多图到 PIXhost（批量识别）~~
 - ~~拉取图像跳转上传（HDBits / imgbox / pixhost 等）~~
 - ~~截图提取与链接清洗~~

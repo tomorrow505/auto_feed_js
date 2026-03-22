@@ -363,24 +363,46 @@ export const appleStyles = `
 
 /* Segmented Control */
 .af-segmented {
-    display: flex;
-    background: #efeff0;
-    padding: 2px;
-    border-radius: var(--af-radius-m);
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: #eceff3;
+    padding: 3px;
+    border-radius: 999px;
 }
 .af-segment-opt {
     flex: 1;
+    min-height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: 4px 10px;
+    padding: 0 11px;
     font-size: 12px;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 999px;
     color: var(--af-text-primary);
-    transition: all 0.2s;
+    font-weight: 500;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
 }
 .af-segment-opt.active {
     background: #fff;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.14);
+}
+
+.af-path-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+.af-path-row .af-input {
+    min-height: 32px;
+}
+.af-path-label {
+    width: 96px;
+}
+.af-path-value {
+    flex: 1;
 }
 `;

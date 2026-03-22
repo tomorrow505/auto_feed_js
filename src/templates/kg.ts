@@ -200,8 +200,10 @@ function detectKgUploadStep(): number {
 }
 
 function getKgStep(): number {
-    const pageFromTitle = parseInt(String(document.title || '').split(' ').pop() || '', 10);
-    return Number.isFinite(pageFromTitle) && pageFromTitle >= 1 && pageFromTitle <= 3 ? pageFromTitle : detectKgUploadStep();
+    // IMPORTANT: title like "Step 2 of 3" must resolve to 2 (not 3).
+    const fromTitle = parseStepFromTitle();
+    if (fromTitle >= 1 && fromTitle <= 3) return fromTitle;
+    return detectKgUploadStep();
 }
 
 function parseImdbJsonLd(doc: Document): any {
@@ -429,6 +431,95 @@ async function fetchImdbDetails(imdbUrl: string): Promise<{
     } catch {
         return empty;
     }
+}
+
+async function fetchOmdbDetailsByImdb(imdbUrlOrId: string): Promise<{
+    title: string;
+    year: string;
+    poster: string;
+    genres: string[];
+    date: string;
+    score: string;
+    director: string;
+    creator: string;
+    cast: string;
+    enDescr: string;
+    countries: string[];
+    language: string;
+}> {
+    const empty = {
+        title: '',
+        year: '',
+        poster: '',
+        genres: [] as string[],
+        date: '',
+        score: '',
+        director: '',
+        creator: '',
+        cast: '',
+        enDescr: '',
+        countries: [] as string[],
+        language: ''
+    };
+
+    const imdbId = extractImdbId(imdbUrlOrId || '');
+    if (!imdbId) return empty;
+
+    try {
+        const api = `https://www.omdbapi.com/?apikey=2edf5c13&i=${encodeURIComponent(imdbId)}&plot=full`;
+        const text = await HtmlFetchService.getText(api, { headers: { accept: 'application/json' } });
+        const data = JSON.parse(text || '{}');
+        if (!data || data.Response !== 'True') return empty;
+
+        const genres = String(data.Genre || '')
+            .split(',')
+            .map((x: string) => x.trim())
+            .filter(Boolean);
+        const countries = String(data.Country || '')
+            .split(',')
+            .map((x: string) => mapCountryName(String(x || '').trim()))
+            .filter(Boolean);
+        const language = String(data.Language || '')
+            .split(',')
+            .map((x: string) => x.trim())
+            .filter(Boolean)
+            .join(', ');
+
+        return {
+            title: String(data.Title || '').trim(),
+            year: String(data.Year || '').match(/\b(19|20)\d{2}\b/)?.[0] || '',
+            poster: String(data.Poster || '').trim() === 'N/A' ? '' : String(data.Poster || '').trim(),
+            genres: uniq(genres),
+            date: String(data.Released || '').trim() === 'N/A' ? '' : String(data.Released || '').trim(),
+            score: String(data.imdbRating || '').trim() === 'N/A' ? '' : String(data.imdbRating || '').trim(),
+            director: String(data.Director || '').trim() === 'N/A' ? '' : String(data.Director || '').trim(),
+            creator: String(data.Writer || '').trim() === 'N/A' ? '' : String(data.Writer || '').trim(),
+            cast: String(data.Actors || '').trim() === 'N/A' ? '' : String(data.Actors || '').trim(),
+            enDescr: String(data.Plot || '').trim() === 'N/A' ? '' : String(data.Plot || '').trim(),
+            countries: uniq(countries),
+            language
+        };
+    } catch {
+        return empty;
+    }
+}
+
+function extractSynopsisFromSource(text: string): string {
+    const src = String(text || '');
+    if (!src) return '';
+    const plain = src
+        .replace(/\[\/?(quote|code|url|img|font|size|color|b|i|u|list|spoiler)[^\]]*\]/gi, ' ')
+        .replace(/https?:\/\/\S+/g, ' ')
+        .replace(/\r/g, '')
+        .replace(/\n{3,}/g, '\n\n');
+
+    const cnIntro =
+        plain.match(/◎\s*简\s*介\s*[:：]?\s*([\s\S]{20,1800}?)(?=\n\s*◎|\n\s*(?:Format|Video|Audio|字幕|Screenshots?|[A-Z][a-z]+:)|$)/i)?.[1] || '';
+    if (cnIntro) return cnIntro.trim();
+
+    const enIntro =
+        plain.match(/\b(?:Plot|Synopsis|Introduction)\b\s*[:：]?\s*([\s\S]{20,1800}?)(?=\n\s*(?:Format|Video|Audio|Screenshots?|[A-Z][a-z]+:)|$)/i)?.[1] || '';
+    return enIntro.trim();
 }
 
 async function fetchTmdbFallbackByImdb(imdbUrlOrId: string): Promise<{ country: string; language: string; year: string }> {
@@ -838,18 +929,30 @@ async function fillKgStep2(workingMeta: TorrentMeta, title: string, baseImdbUrl:
     }
 
     const imdb = await fetchImdbDetails(imdbUrl);
+    const omdb = await fetchOmdbDetailsByImdb(imdbUrl);
     const tmdb = await fetchTmdbFallbackByImdb(imdbUrl);
+    const imdbGenres = imdb.genres.length ? imdb.genres : omdb.genres;
+    const imdbCountries = imdb.countries.length ? imdb.countries : omdb.countries;
+    const imdbTitle = imdb.title || omdb.title;
+    const imdbYear = imdb.year || omdb.year;
+    const imdbDate = imdb.date || omdb.date;
+    const imdbScore = imdb.score || omdb.score;
+    const imdbDirector = imdb.director || omdb.director;
+    const imdbCreator = imdb.creator || omdb.creator;
+    const imdbCast = imdb.cast || omdb.cast;
+    const imdbEnDescr = imdb.enDescr || omdb.enDescr || extractSynopsisFromSource(mergedSource);
+    const imdbPoster = imdb.poster || omdb.poster;
     const mediaLang = uniq([
         ...parseLangListFromMedia(mergedSource, 'audio'),
         ...parseLangListFromMedia(mergedSource, 'sub')
     ]).join(', ');
-    const languageText = imdb.language || tmdb.language || mediaLang || extractLanguageFallback(mergedSource);
+    const languageText = imdb.language || omdb.language || tmdb.language || mediaLang || extractLanguageFallback(mergedSource);
     const countryFallback = extractCountryFallback(mergedSource);
 
     let selectedCountryText = '';
     if (countrySelect) {
         const countryCandidates = [
-            ...imdb.countries,
+            ...imdbCountries,
             ...tmdb.country.split(',').map((x) => x.trim()).filter(Boolean),
             ...countryFallback,
             mapCountryName(workingMeta.sourceSel || '')
@@ -858,27 +961,27 @@ async function fillKgStep2(workingMeta: TorrentMeta, title: string, baseImdbUrl:
         selectedCountryText = (countrySelect.options[countrySelect.selectedIndex]?.textContent || '').trim();
     }
 
-    const directorValue = imdb.director || (titleInput?.value?.trim() || title || 'Unknown');
+    const directorValue = imdbDirector || (titleInput?.value?.trim() || title || 'Unknown');
     directorInputs.forEach((input) => setFormValue(input, directorValue, { force: false }));
     if (langInput) setFormValue(langInput, languageText);
 
     if (descrBox) {
         const shots = getScreenshotsFullSizeFromDescr(mergedDescr, workingMeta.mediumSel);
-        const poster = imdb.poster || workingMeta.images?.[0] || '';
+        const poster = imdbPoster || workingMeta.images?.[0] || '';
         setFormValue(descrBox, formatTpl(KG_INTRO_BASE_CONTENT, {
             poster,
-            title: imdb.title || title,
-            year: imdb.year || tmdb.year || ((workingMeta.title || '').match(/\b(19|20)\d{2}\b/)?.[0] || ''),
-            genres: imdb.genres.join(', '),
-            date: imdb.date,
-            score: imdb.score,
+            title: imdbTitle || title,
+            year: imdbYear || tmdb.year || ((workingMeta.title || '').match(/\b(19|20)\d{2}\b/)?.[0] || ''),
+            genres: imdbGenres.join(', '),
+            date: imdbDate,
+            score: imdbScore,
             imdb_url: imdbUrl,
-            country: imdb.countries.join(', ') || tmdb.country || countryFallback.join(', ') || selectedCountryText,
+            country: imdbCountries.join(', ') || tmdb.country || countryFallback.join(', ') || selectedCountryText,
             language: languageText,
-            director: imdb.director,
-            creator: imdb.creator,
-            cast: imdb.cast,
-            en_descr: imdb.enDescr,
+            director: imdbDirector,
+            creator: imdbCreator,
+            cast: imdbCast,
+            en_descr: imdbEnDescr,
             screenshots: shots
         }).trim());
     }
@@ -886,7 +989,7 @@ async function fillKgStep2(workingMeta: TorrentMeta, title: string, baseImdbUrl:
 
     if (mainGenre || subGenre) {
         let used = -1;
-        const genreCandidates = imdb.genres.length ? imdb.genres : ['Drama', 'Documentary', 'Crime', 'Comedy', 'Action'];
+        const genreCandidates = imdbGenres.length ? imdbGenres : ['Drama', 'Documentary', 'Crime', 'Comedy', 'Action'];
         genreCandidates.forEach((genre, idx) => {
             if (used !== -1) return;
             if (selectOptionByContains(mainGenre, [genre])) used = idx;

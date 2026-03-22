@@ -4,13 +4,7 @@ import { SiteConfig } from '../../types/SiteConfig';
 import { htmlToBBCode } from '../../utils/htmlToBBCode';
 import { dealWithTitle } from '../../common/rules/title';
 import { extractDoubanId, extractImdbId, extractTmdbId, matchLink } from '../../common/rules/links';
-import { getMediainfoPictureFromDescr } from '../../common/rules/media';
-import { getMediumSel } from '../../common/rules/text';
-
-function ensureTrailingSlash(url: string): string {
-    if (!url) return url;
-    return url.endsWith('/') ? url : `${url}/`;
-}
+import { getType } from '../../common/rules/text';
 
 export async function parseNexus(config: SiteConfig, currentUrl: string): Promise<TorrentMeta> {
     // Default selectors for NexusPHP
@@ -70,71 +64,6 @@ export async function parseNexus(config: SiteConfig, currentUrl: string): Promis
 
     let description = descrEl ? htmlToBBCode(descrEl) : '';
     let fullMediaInfo = '';
-
-    // CMCT/SpringSunday special layout: rebuild description to avoid duplicated poster/screens/mediainfo blocks.
-    if (config.name === 'CMCT') {
-        try {
-            const blocks: string[] = [];
-            const screenSet = new Set<string>();
-
-            const extraText = ($('.extra-text').first().text() || '').trim();
-            if (extraText) {
-                const wrapped = extraText.includes('[quote]') ? extraText : `[quote]\n${extraText}\n[/quote]`;
-                blocks.push(wrapped.trim());
-            }
-
-            const poster = ($('#kposter img').first().attr('src') || '').trim();
-            if (poster) blocks.push(`[img]${poster}[/img]`);
-
-            // Intro text is usually inside `.info.douban-info` on CMCT.
-            const introEl =
-                ($('.info.douban-info artical').first()[0] as Element | undefined) ||
-                ($('.info.douban-info article').first()[0] as Element | undefined) ||
-                ($('.info.douban-info').first()[0] as Element | undefined);
-            if (introEl) {
-                let intro = htmlToBBCode(introEl).trim();
-                if (extraText && intro.includes(extraText)) intro = intro.replace(extraText, '').trim();
-                // Avoid carrying screenshots from intro block.
-                intro = intro.replace(/\[img\][\s\S]*?\[\/img\]\s*/gi, '').trim();
-                if (intro) blocks.push(intro);
-            }
-
-            const miEl = $('.codemain').eq(1)[0] as HTMLElement | undefined;
-            if (miEl) fullMediaInfo = (miEl.innerText || $(miEl).text() || '').trim();
-            if (fullMediaInfo) blocks.push(`[quote]${fullMediaInfo}[/quote]`);
-
-            $('.screenshots-container img, #kscreenshots img').each((_, img) => {
-                const src = ((img as HTMLImageElement).src || (img as HTMLImageElement).getAttribute('src') || '').trim();
-                if (!src) return;
-                if (src.includes('detail')) return;
-                if (poster && src === poster) return;
-                screenSet.add(src);
-            });
-            if (screenSet.size) {
-                blocks.push(Array.from(screenSet).map((u) => `[img]${u}[/img]`).join('\n'));
-            }
-
-            const rebuilt = blocks.join('\n\n').trim();
-            if (rebuilt) {
-                description = rebuilt;
-            } else if (description.trim()) {
-                // Fallback: split from existing description and de-duplicate screenshots.
-                const info = getMediainfoPictureFromDescr(description);
-                if (!fullMediaInfo && info.mediainfo) fullMediaInfo = info.mediainfo;
-                const intro = description.split('[quote]')[0].replace(/\[img\][\s\S]*?\[\/img\]\s*/gi, '').trim();
-                const shots = Array.from(new Set(
-                    (info.picInfo.match(/\[img\]([^\[]+?)\[\/img\]/gi) || [])
-                        .map((s) => s.replace(/\[img\]|\[\/img\]/gi, '').trim())
-                        .filter(Boolean)
-                        .filter((u) => !poster || u !== poster)
-                ));
-                description = [intro, fullMediaInfo ? `[quote]${fullMediaInfo}[/quote]` : '', shots.map((u) => `[img]${u}[/img]`).join('\n')]
-                    .filter(Boolean)
-                    .join('\n\n')
-                    .trim();
-            }
-        } catch { }
-    }
 
     const meta: TorrentMeta = {
         title,
@@ -223,10 +152,45 @@ export async function parseNexus(config: SiteConfig, currentUrl: string): Promis
         }
     } catch { }
 
-    // Basic category as type if present
-    const typeText = getText(configSelectors.subtitle) || $(selectors.category).text().trim();
+    // Basic category as type if present.
+    // Prefer first matched category cell instead of concatenating all matched rows.
+    const typeCandidates = [
+        $('td.rowhead:contains("类型") + td').first().text().trim(),
+        $('td.rowhead:contains("類別") + td').first().text().trim(),
+        $('td.rowhead:contains("Category") + td').first().text().trim(),
+        $('td.rowhead:contains("Type") + td').first().text().trim(),
+        $(selectors.category).first().text().trim()
+    ].filter(Boolean);
+    const typeText = typeCandidates[0] || '';
     if (typeText && !meta.type) {
-        meta.type = typeText;
+        meta.type = getType(typeText) || typeText;
+    }
+
+    if (!meta.type) {
+        const infoRowLabels = ['基本信息', '详细信息', '类型', '基本資訊', '標籤列表：', '媒介：', 'Basic Info', '分类 / 制作组', '种子信息'];
+        const tds = $('td').toArray();
+        for (let i = 0; i < tds.length - 1 && !meta.type; i++) {
+            const key = (tds[i].textContent || '').trim();
+            if (!key || infoRowLabels.indexOf(key) < 0) continue;
+            const infoText = (tds[i + 1].textContent || '').trim();
+            if (!infoText) continue;
+            const guessed = getType(infoText);
+            if (guessed) meta.type = guessed;
+        }
+    }
+
+    if (!meta.type) {
+        const blob = `${title}\n${meta.subtitle || ''}\n${description}`;
+        const lineType =
+            blob.match(/(?:^|\n)\s*(?:类型|類別|Category|Type)\s*[:：]\s*([^\n]+)/i)?.[1] ||
+            blob.match(/(?:^|\n)\s*◎\s*类\s*别\s*[:：]?\s*([^\n]+)/i)?.[1] ||
+            '';
+        if (lineType) meta.type = getType(lineType) || lineType.trim();
+    }
+
+    if (!meta.type) {
+        const guessed = getType(`${title}\n${meta.subtitle || ''}`);
+        if (guessed) meta.type = guessed;
     }
 
     return meta;

@@ -7,9 +7,11 @@
 
 这是一个面向 PT 转载场景的重构版脚本，目标是在保留原版核心体验的基础上，提供更清晰的站点适配结构与更稳定的转发流程。
 
-## 当前进度（2026-02-12）
+## 当前进度（2026-03-22）
 - 非音乐站点主链路（解析 -> 缓存 -> 预填）已基本稳定。
 - 音乐站点（RED / OPS / DIC / OpenCD）已接入，但仍在持续完善。
+- Monika（MDU）转发链路已按上游源码规则对齐修复（上传路径、搜索参数、关键表单映射）。
+- 快速搜索已按 `archive/auto_feed.legacy.user.js` 对齐（含 `nzbs.in`、字幕站等独立搜索站点）。
 - 详细状态见：[`docs/wiki/FEATURE_PARITY.md`](docs/wiki/FEATURE_PARITY.md)
 
 ## 核心功能
@@ -17,7 +19,7 @@
 - 自动预填标题、简介、媒体信息、图片等字段
 - IMDb -> 豆瓣 / PTGen 信息补全
 - 页面增强（PTP/HDB 等）与快速搜索入口
-- 图片转存与图床桥接（PTPIMG/PIXhost/Freeimage/Gifyu/Hostik 等）
+- 图片转存与图床桥接（PTPIMG / Pixhost / Freeimage / Hostik / hdbimg）
 - 远程推送（qBittorrent / Transmission / Deluge）
 - 种子清洗（Source/Announce/date/comment 等处理）
 
@@ -70,7 +72,7 @@ npm run dev:screen:stop
 ```
 
 ## 项目结构
-- `src/trackers/`：站点级 parse/fill（TTG、PTP、HDB、GPW、RED、OPS、OpenCD 等）
+- `src/trackers/`：站点级 parse/fill（一站一文件）
 - `src/templates/`：框架级模板（NexusPHP、Unit3D、Unit3DClassic）
 - `src/common/rules/`：通用纯规则（标题重建、分组名、字段规整）
 - `src/services/`：运行时服务（嵌入、增强、图床、远程推送、设置/存储）
@@ -82,6 +84,7 @@ npm run dev:screen:stop
 - 设置说明：[`docs/wiki/Settings.md`](docs/wiki/Settings.md)
 - 功能对照：[`docs/wiki/FEATURE_PARITY.md`](docs/wiki/FEATURE_PARITY.md)
 - 站点支持：[`docs/wiki/Site-Support.md`](docs/wiki/Site-Support.md)
+- 适配教程：[`docs/wiki/Refactor-Adaptation-Tutorial.md`](docs/wiki/Refactor-Adaptation-Tutorial.md)
 
 ## License
 GPL-3.0

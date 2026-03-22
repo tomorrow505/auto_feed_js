@@ -4,7 +4,6 @@ import { DEFAULT_QUICK_SEARCH_TEMPLATES } from '../common/quickSearch';
 
 export interface AppSettings {
     ptpImgApiKey: string;
-    pixhostApiKey: string;
     freeimageApiKey: string;
     gifyuApiKey: string;
     doubanCookie: string;
@@ -72,7 +71,6 @@ export interface RemoteServerConfig {
 
 const DEFAULT_SETTINGS: AppSettings = {
     ptpImgApiKey: '',
-    pixhostApiKey: '',
     freeimageApiKey: '',
     gifyuApiKey: '',
     doubanCookie: '',

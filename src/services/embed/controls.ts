@@ -7,13 +7,21 @@ import { QuickLinkService } from '../QuickLinkService';
 import { StorageService } from '../StorageService';
 import { extractDoubanId, extractImdbId } from '../../common/rules/links';
 import { renderQuickSearchHtml, resolveQuickSearchSetting } from '../../common/quickSearch';
-import { buildKgLegacyInfo, getForwardWarnings, openSettingsPanel, resolveFaviconUrl } from './shared';
+import {
+    buildKgLegacyInfo,
+    getExclusiveSourceWarnings,
+    getForwardTargetBlockReason,
+    getForwardWarnings,
+    openSettingsPanel,
+    resolveFaviconUrl
+} from './shared';
 
     export async function renderForwardRow(container: JQuery, meta: TorrentMeta, settings: AppSettings) {
         container.empty();
 
         const enabledSet = new Set(settings.enabledSites || []);
         const supported = SiteCatalogService.getSupportedSites().filter((s) => enabledSet.has(s.name));
+        const exclusiveWarnings = getExclusiveSourceWarnings(meta);
 
         // --- Forward targets (one-line list with favicon, legacy-like) ---
         const forwardLine = document.createElement('div');
@@ -76,7 +84,13 @@ import { buildKgLegacyInfo, getForwardWarnings, openSettingsPanel, resolveFavico
                 e.preventDefault();
                 e.stopPropagation();
 
-                const warnings = getForwardWarnings(site.name, meta);
+                const blockReason = getForwardTargetBlockReason(site.name, meta);
+                if (blockReason) {
+                    alert(blockReason);
+                    return;
+                }
+
+                const warnings = Array.from(new Set([...exclusiveWarnings, ...getForwardWarnings(site.name, meta)]));
                 if (warnings.length) {
                     const ok = window.confirm(`转发到 ${site.name} 可能违反以下规则:\n${warnings.join('\n')}\n是否仍继续发布？`);
                     if (!ok) return;
@@ -135,6 +149,15 @@ import { buildKgLegacyInfo, getForwardWarnings, openSettingsPanel, resolveFavico
         modeWrap.append(check, label);
         forwardLine.appendChild(modeWrap);
 
+        if (exclusiveWarnings.length) {
+            const tip = document.createElement('div');
+            tip.style.color = '#c0392b';
+            tip.style.fontWeight = 'bold';
+            tip.style.marginBottom = '6px';
+            tip.textContent = '[疑似禁转/禁止转载]';
+            tip.title = exclusiveWarnings.join('\n');
+            rootWrap(container).append(tip);
+        }
         rootWrap(container).append(forwardLine);
 
         // --- Tools row (legacy-ish text) ---
