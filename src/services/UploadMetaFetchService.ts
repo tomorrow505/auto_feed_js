@@ -7,7 +7,7 @@ import { StorageService } from './StorageService';
 import { TorrentService } from './TorrentService';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { isChineseNexusSite } from './SiteCatalogService';
-import { extractDoubanId, extractImdbId, matchLink } from '../common/rules/links';
+import { extractDoubanId, extractImdbId } from '../common/rules/links';
 
 export class UploadMetaFetchService {
     static async tryInject(adapter: BaseEngine) {
@@ -121,26 +121,41 @@ export class UploadMetaFetchService {
             next.description = currentDescr;
         }
 
-        const imdbLink = values.map((v) => matchLink('imdb', v)).find(Boolean) || '';
-        const doubanLink = values.map((v) => matchLink('douban', v)).find(Boolean) || '';
-        const imdbId = values.map((v) => extractImdbId(v)).find(Boolean) || '';
-        const doubanId = values.map((v) => extractDoubanId(v)).find(Boolean) || '';
+        const hintText = (el: HTMLInputElement) =>
+            `${el.name || ''} ${el.id || ''} ${el.placeholder || ''} ${el.getAttribute('aria-label') || ''}`.toLowerCase();
+        const imdbFieldValues = rawInputs
+            .filter((input) => /imdb/.test(hintText(input)))
+            .map((input) => String(input.value || '').trim())
+            .filter(Boolean);
+        const doubanFieldValues = rawInputs
+            .filter((input) => /douban/.test(hintText(input)))
+            .map((input) => String(input.value || '').trim())
+            .filter(Boolean);
 
-        if (imdbLink) {
-            next.imdbUrl = imdbLink;
-            next.imdbId = extractImdbId(imdbLink) || next.imdbId;
-        } else if (imdbId) {
-            next.imdbId = next.imdbId || imdbId;
-            if (next.imdbId) next.imdbUrl = next.imdbUrl || `https://www.imdb.com/title/${next.imdbId}/`;
-        }
+        // Generic fields may contain unrelated numeric values (e.g. TTG type ids).
+        // Only accept strict `tt\d+`/URL patterns from free text to avoid false positives.
+        const imdbIdFromFreeText = values
+            .map((v) => String(v || '').match(/tt\d{5,13}/i)?.[0] || '')
+            .find(Boolean) || '';
+        const doubanIdFromFreeText = values
+            .map((v) => String(v || '').match(/(?:douban\.com\/subject\/|subject\/)(\d{5,})/i)?.[1] || '')
+            .find(Boolean) || '';
+        const imdbUrlFromFreeText = values
+            .map((v) => String(v || '').match(/https?:\/\/(?:www\.)?imdb\.com\/title\/tt\d{5,13}\/?/i)?.[0] || '')
+            .find(Boolean) || '';
+        const doubanUrlFromFreeText = values
+            .map((v) => String(v || '').match(/https?:\/\/(?:movie\.)?douban\.com\/subject\/\d+\/?/i)?.[0] || '')
+            .find(Boolean) || '';
 
-        if (doubanLink) {
-            next.doubanUrl = doubanLink;
-            next.doubanId = extractDoubanId(doubanLink) || next.doubanId;
-        } else if (doubanId) {
-            next.doubanId = next.doubanId || doubanId;
-            if (next.doubanId) next.doubanUrl = next.doubanUrl || `https://movie.douban.com/subject/${next.doubanId}/`;
-        }
+        const imdbId = imdbFieldValues.map((v) => extractImdbId(v)).find(Boolean) || imdbIdFromFreeText;
+        const doubanId = doubanFieldValues.map((v) => extractDoubanId(v)).find(Boolean) || doubanIdFromFreeText;
+        const imdbUrl = imdbUrlFromFreeText || (imdbId ? `https://www.imdb.com/title/${imdbId}/` : '');
+        const doubanUrl = doubanUrlFromFreeText || (doubanId ? `https://movie.douban.com/subject/${doubanId}/` : '');
+
+        if (imdbId) next.imdbId = imdbId;
+        if (imdbUrl) next.imdbUrl = imdbUrl;
+        if (doubanId) next.doubanId = doubanId;
+        if (doubanUrl) next.doubanUrl = doubanUrl;
 
         return next;
     }

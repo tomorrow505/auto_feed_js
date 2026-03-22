@@ -9,15 +9,30 @@ export class NexusPHPEngine extends BaseEngine {
         super(config, url);
     }
 
+    protected async afterParse(meta: TorrentMeta): Promise<TorrentMeta> {
+        return meta;
+    }
+
+    protected async beforeFill(meta: TorrentMeta): Promise<TorrentMeta> {
+        return meta;
+    }
+
+    protected async afterFill(_meta: TorrentMeta): Promise<void> {
+        // no-op
+    }
+
     async parse(): Promise<TorrentMeta> {
         this.log('Parsing NexusPHP page...');
-        const meta = await parseNexus(this.config, this.currentUrl);
+        const parsed = await parseNexus(this.config, this.currentUrl);
+        const meta = await this.afterParse(parsed);
         this.log(`Parsed: ${meta.title}`);
         return meta;
     }
 
     async fill(meta: TorrentMeta): Promise<void> {
         this.log('Filling NexusPHP form...');
-        await fillNexus(meta, this.config);
+        const prepared = await this.beforeFill({ ...meta });
+        await fillNexus(prepared, this.config);
+        await this.afterFill(prepared);
     }
 }

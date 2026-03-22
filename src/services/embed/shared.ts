@@ -204,6 +204,8 @@ export function getForwardWarnings(siteName: string, meta: TorrentMeta): string[
     const warnings: string[] = [];
     const blob = `${meta.title || ''}\n${meta.smallDescr || ''}\n${meta.description || ''}`;
 
+    warnings.push(...getExclusiveSourceWarnings(meta));
+
     if (siteName === 'KG') {
         if (meta.standardSel === '4K' || /\b(?:4K|2160p)\b/i.test(blob)) {
             warnings.push('KG 不允许 4K / 2160p 资源。');
@@ -213,7 +215,73 @@ export function getForwardWarnings(siteName: string, meta: TorrentMeta): string[
         }
     }
 
-    return warnings;
+    return Array.from(new Set(warnings.filter(Boolean)));
+}
+
+export function getExclusiveSourceWarnings(meta: TorrentMeta): string[] {
+    const warnings: string[] = [];
+    const source = String(meta.sourceSite || meta.originSite || '').trim();
+    const title = String(meta.title || '').trim();
+    const blob = `${meta.title || ''}\n${meta.smallDescr || ''}\n${meta.subtitle || ''}\n${meta.description || ''}`.replace(/\[.*?\]/g, ' ');
+    const bodyText = String(document.body?.innerText || '');
+
+    // Legacy keyword guard (global).
+    if (blob.match(/(拒绝转发|不允许转发|严禁转发|谢绝.*?转载|禁转|禁止转载|禁止轉載|禁止转发|謝絕.*?轉載|exclusive|独占|獨占|no[\s-]?reupload|do not reupload|forbid.*reupload|禁止二次转载)/i)) {
+        warnings.push('资源命中禁转关键词（禁转/禁止转载/exclusive/no-reupload）。');
+    }
+    if (title.match(/Audies$|-ADE$|-ADWeb$|@Audies|@ADWeb/i)) {
+        warnings.push('资源命中观众系后缀（Audies/ADE/ADWeb），请按站点规则核查是否可转载。');
+    }
+
+    // Legacy source-site DOM rules.
+    if (source === 'PigGo' && !!document.querySelector('span')) {
+        const has = Array.from(document.querySelectorAll('span')).some((s) => (s.textContent || '').includes('禁转'));
+        if (has) warnings.push('PigGo 页面标记为禁转资源。');
+    }
+    if (source === 'HHClub' && Array.from(document.querySelectorAll('span')).some((s) => (s.textContent || '').includes('禁转'))) {
+        warnings.push('HHClub 页面标记为禁转资源。');
+    }
+    if (source === 'TJUPT' && !!document.querySelector('#tag .tag-exclusive')) {
+        warnings.push('TJUPT 标签包含 exclusive（禁转）。');
+    }
+    if (source === 'PTer' && !!document.querySelector('#kdescr a[href*="tag_exclusive=yes"], a[href*="tag_exclusive=yes"]')) {
+        warnings.push('PTer 标签包含 `tag_exclusive=yes`（禁转）。');
+    }
+    if (['HDDolby', 'HDHome', 'PThome', 'Audiences'].includes(source)) {
+        const hasTag = !!document.querySelector('span.txz, span.tjz');
+        if (hasTag) warnings.push(`${source} 页面标签包含限转/禁转标记（txz/tjz）。`);
+    }
+    if (source === 'BHD' && /THIS IS A BEYONDHD EXCLUSIVE\./i.test(bodyText)) {
+        warnings.push('BHD 页面标记为 EXCLUSIVE。');
+    }
+    if (source === 'HDB' && !!document.querySelector('div.torrent-title > span.exclusive')) {
+        warnings.push('HDB 页面存在 exclusive 标记。');
+    }
+    if (source === 'CMCT' && bodyText.includes('禁转')) {
+        warnings.push('CMCT 页面出现禁转标记。');
+    }
+    if (source === 'OpenCD' && bodyText.includes('禁止轉載')) {
+        warnings.push('OpenCD 页面出现“禁止轉載”标记。');
+    }
+
+    return Array.from(new Set(warnings.filter(Boolean)));
+}
+
+export function getForwardTargetBlockReason(targetSite: string, meta: TorrentMeta): string {
+    const title = String(meta.title || '');
+    const source = String(meta.sourceSite || meta.originSite || '');
+    const medium = String(meta.mediumSel || '');
+
+    if ((source === 'FRDS' || /frds/i.test(title)) && ['CMCT', 'OurBits', 'HDSky'].includes(targetSite)) {
+        return 'FRDS 资源不支持转发到 CMCT / OurBits / HDSky。';
+    }
+    if (/Audies$|-ADE$|-ADWeb$/i.test(title) && targetSite === 'PTT') {
+        return '该资源触发观众系禁转规则（Audies/ADE/ADWeb -> PTT）。';
+    }
+    if (targetSite === 'OurBits' && (medium === 'Remux' || /Remux/i.test(title))) {
+        return 'OurBits 禁止 Remux 资源转发。';
+    }
+    return '';
 }
 
 export function buildKgLegacyInfo(meta: TorrentMeta) {

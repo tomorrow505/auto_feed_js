@@ -350,6 +350,8 @@ export class RemoteDownloadService {
                 const margin = 6;
                 const vh = window.innerHeight || document.documentElement.clientHeight || 800;
                 if (left < margin) left = margin;
+                const maxLeft = Math.max(margin, (window.innerWidth || document.documentElement.clientWidth || 1280) - w - margin);
+                if (left > maxLeft) left = maxLeft;
                 if (top < margin) top = margin;
                 const h = submenu.offsetHeight || 160;
                 if (top + h + margin > vh) top = Math.max(margin, vh - h - margin);
@@ -382,6 +384,20 @@ export class RemoteDownloadService {
     }
 
     private static DRAG_KEY = 'autofeed_remote_sidebar_pos';
+    private static clampSidebarPos(sidebar: HTMLElement, x: number, y: number): { x: number; y: number } {
+        const vw = window.innerWidth || document.documentElement.clientWidth || 1280;
+        const vh = window.innerHeight || document.documentElement.clientHeight || 800;
+        const w = sidebar.offsetWidth || 82;
+        const h = sidebar.offsetHeight || 220;
+        const margin = 4;
+        const maxX = Math.max(margin, vw - w - margin);
+        const maxY = Math.max(margin, vh - h - margin);
+        return {
+            x: Math.min(Math.max(margin, Number.isFinite(x) ? x : margin), maxX),
+            y: Math.min(Math.max(margin, Number.isFinite(y) ? y : margin), maxY)
+        };
+    }
+
     private static enableDrag() {
         const sidebar = document.getElementById('autofeed-remote-sidebar') as HTMLElement | null;
         if (!sidebar) return;
@@ -394,8 +410,9 @@ export class RemoteDownloadService {
             try {
                 const p = JSON.parse(raw);
                 if (typeof p?.x === 'number' && typeof p?.y === 'number') {
-                    sidebar.style.left = `${p.x}px`;
-                    sidebar.style.top = `${p.y}px`;
+                    const clamped = this.clampSidebarPos(sidebar, p.x, p.y);
+                    sidebar.style.left = `${clamped.x}px`;
+                    sidebar.style.top = `${clamped.y}px`;
                     sidebar.style.right = 'auto';
                     sidebar.style.transform = 'none';
                 }
@@ -414,10 +431,9 @@ export class RemoteDownloadService {
             e.preventDefault();
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
-            const nextX = Math.max(0, baseX + dx);
-            const nextY = Math.max(0, baseY + dy);
-            sidebar.style.left = `${nextX}px`;
-            sidebar.style.top = `${nextY}px`;
+            const clamped = this.clampSidebarPos(sidebar, baseX + dx, baseY + dy);
+            sidebar.style.left = `${clamped.x}px`;
+            sidebar.style.top = `${clamped.y}px`;
             sidebar.style.right = 'auto';
             sidebar.style.transform = 'none';
         };
@@ -430,6 +446,16 @@ export class RemoteDownloadService {
             const y = parseInt(sidebar.style.top || '0', 10);
             GMAdapter.setValue(this.DRAG_KEY, JSON.stringify({ x, y })).catch(() => {});
         };
+
+        const onResize = () => {
+            if (!sidebar.style.left || !sidebar.style.top || sidebar.style.right !== 'auto') return;
+            const x = parseInt(sidebar.style.left || '0', 10);
+            const y = parseInt(sidebar.style.top || '0', 10);
+            const clamped = this.clampSidebarPos(sidebar, x, y);
+            sidebar.style.left = `${clamped.x}px`;
+            sidebar.style.top = `${clamped.y}px`;
+        };
+        window.addEventListener('resize', onResize, { passive: true });
 
         header.addEventListener('mousedown', (e) => {
             // Only left click
@@ -740,25 +766,20 @@ export class RemoteDownloadService {
                 method: 'POST',
                 url: `${host}api/v2/auth/login`,
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-                data: new URLSearchParams({ username: server.username, password: server.password }).toString()
+                data: new URLSearchParams({ username: server.username, password: server.password }).toString(),
+                anonymous: true,
+                withCredentials: false
             });
             if (login.status !== 200) {
                 return { ok: false, message: `登录失败: HTTP ${login.status}` };
             }
+            const text = String(login.responseText || '').trim();
+            if (!/^ok\.?$/i.test(text)) {
+                return { ok: false, message: text ? `登录失败: ${text}` : '登录失败: 凭据无效' };
+            }
+            return { ok: true, message: 'OK: qBittorrent 登录成功' };
         } catch (err: any) {
             return { ok: false, message: `登录失败: ${err?.message || String(err)}` };
-        }
-
-        try {
-            const versionResp = await GMAdapter.xmlHttpRequest({
-                method: 'GET',
-                url: `${host}api/v2/app/version`
-            });
-            if (versionResp.status !== 200) return { ok: false, message: `Version 请求失败: HTTP ${versionResp.status}` };
-            const ver = (versionResp.responseText || '').trim();
-            return { ok: true, message: ver ? `OK: qBittorrent ${ver}` : 'OK' };
-        } catch (err: any) {
-            return { ok: false, message: `Version 请求失败: ${err?.message || String(err)}` };
         }
     }
 
@@ -779,12 +800,29 @@ export class RemoteDownloadService {
                     Authorization: auth,
                     ...(sessionId ? { 'X-Transmission-Session-Id': sessionId } : {})
                 },
-                data: payload
+                data: payload,
+                anonymous: true,
+                withCredentials: false
             });
+
+        const parseResult = (responseText: string): string => {
+            if (!responseText) return '';
+            try {
+                const json = JSON.parse(responseText);
+                return String(json?.result || '');
+            } catch {
+                return '';
+            }
+        };
 
         try {
             const first = await requestOnce();
-            if (first.status === 200) return { ok: true, message: 'OK: Transmission RPC' };
+            if (first.status === 401) return { ok: false, message: '认证失败: 用户名或密码错误' };
+            if (first.status === 200) {
+                const result = parseResult(first.responseText || '');
+                if (result && result !== 'success') return { ok: false, message: `RPC 失败: ${result}` };
+                return { ok: true, message: 'OK: Transmission RPC' };
+            }
             if (first.status !== 409) return { ok: false, message: `RPC 失败: HTTP ${first.status}` };
 
             const match = (first.responseHeaders || '').match(/X-Transmission-Session-Id:\s*(.+)/i);
@@ -792,7 +830,12 @@ export class RemoteDownloadService {
             if (!sid) return { ok: false, message: 'RPC 失败: 缺少 Session-Id' };
 
             const second = await requestOnce(sid);
-            if (second.status === 200) return { ok: true, message: 'OK: Transmission RPC' };
+            if (second.status === 401) return { ok: false, message: '认证失败: 用户名或密码错误' };
+            if (second.status === 200) {
+                const result = parseResult(second.responseText || '');
+                if (result && result !== 'success') return { ok: false, message: `RPC 失败: ${result}` };
+                return { ok: true, message: 'OK: Transmission RPC' };
+            }
             return { ok: false, message: `RPC 失败: HTTP ${second.status}` };
         } catch (err: any) {
             return { ok: false, message: `RPC 失败: ${err?.message || String(err)}` };
@@ -953,32 +996,66 @@ export class RemoteDownloadService {
         #autofeed-remote-sidebar {
             position: fixed;
             top: 50%;
-            right: 5px;
+            right: 8px;
             transform: translateY(-50%);
-            width: 70px;
-            background-color: #2c3e50;
-            border: none;
-            border-radius: 8px;
+            width: 86px;
+            max-width: calc(100vw - 16px);
+            box-sizing: border-box;
+            background-color: #243447;
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.28);
             z-index: 9999;
         }
         #autofeed-remote-sidebar .sidebar-header {
             color: #ecf0f1;
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             text-align: center;
-            padding: 8px 0;
-            margin-bottom: 5px;
+            padding: 8px 4px 6px;
+            margin-bottom: 4px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
         }
         #autofeed-remote-sidebar ul {
             list-style: none;
             padding: 0;
             margin: 0;
+        }
+        #autofeed-remote-list > li {
+            position: relative;
+        }
+        #autofeed-remote-list > li > a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 11px 6px;
+            text-decoration: none;
+            color: #ecf0f1;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+        #autofeed-remote-list > li > a:hover {
+            background-color: #2d4258;
+        }
+        #autofeed-remote-list > li:first-child > a {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        #autofeed-remote-list > li:last-child > a {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
         }
         #autofeed-remote-status {
             padding: 8px 8px;
@@ -992,53 +1069,57 @@ export class RemoteDownloadService {
         }
         #autofeed-remote-status[data-kind="ok"] { color: #b6f7c1; }
         #autofeed-remote-status[data-kind="err"] { color: #ffd0d0; }
-        #autofeed-remote-sidebar li a {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 15px 10px;
-            text-decoration: none;
-            color: #ecf0f1;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            font-size: 14px;
-            font-weight: 500;
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-        }
-        #autofeed-remote-sidebar li a:hover {
-            background-color: #34495e;
-        }
         #autofeed-remote-sidebar .submenu {
             display: none;
             position: absolute;
             left: -100%;
-            width: 280px;
-            background-color: #34495e;
+            width: 360px;
+            max-width: min(66vw, 520px);
+            background-color: #1f2d3d;
             border-radius: 8px;
             box-shadow: -4px 0 10px rgba(0, 0, 0, 0.15);
             z-index: 10;
+            overflow: hidden;
         }
         #autofeed-remote-sidebar .submenu li a {
             color: #bdc3c7;
-            padding: 8px 10px;
-            font-size: 12px;
-            align-items: flex-start;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
             justify-content: flex-start;
-            flex-direction: column;
-            gap: 3px;
-            line-height: 1.2;
+            gap: 8px;
+            line-height: 1.35;
+            white-space: nowrap;
+            border-radius: 0;
+            text-decoration: none;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
         }
         #autofeed-remote-sidebar .submenu li a .af-remote-path-label {
             color: #ecf0f1;
             font-weight: 600;
+            background: rgba(255, 255, 255, 0.10);
+            border-radius: 999px;
+            padding: 2px 8px;
+            min-width: 48px;
+            text-align: center;
+            flex: 0 0 auto;
         }
         #autofeed-remote-sidebar .submenu li a .af-remote-path-value {
             color: #b8c8d8;
-            font-size: 11px;
-            word-break: break-all;
-            white-space: normal;
+            font-size: 13px;
+            min-width: 0;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-align: left;
         }
-        #autofeed-remote-sidebar .submenu li a:hover {
-            background-color: #4a6781;
+        #autofeed-remote-sidebar .submenu li a:hover,
+        #autofeed-remote-sidebar .submenu li a:focus {
+            background-color: #2d4258;
             color: #ecf0f1;
         }
         .dialog0 {

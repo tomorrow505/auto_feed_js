@@ -57,10 +57,6 @@ export default defineConfig({
                 match: [
                     'https://kp.m-team.cc/detail/*',
                     'https://kp.m-team.cc/upload*',
-                    '*://*/*detail*.php*',
-                    '*://*/detail*.php*',
-                    '*://*/upload*php*',
-                    '*://*/offer*php*',
                     'https://blutopia.cc/torrents?imdb=tt*',
                     'https://blutopia.cc/torrents/create*',
                     'https://passthepopcorn.me/*',
@@ -81,7 +77,6 @@ export default defineConfig({
                     'https://www.douban.com/subject/*',
                     'https://movie.douban.com/subject/*',
                     'https://www.imdb.com/title/tt*',
-                    '*://*/*index.php?page=torrent-details*',
                     'https://GreatPosterWall.com/*',
                     'https://greatposterwall.com/*',
                     'https://broadcasthe.net/*.php*',
@@ -92,10 +87,7 @@ export default defineConfig({
                     'https://redacted.ch/*',
                     'https://redacted.sh/*',
                     'https://orpheus.network/*',
-                    'https://dicmusic.com/*',
-                    // Standard userscript catch-all patterns (avoid non-standard `http*://`).
-                    'http://*/*',
-                    'https://*/*'
+                    'https://dicmusic.com/*'
                 ],
                 exclude: ['*://*bitpt.cn*'],
                 grant: [

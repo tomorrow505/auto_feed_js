@@ -18,6 +18,17 @@ import { OPSEngine } from '../trackers/OPS';
 import { DICEngine } from '../trackers/DIC';
 import { OpenCDEngine } from '../trackers/OpenCD';
 import { TikEngine } from '../trackers/Tik';
+import { ACMEngine } from '../trackers/ACM';
+import { BLUEngine } from '../trackers/BLU';
+import { MonikaEngine } from '../trackers/Monika';
+import { OnlyEncodesEngine } from '../trackers/OnlyEncodes';
+import { CMCTEngine } from '../trackers/nexus/CMCT';
+import { HDSkyEngine } from '../trackers/nexus/HDSky';
+import { PTerEngine } from '../trackers/nexus/PTer';
+import { AudiencesEngine } from '../trackers/nexus/Audiences';
+import { HDHomeEngine } from '../trackers/nexus/HDHome';
+import { OurBitsEngine } from '../trackers/nexus/OurBits';
+import { FRDSEngine } from '../trackers/nexus/FRDS';
 import { NexusSites } from '../config/sites_nexus';
 import { GazelleSites } from '../config/sites_gazelle';
 import { Unit3DSites } from '../config/sites_unit3d';
@@ -44,14 +55,30 @@ const engineMap: Record<string, new (config: SiteConfig, url: string) => BaseEng
 };
 
 // Site-specific engines override framework-level engines.
-// This keeps per-site behavior isolated in dedicated files (TTG/GPW/RED/OPS/OpenCD etc).
+// Keep one-file-per-site mapping here so site behaviors do not leak into framework templates.
 const siteEngineMap: Record<string, new (config: SiteConfig, url: string) => BaseEngine> = {
+    ACM: ACMEngine,
+    Audiences: AudiencesEngine,
+    CHDBits: CHDBitsEngine,
+    BLU: BLUEngine,
+    CMCT: CMCTEngine,
+    FRDS: FRDSEngine,
+    HDB: HDBEngine,
+    HDHome: HDHomeEngine,
+    HDSky: HDSkyEngine,
+    KG: KGEngine,
+    MTeam: MTeamEngine,
+    Monika: MonikaEngine,
+    OpenCD: OpenCDEngine,
+    OnlyEncodes: OnlyEncodesEngine,
+    OurBits: OurBitsEngine,
+    PTP: PTPEngine,
+    PTer: PTerEngine,
     TTG: TTGEngine,
     GPW: GPWEngine,
     RED: REDEngine,
     OPS: OPSEngine,
     DIC: DICEngine,
-    OpenCD: OpenCDEngine,
     Tik: TikEngine
 };
 

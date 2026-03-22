@@ -7,12 +7,34 @@ import $ from 'jquery';
 import { GMAdapter } from '../services/GMAdapter';
 import { SettingsService, getEffectiveTmdbApiKey } from '../services/SettingsService';
 import { getMediainfoPictureFromDescr } from '../common/rules/media';
-import { getSizeFromDescr } from '../common/rules/helpers';
 import { extractImdbId, extractTmdbId } from '../common/rules/links';
+
+export interface ClassicTypeSelectionContext {
+    meta: TorrentMeta;
+    titleBlob: string;
+    descrBlob: string;
+    medium: string;
+    standard: string;
+    typeId: HTMLSelectElement | null;
+    setSelectIndex: (sel: HTMLSelectElement | null, idx: number) => boolean;
+    setAutoTypeValue: (v: string) => boolean;
+}
 
 export class Unit3DEngine extends BaseEngine {
     constructor(config: SiteConfig, url: string) {
         super(config, url);
+    }
+
+    protected applyClassicSiteTypeSelection(_ctx: ClassicTypeSelectionContext): boolean {
+        return false;
+    }
+
+    protected getClassicAutoResolutionMap(): Record<string, number> {
+        return { '4K': 2, '1080p': 3, '1080i': 4, '720p': 5, SD: 10, '': 10, '8K': 1 };
+    }
+
+    protected getClassicResolutionFallbackMap(): Record<string, number> {
+        return { '4K': 2, '1080p': 3, '1080i': 4, '720p': 5, SD: 10, '8K': 1 };
     }
 
     async parse(): Promise<TorrentMeta> {
@@ -98,6 +120,7 @@ export class Unit3DEngine extends BaseEngine {
 
     async fill(meta: TorrentMeta): Promise<void> {
         this.log('Filling Unit3D form...');
+        const cfg = this.config.selectors || {};
 
         const fire = (el: HTMLElement) => {
             try { el.dispatchEvent(new Event('input', { bubbles: true })); } catch {}
@@ -160,6 +183,7 @@ export class Unit3DEngine extends BaseEngine {
         // --- Title ---
         const title = meta.title || '';
         const titleInputs = [
+            cfg.nameInput || '',
             'input[name="name"]',
             'input#name',
             'input[name="title"]',
@@ -167,7 +191,7 @@ export class Unit3DEngine extends BaseEngine {
             'input#titleauto',
             'input#upload-form-name',
             'input#upload-form-title'
-        ];
+        ].filter(Boolean);
         const lockTitleAfterFileInject = () => {
             if (!title) return;
             [0, 120, 380, 900, 1800, 3000].forEach((ms) => {
@@ -192,7 +216,7 @@ export class Unit3DEngine extends BaseEngine {
 
         // --- IDs (Unit3D variants use different ids/names) ---
         // Legacy parity:
-        // - Some Unit3DClassic sites (e.g. BLU/Tik) re-render parts of the form after `#autocat` change,
+        // - Some Unit3DClassic sites re-render parts of the form after `#autocat` change,
         //   which can wipe imdb/tmdb inputs. So we apply IDs now and again a bit later.
         // NOTE: Regex literals should use `\d` not `\\d` (the latter matches a literal "\d").
         const imdbId = meta.imdbId || extractImdbId(meta.imdbUrl || '') || '';
@@ -202,7 +226,7 @@ export class Unit3DEngine extends BaseEngine {
             try {
                 if (imdbId) {
                     // Classic auto fields (digits only)
-                    setAnyText(['input#autoimdb'], imdbNo);
+                    setAnyText([cfg.imdbInput || '', 'input#autoimdb'].filter(Boolean), imdbNo);
                     // Generic fields
                     setAnyText(['input[name="imdb_id"]', 'input#imdb_id', 'input[name="imdb"]', 'input#imdb'], imdbId);
                     // Some Unit3D forms use a generic url field for IMDb.
@@ -278,6 +302,24 @@ export class Unit3DEngine extends BaseEngine {
         // Third pass (after autocat-driven re-render)
         setTimeout(applyIds, 1200);
 
+        // Subtitle / small description
+        try {
+            const small = (meta.smallDescr || meta.subtitle || '').trim();
+            if (small) {
+                setAnyText(
+                    [
+                        cfg.smallDescrInput || '',
+                        'input[name="small_description"]',
+                        'input[name="small_descr"]',
+                        'input[name="subtitle"]',
+                        'input#subtitle',
+                        'input[name="subhead"]'
+                    ].filter(Boolean),
+                    small
+                );
+            }
+        } catch {}
+
         const typeMap: Record<string, (string | RegExp)[]> = {
             电影: [/Movie/i, /电影/],
             剧集: [/TV/i, /Series/i, /剧集/],
@@ -290,7 +332,7 @@ export class Unit3DEngine extends BaseEngine {
         }
 
         // --- Unit3DClassic legacy "auto" controls (autocat/autotype/autores/autoreg) ---
-        // Match `archive/auto_feed.legacy.user.js` logic for BLU/Tik/Aither/FNP/OnlyEncodes/ReelFliX/ACM/Monika.
+        // Keep generic logic in template; site-specific branches are in dedicated tracker files.
         try {
             const autocat = document.querySelector('#autocat') as HTMLSelectElement | null;
             const autores = document.querySelector('#autores') as HTMLSelectElement | null;
@@ -348,54 +390,18 @@ export class Unit3DEngine extends BaseEngine {
             }
 
             // --- type_id / autotype ---
-            // Legacy drives `type_id` by option index for most sites, except ACM/Tik which use `#autotype` values.
-            const discSize = (medium === 'Blu-ray' || medium === 'UHD') ? getSizeFromDescr(descrBlob) : 0;
-            if (this.siteName === 'ACM') {
-                if (medium === 'UHD') {
-                    if (/remux/i.test(titleBlob)) {
-                        setAutoTypeValue('12');
-                    } else if (0 <= discSize && discSize < 46.57) {
-                        setAutoTypeValue('3');
-                    } else if (discSize < 61.47) {
-                        setAutoTypeValue('2');
-                    } else {
-                        setAutoTypeValue('1');
-                    }
-                } else if (medium === 'Blu-ray') {
-                    if (0 <= discSize && discSize < 23.28) setAutoTypeValue('5');
-                    else if (discSize < 46.57) setAutoTypeValue('4');
-                } else if (medium === 'Remux') setAutoTypeValue('7');
-                else if (medium === 'HDTV') setAutoTypeValue('17');
-                else if (medium === 'Encode') {
-                    if (standard === '4K') setAutoTypeValue('8');
-                    else if (standard === '1080p' || standard === '1080i') setAutoTypeValue('10');
-                    else if (standard === '720p') setAutoTypeValue('11');
-                    else if (standard === 'SD') setAutoTypeValue('13');
-                } else if (medium === 'DVD') {
-                    setAutoTypeValue(/dvd5/i.test(titleBlob) ? '14' : '16');
-                } else if (medium === 'WEB-DL') setAutoTypeValue('9');
-                if (/webrip/i.test(titleBlob)) setAutoTypeValue('9');
-            } else if (this.siteName === 'Tik') {
-                if (/dvd5/i.test(titleBlob)) {
-                    setAutoTypeValue(/Standard.*?PAL/i.test(descrBlob) ? '10' : '8');
-                } else if (/dvd9/i.test(titleBlob)) {
-                    setAutoTypeValue(/Standard.*?PAL/i.test(descrBlob) ? '9' : '7');
-                } else if (/mpls/i.test(descrBlob) && (medium === 'Blu-ray' || medium === 'UHD')) {
-                    if (0 <= discSize && discSize < 23.28) setAutoTypeValue('6');
-                    else if (discSize < 46.57) setAutoTypeValue('5');
-                    else if (discSize < 61.47) setAutoTypeValue('4');
-                    else setAutoTypeValue('3');
-                }
-            } else if (this.siteName === 'OnlyEncodes') {
-                // OnlyEncodes uses different ordering (legacy index mapping).
-                if (medium === 'UHD' || medium === 'Blu-ray') setSelectIndex(typeId, 4);
-                else if (medium === 'Remux') setSelectIndex(typeId, 5);
-                else if (medium === 'HDTV') setSelectIndex(typeId, 6);
-                else if (medium === 'Encode') {
-                    if (meta.codecSel === 'X264' || meta.codecSel === 'H264') setSelectIndex(typeId, 2);
-                    else setSelectIndex(typeId, 1);
-                } else if (medium === 'WEB-DL') setSelectIndex(typeId, 6);
-            } else {
+            // Keep template generic; site-specific branches live in dedicated tracker files.
+            const handledBySite = this.applyClassicSiteTypeSelection({
+                meta,
+                titleBlob,
+                descrBlob,
+                medium,
+                standard,
+                typeId,
+                setSelectIndex,
+                setAutoTypeValue
+            });
+            if (!handledBySite) {
                 // Default Unit3DClassic mapping (legacy index mapping).
                 if (medium === 'UHD' || medium === 'Blu-ray') setSelectIndex(typeId, 1);
                 else if (medium === 'Remux') setSelectIndex(typeId, 2);
@@ -407,9 +413,7 @@ export class Unit3DEngine extends BaseEngine {
 
             // --- resolution_id / autores ---
             if (autores && meta.standardSel) {
-                let dict: Record<string, number> = { '4K': 2, '1080p': 3, '1080i': 4, '720p': 5, SD: 10, '': 10 as any, '8K': 1 };
-                if (this.siteName === 'ACM') dict = { '4K': 1, '1080p': 2, '1080i': 2, '720p': 3, SD: 4, '': 0 as any, '8K': 0 as any };
-                else if (this.siteName === 'BLU') dict = { '4K': 1, '1080p': 2, '1080i': 3, '720p': 5, SD: 0, '': 0 as any, '8K': 11 };
+                const dict = this.getClassicAutoResolutionMap();
                 const idx = dict[meta.standardSel];
                 if (idx !== undefined) {
                     autores.value = String(idx);
@@ -518,8 +522,7 @@ export class Unit3DEngine extends BaseEngine {
                 (document.querySelector('#resolution_id') as HTMLSelectElement | null) ||
                 (document.querySelector('select[name="resolution_id"]') as HTMLSelectElement | null);
             if (sel && meta.standardSel) {
-                let dict: Record<string, number> = { '4K': 2, '1080p': 3, '1080i': 4, '720p': 5, SD: 10, '8K': 1 };
-                if (this.siteName === 'BLU') dict = { '4K': 1, '1080p': 2, '1080i': 3, '720p': 5, SD: 0, '8K': 11 };
+                const dict = this.getClassicResolutionFallbackMap();
                 const idx = dict[meta.standardSel];
                 if (idx !== undefined) {
                     const want = String(idx);
@@ -576,7 +579,16 @@ export class Unit3DEngine extends BaseEngine {
             // Screenshots / bbcode description (best-effort)
             const body = (picText || meta.description || '').trim();
             if (body) {
-                setAnyText(['textarea#upload-form-description', 'textarea#bbcode-description', 'textarea[name="description"]', 'textarea#description'], body);
+                setAnyText(
+                    [
+                        cfg.descrInput || '',
+                        'textarea#upload-form-description',
+                        'textarea#bbcode-description',
+                        'textarea[name="description"]',
+                        'textarea#description'
+                    ].filter(Boolean),
+                    body
+                );
             }
         } catch {}
 
@@ -595,7 +607,17 @@ export class Unit3DEngine extends BaseEngine {
             this.log('Injecting torrent file...');
             const fileInput =
                 ($(
-                    'input[type="file"]#torrent, input[type="file"][name="torrent"], input[type="file"][accept*="torrent"], input.upload-form-file[type="file"]'
+                    [
+                        cfg.torrentInput || '',
+                        'input[type="file"]#torrent',
+                        'input[type="file"]#file',
+                        'input[type="file"][name="torrent"]',
+                        'input[type="file"][name="file"]',
+                        'input[type="file"][accept*="torrent"]',
+                        'input.upload-form-file[type="file"]'
+                    ]
+                        .filter(Boolean)
+                        .join(', ')
                 )[0] as HTMLInputElement) ||
                 null;
             if (fileInput) {

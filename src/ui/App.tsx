@@ -1,8 +1,8 @@
 
 import { h } from 'preact';
-import { useState, useEffect } from 'preact/hooks';
+import { useState, useEffect, useRef } from 'preact/hooks';
 import { SettingsService, AppSettings } from '../services/SettingsService';
-import { DEFAULT_QUICK_SEARCH_TEMPLATES } from '../common/quickSearch';
+import { DEFAULT_QUICK_SEARCH_TEMPLATES, getQuickSearchPresetLabel } from '../common/quickSearch';
 import { SiteCatalogService } from '../services/SiteCatalogService';
 import { RemoteDownloadService } from '../services/RemoteDownloadService';
 import { i18n, SupportedLang } from './i18n';
@@ -14,7 +14,6 @@ export const App = () => {
     const [drag, setDrag] = useState<{ offsetX: number; offsetY: number } | null>(null);
     const [settings, setSettings] = useState<AppSettings>({
         ptpImgApiKey: '',
-        pixhostApiKey: '',
         freeimageApiKey: '',
         gifyuApiKey: '',
         doubanCookie: '',
@@ -54,6 +53,7 @@ export const App = () => {
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
     const [remoteModalOpen, setRemoteModalOpen] = useState(false);
+    const [remoteSaving, setRemoteSaving] = useState(false);
     const [remoteForm, setRemoteForm] = useState<{
         type: 'qb' | 'tr' | 'de';
         name: string;
@@ -73,6 +73,8 @@ export const App = () => {
 
     const [quickPreset, setQuickPreset] = useState('');
     const [quickPresetInput, setQuickPresetInput] = useState('');
+    const settingsRef = useRef<AppSettings>(settings);
+    const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
 
     const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
     const getPanelSize = () => {
@@ -98,6 +100,7 @@ export const App = () => {
 
         SettingsService.load().then((loaded) => {
             setSettings(loaded);
+            settingsRef.current = loaded;
             if (loaded.quickSearchList && loaded.quickSearchList.length) {
                 setQuickPreset(loaded.quickSearchList[0]);
             } else if (DEFAULT_QUICK_SEARCH_TEMPLATES.length) {
@@ -164,10 +167,15 @@ export const App = () => {
         };
     }, [drag]);
 
+    useEffect(() => {
+        settingsRef.current = settings;
+    }, [settings]);
+
     const handleSaveSettings = async () => {
         setSaveState('saving');
         try {
-            await SettingsService.save(settings);
+            const ok = await persistSettings(settingsRef.current);
+            if (!ok) throw new Error('save failed');
             setSaveState('saved');
             window.setTimeout(() => setSaveState('idle'), 1500);
         } catch {
@@ -176,9 +184,63 @@ export const App = () => {
         }
     };
 
-    const setAndPersist = (next: AppSettings) => {
+    const persistSettings = async (next: AppSettings): Promise<boolean> => {
         setSettings(next);
-        SettingsService.save(next).catch(() => { });
+        settingsRef.current = next;
+        let ok = true;
+        const run = async () => {
+            try {
+                await SettingsService.save(next);
+            } catch {
+                ok = false;
+            }
+        };
+        const queued = saveQueueRef.current
+            .catch(() => undefined)
+            .then(run);
+        saveQueueRef.current = queued;
+        await queued;
+        return ok;
+    };
+
+    const setAndPersist = (next: AppSettings) => {
+        void persistSettings(next);
+    };
+
+    const normalizeRemoteUrl = (url: string): string => {
+        let u = String(url || '').trim();
+        if (!u) return '';
+        if (!/^https?:\/\//i.test(u)) u = `http://${u}`;
+        if (!u.endsWith('/')) u += '/';
+        return u;
+    };
+
+    const cloneRemoteServer = (src: any) => ({
+        qbittorrent: { ...(src?.qbittorrent || {}) },
+        transmission: { ...(src?.transmission || {}) },
+        deluge: { ...(src?.deluge || {}) }
+    });
+
+    const resetRemoteForm = () => {
+        setRemoteForm({
+            type: 'qb',
+            name: '',
+            url: '',
+            username: '',
+            password: '',
+            paths: [{ label: 'default', path: '' }]
+        });
+    };
+
+    const getRemotePathRows = (pathMap: Record<string, string> | undefined) => {
+        const rows = Object.entries(pathMap || {})
+            .map(([label, path]) => ({ label: String(label || '').trim(), path: String(path || '').trim() }))
+            .filter((it) => it.label || it.path)
+            .map((it, idx) => ({
+                label: it.label || (idx === 0 ? 'default' : `path${idx + 1}`),
+                path: it.path
+            }));
+        return rows.length ? rows : [{ label: 'default', path: '' }];
     };
 
     const applyRemoteSidebarOpacity = (value: number) => {
@@ -218,18 +280,6 @@ export const App = () => {
             return (s.slice(0, 4) || n.slice(0, 4)).toUpperCase();
         }
         return n.slice(0, 2);
-    };
-
-    const getQuickSearchPresetLabel = (line: string) => {
-        const anchorText = line.match(/>([^<]+)<\/a>/i)?.[1];
-        if (anchorText) return anchorText.trim();
-        const pipe = line.split('|');
-        if (pipe.length > 1) return pipe[0].trim();
-        try {
-            return new URL(line).hostname.replace(/^www\./, '');
-        } catch {
-            return line;
-        }
     };
 
     const quickSearchPresets = Array.from(new Set([
@@ -585,7 +635,6 @@ export const App = () => {
                             <div className="af-card">
                                 <div className="af-card-header">{t.servicesApiKeys}</div>
                                 <InputRow label="PtpImg API Key" value={settings.ptpImgApiKey} onInput={v => setAndPersist({ ...settings, ptpImgApiKey: v })} />
-                                <InputRow label="Pixhost API Key" value={settings.pixhostApiKey} onInput={v => setAndPersist({ ...settings, pixhostApiKey: v })} />
                                 <InputRow label="Freeimage API Key" value={settings.freeimageApiKey} onInput={v => setAndPersist({ ...settings, freeimageApiKey: v })} />
                                 <InputRow label="Gifyu API Key" value={settings.gifyuApiKey} onInput={v => setAndPersist({ ...settings, gifyuApiKey: v })} />
                             </div>
@@ -702,9 +751,7 @@ export const App = () => {
                                 <div style={{ padding: '16px' }}>
                                     <div style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
                                         <button className="af-btn" onClick={() => {
-                                            setRemoteForm({
-                                                type: 'qb', name: '', url: '', username: '', password: '', paths: [{ label: 'default', path: '' }]
-                                            });
+                                            resetRemoteForm();
                                             setRemoteModalOpen(true);
                                         }}>
                                             {t.addClient}
@@ -722,7 +769,7 @@ export const App = () => {
                                                     r.onload = (ev) => {
                                                         try {
                                                             const json = JSON.parse(ev.target?.result as string);
-                                                            setAndPersist({ ...settings, remoteServer: json });
+                                                            setAndPersist({ ...settingsRef.current, remoteServer: json });
                                                             alert('Config loaded');
                                                         } catch { alert('Invalid JSON'); }
                                                     };
@@ -748,23 +795,26 @@ export const App = () => {
                                                             alert(r.ok ? `${t.testSuccess}: ${r.message}` : `${t.testFailed}: ${r.message}`);
                                                         }}>{t.testConnection}</button>
                                                         <button type="button" className="af-btn" onClick={() => {
+                                                            const paths = getRemotePathRows((conf as any).path);
                                                             setRemoteForm({
                                                                 type: 'qb',
                                                                 name,
                                                                 url: conf.url,
                                                                 username: conf.username || '',
                                                                 password: conf.password || '',
-                                                                paths: Object.entries(conf.path || {}).map(([label, path]) => ({ label, path })),
+                                                                paths,
                                                                 editingKey: { type: 'qb', name }
                                                             });
                                                             setRemoteModalOpen(true);
                                                         }}>{t.edit}</button>
                                                         <button type="button" className="af-btn af-btn-danger" onClick={async () => {
                                                             if (!confirm(`Delete QB client "${name}"?`)) return;
-                                                            const next = { ...settings };
+                                                            const base = settingsRef.current;
+                                                            const next = { ...base, remoteServer: cloneRemoteServer(base.remoteServer) };
                                                             if (next.remoteServer?.qbittorrent) {
                                                                 delete (next.remoteServer.qbittorrent as any)[name];
-                                                                await setAndPersist(next);
+                                                                const ok = await persistSettings(next);
+                                                                if (!ok) alert(t.saveFailed);
                                                             }
                                                         }}>{t.delete}</button>
                                                     </div>
@@ -784,23 +834,26 @@ export const App = () => {
                                                             alert(r.ok ? `${t.testSuccess}: ${r.message}` : `${t.testFailed}: ${r.message}`);
                                                         }}>{t.testConnection}</button>
                                                         <button type="button" className="af-btn" onClick={() => {
+                                                            const paths = getRemotePathRows((conf as any).path);
                                                             setRemoteForm({
                                                                 type: 'tr',
                                                                 name,
                                                                 url: conf.url,
                                                                 username: conf.username || '',
                                                                 password: conf.password || '',
-                                                                paths: Object.entries(conf.path || {}).map(([label, path]) => ({ label, path })),
+                                                                paths,
                                                                 editingKey: { type: 'tr', name }
                                                             });
                                                             setRemoteModalOpen(true);
                                                         }}>{t.edit}</button>
                                                         <button type="button" className="af-btn af-btn-danger" onClick={async () => {
                                                             if (!confirm(`Delete TR client "${name}"?`)) return;
-                                                            const next = { ...settings };
+                                                            const base = settingsRef.current;
+                                                            const next = { ...base, remoteServer: cloneRemoteServer(base.remoteServer) };
                                                             if (next.remoteServer?.transmission) {
                                                                 delete (next.remoteServer.transmission as any)[name];
-                                                                await setAndPersist(next);
+                                                                const ok = await persistSettings(next);
+                                                                if (!ok) alert(t.saveFailed);
                                                             }
                                                         }}>{t.delete}</button>
                                                     </div>
@@ -820,23 +873,26 @@ export const App = () => {
                                                             alert(r.ok ? `${t.testSuccess}: ${r.message}` : `${t.testFailed}: ${r.message}`);
                                                         }}>{t.testConnection}</button>
                                                         <button type="button" className="af-btn" onClick={() => {
+                                                            const paths = getRemotePathRows((conf as any).path);
                                                             setRemoteForm({
                                                                 type: 'de',
                                                                 name,
                                                                 url: conf.url,
                                                                 username: '',
                                                                 password: conf.password || '',
-                                                                paths: Object.entries(conf.path || {}).map(([label, path]) => ({ label, path })),
+                                                                paths,
                                                                 editingKey: { type: 'de', name }
                                                             });
                                                             setRemoteModalOpen(true);
                                                         }}>{t.edit}</button>
                                                         <button type="button" className="af-btn af-btn-danger" onClick={async () => {
                                                             if (!confirm(`Delete DE client "${name}"?`)) return;
-                                                            const next = { ...settings };
+                                                            const base = settingsRef.current;
+                                                            const next = { ...base, remoteServer: cloneRemoteServer(base.remoteServer) };
                                                             if (next.remoteServer?.deluge) {
                                                                 delete (next.remoteServer.deluge as any)[name];
-                                                                await setAndPersist(next);
+                                                                const ok = await persistSettings(next);
+                                                                if (!ok) alert(t.saveFailed);
                                                             }
                                                         }}>{t.delete}</button>
                                                     </div>
@@ -864,10 +920,14 @@ export const App = () => {
                             <button
                                 type="button"
                                 className="af-close-btn"
+                                disabled={remoteSaving}
                                 onMouseDown={(e) => e.stopPropagation()}
                                 onClick={(e) => {
+                                    if (remoteSaving) return;
                                     e.preventDefault();
                                     e.stopPropagation();
+                                    setRemoteSaving(false);
+                                    resetRemoteForm();
                                     setRemoteModalOpen(false);
                                 }}
                             >
@@ -891,13 +951,28 @@ export const App = () => {
                             <div style={{ marginTop: '10px' }}>
                                 <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>{t.downloadPaths}</div>
                                 {remoteForm.paths.map((p, i) => (
-                                    <div key={i} style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
-                                        <input className="af-input" style={{ width: '80px' }} placeholder={t.pathLabel} value={p.label} onInput={e => {
-                                            const np = [...remoteForm.paths]; np[i].label = e.currentTarget.value; setRemoteForm({ ...remoteForm, paths: np });
+                                    <div key={i} className="af-path-row">
+                                        <input className="af-input af-path-label" placeholder={t.pathLabel} value={p.label} onInput={e => {
+                                            const np = [...remoteForm.paths];
+                                            np[i] = { ...np[i], label: e.currentTarget.value };
+                                            setRemoteForm({ ...remoteForm, paths: np });
                                         }} />
-                                        <input className="af-input" style={{ flex: 1 }} placeholder={t.pathValue} value={p.path} onInput={e => {
-                                            const np = [...remoteForm.paths]; np[i].path = e.currentTarget.value; setRemoteForm({ ...remoteForm, paths: np });
+                                        <input className="af-input af-path-value" placeholder={t.pathValue} value={p.path} onInput={e => {
+                                            const np = [...remoteForm.paths];
+                                            np[i] = { ...np[i], path: e.currentTarget.value };
+                                            setRemoteForm({ ...remoteForm, paths: np });
                                         }} />
+                                        <button
+                                            type="button"
+                                            className="af-btn"
+                                            style={{ padding: '0 10px', minWidth: '42px' }}
+                                            onClick={() => {
+                                                const next = remoteForm.paths.filter((_, idx) => idx !== i);
+                                                setRemoteForm({ ...remoteForm, paths: next.length ? next : [{ label: 'default', path: '' }] });
+                                            }}
+                                        >
+                                            -
+                                        </button>
                                     </div>
                                 ))}
                                 <button type="button" className="af-btn" style={{ width: '100%', marginTop: '4px' }} onClick={() => setRemoteForm({ ...remoteForm, paths: [...remoteForm.paths, { label: '', path: '' }] })}>{t.addPath}</button>
@@ -906,11 +981,15 @@ export const App = () => {
                         <div style={{ padding: '16px', borderTop: '1px solid var(--af-border-light)', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                             <button type="button" className="af-btn" style={{ marginRight: 'auto' }} onClick={async (e) => {
                                 const btn = e.currentTarget;
-                                const originalText = btn.textContent;
                                 btn.textContent = t.testing;
                                 btn.disabled = true;
                                 try {
-                                    const { type, url, username, password } = remoteForm;
+                                    const { type, username, password } = remoteForm;
+                                    const url = normalizeRemoteUrl(remoteForm.url);
+                                    if (!url) {
+                                        alert(settings.uiLanguage === 'zh' ? '地址不能为空' : 'URL is required');
+                                        return;
+                                    }
                                     let res = { ok: false, message: '' };
                                     if (type === 'qb') res = await RemoteDownloadService.testQbittorrent({ url, username, password });
                                     else if (type === 'tr') res = await RemoteDownloadService.testTransmission({ url, username, password });
@@ -924,35 +1003,86 @@ export const App = () => {
                                     btn.disabled = false;
                                 }
                             }}>{t.testConnection}</button>
-                            <button type="button" className="af-btn" onClick={() => setRemoteModalOpen(false)}>{t.cancel}</button>
-                            <button type="button" className="af-btn af-btn-primary" onClick={async () => {
-                                const newSettings = { ...settings };
-                                if (!newSettings.remoteServer) newSettings.remoteServer = {};
-                                const key = remoteForm.type === 'qb' ? 'qbittorrent' : remoteForm.type === 'tr' ? 'transmission' : 'deluge';
-                                if (!newSettings.remoteServer[key]) newSettings.remoteServer[key] = {};
-
-                                const pathsMap: Record<string, string> = {};
-                                remoteForm.paths.forEach(p => { if (p.label && p.path) pathsMap[p.label] = p.path; });
-
-                                // If editing and name changed, remove old key first.
-                                if (remoteForm.editingKey) {
-                                    const oldKey = remoteForm.editingKey.type === 'qb' ? 'qbittorrent' : remoteForm.editingKey.type === 'tr' ? 'transmission' : 'deluge';
-                                    const oldName = remoteForm.editingKey.name;
-                                    if (oldKey !== key || oldName !== remoteForm.name) {
-                                        try { delete (newSettings.remoteServer[oldKey] as any)[oldName]; } catch {}
-                                    }
-                                }
-
-                                newSettings.remoteServer[key]![remoteForm.name] = {
-                                    url: remoteForm.url,
-                                    username: remoteForm.username,
-                                    password: remoteForm.password,
-                                    path: pathsMap
-                                };
-
-                                await setAndPersist(newSettings);
+                            <button type="button" className="af-btn" disabled={remoteSaving} onClick={() => {
+                                if (remoteSaving) return;
+                                setRemoteSaving(false);
+                                resetRemoteForm();
                                 setRemoteModalOpen(false);
-                            }}>{t.save}</button>
+                            }}>{t.cancel}</button>
+                            <button
+                                type="button"
+                                className="af-btn af-btn-primary"
+                                disabled={remoteSaving}
+                                onClick={async () => {
+                                    if (remoteSaving) return;
+                                    const name = String(remoteForm.name || '').trim();
+                                    const url = normalizeRemoteUrl(remoteForm.url);
+                                    const username = String(remoteForm.username || '').trim();
+                                    const password = String(remoteForm.password || '').trim();
+
+                                    if (!name) {
+                                        alert(settings.uiLanguage === 'zh' ? '名称不能为空' : 'Name is required');
+                                        return;
+                                    }
+                                    if (!url) {
+                                        alert(settings.uiLanguage === 'zh' ? '地址不能为空' : 'URL is required');
+                                        return;
+                                    }
+                                    if (remoteForm.type !== 'de' && !username) {
+                                        alert(settings.uiLanguage === 'zh' ? '用户名不能为空' : 'Username is required');
+                                        return;
+                                    }
+
+                                    const pathsMap: Record<string, string> = {};
+                                    remoteForm.paths
+                                        .map((it) => ({ label: String(it.label || '').trim(), path: String(it.path || '').trim() }))
+                                        .filter((it) => it.label || it.path)
+                                        .forEach((it, idx) => {
+                                            if (!it.path) return;
+                                            const label = it.label || (idx === 0 ? 'default' : `path${idx + 1}`);
+                                            pathsMap[label] = it.path;
+                                        });
+                                    if (!Object.keys(pathsMap).length) pathsMap.default = '';
+
+                                    const key = remoteForm.type === 'qb' ? 'qbittorrent' : remoteForm.type === 'tr' ? 'transmission' : 'deluge';
+                                    const base = settingsRef.current;
+                                    const remoteServer = cloneRemoteServer(base.remoteServer) as any;
+                                    if (!remoteServer[key]) remoteServer[key] = {};
+
+                                    if (remoteForm.editingKey) {
+                                        const oldKey = remoteForm.editingKey.type === 'qb' ? 'qbittorrent' : remoteForm.editingKey.type === 'tr' ? 'transmission' : 'deluge';
+                                        const oldName = remoteForm.editingKey.name;
+                                        if (remoteServer[oldKey] && (oldKey !== key || oldName !== name)) {
+                                            delete remoteServer[oldKey][oldName];
+                                        }
+                                    }
+
+                                    remoteServer[key][name] = remoteForm.type === 'de'
+                                        ? {
+                                            url,
+                                            password,
+                                            path: pathsMap
+                                        }
+                                        : {
+                                            url,
+                                            username,
+                                            password,
+                                            path: pathsMap
+                                    };
+
+                                    setRemoteSaving(true);
+                                    const ok = await persistSettings({ ...base, remoteServer });
+                                    setRemoteSaving(false);
+                                    if (!ok) {
+                                        alert(t.saveFailed);
+                                        return;
+                                    }
+                                    resetRemoteForm();
+                                    setRemoteModalOpen(false);
+                                }}
+                            >
+                                {remoteSaving ? `${t.save}...` : t.save}
+                            </button>
                         </div>
                     </div>
                 </div>

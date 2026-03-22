@@ -280,7 +280,7 @@ export class PageEnhancerService {
                         <center>
                             <a target="_blank" class="rating" id="letterboxd-title-link" href="${lb.url}" rel="noreferrer">
                                 <img src="https://letterboxd.com/favicon.ico"
-                                    style="height:64px;width:64px;"
+                                    style="height:44px;width:44px;object-fit:contain;"
                                     title="Letterboxd"
                                     onerror="this.onerror=null;this.src='https://s.ltrbxd.com/static/img/icons/favicon.ico';" />
                             </a>
@@ -604,12 +604,13 @@ export class QuickSearchService {
                 let result: string[] = [];
                 if (settings.ptpImgApiKey) {
                     result = await ImageHostService.uploadToPtpImg([poster], settings.ptpImgApiKey);
-                } else if (settings.pixhostApiKey || !settings.freeimageApiKey) {
-                    result = await ImageHostService.uploadToPixhost([poster]);
                 } else if (settings.freeimageApiKey) {
                     result = await ImageHostService.uploadToFreeimage([poster], settings.freeimageApiKey);
                 } else if (settings.gifyuApiKey) {
                     result = await ImageHostService.uploadToGifyu([poster], settings.gifyuApiKey);
+                } else {
+                    // No API key mode fallback: Pixhost remote upload does not require user API key.
+                    result = await ImageHostService.uploadToPixhost([poster]);
                 }
                 if (result.length) {
                     await GMAdapter.setClipboard(result[0]);

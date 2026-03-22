@@ -43,6 +43,8 @@ const joinUrl = (base: string, path: string) => {
 const buildUploadUrl = (site: SiteConfig, options?: ForwardLinkOptions): string => {
     const base = resolveBaseUrl(site, options);
     if (!base) return '#';
+    // Legacy parity: Monika uses `/upload/1` (not Unit3D `/torrents/create`).
+    if (site.name === 'Monika') return joinUrl(base, 'upload/1');
     if (site.name === 'BHD') return joinUrl(base, 'upload');
     if (site.name === 'MTeam') return joinUrl(base, 'upload');
     // OpenCD uses a dedicated upload plugin page.
@@ -66,6 +68,10 @@ const buildSearchUrl = (site: SiteConfig, meta: TorrentMeta, options?: ForwardLi
         Tik: () => imdbId ? joinUrl(base, `torrents?imdbId=${imdbId}#page/1`) : joinUrl(base, `torrents?search=${searchName}`),
         DarkLand: () => imdbId ? joinUrl(base, `torrents?imdbId=${imdbId}#page/1`) : joinUrl(base, `torrents?search=${searchName}`),
         ACM: () => imdbNo ? joinUrl(base, `torrents?imdb=${imdbNo}#page/1`) : joinUrl(base, `torrents?search=${searchName}`),
+        // Legacy parity: Monika follows Unit3D-style imdbId search.
+        Monika: () => imdbId
+            ? joinUrl(base, `torrents?imdbId=${imdbId}#page/1`)
+            : joinUrl(base, `torrents?name=${searchName}&sortField=size`),
         TTG: () => imdbNo ? joinUrl(base, `browse.php?search_field=imdb${imdbNo}&c=M`) : joinUrl(base, `browse.php?search_field=${searchName}`),
         // Legacy parity: MTeam browse keyword is title-based, not IMDb id.
         MTeam: () => joinUrl(base, `browse?keyword=${searchName}`),
@@ -138,7 +144,7 @@ export class ForwardLinkService {
         const detectExclusive = (m: TorrentMeta) => {
             const text = `${m.title || ''} ${m.smallDescr || ''} ${m.subtitle || ''} ${m.description || ''}`
                 .replace(/\[.*?\]/g, '');
-            return !!text.match(/(拒绝转发|不允许转发|严禁转发|谢绝.*?转载|禁转|禁止转载|謝絕.*?轉載|exclusive|严禁转载)/i);
+            return !!text.match(/(拒绝转发|不允许转发|严禁转发|谢绝.*?转载|禁转|禁止转载|禁止轉載|禁止转发|謝絕.*?轉載|exclusive|独占|獨占|严禁转载|no[\s-]?reupload|do not reupload|forbid.*reupload|禁止二次转载)/i);
         };
         const isExclusive = detectExclusive(meta);
 
