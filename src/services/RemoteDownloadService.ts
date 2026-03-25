@@ -52,7 +52,7 @@ export class RemoteDownloadService {
         menu.attr('data-server', serverName);
         menu.attr('data-type', type);
 
-        const prefix = type.toUpperCase();
+        const prefix = type.toUpperCase()[0];
         const link = $(`<a target="_blank"></a>`);
         link.attr('href', serverUrl || '#');
         link.text(`${prefix}-${serverName}`);
@@ -75,10 +75,7 @@ export class RemoteDownloadService {
         a.attr('data-path', entry.path || '');
         a.attr('data-label', entry.label || 'default');
         a.attr('title', entry.path || '(client default)');
-        a.html(
-            `<span class="af-remote-path-label">${entry.label || 'default'}</span>` +
-            `<span class="af-remote-path-value">${entry.path || '(client default)'}</span>`
-        );
+        a.html(`${entry.label || 'default'}`);
         li.append(a);
         submenu.append(li);
     }
@@ -183,7 +180,11 @@ export class RemoteDownloadService {
             <div id="autofeed-remote-sidebar">
                 <div class="sidebar-header">
                     <span>远程推送</span>
-                    <div class="download-icon">⬇</div>
+                    <div class="download-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="20" viewBox="0,0,256,256">
+                            <g transform=""><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="none" stroke-linecap="butt" stroke-linejoin="none" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path transform="scale(5.12,5.12)" d="M50,32c0,4.96484 -4.03516,9 -9,9h-30c-6.06641,0 -11,-4.93359 -11,-11c0,-4.97266 3.32422,-9.30469 8.01563,-10.59375c0.30859,-6.34375 5.56641,-11.40625 11.98438,-11.40625c4.01953,0 7.79688,2.05469 10.03516,5.40625c0.96875,-0.27344 1.94531,-0.40625 2.96484,-0.40625c5.91016,0 10.75,4.6875 10.98828,10.54297c3.52734,1.19141 6.01172,4.625 6.01172,8.45703z" id="strokeMainSVG" fill="#2c3e50" stroke="#2c3e50" stroke-width="2" stroke-linejoin="round"></path><g transform="scale(5.12,5.12)" fill="#ffffff" stroke="none" stroke-width="1" stroke-linejoin="miter"><path d="M43.98828,23.54297c-0.23828,-5.85547 -5.07812,-10.54297 -10.98828,-10.54297c-1.01953,0 -1.99609,0.13281 -2.96484,0.40625c-2.23828,-3.35156 -6.01562,-5.40625 -10.03516,-5.40625c-6.41797,0 -11.67578,5.0625 -11.98437,11.40625c-4.69141,1.28906 -8.01562,5.62109 -8.01562,10.59375c0,6.06641 4.93359,11 11,11h30c4.96484,0 9,-4.03516 9,-9c0,-3.83203 -2.48437,-7.26562 -6.01172,-8.45703zM25,35.41406l-6.70703,-6.70703l1.41406,-1.41406l4.29297,4.29297v-11.58594h2v11.58594l4.29297,-4.29297l1.41406,1.41406z"></path></g></g></g>
+                        </svg>
+                    </div>
                 </div>
                 <ul id="autofeed-remote-list"></ul>
                 <div id="autofeed-remote-status" style="display:none;"></div>
@@ -328,57 +329,29 @@ export class RemoteDownloadService {
             else run(opts.skipDefault);
         });
 
-        const menuItems = document.querySelectorAll('#autofeed-remote-sidebar .menu-item');
-        menuItems.forEach((item) => {
-            const submenu = item.querySelector('.submenu') as HTMLElement | null;
-            if (!submenu) return;
-            let hideTimer: number | null = null;
+        const menuItems = document.querySelectorAll<HTMLLIElement>('.menu-item');
 
-            const show = () => {
-                if (hideTimer) window.clearTimeout(hideTimer);
-                hideTimer = null;
-                const rect = item.getBoundingClientRect();
+        menuItems.forEach((item: HTMLLIElement) => {
+            // Select the submenu within the current menu item
+            const submenu = item.querySelector<HTMLElement>('.submenu');
+            if (!submenu) return;
+            item.addEventListener('mouseenter', (e: MouseEvent) => {
+                // Get the bounding rectangle of the parent menu item
+                const rect: DOMRect = item.getBoundingClientRect();
                 submenu.style.display = 'block';
                 submenu.style.position = 'fixed';
-                // Explicitly position to the left of the sidebar item (avoid CSS left:-100% + fixed bugs).
-                const sidebarEl = document.getElementById('autofeed-remote-sidebar') as HTMLElement | null;
-                const sidebarRect = sidebarEl ? sidebarEl.getBoundingClientRect() : null;
-                // Measure width after display
-                const w = submenu.offsetWidth || 70;
-                let left = (sidebarRect ? sidebarRect.left : rect.left) - w - 8;
-                let top = rect.top;
-                const margin = 6;
-                const vh = window.innerHeight || document.documentElement.clientHeight || 800;
-                if (left < margin) left = margin;
-                const maxLeft = Math.max(margin, (window.innerWidth || document.documentElement.clientWidth || 1280) - w - margin);
-                if (left > maxLeft) left = maxLeft;
-                if (top < margin) top = margin;
-                const h = submenu.offsetHeight || 160;
-                if (top + h + margin > vh) top = Math.max(margin, vh - h - margin);
-                submenu.style.left = `${left}px`;
-                submenu.style.top = `${top}px`;
-            };
-
-            const scheduleHide = () => {
-                if (hideTimer) window.clearTimeout(hideTimer);
-                hideTimer = window.setTimeout(() => {
-                    submenu.style.display = 'none';
-                }, 220);
-            };
-
-            item.addEventListener('mouseenter', show);
-            item.addEventListener('mouseleave', scheduleHide);
-            submenu.addEventListener('mouseenter', show);
-            submenu.addEventListener('mouseleave', scheduleHide);
-            item.addEventListener('click', (e) => {
-                const target = e.target as HTMLElement | null;
-                if (target?.closest('.submenu')) return;
-                e.preventDefault();
-                if (submenu.style.display === 'block') {
-                    submenu.style.display = 'none';
-                    return;
+                const sidebar = document.getElementById('autofeed-remote-sidebar') as HTMLElement;
+                if (sidebar) {
+                    const sidebarHeight: number = sidebar.offsetHeight;
+                    const calculatedTop: number = rect.top - (window.innerHeight / 2) + (sidebarHeight / 2);
+                    submenu.style.top = `${calculatedTop}px`;
                 }
-                show();
+                const gap: number = -20;
+                submenu.style.right = `${window.innerWidth - rect.left + gap}px`;
+                submenu.style.left = 'auto';
+            });
+            item.addEventListener('mouseleave', () => {
+                submenu.style.display = 'none';
             });
         });
     }
@@ -998,7 +971,7 @@ export class RemoteDownloadService {
             top: 50%;
             right: 8px;
             transform: translateY(-50%);
-            width: 86px;
+            width: 80px;
             max-width: calc(100vw - 16px);
             box-sizing: border-box;
             background-color: #243447;
@@ -1019,35 +992,20 @@ export class RemoteDownloadService {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2px;
+            gap: 4px;
         }
         #autofeed-remote-sidebar ul {
             list-style: none;
             padding: 0;
             margin: 0;
+            border-radius: 8px 8px 8px 8px;
         }
-        #autofeed-remote-list > li {
-            position: relative;
-        }
-        #autofeed-remote-list > li > a {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 11px 6px;
-            text-decoration: none;
-            color: #ecf0f1;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: center;
-            line-height: 1.2;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-        }
-        #autofeed-remote-list > li > a:hover {
-            background-color: #2d4258;
+        #autofeed-remote-list li {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            border-radius: 8px 8px 8px 8px;
         }
         #autofeed-remote-list > li:first-child > a {
             border-top-left-radius: 8px;
@@ -1057,6 +1015,22 @@ export class RemoteDownloadService {
             border-bottom-left-radius: 8px;
             border-bottom-right-radius: 8px;
         }
+        #autofeed-remote-list li a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 11px 6px;
+            text-decoration: none;
+            color: #ecf0f1;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+        #autofeed-remote-list li a:hover {
+            background-color: #2d4258;
+        }
+
         #autofeed-remote-status {
             padding: 8px 8px;
             border-top: 1px solid rgba(255, 255, 255, 0.12);
@@ -1069,12 +1043,12 @@ export class RemoteDownloadService {
         }
         #autofeed-remote-status[data-kind="ok"] { color: #b6f7c1; }
         #autofeed-remote-status[data-kind="err"] { color: #ffd0d0; }
+        
         #autofeed-remote-sidebar .submenu {
             display: none;
             position: absolute;
             left: -100%;
-            width: 360px;
-            max-width: min(66vw, 520px);
+            width: 80px;
             background-color: #1f2d3d;
             border-radius: 8px;
             box-shadow: -4px 0 10px rgba(0, 0, 0, 0.15);
@@ -1082,40 +1056,13 @@ export class RemoteDownloadService {
             overflow: hidden;
         }
         #autofeed-remote-sidebar .submenu li a {
-            color: #bdc3c7;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 10px 12px;
-            font-size: 13px;
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: flex-start;
-            gap: 8px;
-            line-height: 1.35;
-            white-space: nowrap;
-            border-radius: 0;
-            text-decoration: none;
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-        }
-        #autofeed-remote-sidebar .submenu li a .af-remote-path-label {
-            color: #ecf0f1;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.10);
-            border-radius: 999px;
-            padding: 2px 8px;
-            min-width: 48px;
-            text-align: center;
-            flex: 0 0 auto;
-        }
-        #autofeed-remote-sidebar .submenu li a .af-remote-path-value {
-            color: #b8c8d8;
+            color: #bdc3c7;
+            padding: 12px 10px;
             font-size: 13px;
-            min-width: 0;
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            text-align: left;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
         }
         #autofeed-remote-sidebar .submenu li a:hover,
         #autofeed-remote-sidebar .submenu li a:focus {

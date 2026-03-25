@@ -1,10 +1,13 @@
 
-export function htmlToBBCode(element: Element | null): string {
+export function htmlToBBCode(element: Element | null, site?: string): string {
     if (!element) return '';
+    if (site !== undefined) {
+        return walkDOM(element, site);
+    }
     return walkDOM(element);
 }
 
-function walkDOM(node: Node): string {
+function walkDOM(node: Node, site?: string): string {
     if (node.nodeType === Node.TEXT_NODE) {
         return node.textContent || '';
     }
@@ -18,7 +21,11 @@ function walkDOM(node: Node): string {
 
     // Process children
     Array.from(el.childNodes).forEach(child => {
-        content += walkDOM(child);
+        if (site !== undefined) {
+            content += walkDOM(child, site);
+        } else {
+            content += walkDOM(child);
+        }
     });
 
     const tagName = el.tagName.toLowerCase();
@@ -47,6 +54,10 @@ function walkDOM(node: Node): string {
         case 'pre':
             return `[code]${content}[/code]`;
         case 'br':
+            // Some sites use <br> for spacing, we can ignore it or convert to newline based on the site
+            if (site !== undefined && ['CMCT'].indexOf(site) >= 0) {
+                return '';
+            }
             return '\n';
         case 'p':
         case 'div':

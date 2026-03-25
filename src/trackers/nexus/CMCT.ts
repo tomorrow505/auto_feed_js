@@ -76,13 +76,15 @@ export class CMCTEngine extends NexusPHPEngine {
             if (poster) blocks.push(`[img]${poster}[/img]`);
 
             const introEl =
-                ($('.info.douban-info artical').first()[0] as Element | undefined) ||
+                ($('.info.douban-info artical.copy').first()[0] as Element | undefined) ||
                 ($('.info.douban-info article').first()[0] as Element | undefined) ||
+                ($('.info.douban-info artical').first()[0] as Element | undefined) ||
                 ($('.info.douban-info').first()[0] as Element | undefined);
             if (introEl) {
-                let intro = htmlToBBCode(introEl).trim();
+                let intro = htmlToBBCode(introEl, meta.sourceSite).trim();
                 if (extraText && intro.includes(extraText)) intro = intro.replace(extraText, '').trim();
                 intro = intro.replace(/\[img\][\s\S]*?\[\/img\]\s*/gi, '').trim();
+                intro = intro.split('◎◎◎◎!!!!资料转载请注明出处!!!!◎◎◎◎')[0].trim();
                 if (intro) blocks.push(intro);
             }
 

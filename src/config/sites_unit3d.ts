@@ -31,6 +31,13 @@ export const Unit3DSites: SiteConfig[] = [
         description: 'Monika'
     },
     {
+        name: 'Aither',
+        type: SiteType.Unit3DClassic,
+        keywords: ['aither.cc'],
+        baseUrl: 'https://aither.cc/',
+        description: 'Aither'
+    },
+    {
         name: 'BHD',
         type: SiteType.BHD,
         keywords: ['beyond-hd.me', 'beyond-hd.xyz', 'beyond-hd.site', 'beyond-hd.io', 'beyond-hd.', 'beyondhd.co', 'beyondhd.'],

@@ -509,7 +509,7 @@ export class EmbedService {
                 const isActionRow = (tr: HTMLTableRowElement) => {
                     const first = tr.querySelector('td,th') as HTMLElement | null;
                     const text = (first?.textContent || '').trim();
-                    return /^(行为|行為|操作|Action|Actions|Tools:|小货车)\b/i.test(text);
+                    return /^加入收藏/i.test(text);
                 };
 
                 const root =
