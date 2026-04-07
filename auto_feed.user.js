@@ -100,7 +100,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.1.0.7
+// @version      2.1.0.8
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -5822,8 +5822,8 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php\?id.*/) && extra
         getDoc(r_url, null, function(rating_doc) {
             var rating_info = $('.average-rating', rating_doc).html();
             console.log(rating_info);
-            var rates = rating_info.match(/Weighted average of (.*?) based on (\d+).*?ratings/)[1];
-            var votes = rating_info.match(/Weighted average of (.*?) based on (\d+).*?ratings/)[2];
+            var rates = rating_info.match(/Weighted average of (.*?) based on ([\d,]+).*?ratings/)[1];
+            var votes = rating_info.match(/Weighted average of (.*?) based on ([\d,]+).*?ratings/)[2];
             rates = (parseFloat(rates) * 2).toFixed(1);
             console.log(rates, votes);
             $('#ptp_rating_td').prev().before(`
@@ -9301,6 +9301,8 @@ function auto_feed() {
             } else if (origin_site == 'HDSky') {
                 raw_info.torrent_name = $('input[value*=".torrent"]').val();
                 raw_info.torrent_url = $('a[href*="download.php"]').attr('href');
+            } else if (origin_site == 'Audiences') {
+                raw_info.torrent_url = used_site_info[origin_site].url + $('a[href*="download.php"]:contains(下载种子)').attr('href');
             } else if (origin_site == 'TTG') {
                 raw_info.torrent_name = $('a[href*="dl"]:contains(torrent)').text();
                 raw_info.torrent_url = $('a[href*="dl"]:contains(点击复制到剪切板)').attr('href');
@@ -12702,7 +12704,6 @@ function auto_feed() {
             raw_info.region = $('td:contains("Region")').next().text().trim();
             raw_info.distributor = $('td:contains("Distributor")').next().text().trim();
         }
-        console.log(raw_info.region, raw_info.distributor);
 
         if (remote_server !== null && origin_site !== 'SportsCult') {
             init_remote_server_button();
