@@ -100,7 +100,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.1.0.8
+// @version      2.1.0.9
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -11021,7 +11021,7 @@ function auto_feed() {
                 if (tds[i].textContent == 'Video Quality') {
                     raw_info.standard_sel = tds[i + 1].innerHTML.trim();
                 } else if (tds[i].textContent == 'Description') {
-                    raw_info.descr += walkDOM(tds[i + 1]);
+                    raw_info.descr += walkDOM(tds[i + 1].cloneNode(true));
                 } else if (tds[i].textContent == 'Rip Type') {
                     var tmp_type = tds[i + 1].innerHTML.trim();
                     if (tmp_type.match(/BluRay Raw/i)){
@@ -11511,7 +11511,7 @@ function auto_feed() {
         }
 
         if (origin_site == 'MTeam') {
-            raw_info.descr = walkDOM($('div.markdown-body')[0])
+            raw_info.descr = walkDOM($('div.markdown-body')[0].cloneNode(true));
             raw_info.descr = raw_info.descr.replace(/預覽/g, '');
             var torrent_id = site_url.match(/detail\/(\d+)/)[1];
             function build_fetch(api) {
