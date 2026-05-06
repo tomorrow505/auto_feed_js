@@ -3272,7 +3272,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
     }
 
     if (site == 'PTP') {
-        input_box.style.width = '320px';
+        input_box.style.width = '270px';
     }else if (site == 'PHD' || site == 'avz' || site == 'BHD' || site == 'CNZ') {
         input_box.style.width = '270px';
     } else {
@@ -3317,7 +3317,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         container.appendChild(brDiv);
     }
 
-    if (['PHD','avz', 'CNZ', 'FileList', 'TTG', 'PTP'].indexOf(site) > -1) {
+    if (['PHD','avz', 'CNZ', 'FileList', 'TTG'].indexOf(site) > -1) {
         var download_button = document.createElement('input');
 
         var select_img = document.createElement("input");
@@ -3408,7 +3408,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         }
     }
 
-    if (site == 'HDB') {
+    if (site == 'HDB' || site == 'PTP') {
         var send_pixhost = document.createElement('input');
         send_pixhost.type = "button";
         send_pixhost.id = 'send_pixhost';
@@ -3425,24 +3425,9 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         };
         container.appendChild(send_pixhost);
 
-        var send_ptpimg = document.createElement('input');
-        send_ptpimg.type = "button";
-        send_ptpimg.id = 'send_ptpimg';
-        send_ptpimg.value = 'PTPIMG';
-        send_ptpimg.style.marginLeft = '12px';
-        send_ptpimg.onclick = function() {
-            if (raw_info.images.length > 0) {
-                GM_setValue('HDB_images', raw_info.images.join(', '));
-                window.open('https://ptpimg.me/', '_blank');
-            } else {
-                alert('请选择要转存的图片！！！')
-            }
-        };
-        container.appendChild(send_ptpimg);
-
         var send_imgbox = document.createElement('input');
         send_imgbox.type = "button";
-        send_imgbox.id = 'send_ptpimg';
+        send_imgbox.id = 'send_imgbox';
         send_imgbox.value = 'IMGBOX';
         send_imgbox.style.marginLeft = '12px';
         send_imgbox.onclick = function() {
@@ -3483,7 +3468,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         if (site == 'MTV'){
              $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"backgroundColor": "#262626"});
         } else if (site != 'BTN'){
-            $('#douban_button,#ptgen_button,#search_button,#download_pngs').css({"border": "1px solid #2F3546", "color": "#FFFFFF", "backgroundColor": "#2F3546"});
+            $('#douban_button,#ptgen_button,#search_button,#download_pngs,#send_pixhost,#send_imgbox').css({"border": "1px solid #2F3546", "color": "#FFFFFF", "backgroundColor": "#2F3546"});
             if (site == 'PTP') {
                 textarea.style.width = '675px';
             } else if (site == 'GPW') {
