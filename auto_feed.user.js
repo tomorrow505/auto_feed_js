@@ -5800,13 +5800,12 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php\?id.*/) && extra
             return;
         }
     });
-    var letterboxd_url = 'https://letterboxd.com/imdb/' + imdbLink.match(/tt\d+/)[0];
+    var letterboxd_url = 'https://letterboxd.com/imdb/' + imdbLink.match(/tt\d+/)[0] + '/';
     getDoc(letterboxd_url, null, function(doc) {
         var b_url = $('meta[property="og:url"]', doc).prop('content');
-        var r_url = b_url.replace('.com/', '.com/csi/') + 'ratings-summary/';
+        var r_url = b_url.replace('.com/', '.com/csi/') + 'rating-histogram/';
         getDoc(r_url, null, function(rating_doc) {
-            var rating_info = $('.average-rating', rating_doc).html();
-            console.log(rating_info);
+            var rating_info = $('.averagerating', rating_doc).attr('title');
             var rates = rating_info.match(/Weighted average of (.*?) based on ([\d,]+).*?ratings/)[1];
             var votes = rating_info.match(/Weighted average of (.*?) based on ([\d,]+).*?ratings/)[2];
             rates = (parseFloat(rates) * 2).toFixed(1);
