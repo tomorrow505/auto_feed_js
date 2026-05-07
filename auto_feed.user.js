@@ -100,7 +100,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.1.0.9
+// @version      2.1.1.0
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8546,38 +8546,52 @@ function get_douban_info(raw_info) {
                     $('input[name=douban]').val(match_link('douban', data));
                 }
             } else if (site_url.match(/^https:\/\/.*.douban.com/)) {
+                var poster = data.match(/https:\/\/img\d.doubanio.com.*?jpg/)[0];
                 if (douban_poster_rehost == -1) {
                     GM_setClipboard(data);
                     $('#copy').text('完成');
                 } else if (douban_poster_rehost == 0) {
-                    var if_rehost = confirm("是否选择转存豆瓣海报？\n如果选择为是：则优先ptpimg，没有配置key则PixHost。");
+                    var if_rehost = confirm("是否选择转存豆瓣海报到PIXHOST？");
                     if (if_rehost) {
-                        var poster = data.match(/https:\/\/img\d.doubanio.com.*?jpg/)[0];
-                        if (used_ptp_img_key) {
-                            douban_poster_rehost = 1;
-                        } else {
-                            douban_poster_rehost = 2;
-                        }
-                        GM_setValue('douban_poster_rehost', douban_poster_rehost);
+                        GM_setValue('douban_poster_rehost', 1);
                     } else {
                         GM_setValue('douban_poster_rehost', -1);
                         GM_setClipboard(data);
                         $('#copy').text('完成');
                     }
                 } else {
-                    if (used_ptp_img_key) {
-                        ptp_send_doubanposter(poster, used_ptp_img_key, function(new_url){
-                            data = data.replace(/https:\/\/img\d.doubanio.com.*?jpg/, new_url);
-                            GM_setClipboard(data);
-                            $('#copy').text('完成');
-                        });
-                    } else {
-                        transferToPixhost(poster).then(new_url => {
-                            data = data.replace(/https:\/\/img\d.doubanio.com.*?jpg/, new_url);
-                            GM_setClipboard(data);
-                            $('#copy').text('完成');
-                        });
-                    }
+                    const douban_id = site_url.match(/subject\/(\d+)/)[1];
+                    const photo_url = `https://movie.douban.com/subject/${douban_id}/photos?type=R`;
+                    getDoc(photo_url, null, function(doc) {
+                        const $firstLi = $('#content', doc).find('li:first');
+                        const dataId = $firstLi.attr('data-id');
+                        if (dataId) {
+                            const singlePosterUrl = 'https://movie.douban.com/photos/photo/' + dataId;
+                            getDoc(singlePosterUrl, null, function(doc) {
+                                const imgElement = $('.magnifier', doc);
+                                if (imgElement) {
+                                    img = imgElement.find('a').attr('href');
+                                    if (img.match(/nenya/)) {
+                                        transferToPixhost(img).then(new_url => {
+                                            data = data.replace(/https:\/\/img\d.doubanio.com.*?jpg/, new_url);
+                                            GM_setClipboard(data);
+                                            $('#copy').text('完成');
+                                        });
+                                    } else {
+                                        GM_setClipboard(data);
+                                        $('#copy').text('完成');
+                                    }
+                                } else {
+                                    console.warn("未在页面中找到指定的图片链接");
+                                    GM_setClipboard(data);
+                                    $('#copy').text('完成');
+                                }
+                            });
+                        } else {
+                            console.warn("未找到图片 ID");
+                        }
+                    });
+
                 }
             } else {
                 $('textarea[name="douban_info"]').val(raw_info.descr);
