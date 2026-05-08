@@ -913,7 +913,8 @@ if (site_url.match(/^https:\/\/nebulance.io\/torrents.php\?id=\d+#separator#/)) 
 ********************************************************************************************************************/
 
 //提供可用的获取豆瓣信息两个api，从0-1选择。主要应用于外站，另一个是自动爬取豆瓣页面
-const apis = ['https://api.iyuu.cn/App.Movie.Ptgen', 'https://ptgen.tju.pt/infogen'];
+const apis = ['https://doubaninfo.com/api/v1_douban.php', 'https://ptgen.tju.pt/infogen'];
+var douban_key = GM_getValue('douban_key') === undefined ? '': GM_getValue('douban_key');
 var api_chosen = GM_getValue('api_chosen') === undefined ? 3: GM_getValue('api_chosen');
 var tldomain = GM_getValue('tldomain') === undefined ? 0: GM_getValue('tldomain');
 var imdb2db_chosen = GM_getValue('imdb2db_chosen') === undefined ? 0: GM_getValue('imdb2db_chosen');
@@ -5805,15 +5806,23 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php\?id.*/) && extra
         for (let i = 0; i < maxRetries; i++) {
             try {
                 return await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => reject("Request Timeout"), 10000);
                     getDoc(url, null, (doc) => {
-                        if (doc) resolve(doc);
-                        else reject("Empty doc");
+                        clearTimeout(timeout);
+                        if (doc && doc !== 'error') {
+                            resolve(doc);
+                        } else {
+                            reject("Invalid doc: " + doc);
+                        }
                     });
                 });
             } catch (err) {
-                if (i === maxRetries - 1) throw err;
-                console.warn(`请求失败，正在进行第 ${i + 1} 次重试...`);
-                await new Promise(res => setTimeout(res, delay)); // 等待后重试
+                if (i === maxRetries - 1) {
+                    console.error(`达到最大重试次数，最后一次错误: ${err}`);
+                    throw err;
+                }
+                console.warn(`第 ${i + 1} 次尝试失败 (${err})，${delay}ms 后重试...`);
+                await new Promise(res => setTimeout(res, delay));
             }
         }
     }
@@ -5830,6 +5839,7 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php\?id.*/) && extra
             const r_url = b_url.replace('.com/', '.com/csi/') + 'rating-histogram/';
             const rating_doc = await fetchWithRetry(r_url);
 
+            console.log(r_url);
             const rating_info = $('.averagerating', rating_doc).attr('title');
             const ratingMatch = rating_info ? rating_info.match(/Weighted average of (.*?) based on ([\d,]+)/) : null;
 
@@ -7108,7 +7118,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         //**************************************************** 4 ***************************************************************************
         $('#setting').append(`<b>选择PTGen的API节点(适用于外站)：</b>`);
-        $('#setting').append(`<input type="radio" name="ptgen" value="0">api.iyuu.cn`);
+        $('#setting').append(`<input type="radio" name="ptgen" value="0">doubaninfo`);
         $('#setting').append(`<input type="radio" name="ptgen" value="1">ptgen`);
         $('#setting').append(`<input type="radio" name="ptgen" value="3">豆瓣页面爬取`);
         $(`input:radio[name="ptgen"][value="${api_chosen}"]`).prop('checked', true);
@@ -7331,8 +7341,8 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
         //自制ptgen
         $table.append(`<tr style="display:none;"><td width="1%" class="rowhead nowrap" valign="top" align="right">PTGen</td><td width="99%" class="rowfollow" valign="top" align="left" id="ptgen"></td></tr>`);
         $('#ptgen').append(`<label><b>输入豆瓣/IMDB/Bangumi链接查询:</b></label><input type="text" name="url" style="width: 320px; margin-left:5px">`);
-        $('#ptgen').append(`<input type="button" id="go_ptgen" value="获取信息" style="margin-left:15px"><input type="button" id="douban2ptp" value="海报转存PTPimg" style="margin-left:15px"><br><br>`);
-        $('#ptgen').append(`<textarea name="douban_info" style="width:720px" rows="30"></textarea><br>`);
+        $('#ptgen').append(`<input type="button" id="go_ptgen" value="获取信息" style="margin-left:15px"><br><br>`);
+        $('#ptgen').append(`<textarea name="douban_info" style="width:600px" rows="30"></textarea><br>`);
 
         $('#go_ptgen').click(function(){
             var raw_info = {'url': '', 'dburl': '', 'descr': '', 'bgmurl': ''};
@@ -7410,24 +7420,6 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
                     GM_setClipboard(data.trim());
                 });
             }
-            $('#douban2ptp').click(function(){
-                var textarea = $('textarea[name="douban_info"]');
-                if (textarea.val().match(/https:\/\/img\d.doubanio.com.*?jpg/)) {
-                    var poster = textarea.val().match(/https:\/\/img\d.doubanio.com.*?jpg/)[0];
-                    ptp_send_doubanposter(poster, used_ptp_img_key, function(new_url){
-                        textarea.val(textarea.val().replace(/https:\/\/img\d.doubanio.com.*?jpg/, new_url));
-                    });
-                } else if (textarea.val().match(/\[img\]https:\/\/m.media-amazon.com\/images\/.*?jpg\[\/img\]/)) {
-                    var poster = textarea.val().match(/https:\/\/m.media-amazon.com\/images.*?jpg/)[0];
-                    ptp_send_images([poster], used_ptp_img_key)
-                    .then(function(new_url){
-                        new_url = new_url.toString().split(',').join('\n').replace(/\[.*?\]/g, '');
-                        textarea.val(textarea.val().replace(/https:\/\/m.media-amazon.com\/images.*?jpg/, new_url));
-                    }).catch(function(err){
-                        alert(err);
-                    });
-                }
-            });
         });
 
         //mediainfo转换
@@ -8526,12 +8518,6 @@ function get_douban_info(raw_info) {
     getDoc(raw_info.dburl, null, function(doc) {
         const infoGenClickEvent = async e => {
             var data = formatInfo(await getInfo(doc, raw_info));
-            if (raw_info.origin_site == 'PTP') {
-                let poster = document.querySelector('.sidebar-cover-image')?.src;
-                if (poster) {
-                    data = data.replace(/https:\/\/img\d.doubanio.com.*?jpg/, poster);
-                }
-            }
             raw_info.descr = data + '\n\n' + raw_info.descr;
             var thanks = raw_info.descr.match(/\[quote\].*?感谢原制作者发布。.*?\[\/quote\]/);
             if (thanks) {
@@ -13825,14 +13811,43 @@ function auto_feed() {
                     }
                 }
 
+                function after_douban(douban_info, is_douban_needed) {
+                    douban_info = douban_info.replace("[/img][/center]", "[/img]");
+                    douban_info = douban_info.replace("hongleyou.cn", "doubanio.com");
+                    if (douban_info != '') {
+                        raw_info.descr = douban_info + '\n\n' + raw_info.descr;
+                        var thanks = raw_info.descr.match(/\[quote\].*?感谢原制作者发布。.*?\[\/quote\]/);
+                        if (thanks) {
+                            raw_info.descr = thanks[0] + '\n' + raw_info.descr.replace(thanks[0], '');
+                        }
+
+                        if (is_douban_needed && raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
+                            raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
+                        }
+                        if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}纪录片/i)) {
+                            raw_info.type = '纪录';
+                        } else if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}动画/i)) {
+                            raw_info.type = '动漫';
+                        }
+                        set_jump_href(raw_info, 1);
+                        jump_str = dictToString(raw_info);
+                        douban_button.value = '获取成功';
+                        try { $('#textarea').val(douban_info); } catch(err) {}
+                        GM_setClipboard(douban_info);
+                        rebuild_href(raw_info);
+                    } else {
+                        douban_button.value = '获取失败';
+                    }
+                }
+
                 create_site_url_for_douban_info(raw_info, is_douban_needed)
                 .then(function(data){
                     console.log(data)
-                    if (api_chosen == 0 || api_chosen == 2) {
+                    if (api_chosen == 0) {
                         if (raw_info.dburl){
-                            url_to_search = '?url=' + raw_info.dburl;
+                            url_to_search = '?url=' + raw_info.dburl.match(/subject\/(\d+)/i)[1];
                         } else if (raw_info.url){
-                            url_to_search = '?url=' + raw_info.url;
+                            url_to_search = '?url=' + raw_info.url.match(/tt\d+/)[0];
                         }
                     } else {
                         if (raw_info.dburl){
@@ -13842,39 +13857,23 @@ function auto_feed() {
                         }
                     }
                     if (api_chosen < 3) {
-                        getJson(apis[api_chosen] + url_to_search, null, function(res){
-                            if (api_chosen == 0) {
-                                var douban_info = !res.msg ? res.data.format : "";
-                            } else {
+                        url_to_search = apis[api_chosen] + url_to_search;
+                        if (api_chosen == 0) {
+                            if (!douban_key) {
+                                douban_key = prompt('请输入豆影API密钥（可选），获取方法见：<br>https://doubaninfo.com/user/dashboard.php，输入后方可使用！');
+                                GM_setValue('douban_key', douban_key);
+                            }
+                            url_to_search += `&key=${douban_key}&format=bbcode`;
+                            getDoc(url_to_search, null, function(res){
+                                douban_info = $('body', res).text();
+                                after_douban(douban_info, is_douban_needed);
+                            });
+                        } else {
+                            getJson(url_to_search, null, function(res){
                                 douban_info = !res.error ? res.format: "";
-                            }
-                            douban_info = douban_info.replace("[/img][/center]", "[/img]");
-                            douban_info = douban_info.replace("hongleyou.cn", "doubanio.com");
-                            if (douban_info != '') {
-                                raw_info.descr = douban_info + '\n\n' + raw_info.descr;
-                                var thanks = raw_info.descr.match(/\[quote\].*?感谢原制作者发布。.*?\[\/quote\]/);
-                                if (thanks) {
-                                    raw_info.descr = thanks[0] + '\n' + raw_info.descr.replace(thanks[0], '');
-                                }
-
-                                if (is_douban_needed && raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
-                                    raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
-                                }
-                                if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}纪录片/i)) {
-                                    raw_info.type = '纪录';
-                                } else if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}动画/i)) {
-                                    raw_info.type = '动漫';
-                                }
-                                set_jump_href(raw_info, 1);
-                                jump_str = dictToString(raw_info);
-                                douban_button.value = '获取成功';
-                                try { $('#textarea').val(douban_info); } catch(err) {}
-                                GM_setClipboard(douban_info);
-                                rebuild_href(raw_info);
-                            } else {
-                                douban_button.value = '获取失败';
-                            }
-                        });
+                                after_douban(douban_info, is_douban_needed);
+                            });
+                        }
                     } else {
                         get_douban_info(raw_info);
                     }
@@ -13940,7 +13939,12 @@ function auto_feed() {
                     url = host_link + '#ptgen?' + tmp_url;
                     window.open(url, '_blank');
                 }, function() {
-                    url = host_link + '#ptgen?' + tmp_url.match(/tt\d+/)[0];
+                    if (tmp_url.match(/subject\/(\d+)/i)) {
+                        tmp_url = tmp_url.match(/subject\/(\d+)/i)[1];
+                    } else if (tmp_url.match(/tt\d+/)) {
+                        tmp_url = tmp_url.match(/tt\d+/)[0];
+                    }
+                    url = host_link + '#ptgen?' + tmp_url;
                     window.open(url, '_blank');
                 });
             }, false);
