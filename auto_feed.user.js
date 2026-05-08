@@ -7118,7 +7118,7 @@ if (site_url.match(/^https:\/\/.*?usercp.php\?action=personal(#setting|#ptgen|#m
 
         //**************************************************** 4 ***************************************************************************
         $('#setting').append(`<b>选择PTGen的API节点(适用于外站)：</b>`);
-        $('#setting').append(`<input type="radio" name="ptgen" value="0">doubaninfo`);
+        $('#setting').append(`<input type="radio" name="ptgen" value="0">豆影`);
         $('#setting').append(`<input type="radio" name="ptgen" value="1">ptgen`);
         $('#setting').append(`<input type="radio" name="ptgen" value="3">豆瓣页面爬取`);
         $(`input:radio[name="ptgen"][value="${api_chosen}"]`).prop('checked', true);
@@ -14039,7 +14039,7 @@ function auto_feed() {
                 border-radius: 4px; /* 圆角 */
                 transition: background-color 0.3s ease; /* 过渡效果 */
                 display: block; /* 垂直排列 */
-                width: 30px; /* 固定宽度 */
+                width: 100%; /* 固定宽度 */
                 font-size: 10px;
                 text-align: center; /* 文本居中 */
             }
@@ -14081,28 +14081,6 @@ function auto_feed() {
                         }
                     } else {
                         alert("获取 TMDB 信息失败");
-                    }
-                }
-            });
-        }
-
-        function getPTPPoster(imdbId) {
-            GM_xmlhttpRequest({
-                method: "GET",
-                url: `https://passthepopcorn.me/torrents.php?searchstr=${imdbId}&action=basic`,
-                onload: function(response) {
-                    if (response.status === 200) {
-                        let parser = new DOMParser();
-                        let doc = parser.parseFromString(response.responseText, "text/html");
-                        let poster = doc.querySelector('.sidebar-cover-image')?.src;
-                        if (poster) {
-                            GM_setClipboard(poster);
-                            alert('PTP海报链接已经复制至粘贴板！！');
-                        } else {
-                            alert("未找到 PTP 海报");
-                        }
-                    } else {
-                        alert("获取 PTP 信息失败，请检查 Cookie 是否正确");
                     }
                 }
             });
@@ -14165,35 +14143,57 @@ function auto_feed() {
         }
 
         raw_info = stringToDict(site_url.split(separator)[1]); //将弄回来的字符串转成字典
-        if (raw_info.url) {
-            var imdbid = raw_info.url.match(/tt\d+/)[0];
-            $('body').append(`<div id="navbarContainer" title="由于豆瓣链接经常失效，此处根据IMDB编号提供几个海报替换查询按钮。">
-                <div class="title">其他海报</div>
-                <a href="#" id="link1">IMDb</a>
-                <a href="#" id="link2"  title="需要填写TMDB的APIKEY。">TMDB</a>
-                <a href="#" id="link3">BOXD</a>
-                <a href="#" id="link4" title="需要有皮的账号。">PTP</a>
-                <a href="#" id="link5" title="主要是海外电视剧。">MAZE</a>
-            </div>`);
-            $("#link1").click(function(event) {
-                event.preventDefault();
-                getIMDbPoster(imdbid);
-            });
-            $("#link2").click(function(event) {
-                event.preventDefault();
-                getTMDBPoster(imdbid, used_tmdb_key);
-            });
-            $("#link3").click(function(event) {
-                event.preventDefault();
-                getLetterboxdPoster(imdbid, used_tmdb_key);
-            });
-            $("#link4").click(function(event) {
-                event.preventDefault();
-                getPTPPoster(imdbid);
-            });
+        if (raw_info.url || raw_info.dburl) {
+            $('body').append(`<div id="navbarContainer" title="由于豆瓣海报可能失效，此处根据IMDB编号提供几个海报替换查询按钮。以及通过豆影获取豆瓣简介的功能。">
+                    <div class="title">其他海报</div>
+                    <a href="#" id="link1" enable="false">IMDb</a>
+                    <a href="#" id="link2" title="需要填写TMDB的APIKEY。" enable="false">TMDB</a>
+                    <a href="#" id="link3" enable="false">BOXD</a>
+                    <a href="#" id="link4" title="主要是海外电视剧。" enable="false">MAZE</a>
+                    <div class="title">获取简介</div>
+                    <a href="#" id="link5" title="获取豆瓣简介" enable="false">豆瓣</a>
+                </div>`);
+            if (raw_info.url) {
+                var imdbid = raw_info.url.match(/tt\d+/)[0];
+                $("#link1").attr("enable", "true");
+                $("#link2").attr("enable", "true");
+                $("#link3").attr("enable", "true");
+                $("#link4").attr("enable", "true");
+                $("#link1").click(function(event) {
+                    event.preventDefault();
+                    getIMDbPoster(imdbid);
+                });
+                $("#link2").click(function(event) {
+                    event.preventDefault();
+                    getTMDBPoster(imdbid, used_tmdb_key);
+                });
+                $("#link3").click(function(event) {
+                    event.preventDefault();
+                    getLetterboxdPoster(imdbid, used_tmdb_key);
+                });
+                $("#link4").click(function(event) {
+                    event.preventDefault();
+                    getMAZEPoster(imdbid);
+                });
+            }
             $("#link5").click(function(event) {
                 event.preventDefault();
-                getMAZEPoster(imdbid);
+                if (raw_info.dburl){
+                    url_to_search = '?url=' + raw_info.dburl.match(/subject\/(\d+)/i)[1];
+                } else if (raw_info.url){
+                    url_to_search = '?url=' + raw_info.url.match(/tt\d+/)[0];
+                }
+                url_to_search = 'https://doubaninfo.com/api/v1_douban.php' + url_to_search;
+                if (!douban_key) {
+                    douban_key = prompt('请输入豆影API密钥（可选），获取方法见：<br>https://doubaninfo.com/user/dashboard.php，输入后方可使用！');
+                    GM_setValue('douban_key', douban_key);
+                }
+                url_to_search += `&key=${douban_key}&format=bbcode`;
+                getDoc(url_to_search, null, function(res){
+                    douban_info = $('body', res).text();
+                    GM_setClipboard(douban_info);
+                    alert('豆瓣简介已经复制至粘贴板！！');
+                });
             });
         }
         if ($('td:contains(你没有发布种子的权限)').length || $('p:contains("对不起你暂没有发布种子的权限")').length || $('td:contains(请提交候选)').length || $('a[href="?add_offer=1"]').length || $('h1:contains("候选区")').length) {
