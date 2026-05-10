@@ -3282,7 +3282,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
 
     if (site == 'PTP') {
         input_box.style.width = '270px';
-    }else if (site == 'PHD' || site == 'avz' || site == 'BHD' || site == 'CNZ') {
+    }  else if (site == 'PHD' || site == 'avz' || site == 'BHD' || site == 'CNZ') {
         input_box.style.width = '270px';
     } else {
         input_box.style.width = '280px';
@@ -4477,39 +4477,52 @@ function parseDoubanHtml(html) {
     return raw_data;
 }
 
-async function getData(imdb_url, callback) {
+async function getData(imdb_url, need_poster, callback) {
     const imdb_id = imdb_url.match(/tt\d+/)[0];
     console.log('🚀 开始获取跨站数据...');
 
-    // 1. 尝试获取 IMDb 海报 (即使失败也不报错)
-    let imdb_poster = "";
-    try {
-        // 设置较短的超时，避免 IMDb 加载太慢拖累整体进度
-        const imdbDoc = await fetchWithRetry(`https://www.imdb.com/title/${imdb_id}/`, 5, 500); 
-        imdb_poster = $(imdbDoc).find('meta[property="og:image"]').attr('content');
-    } catch (e) {
-        console.warn("⚠️ IMDb 海报获取失败，将使用豆瓣海报作为备选");
+    let tmdb_poster = "";
+
+    // 1. 尝试从 TMDB API 获取海报
+    if (need_poster) {
+        try {
+            // 使用 find 接口，通过 imdb_id 查找
+            const tmdb_find_url = `https://api.themoviedb.org/3/find/${imdb_id}?api_key=${used_tmdb_key}&external_source=imdb_id`;
+            
+            // 建议：fetchWithRetry 如果只处理 getDoc，可以直接用原生的 fetch 替代
+            const response = await fetch(tmdb_find_url);
+            const data = await response.json();
+
+            // TMDB 会返回 movie_results 或 tv_results
+            const movie = data.movie_results?.[0] || data.tv_results?.[0];
+            
+            if (movie && movie.poster_path) {
+                // 拼接图片完整地址，w500 是宽度，也可以改为 original
+                tmdb_poster = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
+                console.log('✅ 成功匹配 TMDB 海报');
+            }
+        } catch (e) {
+            console.warn("⚠️ TMDB API 请求失败:", e);
+        }
     }
 
+    // 2. 剩下的豆瓣流程保持不变
     try {
-        // 2. 获取豆瓣搜索结果
         const doubanSearchDoc = await fetchWithRetry(`https://m.douban.com/search/?query=${imdb_id}&type=movie`);
         const searchList = $(doubanSearchDoc).find('ul.search_results_subjects');
         
         if (!searchList.length) throw "豆瓣未搜索到该影片";
         const douban_id = searchList.find('a').attr('href').match(/subject\/(\d+)/)[1];
         
-        // 3. 获取豆瓣详情
         const doubanDetailHtml = await fetchWithRetry(`https://movie.douban.com/subject/${douban_id}/`);
         const finalData = parseDoubanHtml(doubanDetailHtml);
         
-        // 4. 核心逻辑：海报优先级选择
-        // 如果 IMDb 有图就用 IMDb，没有就保持 parseDoubanHtml 抓到的豆瓣图
-        if (imdb_poster && imdb_poster !== 'null') {
-            finalData.image = imdb_poster; 
-            finalData.using_imdb_poster = true; // 做个标记方便调试
+        // 3. 优先级策略：TMDB 优先 > 豆瓣
+        if (tmdb_poster) {
+            finalData.image = tmdb_poster; 
+            finalData.using_tmdb_poster = true;
         } else {
-            finalData.using_imdb_poster = false;
+            finalData.using_tmdb_poster = false;
         }
 
         finalData.imdb_id = imdb_id;
@@ -4544,6 +4557,35 @@ async function getDataFromDou(douban_url, callback) {
         callback({ data: raw_data });
     } catch (err) {
         console.error("获取豆瓣详情失败:", err);
+    }
+}
+
+function after_douban(douban_info, is_douban_needed) {
+    douban_info = douban_info.replace("[/img][/center]", "[/img]");
+    douban_info = douban_info.replace("hongleyou.cn", "doubanio.com");
+    if (douban_info != '') {
+        raw_info.descr = douban_info + '\n\n' + raw_info.descr;
+        var thanks = raw_info.descr.match(/\[quote\].*?感谢原制作者发布。.*?\[\/quote\]/);
+        if (thanks) {
+            raw_info.descr = thanks[0] + '\n' + raw_info.descr.replace(thanks[0], '');
+        }
+
+        if (is_douban_needed && raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
+            raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
+        }
+        if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}纪录片/i)) {
+            raw_info.type = '纪录';
+        } else if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}动画/i)) {
+            raw_info.type = '动漫';
+        }
+        set_jump_href(raw_info, 1);
+        jump_str = dictToString(raw_info);
+        douban_button.value = '获取成功';
+        try { $('#textarea').val(douban_info); } catch(err) {}
+        GM_setClipboard(douban_info);
+        rebuild_href(raw_info);
+    } else {
+        douban_button.value = '获取失败';
     }
 }
 
@@ -5877,7 +5919,7 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php\?id.*/) && extra
     if (!imdbLink) {
         return;
     }
-    getData(imdbLink, function(data){
+    getData(imdbLink, false, function(data){
         console.log(data);
         if (data.data) {
             addInfoToPage(data['data']);
@@ -5938,7 +5980,7 @@ if (site_url.match(/^https?:\/\/secret-cinema.pw\/torrents.php\?id.*/) && all_si
         if (!imdbLink) {
             return;
         }
-        getData(imdbLink, function(data){
+        getData(imdbLink, false, function(data){
             console.log(data);
             if (data.data) {
                 addInfoToPage(data['data']);
@@ -6004,7 +6046,7 @@ if (site_url.match(/^https?:\/\/www.morethantv.me\/torrents.php\?id.*/)) {
         if (!imdbLink) {
             return;
         }
-        getData(imdbLink, function(data){
+        getData(imdbLink, false, function(data){
             console.log(data);
             if (data.data) {
                 addInfoToPage(data['data']);
@@ -6072,7 +6114,7 @@ if (site_url.match(/^https?:\/\/hdbits.org\/details.php\?id=.*/) && extra_settin
                 return;
             }
         }
-        getData(links[0].href, function(data){
+        getData(links[0].href, true, function(data){
             console.log(data['data'])
             addInfoToPage(data['data']);
         });
@@ -6642,7 +6684,7 @@ if (site_url.match(/^https:\/\/blutopia.cc\/torrents\/similar/)) {
     var ids = $('ul.meta__ids').html()
     raw_info.url = match_link('imdb', ids);
     if (raw_info.url && all_sites_show_douban) {
-        getData(raw_info.url, function(data){
+        getData(raw_info.url, false, function(data){
             if (data.data) {
                 var score = data.data.average + '分';
                 if (!score.replace('分', '')) score = '暂无评分';
@@ -6662,7 +6704,7 @@ if (site_url.match(/^https:\/\/beyond-hd.me\/library\/title/)) {
     try {
         raw_info.url = match_link('imdb', imdb_box.innerHTML);
         if (raw_info.url && all_sites_show_douban) {
-            getData(raw_info.url, function(data){
+            getData(raw_info.url, false, function(data){
                 console.log(data);
                 if (data.data) {
                     var score = data.data.average + '分';
@@ -9737,7 +9779,7 @@ function auto_feed() {
                             raw_info.url = 'https://www.imdb.com/title/' + data.externals.imdb;
                             reBuildHref(raw_info, forward_r);
                             if (all_sites_show_douban) {
-                                getData(raw_info.url, function(data){
+                                getData(raw_info.url, true, function(data){
                                     console.log(data);
                                     if (data.data){
                                         $('td:contains(豆瓣信息)').last().parent().before(`<tr><td align=right style="font-weight: bold;">豆瓣</td><td id="douban_info"></td></tr>`);
@@ -9784,7 +9826,7 @@ function auto_feed() {
             raw_info.descr = walkDOM(descr.cloneNode(true));
 
             if (all_sites_show_douban && raw_info.url) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, true, function(data){
                     if (data.data){
                         $('td:contains(豆瓣信息)').last().parent().before(`<tr><td colSpan="2" id="douban_info"></td></tr>`);
                         add_douban_info_table($('#douban_info'), 150, data);
@@ -9833,7 +9875,7 @@ function auto_feed() {
             raw_info.url = match_link('imdb', $('#torrent-page').html());
             raw_info.type = $('.torrent-format').text().get_type();
             if (all_sites_show_douban && raw_info.url) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, true, function(data){
                     if (data.data){
                         $('td:contains(豆瓣信息)').last().parent().before(`<tr><td colSpan="2" id="douban_info"></td></tr>`);
                         add_douban_info_table($('#douban_info'), 150, data);
@@ -9859,7 +9901,7 @@ function auto_feed() {
             raw_info.url = match_link('imdb', $('div.container').html());
             raw_info.type = "电影";
             if (all_sites_show_douban && raw_info.url) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, true, function(data){
                     if (data.data){
                         if (data.data.cast.split('/').length > 6) {
                             var cast = data.data.cast.split('/');
@@ -9930,7 +9972,7 @@ function auto_feed() {
             var td = $('td:contains(Information)').next()[0];
             raw_info.descr = walkDOM(td.cloneNode(true));
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data){
                         $('td:contains(豆瓣信息)').last().parent().before(`<tr><td colSpan="2" id="douban_info"></td></tr>`);
@@ -9956,7 +9998,7 @@ function auto_feed() {
             raw_info.name = $('#highlighted').find('a[href*=download]').first().text().split('/').pop().trim();
             raw_info.url = match_link('imdb', $('#highlighted').html());
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data){
                         $('#highlighted').find('tr:eq(1)').after(`<tr><td align=right style="font-weight: bold;">豆瓣</td><td id="douban_info"></td></tr>`);
@@ -10189,7 +10231,7 @@ function auto_feed() {
             raw_info.descr = raw_info.descr.replace(/https:\/\/wsrv.nl\/\?n=-1&url=/g, '');
             raw_info.torrent_url = $('a[href*="download/"]').attr('href');
             if (raw_info.url && all_sites_show_douban && (origin_site == 'FNP' || origin_site == 'OnlyEncodes' || origin_site == 'ReelFliX')) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data) {
                         var score = data.data.average + '分';
@@ -10218,7 +10260,7 @@ function auto_feed() {
             raw_info.name = $('span[class="torrent-category badge-extra"]:first').text().replace(/\(|\)/g, '').replace(/English-/, '-');
             var search_name = get_search_name(raw_info.name);
             if (all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data){
                         $('td:contains(豆瓣信息)').last().parent().before(`<tr><td align=right style="font-weight: bold;">豆瓣</td><td id="douban_info"></td></tr>`);
@@ -10258,7 +10300,7 @@ function auto_feed() {
             raw_info.url = match_link('imdb', imdb_box.innerHTML);
             tbody = document.getElementById('torrent_details');
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data) {
                         data = data.data;
@@ -10756,7 +10798,7 @@ function auto_feed() {
             }
 
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data) {
                         var score = data.data.average + '分';
@@ -10801,7 +10843,7 @@ function auto_feed() {
             raw_info.descr = '[quote]\n' + raw_info.descr + '\n[/quote]';
 
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data) {
                         var score = data.data.average + '分';
@@ -11001,7 +11043,7 @@ function auto_feed() {
             }, 1000);
 
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data) {
                         $('img[src="/styles/images/starbig.png"]').first().parent().append(` | 豆：${data.data.average}`);
@@ -11358,6 +11400,8 @@ function auto_feed() {
                     raw_info.small_descr = tds[i].nextSibling.textContent;
                 } else if (origin_site == '影') {
                     raw_info.small_descr = tds[i].nextSibling.nextSibling.textContent;
+                } else if (origin_site == 'Audiences') {
+                    raw_info.small_descr = tds[i].nextSibling.getElementsByTagName('div')[0].getElementsByTagName('div')[0].textContent;
                 } else {
                     if (origin_site == 'U2') {
                         raw_info.small_descr = $(tds[i]).parent().find('td:last').text();
@@ -11365,6 +11409,7 @@ function auto_feed() {
                         raw_info.small_descr += tds[i].parentNode.lastChild.textContent;
                     }
                 }
+                console.log(raw_info.small_descr);
             }
             if (['标题'].indexOf(tds[i].textContent) > -1 && !raw_info.name && origin_site == '影') {
                 raw_info.name = tds[i].nextSibling.nextSibling.textContent;
@@ -12195,7 +12240,7 @@ function auto_feed() {
                 }
             }
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data) {
                         var score = data.data.average + '分';
@@ -12256,7 +12301,7 @@ function auto_feed() {
             raw_info.imgs_cmct = imginfo;
 
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data) {
                         $container = $('.imdbnew2');
@@ -12313,7 +12358,7 @@ function auto_feed() {
 
         if (origin_site == 'KG') {
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, true, function(data){
                     console.log(data);
                     if (data.data){
                         $('td:contains(Internet Link)').last().parent().before(`<tr><td align=right style="font-weight: bold;">豆瓣</td><td id="douban_info"></td></tr>`);
@@ -12326,7 +12371,7 @@ function auto_feed() {
 
         if (origin_site == 'CG') {
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data){
                         data.data.image = '//cinemageddon.net/cauldron.php?i=' + data.data.image.replace(/:/g, '%3A').replace(/\//g, '%2F');
@@ -12379,7 +12424,7 @@ function auto_feed() {
             };
 
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data) {
                         var score = data.data.average + '分';
@@ -12445,7 +12490,7 @@ function auto_feed() {
             raw_info.descr += '\n\n' + vob_info + img_urls;
 
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     if (data.data) {
                         var score = data.data.average + '分';
                         if (!score.replace('分', '')) score = '暂无评分';
@@ -12521,7 +12566,7 @@ function auto_feed() {
             raw_info.descr = '[quote]' + mediainfo + '[/quote]\n\n' + vob_info + picture_info;
 
             if (raw_info.url && all_sites_show_douban) {
-                getData(raw_info.url, function(data){
+                getData(raw_info.url, false, function(data){
                     console.log(data);
                     if (data.data) {
                         var score = data.data.average + '分';
@@ -13017,12 +13062,21 @@ function auto_feed() {
             }
         }
 
-        var check=document.createElement("input");
-        check.setAttribute("type","checkbox");
-        check.setAttribute("id",'search_type');
+        var label = document.createElement("label");
+        label.style.display = 'inline-flex';
+        label.style.alignItems = 'center';
+        label.style.cursor = 'pointer';
+
+        var check = document.createElement("input");
+        check.setAttribute("type", "checkbox");
+        check.setAttribute("id", 'search_type');
+        check.style.margin = "4px 2px 0 4px"; // 勾选框右侧留 4px 间距
+
         var check_text = document.createTextNode('查重');
-        forward_r.append(check);
-        forward_r.append(check_text);
+
+        label.append(check);
+        label.append(check_text);
+        forward_r.append(label);
         set_jump_href(raw_info, 1);
 
         if (origin_site == 'PTer') {
@@ -13045,9 +13099,9 @@ function auto_feed() {
         ptgen.innerHTML = 'PTgen';
         ptgen.id = 'ptgen';
         ptgen.title = '根据页面的豆瓣或imdb的ID获取豆瓣信息。';
-        ptgen.href = host_link + '#ptgen?';
+        ptgen.href = 'https://doubaninfo.com/' + '#ptgen?url=';
         if (raw_info.dburl) {
-            ptgen.href = raw_info.dburl;
+            ptgen.href += raw_info.dburl.match(/subject\/(\d+)/)[1];
         } else if (raw_info.url) {
             ptgen.href += raw_info.url.match(/tt\d+/)[0];
         }
@@ -13891,34 +13945,34 @@ function auto_feed() {
                     }
                 }
 
-                function after_douban(douban_info, is_douban_needed) {
-                    douban_info = douban_info.replace("[/img][/center]", "[/img]");
-                    douban_info = douban_info.replace("hongleyou.cn", "doubanio.com");
-                    if (douban_info != '') {
-                        raw_info.descr = douban_info + '\n\n' + raw_info.descr;
-                        var thanks = raw_info.descr.match(/\[quote\].*?感谢原制作者发布。.*?\[\/quote\]/);
-                        if (thanks) {
-                            raw_info.descr = thanks[0] + '\n' + raw_info.descr.replace(thanks[0], '');
-                        }
+                // function after_douban(douban_info, is_douban_needed) {
+                //     douban_info = douban_info.replace("[/img][/center]", "[/img]");
+                //     douban_info = douban_info.replace("hongleyou.cn", "doubanio.com");
+                //     if (douban_info != '') {
+                //         raw_info.descr = douban_info + '\n\n' + raw_info.descr;
+                //         var thanks = raw_info.descr.match(/\[quote\].*?感谢原制作者发布。.*?\[\/quote\]/);
+                //         if (thanks) {
+                //             raw_info.descr = thanks[0] + '\n' + raw_info.descr.replace(thanks[0], '');
+                //         }
 
-                        if (is_douban_needed && raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
-                            raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
-                        }
-                        if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}纪录片/i)) {
-                            raw_info.type = '纪录';
-                        } else if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}动画/i)) {
-                            raw_info.type = '动漫';
-                        }
-                        set_jump_href(raw_info, 1);
-                        jump_str = dictToString(raw_info);
-                        douban_button.value = '获取成功';
-                        try { $('#textarea').val(douban_info); } catch(err) {}
-                        GM_setClipboard(douban_info);
-                        rebuild_href(raw_info);
-                    } else {
-                        douban_button.value = '获取失败';
-                    }
-                }
+                //         if (is_douban_needed && raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)){
+                //             raw_info.url = raw_info.descr.match(/http(s*):\/\/www.imdb.com\/title\/tt(\d+)/i)[0] + '/';
+                //         }
+                //         if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}纪录片/i)) {
+                //             raw_info.type = '纪录';
+                //         } else if (raw_info.descr.match(/类[\s\S]{0,5}别[\s\S]{0,30}动画/i)) {
+                //             raw_info.type = '动漫';
+                //         }
+                //         set_jump_href(raw_info, 1);
+                //         jump_str = dictToString(raw_info);
+                //         douban_button.value = '获取成功';
+                //         try { $('#textarea').val(douban_info); } catch(err) {}
+                //         GM_setClipboard(douban_info);
+                //         rebuild_href(raw_info);
+                //     } else {
+                //         douban_button.value = '获取失败';
+                //     }
+                // }
 
                 create_site_url_for_douban_info(raw_info, is_douban_needed)
                 .then(function(data){
@@ -13993,11 +14047,17 @@ function auto_feed() {
                         console.log(data);
                         if (data) {
                             textarea.value = data;
+                            after_douban(data, false);
+                            try{
+                                raw_info.dburl = data.match(/http(s*):\/\/.*?douban.com\/subject\/(\d+)/i)[0] + '/';
+                                $('#input_box').val(raw_info.dburl);
+                            } catch(err){
+                                console.log(err);
+                            }
                         } else {
-                            textarea.value += "暂时没有搜索结果！！";
+                            textarea.value = "暂时没有搜索结果！！";
                         }
                     });
-
                 } else {
                     var search_url = 'https://search.douban.com/movie/subject_search?search_text=' + search_name;
                     if (raw_info.type == '电影' && raw_info.url){
@@ -20039,7 +20099,7 @@ function auto_feed() {
                             add_href(data);
                         });
                     } else if (raw_info.url) {
-                        getData(raw_info.url, function(data){
+                        getData(raw_info.url, false, function(data){
                             add_href(data);
                         });
                     }
