@@ -2694,33 +2694,51 @@ function judge_forward_site_in_domestic(site){
     }
 }
 
-//从简介和名称获取副标题
-function get_small_descr_from_descr(descr, name){
+function get_small_descr_from_descr(descr, name) {
     var small_descr = '', videoname = '', sub_str = '', type_str = '';
-    if (descr.match(/译.{0,5}名[^\r\n]+/)) {
-        videoname = descr.match(/译.*?名([^\r\n]+)/)[1];
-        if (!/.*[\u4e00-\u9fa5]+.*/.test(videoname) || videoname.trim() == '') {
-            try{videoname = descr.match(/片.*?名([^\r\n]+)/)[1];} catch (err) {}
+    if (descr) {
+        var getMatch = function(pattern) {
+            var m = descr.match(pattern);
+            return (m && m[1]) ? m[1].trim() : null;
+        };
+
+        var yiming = getMatch(/译.{0,5}名[ \t]*[:：]?([^\r\n]+)/); // 译名
+        var pianming = getMatch(/片.{0,5}名[ \t]*[:：]?([^\r\n]+)/); // 片名
+
+        if (api_chosen == 0) {
+            videoname = pianming || yiming || '';
+        } else {
+            videoname = yiming || pianming || '';
         }
-        videoname = videoname.trim(); //去除首尾空格
-        if (name.match(/S\d{2}E\d{2}/i)) { //电视剧单集
-            sub_str = name.match(/S(\d{2})E(\d{2})/i);
-            sub_str = ' *第' + numToChinese(parseInt(sub_str[1])) + '季 第' + parseInt(sub_str[2]) +'集*';
-        } else if (name.match(/S\d{2}/)) {
-            sub_str = name.match(/S(\d{2})/i);
-            sub_str = ' *第' + numToChinese(parseInt(sub_str[1])) + '季';
-            if (descr.match(/◎集.{1,10}数.*?(\d+)/)) {
-                sub_str += ' 全' + parseInt(descr.match(/◎集.{1,10}数.*?(\d+)/)[1]) + '集*'
-            } else {
-                sub_str += '*';
+        if (videoname !== '' && !/.*[\u4e00-\u9fa5]+.*/.test(videoname)) {
+            // 如果选出来的名字没中文，看另一个备份里有没有中文
+            var backup = (api_chosen === 0) ? yiming : pianming;
+            if (backup && /.*[\u4e00-\u9fa5]+.*/.test(backup)) {
+                videoname = backup;
             }
         }
-        small_descr = videoname + sub_str;
-    } if (descr.match(/类.{0,5}别[^\r\n]+/)) {
+        if (videoname) {
+            if (name.match(/S\d{2}E\d{2}/i)) { 
+                var eMatch = name.match(/S(\d{2})E(\d{2})/i);
+                sub_str = ' *第' + numToChinese(parseInt(eMatch[1])) + '季 第' + parseInt(eMatch[2]) + '集*';
+            } else if (name.match(/S\d{2}/i)) {
+                var sMatch = name.match(/S(\d{2})/i);
+                sub_str = ' *第' + numToChinese(parseInt(sMatch[1])) + '季';
+                var episodeCount = descr.match(/◎集.{1,10}数.*?(\d+)/);
+                if (episodeCount) {
+                    sub_str += ' 全' + parseInt(episodeCount[1]) + '集*';
+                } else {
+                    sub_str += '*';
+                }
+            }
+            small_descr = videoname + sub_str;
+        }
+    }
+
+    if (descr.match(/类.{0,5}别[^\r\n]+/)) {
         type_str = descr.match(/类.*别([^\r\n]+)/)[1];
-        type_str = type_str.trim(); //去除首尾空格
-        type_str = type_str.replace(/\//g, ''); //去除/
-        small_descr = small_descr + ' | 类别：' + type_str;
+        type_str = type_str.trim().replace(/\//g, ''); 
+        small_descr = (small_descr ? small_descr + ' | ' : '') + '类别：' + type_str;
     }
     return small_descr.trim();
 }
