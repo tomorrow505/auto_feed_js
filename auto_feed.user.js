@@ -3281,7 +3281,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
     }
 
     if (site == 'PTP') {
-        input_box.style.width = '270px';
+        input_box.style.width = '260px';
     }  else if (site == 'PHD' || site == 'avz' || site == 'BHD' || site == 'CNZ') {
         input_box.style.width = '270px';
     } else {
@@ -3310,7 +3310,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
     checkBox.setAttribute("id", 'douying_api');
     checkBox.style.margin = '0 4px 0 0'; // 右边留点间距
 
-    var douban_text = document.createTextNode('DY-API');
+    var douban_text = document.createTextNode('API');
 
     label.append(checkBox);
     label.append(douban_text);
@@ -4513,7 +4513,7 @@ async function getData(imdb_url, need_poster, callback) {
         
         if (!searchList.length) throw "豆瓣未搜索到该影片";
         const douban_id = searchList.find('a').attr('href').match(/subject\/(\d+)/)[1];
-        
+        $('#input_box').val(`https://movie.douban.com/subject/${douban_id}/`);
         const doubanDetailHtml = await fetchWithRetry(`https://movie.douban.com/subject/${douban_id}/`);
         const finalData = parseDoubanHtml(doubanDetailHtml);
         
@@ -8724,91 +8724,6 @@ function get_douban_info(raw_info) {
     });
 }
 
-function add_picture_transfer() {
-    GM_addStyle(
-        `.delete_div {
-        position: fixed;
-        bottom: 30%;
-        right: 27%;
-        width: 46%;
-        color:white;
-    }`);
-    $(`body`).append(`
-        <div class="delete_div" style="align:center; color:white; display:none; border-radius: 5px">
-            <div id="rehost" style="width: 100%; margin:auto;"></div>
-        </div>`);
-    $('#rehost').append(`<td style="width:100%; border: none; background-color:rgba(72,101,131,0.7); padding: 6px" valign="top" align="left" id="rehostimg"></td>`);
-
-    $('#rehostimg').append(`<b>选择转存站点：</b>`)
-    for (key in used_rehost_img_info){
-        $('#rehostimg').append(`<input style="vertical-align:middle" type="radio" name="rehost_site" value="${key}">${key}`);
-    }
-    $('#rehostimg').append(`<input style="vertical-align:middle" type="radio" name="rehost_site" value="PixHost">PixHost`);
-    $('#rehostimg').append(`<input style="vertical-align:middle" type="radio" name="rehost_site" value="PTPimg">PTPimg`);
-    $('#rehostimg').append(`<input style="vertical-align:middle;margin-left:160px;color:red;width:20px;" type="button" name="close_panel" value="&times;">`);
-    $('input[name="close_panel"]').click(()=>{
-        $('input[name="img_url"]').val('');
-        $('textarea[name="show_result"]').val('');
-        $('div.delete_div').hide();
-    });
-
-    $(`input:radio[value="freeimage"]`).prop('checked', true);
-    $('#rehostimg').append(`<br><br>`);
-
-    $('#rehostimg').append(`<label><b>输入想要转存的图片链接:</b></label><input type="text" name="img_url" style="width: 350px; margin-left:5px">`);
-    $('#rehostimg').append(`<input type="button" id="go_rehost" value="开始转存" style="margin-left:5px"><br>`);
-    $('#rehostimg').append(`<p>注意：自动获取的为img9域名，如失败，可自行更换为1,2,9。</p>`)
-    if (site_url.match(/springsunday/)) {
-        $('#go_rehost').css({'color': 'white', 'background' :'url(https://springsunday.net/styles/Maya/images/btn_submit_bg.gif) repeat left top', 'border': '1px black'});
-    }
-    $('#rehostimg').append(`<textarea name="show_result" style="width:560px" rows="6"></textarea><br>`);
-    $('#go_rehost').click(function(){
-        var rehost_site = $('input[name="rehost_site"]:checked').val();
-        var img_url = $('input[name="img_url"]').val();
-        if (rehost_site == 'PixHost' || rehost_site == 'PTPimg' || used_rehost_img_info[rehost_site]['api-key']) {
-            if (!img_url.match(/https?:\/\/.*?(png|jpg|webp)/)) {
-                alert('请输入图片链接！！');
-                return;
-            }
-        } else {
-            alert('没有APIKEY无法完成转存工作！！');
-            return;
-        }
-        $('#go_rehost').prop('value', '正在转存');
-        if (rehost_site == 'PixHost') {
-            transferToPixhost(img_url).then(new_url => {
-                $('textarea[name="show_result"]').val(new_url);
-                $('#go_rehost').prop('value', '转存成功');
-                GM_setClipboard(new_url);
-            });
-        } else if (rehost_site == 'PTPimg') {
-            ptp_send_doubanposter(img_url, used_ptp_img_key, function(new_url){
-                $('textarea[name="show_result"]').val(new_url);
-                $('#go_rehost').prop('value', '转存成功');
-                GM_setClipboard(new_url);
-            });
-        } else {
-            rehost_single_img(rehost_site, img_url)
-            .then(function(result){
-                $('textarea[name="show_result"]').val(result);
-                $('#go_rehost').prop('value', '转存成功');
-            })
-            .catch(function(err){
-                $('#go_rehost').prop('value', '转存失败');
-                alert(err);
-            })
-        }
-    });
-    $('a:contains("单图转存"),a:contains("海报转存")').click((e)=>{
-        e.preventDefault();
-        if ($('div.delete_div').is(":hidden")) {
-            $('div.delete_div').show();
-        } else {
-            $('div.delete_div').hide();
-        }
-    });
-}
-
 if (site_url.match(/^https:\/\/pterclub.net\/upload.php/)) {
     $('input[name=url]:first').after(`<input type="button" value="获取简介" class="get_descr" data="url" />`);
     $('input[name=douban]').after(`<input type="button" value="获取简介" class="get_descr" data="douban" />`);
@@ -8936,14 +8851,6 @@ if(site_url.match(/^https:\/\/movie.douban.com\/subject\/\d+/i) && if_douban_jum
             $('#info').append(`<br><span class="pl">影视名称:</span> ${name}<br>`);
         }
 
-        $('#mainpic').append(`<br><a href="#">海报转存</a>`);
-        add_picture_transfer();
-        var poster = $('#mainpic img')[0].src.replace(
-            /^.+(p\d+).+$/,
-            (_, p1) => `https://img2.doubanio.com/view/photo/l_ratio_poster/public/${p1}.jpg`
-        );
-        $('input[name=img_url]').val(poster);
-
         try {
             if($('#info').html().match(/tt\d+/i)){
                 var imdbid = $('#info').html().match(/tt\d+/i)[0];
@@ -8985,13 +8892,7 @@ if (site_url.match(/^https:\/\/(music|book).douban.com\/subject\/\d+/)) {
     if (site_url.match(/book/)) {
         source_type = '书籍';
     }
-    $('#mainpic').append(`<br><a href="#">海报转存</a>`);
-    add_picture_transfer();
-    var poster = $('#mainpic img')[0].src.replace(
-        /^.+(p\d+).+$/,
-        (_, p1) => `https://img2.doubanio.com/view/photo/l_ratio_poster/public/${p1}.jpg`
-    );
-    $('input[name=img_url]').val(poster);
+
     function walk_Dom(n) {
         do {
             if (n.nodeName == 'SPAN' && n.className == 'pl') {
@@ -13157,14 +13058,6 @@ function auto_feed() {
         reset_host.target = '_blank';
         forward_r.appendChild(reset_host);
 
-        forward_r.innerHTML = forward_r.innerHTML + ' | ';
-        var rehost_link = document.createElement('a');
-        rehost_link.innerHTML = '单图转存';
-        rehost_link.title = '过期功能，基本上可以使用提取图片进行覆盖，具体见教程。';
-        rehost_link.href = "#";
-        rehost_link.target = '_blank';
-        forward_r.appendChild(rehost_link);
-
         if (used_ptp_img_key != ''){
             forward_r.innerHTML = forward_r.innerHTML + ' | ';
             var refresh_icos = document.createElement('a');
@@ -14079,7 +13972,6 @@ function auto_feed() {
                 window.open(url, '_blank');
             }, false);
         }
-        add_picture_transfer();
 
         $('#get_img').click((e)=>{
             if (origin_site == 'TTG') {
