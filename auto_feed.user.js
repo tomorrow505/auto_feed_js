@@ -4900,12 +4900,25 @@ async function selectDropdownOption(tid, index, targetTitle) {
     var clickEvent = document.createEvent ('MouseEvents');
     clickEvent.initEvent ('mousedown', true, true);
     document.getElementById(tid).dispatchEvent(clickEvent);
-    await new Promise(resolve => setTimeout(resolve, 100));
-    const listHolder = document.querySelectorAll('.rc-virtual-list-holder')[index];
+    
+    // 等待下拉列表出现，带重试机制
+    let listHolder = null;
+    const maxRetries = 10;
+    const retryDelay = 200;
+    for (let i = 0; i < maxRetries; i++) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        listHolder = document.querySelectorAll('.rc-virtual-list-holder')[index];
+        if (listHolder) {
+            break;
+        }
+        console.log(`等待下拉列表渲染... (${i + 1}/${maxRetries})`);
+    }
+    
     if (!listHolder) {
         console.error("未找到下拉列表，请确保下拉框已经打开！");
         return;
     }
+    
     const findAndClick = () => {
         const option = listHolder.querySelector(`.ant-select-item-option[title="${targetTitle}"]`);
         if (option) {
@@ -17270,7 +17283,64 @@ function auto_feed() {
 
         else if (forward_site == 'YemaPT') {
             delete Array.prototype.remove;
-            var type_code = '未分类';
+            
+            // 监听 yemapt 的表单准备完毕事件，只通过该事件触发一次数据填充
+            var yemaPTFormReadyHandler = function(e) {
+                console.log('YemaPT form ready via torrentAddPageReady event, detail:', e);
+                processYemaPTForm();
+            };
+            
+            window.addEventListener('torrentAddPageReady', yemaPTFormReadyHandler, { once: true });
+            
+            function processYemaPTForm() {
+                const ant_form = document.querySelector('form.ant-form')
+                const __reactFiber = getReactFiberNode(ant_form);
+                const instance = getReactComponentInstance(__reactFiber);
+                if (instance) ant_form_instance = instance;
+                instance?.context?.setFieldsValue({ 'showName': raw_info.name });
+                instance?.context?.setFieldsValue({ 'shortDesc': raw_info.small_descr });
+                try {
+                    const cover_img = raw_info.descr?.split('[/img]')?.at(0).split('[img]')?.at(1).trim();
+                    instance?.context?.setFieldsValue({ 'picture': cover_img });
+                } catch (err) {}
+
+                setTimeout(function(){
+                    addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, null);
+                }, 200);
+
+                function bbcode2markdown(text) {
+                    text = text.replace(/\[size=\d\]/ig, '').replace(/\[\/size\]/ig, '');
+                    text = text.replace(/\[font=.+?\]/ig, '').replace(/\[\/font\]/ig, '');
+                    text = text.replace(/\[color=.+?\]/ig, '').replace(/\[\/color\]/ig, '');
+                    text = text.replace(/\[img\](.*?)\[\/img\]/ig, '![_]($1)');
+                    text = text.replace(/\[b\]\s*/ig, '**').replace(/\s*\[\/b\]/ig, '**');
+                    text = text.replace(/\[i\]\s*/ig, '*').replace(/\s*\[\/i\]/ig, '*');
+                    text = text.replace(/\[url=([^\]]*?)\](.*?)\[\/url\]/ig, '[$2]($1)');
+                    text = text.replace(/\[quote\](.*?)\[\/quote\]/isg, (m, n) => '> '+ n.split('\n').join('\n> ')+'\n\n');
+                    return text;
+                }
+                instance?.context?.setFieldsValue({ 'longDesc': bbcode2markdown(raw_info.descr) });
+                $('#longDesc').css({'height': '800px'});
+
+                // 匿名
+                if (if_uplver) {
+                    $('input[class="ant-radio-input"][value="y"]').click();
+                }
+
+                if (raw_info.dburl) {
+                    try{
+                        const dbid = raw_info.dburl.match(/subject\/(\d+)/)[1];
+                        instance?.context?.setFieldsValue({ 'douban': dbid });
+                    } catch (err) {}
+                }
+                if (raw_info.url) {
+                    try{
+                        const imdbid = raw_info.url.match(/title\/tt(\d+)/)[1];
+                        instance?.context?.setFieldsValue({ 'imdb': imdbid });
+                    } catch (err) {}
+                }
+                
+                var type_code = '未分类';
             switch (raw_info.type){
                 case '电影': case '剧集': case '综艺': case '动漫': case '体育': case '短剧': case '软件': case '游戏': case '书籍': case '音乐':
                     type_code = raw_info.type; break;
@@ -17390,56 +17460,8 @@ function auto_feed() {
                     console.error("执行过程中出错:", error);
                 }
             }
-
-            $('#shortDesc').wait(function(){
-                const ant_form = document.querySelector('form.ant-form')
-                const __reactFiber = getReactFiberNode(ant_form);
-                const instance = getReactComponentInstance(__reactFiber);
-                if (instance) ant_form_instance = instance;
-                instance?.context?.setFieldsValue({ 'showName': raw_info.name });
-                instance?.context?.setFieldsValue({ 'shortDesc': raw_info.small_descr });
-                try {
-                    const cover_img = raw_info.descr?.split('[/img]')?.at(0).split('[img]')?.at(1).trim();
-                    instance?.context?.setFieldsValue({ 'picture': cover_img });
-                } catch (err) {}
-
-                setTimeout(function(){
-                    addTorrent(raw_info.torrent_url, raw_info.torrent_name, forward_site, null);
-                }, 200);
-
-                function bbcode2markdown(text) {
-                    text = text.replace(/\[size=\d\]/ig, '').replace(/\[\/size\]/ig, '');
-                    text = text.replace(/\[font=.+?\]/ig, '').replace(/\[\/font\]/ig, '');
-                    text = text.replace(/\[color=.+?\]/ig, '').replace(/\[\/color\]/ig, '');
-                    text = text.replace(/\[img\](.*?)\[\/img\]/ig, '![_]($1)');
-                    text = text.replace(/\[b\]\s*/ig, '**').replace(/\s*\[\/b\]/ig, '**');
-                    text = text.replace(/\[i\]\s*/ig, '*').replace(/\s*\[\/i\]/ig, '*');
-                    text = text.replace(/\[url=([^\]]*?)\](.*?)\[\/url\]/ig, '[$2]($1)');
-                    text = text.replace(/\[quote\](.*?)\[\/quote\]/isg, (m, n) => '> '+ n.split('\n').join('\n> ')+'\n\n');
-                    return text;
-                }
-                instance?.context?.setFieldsValue({ 'longDesc': bbcode2markdown(raw_info.descr) });
-                $('#longDesc').css({'height': '800px'});
-
-                // 匿名
-                if (if_uplver) {
-                    $('input[class="ant-radio-input"][value="y"]').click();
-                }
-
-                if (raw_info.dburl) {
-                    try{
-                        const dbid = raw_info.dburl.match(/subject\/(\d+)/)[1];
-                        instance?.context?.setFieldsValue({ 'douban': dbid });
-                    } catch (err) {}
-                }
-                if (raw_info.url) {
-                    try{
-                        const imdbid = raw_info.url.match(/title\/tt(\d+)/)[1];
-                        instance?.context?.setFieldsValue({ 'imdb': imdbid });
-                    } catch (err) {}
-                }
-                runSequence(medium_code, standard_code, videoCodec, audioCodec, source_code, team_code, tags, type_code);
-            }, 1000/*次*/, 200/*毫秒/次*/);
+            runSequence(medium_code, standard_code, videoCodec, audioCodec, source_code, team_code, tags, type_code);
+            }
         }
 
         else if (forward_site == 'TTG'){
