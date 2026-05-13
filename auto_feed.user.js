@@ -4439,7 +4439,7 @@ function parseDoubanHtml(html) {
 
     // 基础信息
     raw_data.title = $html.find("title").text().replace("(豆瓣)", "").trim();
-    raw_data.id = ($html.find('link[rel="canonical"]').attr('href') || "").match(/subject\/(\d+)/)?.[1] || "";
+    raw_data.id = ($html.find('meta[property="og:url"]').attr('content') || "").match(/subject\/(\d+)/)?.[1] || "";
     
     // 海报处理 (增加 Referrer 绕过处理建议)
     try {
