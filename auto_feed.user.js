@@ -5681,15 +5681,8 @@ if (site_url.match(/^https?:\/\/passthepopcorn.me\/torrents.php.*/) && extra_set
                 div.insertBefore(new_div, div.firstElementChild);
                 a.addEventListener('click', function(e) {
                     e.preventDefault();
-                    var raw_info = {'url': `http://www.imdb.com/title/tt${imdb_id}`, 'dburl': '', 'descr': '', 'bgmurl': ''};
-                    create_site_url_for_douban_info(raw_info, true).then(function(raw_info){
-                        if (raw_info.dburl){
-                            window.open(raw_info.dburl);
-                        }
-                    }, function(err) {
-                        console.error(err);
-                        window.open(ptgen_url, target="_blank");
-                    });
+                    const douying_url = 'https://doubaninfo.com/#ptgen?url=tt' + imdb_id;
+                    window.open(douying_url, target="_blank");
                 })
             } catch(err){}
         }
