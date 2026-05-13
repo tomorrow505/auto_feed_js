@@ -70,6 +70,7 @@
 // @match        http*://cinemaz.to/torrent/*
 // @match        https://zhuque.in/torrent/*
 // @match        https://www.yemapt.org/*
+// @match        https://www1.yemapt.org/*
 // @match        https://beyond-hd.me/download_check/*
 // @match        http*://passthepopcorn.me/torrents.php?id*
 // @match        http*://*php?id=*&torrentid=*
@@ -284,7 +285,7 @@ if (site_url.match(/^.{3,30}userdetail/i) && !site_url.match(/bluebird-hd/)) {
     return;
 }
 
-if (site_url.match(/^https:\/\/www.yemapt.org/) && !site_url.match(/add\?/)) {
+if (site_url.match(/^https:\/\/www1?.yemapt.org/) && !site_url.match(/add\?/)) {
     return;
 }
 
@@ -1045,7 +1046,7 @@ const default_site_info = {
     'ICC': {'url': 'https://www.icc2022.com/', 'enable': 1},
     'CyanBug': {'url': 'https://cyanbug.net/', 'enable': 1},
     'ZHUQUE': {'url': 'https://zhuque.in/', 'enable': 1},
-    'YemaPT': {'url': 'https://www.yemapt.org/', 'enable': 1},
+    'YemaPT': {'url': 'https://www1?.yemapt.org/', 'enable': 1},
     '海棠': {'url': 'https://www.htpt.cc/', 'enable': 1},
     '杏林': {'url': 'https://xingtan.one/', 'enable': 1},
     'UBits': {'url': 'https://ubits.club/', 'enable': 1},
@@ -1392,7 +1393,7 @@ const o_site_info = {
     'DTR': 'https://torrent.desi/',
     'HONE': 'https://hawke.uno/',
     'ZHUQUE': 'https://zhuque.in/',
-    'YemaPT': 'https://www.yemapt.org/',
+    'YemaPT': 'https://www1?.yemapt.org/',
     'SpeedApp': 'https://speedapp.io/',
     'MTeam': used_site_info.MTeam.url,
     'ReelFliX': 'https://reelflix.cc/',
@@ -2218,7 +2219,7 @@ function judge_if_the_site_as_source() {
     if (site_url.match(/^https:\/\/.*open.cd\/plugin_upload.php#separator#/i)) {
         return 0;
     }
-    if (site_url.match(/^https:\/\/www.yemapt.org\/#\/torrent\/add\?/i)) {
+    if (site_url.match(/^https:\/\/www1?.yemapt.org\/#\/torrent\/add\?/i)) {
         return 0;
     }
     if (site_url.match(/^https?:\/\/(avistaz|privatehd|cinemaz).to\/upload\/torrent\/\d+/i)) {
@@ -2329,7 +2330,7 @@ function judge_if_the_site_in_domestic() {
         if (key != 'FRDS' && key != 'BYR' && key != 'U2'){
             domain = o_site_info[key].split('//')[1].replace('/', '');
             reg = new RegExp(domain, 'i');
-            if (site_url.split('#separator#')[0].match(reg) || site_url.match(/https:\/\/www.yemapt.org\/#\/torrent\/add\?/)){
+            if (site_url.split('#separator#')[0].match(reg) || site_url.match(/https:\/\/www1?.yemapt.org\/#\/torrent\/add\?/)){
                 return 0;
             }
         }
