@@ -102,7 +102,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.1.1.0
+// @version      2.1.1.1
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -2432,7 +2432,7 @@ String.prototype.medium_sel = function() { //媒介
         result = 'Remux';
     } else if (result.match(/(Blu-ray|.MPLS|Bluray原盘)/i) && !result.match(/Encode/i)) {
         result = 'Blu-ray';
-    } else if (result.match(/(UHD|UltraHD)/i) && !result.match(/Encode/i)) {
+    } else if (result.match(/(UHD|UltraHD)/i) && !result.match(/Encode|BDRIP|webrip|BluRay/i) && !result.match(/(x|H).?(264|265)/i)) {
         result = 'UHD';
     } else if (result.match(/(Encode|BDRIP|webrip|BluRay)/i) || result.match(/(x|H).?(264|265)/i)) {
         result = 'Encode';
@@ -4505,23 +4505,26 @@ async function getData(imdb_url, need_poster, callback) {
     // 1. 尝试从 TMDB API 获取海报
     if (need_poster) {
         try {
-            // 使用 find 接口，通过 imdb_id 查找
             const tmdb_find_url = `https://api.themoviedb.org/3/find/${imdb_id}?api_key=${used_tmdb_key}&external_source=imdb_id`;
-            
-            // 建议：fetchWithRetry 如果只处理 getDoc，可以直接用原生的 fetch 替代
-            const response = await fetch(tmdb_find_url);
-            const data = await response.json();
 
-            // TMDB 会返回 movie_results 或 tv_results
+            const data = await new Promise((resolve) => {
+                getJson(tmdb_find_url, null, function(response) {
+                    resolve(response);
+                });
+            });
+
+            // 检查返回的数据结构
             const movie = data.movie_results?.[0] || data.tv_results?.[0];
             
             if (movie && movie.poster_path) {
-                // 拼接图片完整地址，w500 是宽度，也可以改为 original
+                // 拼接 TMDB 高清海报地址
                 tmdb_poster = `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-                console.log('✅ 成功匹配 TMDB 海报');
+                console.log('✅ 成功通过 TMDB API 匹配海报');
+            } else {
+                console.warn('分 TMDB 未能找到该 IMDb ID 对应的海报');
             }
         } catch (e) {
-            console.warn("⚠️ TMDB API 请求失败:", e);
+            console.warn("⚠️ TMDB API 处理出错:", e);
         }
     }
 
