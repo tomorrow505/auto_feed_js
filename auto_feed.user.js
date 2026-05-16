@@ -17393,23 +17393,34 @@ function auto_feed() {
                 standard_code = standard_dict[raw_info.standard_sel];
             }
 
-            var source_code = 'Other';
+            var source_codes = [];
             var source_dict = {'大陆': 'CN(中国)', '香港': 'HK/CN(香港)', '台湾': 'TW/CN(台湾)', '日本': 'JP(日本)', '韩国': 'KR(韩国)'};
             if (source_dict.hasOwnProperty(raw_info.source_sel)){
-                source_code = source_dict[raw_info.source_sel];
+                source_codes.push(source_dict[raw_info.source_sel]);
             }
             const europeanCountries = ["阿尔巴尼亚","安道尔","奥地利","白俄罗斯","比利时","波斯尼亚和黑塞哥维那","保加利亚","克罗地亚","塞浦路斯","捷克","丹麦","爱沙尼亚","芬兰","法国","德国","希腊","匈牙利","冰岛","爱尔兰","意大利","科索沃","拉脱维亚","列支敦士登","立陶宛","卢森堡","马耳他","摩尔多瓦","摩纳哥","黑山","荷兰","北马其顿","挪威","波兰","葡萄牙","罗马尼亚","俄罗斯","圣马力诺","塞尔维亚","斯洛伐克","斯洛文尼亚","西班牙","瑞典","瑞士","乌克兰","英国","梵蒂冈","挪威","西德"];
-            if (raw_info.source_sel == '欧美') {
+            if (raw_info.source_sel == '欧美' || source_codes.length === 0) {
                 var reg_region = raw_info.descr.match(/(地.{0,5}?区|国.{0,5}?家|产.{0,5}?地|◎產.{0,5}?地)([^\r\n]+)/);
                 if (reg_region) {
-                    var region = reg_region[2].trim();
-                    region = region.split("/")[0].trim();
-                    if (region.match('美国')) {
-                        source_code = 'US(美国)';
-                    } else if (europeanCountries.indexOf(region) > -1){
-                        source_code = 'EU(欧洲)';
+                    var region_text = reg_region[2].trim();
+                    var regions = region_text.split('/').map(r => r.trim()).filter(r => r);
+                    for (var region of regions) {
+                        if (region.match('美国')) {
+                            if (!source_codes.includes('US(美国)')) source_codes.push('US(美国)');
+                        } else if (region.match('英国')) {
+                            if (!source_codes.includes('UK(英国)')) source_codes.push('UK(英国)');
+                        } else if (europeanCountries.indexOf(region) > -1){
+                            if (!source_codes.includes('EU(欧洲)')) source_codes.push('EU(欧洲)');
+                        } else if (region.match('加拿大')) {
+                            if (!source_codes.includes('CA(加拿大)')) source_codes.push('CA(加拿大)');
+                        } else if (region.match('澳大利亚|澳洲')) {
+                            if (!source_codes.includes('AU(澳大利亚)')) source_codes.push('AU(澳大利亚)');
+                        }
                     }
                 }
+            }
+            if (source_codes.length === 0) {
+                source_codes = ['Other'];
             }
             const team_dict = ['OurBits', 'BtsHD', 'BtsTV', 'HDChina', 'CMCT', 'HHWEB', 'FRDS', 'MTeam', 'QHstudio', 'UBits'];
             // 查找逻辑
@@ -17427,13 +17438,13 @@ function auto_feed() {
             if (!labels.complete && raw_info.name.match(/E\d+/i)) { tags.push('分集'); }
             if (labels.complete) { tags.push('完结'); }
 
-            async function runSequence(medium_code, standard_code, videoCodec, audioCodec, source_code, team_code, tags, type_code) {
+            async function runSequence(medium_code, standard_code, videoCodec, audioCodec, source_codes, team_code, tags, type_code) {
                 try {
                     await selectDropdownOption('medium', 0, medium_code);
                     await selectDropdownOption('standard', 1, standard_code);
                     await selectDropdownOption('codec', 2, videoCodec);
                     await selectDropdownOption('audiocodec', 3, audioCodec);
-                    await selectDropdownOption('region', 4, source_code);
+                    await selectDropdownOption('regionList', 4, source_codes);
                     await selectDropdownOption('team', 5, team_code);
                     await selectDropdownOption('tagList', 6, tags);
                     await selectDropdownOption('categoryId', 7, type_code);
@@ -17441,7 +17452,12 @@ function auto_feed() {
                     console.error("执行过程中出错:", error);
                 }
             }
-            runSequence(medium_code, standard_code, videoCodec, audioCodec, source_code, team_code, tags, type_code);
+            runSequence(medium_code, standard_code, videoCodec, audioCodec, source_codes, team_code, tags, type_code);
+
+            // 填写 mediainfo
+            if (raw_info.full_mediainfo) {
+                instance?.context?.setFieldsValue({ 'mediaInfo': raw_info.full_mediainfo });
+            }
             }
         }
 
