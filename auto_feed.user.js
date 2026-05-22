@@ -17300,7 +17300,20 @@ function auto_feed() {
                     text = text.replace(/\[quote\](.*?)\[\/quote\]/isg, (m, n) => '> '+ n.split('\n').join('\n> ')+'\n\n');
                     return text;
                 }
-                instance?.context?.setFieldsValue({ 'longDesc': bbcode2markdown(raw_info.descr) });
+                const yemaPTInfos = get_mediainfo_picture_from_descr(raw_info.descr || '');
+                var yemaPTMediaInfo = raw_info.full_mediainfo || raw_info.multi_mediainfo || yemaPTInfos.mediainfo || '';
+                yemaPTMediaInfo = yemaPTMediaInfo.replace(/\[\/?(quote|code|font|size|color).*?\]/ig, '').trim();
+
+                function removeMediaInfoFromDescr(text) {
+                    var cleaned = text || '';
+                    cleaned = cleaned.replace(/\[quote.*?\][\s\S]*?(DISC INFO|\.MPLS|Video Codec|Disc Label|General|RELEASE\.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率)[\s\S]*?\[\/quote\]\s*/ig, '');
+                    if (yemaPTMediaInfo.length > 20) {
+                        cleaned = cleaned.replace(yemaPTMediaInfo, '');
+                    }
+                    return cleaned.replace(/\[quote.*?\]\s*\[\/quote\]/ig, '').replace(/\n{3,}/g, '\n\n').trim();
+                }
+
+                instance?.context?.setFieldsValue({ 'longDesc': bbcode2markdown(removeMediaInfoFromDescr(raw_info.descr)) });
                 $('#longDesc').css({'height': '800px'});
 
                 // 匿名
@@ -17331,38 +17344,41 @@ function auto_feed() {
             }
             var medium_code = 'Other';
             switch(raw_info.medium_sel){
-                case 'UHD': medium_code = 'Blu-rayUHD'; break;
-                case 'Blu-ray': case 'Remux': case 'Encode': case 'CD':
-                    medium_code = raw_info.medium_sel;
-                    break;
-                case 'HDTV': medium_code = 'HDTV/TV'; break;
-                case 'WEB-DL': medium_code = 'Web-dl'; break;
+                case 'UHD': medium_code = 'Blu-ray UHD (4K Complete)'; break;
+                case 'Blu-ray': medium_code = 'Blu-ray (1080p Complete)'; break;
+                case 'Remux': medium_code = 'Remux'; break;
+                case 'Encode': medium_code = 'Rip/Encode'; break;
+                case 'CD': medium_code = 'Audio CD/Vinyl'; break;
+                case 'HDTV': medium_code = 'HDTV/TV Cap'; break;
+                case 'WEB-DL': medium_code = 'Web-DL/WebRip'; break;
                 case 'DVD':
                     if (raw_info.name.match(/dvdrip/i)){
-                        medium_code = 'DVDrip';
+                        medium_code = 'DVDRip';
                     } else {
-                        medium_code = 'DVD';
+                        medium_code = 'DVD (Complete/ISO)';
                     }
                     break;
             }
             var videoCodec = 'Other';
             switch (raw_info.codec_sel){
                 case 'H264': case 'X264':
-                    videoCodec = 'H.264(x264/AVC)';
+                    videoCodec = 'H.264/AVC';
                     if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
                         videoCodec = 'Bluray(AVC)';
                     }
                     break;
-                case 'VC-1': videoCodec = 'Bluray(VC1)'; break;
-                case 'XVID': videoCodec = 'Xvid'; break;
-                case 'MPEG-2': videoCodec = 'MPEG-2'; break;
+                case 'VC-1': videoCodec = 'VC-1(Blu-ray)'; break;
+                case 'XVID': videoCodec = 'Xvid/DivX'; break;
+                case 'MPEG-2': videoCodec = 'MPEG-2(Blu-ray/DVD)'; break;
                 case 'H265': case 'X265':
-                    videoCodec = 'H.265(x265/HEVC)';
+                    videoCodec = 'H.265/HEVC';
                     if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD') {
                         videoCodec = 'Bluray(HEVC)';
                     }
                     break;
-                case 'AV1': videoCodec = 'AV1';
+                case 'AV1': videoCodec = 'AV1'; break;
+                case 'VP9': videoCodec = 'VP9'; break;
+                case 'H266': case 'VVC': videoCodec = 'H.266/VVC'; break;
             }
             var audioCodec = 'Other';
             switch (raw_info.audiocodec_sel){
@@ -17374,27 +17390,33 @@ function auto_feed() {
                     audioCodec = 'TrueHD Atmos';
                     break;
                 case 'AC3':
-                    audioCodec = 'AC3(DD)';
+                    audioCodec = 'AC3 (Dolby Digital)';
                     if (raw_info.name.match(/DDP|DD\+/)) {
-                        audioCodec = 'E-AC3(DDP)';
-                        if (raw_info.name.match(/Atoms/)) {
-                            audioCodec = 'E-AC3 Atoms Atoms';
+                        audioCodec = 'E-AC3 (Dolby Digital Plus)';
+                        if (raw_info.name.match(/Atmos/i)) {
+                            audioCodec = 'E-AC3 Atmos';
                         }
                     }
                     break;
-                case 'LPCM': case 'DTS': case 'AAC': case 'Flac': case 'APE': case 'WAV': case 'MP3':
+                case 'LPCM': case 'DTS': case 'AAC': case 'Flac': case 'FLAC': case 'APE': case 'MP3': case 'OGG': case 'Opus':
                     audioCodec = raw_info.audiocodec_sel.toUpperCase();
+                    if (raw_info.audiocodec_sel == 'Opus') audioCodec = 'Opus';
+                    break;
+                case 'WAV':
+                    audioCodec = 'Other';
+                    break;
             }
             var standard_code = 'Other';
             var standard_dict = {
-                '4K': '2160p/4K', '1080p': '1080p', '1080i': '1080i', '720p': '720p', 'SD': 'SD'
+                '8K': '8K', '4K': '4K/2160p', '2K': '2K/1440p', '1440p': '2K/1440p',
+                '1080p': '1080p', '1080i': '1080i', '720p': '720p', '720i': '720i', 'SD': 'SD'
             };
             if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
                 standard_code = standard_dict[raw_info.standard_sel];
             }
 
             var source_codes = [];
-            var source_dict = {'大陆': 'CN(中国)', '香港': 'HK/CN(香港)', '台湾': 'TW/CN(台湾)', '日本': 'JP(日本)', '韩国': 'KR(韩国)'};
+            var source_dict = {'大陆': 'CN(中国)', '香港': 'HK/CN(香港)', '台湾': 'TW/CN(台湾)', '美国': 'US(美国)', '日本': 'JP(日本)', '韩国': 'KR(韩国)'};
             if (source_dict.hasOwnProperty(raw_info.source_sel)){
                 source_codes.push(source_dict[raw_info.source_sel]);
             }
@@ -17408,13 +17430,9 @@ function auto_feed() {
                         if (region.match('美国')) {
                             if (!source_codes.includes('US(美国)')) source_codes.push('US(美国)');
                         } else if (region.match('英国')) {
-                            if (!source_codes.includes('UK(英国)')) source_codes.push('UK(英国)');
+                            if (!source_codes.includes('EU(欧洲)')) source_codes.push('EU(欧洲)');
                         } else if (europeanCountries.indexOf(region) > -1){
                             if (!source_codes.includes('EU(欧洲)')) source_codes.push('EU(欧洲)');
-                        } else if (region.match('加拿大')) {
-                            if (!source_codes.includes('CA(加拿大)')) source_codes.push('CA(加拿大)');
-                        } else if (region.match('澳大利亚|澳洲')) {
-                            if (!source_codes.includes('AU(澳大利亚)')) source_codes.push('AU(澳大利亚)');
                         }
                     }
                 }
@@ -17433,10 +17451,15 @@ function auto_feed() {
             if (labels.zz) { tags.push('中字'); }
             if (labels.yy) { tags.push('粤语'); }
             if (labels.yz) { tags.push('英字'); }
-            if (labels.hdr10 || labels.hdr10plus) { tags.push('HDR10'); }
+            if (labels.hdr10) { tags.push('HDR10'); }
+            if (labels.hdr10plus) { tags.push('HDR10+'); }
             if (labels.db) { tags.push('杜比视界'); }
-            if (!labels.complete && raw_info.name.match(/E\d+/i)) { tags.push('分集'); }
+            if (raw_info.name.match(/atmos/i) || raw_info.descr.match(/atmos/i)) { tags.push('杜比全景声(Atmos)'); }
+            if (raw_info.name.match(/dts[ .-]?(x|xll)/i) || raw_info.descr.match(/DTS[ .-]?X/i)) { tags.push('DTS-X'); }
+            if (raw_info.name.match(/(?:5\.1|7\.1)/) || raw_info.descr.match(/(?:5\.1|7\.1)\s*(?:声道|channels?)/i)) { tags.push('5.1/7.1声道'); }
+            if (!labels.complete && raw_info.name.match(/E\d+/i)) { tags.push('连载中'); }
             if (labels.complete) { tags.push('完结'); }
+            tags = Array.from(new Set(tags));
 
             async function runSequence(medium_code, standard_code, videoCodec, audioCodec, source_codes, team_code, tags, type_code) {
                 try {
@@ -17455,8 +17478,19 @@ function auto_feed() {
             runSequence(medium_code, standard_code, videoCodec, audioCodec, source_codes, team_code, tags, type_code);
 
             // 填写 mediainfo
-            if (raw_info.full_mediainfo) {
-                instance?.context?.setFieldsValue({ 'mediaInfo': raw_info.full_mediainfo });
+            if (yemaPTMediaInfo) {
+                instance?.context?.setFieldsValue({ 'mediaInfo': yemaPTMediaInfo });
+                const mediaInfoInput = document.getElementById('mediaInfo');
+                if (mediaInfoInput) {
+                    const lastValue = mediaInfoInput.value;
+                    mediaInfoInput.value = yemaPTMediaInfo;
+                    const tracker = mediaInfoInput._valueTracker;
+                    if (tracker) {
+                        tracker.setValue(lastValue);
+                    }
+                    mediaInfoInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    mediaInfoInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
             }
             }
         }
