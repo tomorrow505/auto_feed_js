@@ -1046,7 +1046,7 @@ const default_site_info = {
     'ICC': {'url': 'https://www.icc2022.com/', 'enable': 1},
     'CyanBug': {'url': 'https://cyanbug.net/', 'enable': 1},
     'ZHUQUE': {'url': 'https://zhuque.in/', 'enable': 1},
-    'YemaPT': {'url': 'https://www1?.yemapt.org/', 'enable': 1},
+    'YemaPT': {'url': 'https://www.yemapt.org/', 'enable': 1},
     '海棠': {'url': 'https://www.htpt.cc/', 'enable': 1},
     '杏林': {'url': 'https://xingtan.one/', 'enable': 1},
     'UBits': {'url': 'https://ubits.club/', 'enable': 1},
@@ -1390,7 +1390,7 @@ const o_site_info = {
     'Monika': 'https://monikadesign.uk/',
     'HONE': 'https://hawke.uno/',
     'ZHUQUE': 'https://zhuque.in/',
-    'YemaPT': 'https://www1?.yemapt.org/',
+    'YemaPT': 'https://www.yemapt.org/',
     'SpeedApp': 'https://speedapp.io/',
     'MTeam': used_site_info.MTeam.url,
     'ReelFliX': 'https://reelflix.cc/',
@@ -17306,9 +17306,18 @@ function auto_feed() {
 
                 function removeMediaInfoFromDescr(text) {
                     var cleaned = text || '';
-                    cleaned = cleaned.replace(/\[quote.*?\][\s\S]*?(DISC INFO|\.MPLS|Video Codec|Disc Label|General|RELEASE\.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率)[\s\S]*?\[\/quote\]\s*/ig, '');
-                    if (yemaPTMediaInfo.length > 20) {
-                        cleaned = cleaned.replace(yemaPTMediaInfo, '');
+                    if (yemaPTMediaInfo.length > 20 && yemaPTMediaInfo.match(/DISC INFO|\.MPLS|Video Codec|Disc Label|General|RELEASE\.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率/i)) {
+                        const normalizeMediaInfo = function(value) {
+                            return value.replace(/\[\/?(quote|code|font|size|color).*?\]/ig, '').replace(/\s+/g, ' ').trim();
+                        };
+                        const mediaInfoText = normalizeMediaInfo(yemaPTMediaInfo);
+                        cleaned = cleaned.replace(/\[quote.*?\]([\s\S]*?)\[\/quote\]\s*/ig, function(match, quoteText) {
+                            const normalizedQuote = normalizeMediaInfo(quoteText);
+                            if (normalizedQuote.includes(mediaInfoText) && normalizedQuote.length < mediaInfoText.length * 1.5) {
+                                return '';
+                            }
+                            return match;
+                        });
                     }
                     return cleaned.replace(/\[quote.*?\]\s*\[\/quote\]/ig, '').replace(/\n{3,}/g, '\n\n').trim();
                 }
@@ -17333,7 +17342,27 @@ function auto_feed() {
                         instance?.context?.setFieldsValue({ 'imdb': imdbid });
                     } catch (err) {}
                 }
-                
+                if (raw_info.type == '剧集' || raw_info.type == '综艺' || raw_info.type == '动漫' || raw_info.type == '纪录') {
+                    var yemaPTSeason = '';
+                    try {
+                        yemaPTSeason = parseInt(raw_info.name.match(/S(\d+)/i)[1]);
+                    } catch (err) {}
+                    if (yemaPTSeason) {
+                        instance?.context?.setFieldsValue({ 'season': yemaPTSeason });
+                        const seasonInput = document.getElementById('season');
+                        if (seasonInput) {
+                            const lastValue = seasonInput.value;
+                            seasonInput.value = yemaPTSeason;
+                            const tracker = seasonInput._valueTracker;
+                            if (tracker) {
+                                tracker.setValue(lastValue);
+                            }
+                            seasonInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            seasonInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    }
+                }
+
                 var type_code = '未分类';
             switch (raw_info.type){
                 case '电影': case '剧集': case '综艺': case '动漫': case '体育': case '短剧': case '软件': case '游戏': case '书籍': case '音乐':
