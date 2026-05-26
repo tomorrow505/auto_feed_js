@@ -5569,7 +5569,7 @@ if (site_url.match(/^https?:\/\/hdbits.org\/browse.php*/)) {
     $('#torrent-list > thead > tr > th:eq(1)').after('<th class="center">FL</th>');
 
     $('#torrent-list > tbody > tr > td:nth-child(3)').each(function(){
-        var discount = $(this).find('a').attr('title').split(' ')[0];
+        var discount = $(this).find('b > a').attr('title')?.split(' ')[0] || '';
         switch(discount) {
             case '100%':
                 $(this).after('<td class="disc-100 center">100%</td>');
@@ -11311,7 +11311,9 @@ function auto_feed() {
                 } else if (origin_site == '影') {
                     raw_info.small_descr = tds[i].nextSibling.nextSibling.textContent;
                 } else if (origin_site == 'Audiences') {
-                    raw_info.small_descr = tds[i].nextSibling.getElementsByTagName('div')[0].getElementsByTagName('div')[0].textContent;
+                    const nextNode = tds[i].nextSibling;
+                    raw_info.small_descr = nextNode.getElementsByTagName('div')?.[0]
+  ?.getElementsByTagName('div')?.[0]?.textContent ?? nextNode.textContent;
                 } else {
                     if (origin_site == 'U2') {
                         raw_info.small_descr = $(tds[i]).parent().find('td:last').text();
@@ -12945,7 +12947,7 @@ function auto_feed() {
                 forward_r.appendChild(para);
                 para.target = "_blank"; para.id = key;
 
-                if (Object.keys(pt_icos).length === 0 || pt_icos[key] === undefined) {
+                if (!pt_icos || Object.keys(pt_icos).length === 0 || pt_icos[key] === undefined) {
                     img_url = used_site_info[key].url + 'favicon.ico';
                     if (origin_site != 'mam') {
                         img_url_wsrv = 'https://wsrv.nl/?url=' + img_url;
