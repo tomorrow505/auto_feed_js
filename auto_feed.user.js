@@ -151,8 +151,19 @@
 
 function decodeSiteURL() {
     var url = new URL(location.href);
-    url.hash = decodeURIComponent(url.hash);
-    return decodeURI(url.toString())
+    var hash = url.hash;
+    url.hash = '';
+    var siteUrl = decodeURI(url.toString());
+
+    if (!hash.match(/#separator#/)) {
+        return siteUrl + hash;
+    }
+
+    try {
+        return siteUrl + decodeURIComponent(hash);
+    } catch (e) {
+        return siteUrl + hash;
+    }
 }
 
 var site_url = decodeSiteURL();
