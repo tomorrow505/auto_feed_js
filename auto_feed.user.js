@@ -102,7 +102,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.1.1.1
+// @version      2.1.1.2
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -8111,15 +8111,39 @@ function full_bdinfo2summary(descr) {
 
     if (descr.match(/SUBTITLES:[\s\S]{0,20}Codec/i)) {
         var subtitle_info = descr.match(/SUBTITLES:[\s\S]{0,300}-----------([\s\S]*)/i)[1].split(/FILES/i)[0].trim();
-        summary['Subtitle'] = subtitle_info.split('\n').map(e=>{
-            var info = e.split(/\s{5,15}/).filter(function(ee){if (ee.trim() && ee.trim() != '[/quote]') return ee.trim();});
+
+        summary['Subtitle'] = subtitle_info.split('\n').map(e => {
+            var info = e.split(/\s{5,15}/).filter(function(ee) {
+                if (ee.trim() && ee.trim() != '[/quote]') return ee.trim();
+            });
+
+            if (info.length >= 3) {
+                info = [
+                    info[1], // Language
+                    info[2], // Bitrate
+                    info[3]  // Description, 可能为空
+                ].filter(Boolean);
+            }
+
             return info.join(' / ').trim();
         }).join('\nSubtitle: ').split('[/quote]')[0].replace(/(\nSubtitle: )+$/, '');
     }
+
     if (descr.match(/Audio:[\s\S]{0,20}Codec/i)) {
         var audio_info = descr.match(/Audio:[\s\S]{0,300}-----------([\s\S]*)/i)[1].split(/subtitles|\[.*?quote\]/i)[0].trim();
-        summary['Audio'] = audio_info.split('\n').map(e=>{
-            var info = e.split(/\s{5,15}/).filter(function(ee){if (ee.trim() && ee.trim() != '[/quote]') return ee.trim();});
+
+        summary['Audio'] = audio_info.split('\n').map(e => {
+            var info = e.split(/\s{5,15}/).filter(function(ee) {
+                if (ee.trim() && ee.trim() != '[/quote]') return ee.trim();
+            });
+            if (info.length >= 3) {
+                info = [
+                    info[1], // Language
+                    info[0], // Codec
+                    info[2], // Bitrate
+                    info[3]  // Description, 可能为空
+                ].filter(Boolean);
+            }
             return info.join(' / ').trim();
         }).join('\nAudio: ');
     }
@@ -11379,7 +11403,7 @@ function auto_feed() {
                 } else if (origin_site == 'Audiences') {
                     const nextNode = tds[i].nextSibling;
                     raw_info.small_descr = nextNode.getElementsByTagName('div')?.[0]
-  ?.getElementsByTagName('div')?.[0]?.textContent ?? nextNode.textContent;
+ ?.getElementsByTagName('div')?.[0]?.textContent ?? nextNode.textContent;
                 } else {
                     if (origin_site == 'U2') {
                         raw_info.small_descr = $(tds[i]).parent().find('td:last').text();
