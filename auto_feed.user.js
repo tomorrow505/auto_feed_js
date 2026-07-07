@@ -17412,12 +17412,32 @@ function auto_feed() {
                 const yemaPTInfos = get_mediainfo_picture_from_descr(raw_info.descr || '');
                 var yemaPTMediaInfo = raw_info.full_mediainfo || raw_info.multi_mediainfo || yemaPTInfos.mediainfo || '';
                 yemaPTMediaInfo = yemaPTMediaInfo.replace(/\[\/?(quote|code|font|size|color).*?\]/ig, '').trim();
+                function fillYemaPTScreenshotList() {
+                    get_full_size_picture_urls(null, yemaPTInfos.pic_info, $('#not'), false, function(img_info) {
+                        var screenshotList = img_info.split(/\n+/).map(function(item) {
+                            return item.trim();
+                        }).filter(function(item) {
+                            return item;
+                        });
+                        screenshotList = Array.from(new Set(screenshotList));
+                        if (screenshotList.length > 0) {
+                            torrentForm?.setFieldsValue({ 'screenshotList': screenshotList });
+                        }
+                    });
+                }
 
                 function removeMediaInfoFromDescr(text) {
                     var cleaned = text || '';
                     if (yemaPTCoverImg) {
                         const escapedPoster = yemaPTCoverImg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                         cleaned = cleaned.replace(new RegExp(`^\\s*(?:\\[url=[^\\]]+\\])?\\[img\\]${escapedPoster}\\[\\/img\\](?:\\[\\/url\\])?\\s*`, 'i'), '');
+                    }
+                    if (yemaPTInfos.pic_info) {
+                        const yemaPTScreenshotBBCodes = yemaPTInfos.pic_info.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/ig) || [];
+                        yemaPTScreenshotBBCodes.forEach(function(item) {
+                            const escapedItem = item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            cleaned = cleaned.replace(new RegExp(`\\s*${escapedItem}\\s*`, 'ig'), '\n');
+                        });
                     }
                     if (yemaPTMediaInfo.length > 20 && yemaPTMediaInfo.match(/DISC INFO|\.MPLS|Video Codec|Disc Label|General|RELEASE\.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率/i)) {
                         const normalizeMediaInfo = function(value) {
@@ -17622,6 +17642,7 @@ function auto_feed() {
             if (yemaPTMediaInfo) {
                 torrentForm?.setFieldsValue({ 'mediaInfo': yemaPTMediaInfo });
             }
+            fillYemaPTScreenshotList();
             torrentForm?.setFieldsValue({ 'categoryId': yemaPTOptionValue('categoryId', type_code, '未分类') });
             return true;
         }
