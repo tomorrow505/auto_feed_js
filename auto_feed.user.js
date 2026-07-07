@@ -1576,6 +1576,7 @@ var raw_info = {
     'url': '', //imdb链接
     'dburl': '', //豆瓣链接
     'descr': '', //简介
+    'poster': '', //海报
     'log_info': '',  //音乐特有
     'tracklist': '', //音乐特有
     'music_type': '', //音乐特有
@@ -3128,6 +3129,7 @@ function fill_raw_info(raw_info, forward_site){
     raw_info.small_descr = raw_info.small_descr || '';
     raw_info.descr = raw_info.descr || '';
     raw_info.full_mediainfo = raw_info.full_mediainfo || '';
+    raw_info.poster = raw_info.poster || '';
     raw_info.tracklist = raw_info.tracklist || '';
     raw_info.log_info = raw_info.log_info || '';
     raw_info.edition_info = raw_info.edition_info || '';
@@ -9544,6 +9546,10 @@ function auto_feed() {
             insert_row = tbody.insertRow(0);
             douban_box = tbody.insertRow(0);
             try {
+                var cover = $('#cover-content').attr('src') || $('#cover-content').attr('data-src');
+                if (cover) {
+                    raw_info.poster = cover;
+                }
                 if ($('div:contains(其他信息):last').length) {
                     var div_descr = $('div:contains(其他信息):last').parent().next()[0];
                     raw_info.descr = walkDOM(div_descr.cloneNode(true)).trim();
@@ -9562,7 +9568,7 @@ function auto_feed() {
             } catch (err) {}
             try {
                 var screen = $('#screenshot-content')[0];
-                raw_info.descr = '\n' + walkDOM(screen.cloneNode(true));
+                raw_info.descr = (raw_info.descr ? raw_info.descr + '\n\n' : '') + walkDOM(screen.cloneNode(true)).trim();
             } catch (err) {}
             try {
                 raw_info.url = match_link('imdb', $('#kimdb').html());
@@ -17380,9 +17386,12 @@ function auto_feed() {
                 ant_form_instance = torrentForm;
                 torrentForm?.setFieldsValue({ 'showName': raw_info.name });
                 torrentForm?.setFieldsValue({ 'shortDesc': raw_info.small_descr });
+                var yemaPTCoverImg = '';
                 try {
-                    const cover_img = raw_info.descr?.split('[/img]')?.at(0).split('[img]')?.at(1).trim();
-                    torrentForm?.setFieldsValue({ 'picture': cover_img });
+                    yemaPTCoverImg = raw_info.poster || raw_info.descr?.split('[/img]')?.at(0).split('[img]')?.at(1).trim();
+                    if (yemaPTCoverImg) {
+                        torrentForm?.setFieldsValue({ 'picture': yemaPTCoverImg });
+                    }
                 } catch (err) {}
 
                 setTimeout(function(){
@@ -17406,6 +17415,10 @@ function auto_feed() {
 
                 function removeMediaInfoFromDescr(text) {
                     var cleaned = text || '';
+                    if (yemaPTCoverImg) {
+                        const escapedPoster = yemaPTCoverImg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        cleaned = cleaned.replace(new RegExp(`^\\s*(?:\\[url=[^\\]]+\\])?\\[img\\]${escapedPoster}\\[\\/img\\](?:\\[\\/url\\])?\\s*`, 'i'), '');
+                    }
                     if (yemaPTMediaInfo.length > 20 && yemaPTMediaInfo.match(/DISC INFO|\.MPLS|Video Codec|Disc Label|General|RELEASE\.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率/i)) {
                         const normalizeMediaInfo = function(value) {
                             return value.replace(/\[\/?(quote|code|font|size|color).*?\]/ig, '').replace(/\s+/g, ' ').trim();
