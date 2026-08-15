@@ -19,7 +19,7 @@
 - 自动预填标题、简介、媒体信息、图片等字段
 - IMDb -> 豆瓣 / PTGen 信息补全
 - 页面增强（PTP/HDB 等）与快速搜索入口
-- 图片转存与图床桥接（PTPIMG / Pixhost / Freeimage / Hostik / hdbimg）
+- 图片转存与图床桥接（PTPIMG / Pixhost / Freeimage / ImgBB / Hostik / hdbimg）
 - 远程推送（qBittorrent / Transmission / Deluge）
 - 种子清洗（Source/Announce/date/comment 等处理）
 
@@ -57,12 +57,25 @@
 命令：
 ```bash
 npm install
-npm run dev
 npm run build
 ```
 
-本地安装入口：
-- `http://127.0.0.1:5174/auto-feed.user.js`
+默认本地安装入口：
+- `file:///absolute/path/to/auto_feed_js/dist/auto-feed-refactor.user.js`
+
+说明：
+- `npm run build` 会生成完整脚本 `dist/auto_feed.user.js` 和轻量 loader `dist/auto-feed-refactor.user.js`。
+- loader 的 `@require` 默认指向本机 `dist/auto_feed.user.js`，不依赖 `127.0.0.1:5174` 服务常驻。
+- loader 每次构建会追加本地构建版本号，打开本地入口时 Tampermonkey 会识别为 `Update`。
+- Chrome/Tampermonkey 使用 `file://` 脚本时，需要在扩展管理页给 Tampermonkey 开启“允许访问文件网址”。
+
+需要临时热更新预览时，再启动本地服务：
+```bash
+npm run dev
+```
+
+临时服务入口：
+- `http://127.0.0.1:5174/auto-feed-refactor.user.js`
 
 后台常驻（screen）：
 ```bash

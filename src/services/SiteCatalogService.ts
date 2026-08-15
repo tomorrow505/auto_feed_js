@@ -2,6 +2,7 @@ import { SiteConfig } from '../types/SiteConfig';
 import { NexusSites } from '../config/sites_nexus';
 import { GazelleSites } from '../config/sites_gazelle';
 import { Unit3DSites } from '../config/sites_unit3d';
+import { SpecialSites } from '../config/sites_special';
 
 export const DEFAULT_ENABLED_SITE_NAMES = [
     // Default enabled sites (user can edit in Settings).
@@ -25,7 +26,10 @@ export const DEFAULT_ENABLED_SITE_NAMES = [
     'OPS',
     'DIC',
     'RED',
-    'Monika'
+    'Monika',
+    'SC',
+    'TJUPT',
+    'HDT'
 ] as const;
 
 const CHINESE_NEXUS_SITES = new Set([
@@ -38,7 +42,8 @@ const CHINESE_NEXUS_SITES = new Set([
     'HDHome',
     'OurBits',
     'OpenCD',
-    'Audiences'
+    'Audiences',
+    'TJUPT'
 ]);
 
 export function isChineseNexusSite(siteName: string): boolean {
@@ -47,7 +52,7 @@ export function isChineseNexusSite(siteName: string): boolean {
 
 export class SiteCatalogService {
     static getAllSites(): SiteConfig[] {
-        return [...NexusSites, ...GazelleSites, ...Unit3DSites];
+        return [...NexusSites, ...GazelleSites, ...Unit3DSites, ...SpecialSites];
     }
 
     static getSupportedSites(): SiteConfig[] {

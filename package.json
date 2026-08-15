@@ -12,7 +12,7 @@
     "dev:screen:attach": "bash scripts/dev-full-screen.sh attach",
     "dev:screen:status": "bash scripts/dev-full-screen.sh status",
     "dev:loader": "node scripts/vite.mjs",
-    "build": "tsc && node scripts/vite.mjs build && node -e \"const fs=require('fs');fs.copyFileSync('dist/auto_feed.user.js','dist/auto-feed-refactor.user.js');\"",
+    "build": "tsc && node scripts/vite.mjs build && node scripts/postbuild-userscripts.mjs",
     "preview": "node scripts/vite.mjs preview"
   },
   "dependencies": {

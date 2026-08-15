@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { TorrentMeta } from '../types/TorrentMeta';
 import { SiteConfig } from '../types/SiteConfig';
 import { htmlToBBCode } from '../utils/htmlToBBCode';
+import { dispatchFormEvents } from '../common/dom/form';
 
 export async function parseGazelle(config: SiteConfig, currentUrl: string): Promise<TorrentMeta> {
     const selectors = {
@@ -64,15 +65,31 @@ export async function fillGazelle(meta: TorrentMeta, config: SiteConfig): Promis
     const imageInput = $('input[name="image"]').first();
     const descrInput = $('textarea[name="description"], textarea[name="body"]').first();
 
-    if (nameInput.length) nameInput.val(meta.title || '');
+    const fire = (jq: JQuery<HTMLElement>) => jq.each((_, el) => dispatchFormEvents(el));
+    if (nameInput.length) {
+        nameInput.val(meta.targetTitle || meta.title || '');
+        fire(nameInput as JQuery<HTMLElement>);
+    }
     if (yearInput.length) {
         const yearMatch = (meta.subtitle || '').match(/(19|20)\d{2}/);
-        if (yearMatch) yearInput.val(yearMatch[0]);
+        if (yearMatch) {
+            yearInput.val(yearMatch[0]);
+            fire(yearInput as JQuery<HTMLElement>);
+        }
     }
     if (tagsInput.length && meta.subtitle) {
         const tagsPart = meta.subtitle.split('|').pop()?.trim();
-        if (tagsPart) tagsInput.val(tagsPart.replace(/,\s*/g, ','));
+        if (tagsPart) {
+            tagsInput.val(tagsPart.replace(/,\s*/g, ','));
+            fire(tagsInput as JQuery<HTMLElement>);
+        }
     }
-    if (imageInput.length && meta.images && meta.images[0]) imageInput.val(meta.images[0]);
-    if (descrInput.length) descrInput.val(meta.description || '');
+    if (imageInput.length && meta.images && meta.images[0]) {
+        imageInput.val(meta.images[0]);
+        fire(imageInput as JQuery<HTMLElement>);
+    }
+    if (descrInput.length) {
+        descrInput.val(meta.description || '');
+        fire(descrInput as JQuery<HTMLElement>);
+    }
 }

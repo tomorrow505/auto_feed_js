@@ -8,6 +8,7 @@
 - Unit3D/Classic：BHD、BLU、Tik、KG、Monika
 
 补充：Monika（MDU）已按上游源码规则对齐修复上传路径与关键表单映射。
+补充：SC、TJUPT、HDT 已补齐为可识别源站/目标站，并按 legacy 规则加入专属 tracker；HDT 归入 special 站点清单，避免误放进 Nexus/Gazelle/Unit3D 分类。2026-05-18 回归修复了三站上传页表单等待、SC group-only 源页注入、HDT details/torrents 源页兼容、TJUPT 专用字段与通用标题抢写等问题。
 
 ## 音乐站点（持续补齐）
 - RED
@@ -22,6 +23,10 @@
 - ACM
 - HDF
 - PrivateHD
+
+## 本地构建验证
+- 图床按钮已从 Gifyu 切换为 ImgBB，旧 `gifyuApiKey` 会迁移到 `imgbbApiKey`。
+- Cinematik 的 IMDb aspect ratio 兜底已按当前 IMDb technical 页 DOM 验证，可读取 `Aspect ratio1.85 : 1` 形态。
 
 ## 代码位置
 - 站点配置：`src/config/`

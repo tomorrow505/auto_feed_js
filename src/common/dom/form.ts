@@ -19,6 +19,30 @@ export function setFormValue(
     return true;
 }
 
+export function setFirstFormValue(
+    selector: string,
+    value: string | undefined,
+    options?: { force?: boolean }
+): boolean {
+    if (!value) return false;
+    const el = document.querySelector(selector) as FormValueElement | null;
+    return setFormValue(el, value, options);
+}
+
+export function setAllFormValues(
+    selector: string,
+    value: string | undefined,
+    options?: { force?: boolean }
+): boolean {
+    if (!value) return false;
+    let changed = false;
+    document.querySelectorAll(selector).forEach((node) => {
+        const el = node as FormValueElement;
+        if (setFormValue(el, value, options)) changed = true;
+    });
+    return changed;
+}
+
 export function setChecked(el: HTMLInputElement | null | undefined, checked: boolean): boolean {
     if (!el) return false;
     if (el.checked === checked) return false;

@@ -40,7 +40,7 @@ case "$cmd" in
     cat <<EOF
 Usage: $0 <start|stop|attach|status>
 
-Starts/stops a detached screen session running the full userscript dev server on 127.0.0.1:5174.
+Starts/stops a detached screen session running the full userscript dev server.
 EOF
     exit 2
     ;;

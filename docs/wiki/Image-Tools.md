@@ -3,12 +3,12 @@
 ## 当前能力
 - 简介图片提取与替换
 - 缩略图 -> 原图链接转换（按常见图床规则）
-- 重传图床：PTPImg / Pixhost / Freeimage
+- 重传图床：PTPImg / Pixhost / Freeimage / ImgBB
 - 图床桥接：hdbits / imgbox / pixhost / hdbimg / hostik
 
 ## 使用入口
 - 在转发嵌入区点击图床按钮。
-- 或在设置页填写图床 API Key（PTPImg / Freeimage）后使用重传。
+- 或在设置页填写图床 API Key（PTPImg / Freeimage / ImgBB）后使用重传。
 
 ## 行为说明
 - 优先使用你在页面中手工勾选/缓存过的截图。

@@ -1,6 +1,6 @@
 # Auto-Feed Refactor 功能对照表
 
-更新时间：2026-03-22
+更新时间：2026-05-18
 
 本文档对照原版 Wiki（`auto_feed_js.wiki/支持的站点.md`）并同步当前重构进度：
 - 标题 `✅` = 该模块核心能力已可用
@@ -89,12 +89,13 @@
 - ~~多图到 PIXhost（批量识别）~~
 - ~~拉取图像跳转上传（HDBits / imgbox / pixhost 等）~~
 - ~~截图提取与链接清洗~~
-- ✨ Hostik / hdbimg 桥接支持
+- ✨ HDB 保留原始 JPG 浏览体验，需要转存时再按 legacy 方式本地下载 PNG
+- ✨ Hostik / hdbimg 桥接支持（Hostik 根据原资源标题免点击创建/复用相册，完成上传后自动弹出结果）
 
 ### ✅ 信息增强
 - ~~IMDb -> 豆瓣基础获取~~
 - ~~PTGen 基础获取~~
-- ~~PTP / HDB 页面增强（评分、快搜入口）~~
+- ~~PTP / HDB 页面增强（评分、快搜入口，含 PTP 豆瓣延迟恢复）~~
 
 ### 🚧 缺失辅助功能
 - **部分站点中文信息覆盖**: **尚未全覆盖**。
@@ -181,7 +182,7 @@
 | HDRoute | http://hdroute.org/ | :heavy_check_mark: | :x: | ❌ | 未测试 | 不能说 |
 | HDSky | https://hdsky.me/ | :heavy_check_mark: | :heavy_check_mark: | ✅ | 已测试 | HDSky |
 | HDSpace | https://hd-space.org/ | :heavy_check_mark: | :x: | ❌ | 未测试 | 不是很了解 |
-| HDT | https://hd-torrents.org/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 核弹头，季考（已取消） |
+| HDT | https://hd-torrents.org/ | :heavy_check_mark: | :heavy_check_mark: | ⚠️ | 本地流程验证 | 核弹头，季考（已取消）；已补独立 source/target tracker 与 details/torrents 源页兼容 |
 | HDTime | https://hdtime.org/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 高清时光 |
 | HDU | https://pt.hdupt.com/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 好多油 |
 | HDVideo | https://hdvideo.one/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 国内新站 |
@@ -235,11 +236,11 @@
 | ReelFlix | https://reelflix.xyz/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 外网影视站，unit3d |
 | RouSi | https://rousi.zip/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 无 |
 | RS | https://resource.xidian.edu.cn/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 西电教育站，外网不开 |
-| SC | https://secret-cinema.pw/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 小众电影外站，GZ架构 |
+| SC | https://secret-cinema.pw/ | :heavy_check_mark: | :heavy_check_mark: | ⚠️ | 本地流程验证 | 小众电影外站，GZ架构；已补 source/target tracker，支持 group-only 源页注入与 SC 上传字段 |
 | SoulVoice | https://pt.soulvoice.club/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 铃音 |
 | TCCF | https://et8.org/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 教育资源站 |
 | Tik | https://www.cinematik.net/ | :heavy_check_mark: | :heavy_check_mark: | ✅ | 已测试 | 题库，小众原盘站点，逼格站 |
-| TJUPT | https://www.tjupt.org/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 北洋，天大教育站 |
+| TJUPT | https://www.tjupt.org/ | :heavy_check_mark: | :heavy_check_mark: | ⚠️ | 本地流程验证 | 北洋，天大教育站；已补 source/target tracker，拆分通用 name 与专用 ename/cname 填充 |
 | TLFbits | http://pt.eastgame.org/ | :heavy_check_mark: | :heavy_check_mark: | ❌ | 未测试 | 吐鲁番，小体积 |
 | ~~TorrentDB~~ | ~~https://torrentdb.net/~~ | :x: | :heavy_check_mark: | ❌ | 未测试 | ~~已关站~~ |
 | TorrentLeech | https://www.torrentleech.org/ | :x: | :heavy_check_mark: | ❌ | 未测试 | 0day站，HR时间长 |

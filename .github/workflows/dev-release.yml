@@ -32,6 +32,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          AUTOFEED_USERSCRIPT_URL: https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
 
       - name: Update dev tag
         run: |

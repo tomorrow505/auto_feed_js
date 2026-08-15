@@ -7,12 +7,25 @@
 ## 命令
 ```bash
 npm install
-npm run dev
 npm run build
 ```
 
-本地安装入口：
-- `http://127.0.0.1:5174/auto-feed.user.js`
+默认本地安装入口：
+- `file://<repo>/dist/auto-feed-refactor.user.js`
+
+`npm run build` 会同时生成：
+- `dist/auto_feed.user.js`：完整脚本。
+- `dist/auto-feed-refactor.user.js`：轻量 loader，头部 `@require` 指向本机完整脚本。
+
+默认开发安装不再依赖 `127.0.0.1:5174` 常驻服务。loader 每次构建会追加本地构建版本号，打开本地入口时 Tampermonkey 会识别为 `Update`。Chrome/Tampermonkey 使用 `file://` loader 时，需要在扩展管理页给 Tampermonkey 开启“允许访问文件网址”。
+
+需要临时热更新预览时再启动：
+```bash
+npm run dev
+```
+
+临时服务入口：
+- `http://127.0.0.1:5174/auto-feed-refactor.user.js`
 
 ## 架构约定
 - `trackers`：站点差异（parse/fill，一站一文件）

@@ -181,7 +181,7 @@ export class Unit3DEngine extends BaseEngine {
         };
 
         // --- Title ---
-        const title = meta.title || '';
+        const title = meta.targetTitle || meta.title || '';
         const titleInputs = [
             cfg.nameInput || '',
             'input[name="name"]',
@@ -192,8 +192,9 @@ export class Unit3DEngine extends BaseEngine {
             'input#upload-form-name',
             'input#upload-form-title'
         ].filter(Boolean);
+        const shouldLockTitleAfterFileInject = this.siteName !== 'Tik';
         const lockTitleAfterFileInject = () => {
-            if (!title) return;
+            if (!title || !shouldLockTitleAfterFileInject) return;
             [0, 120, 380, 900, 1800, 3000].forEach((ms) => {
                 window.setTimeout(() => {
                     setAnyText(titleInputs, title);

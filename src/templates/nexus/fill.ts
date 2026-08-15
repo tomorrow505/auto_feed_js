@@ -17,7 +17,7 @@ export async function fillNexus(meta: TorrentMeta, config: SiteConfig): Promise<
 
     const overrides = config.selectors || {};
 
-    const titleVal = meta.title || '';
+    const titleVal = meta.targetTitle || meta.title || '';
     const smallDescrVal = meta.subtitle || meta.smallDescr || '';
     const descrVal = meta.description || '';
     const nameInputSelector = overrides.nameInput || formSelectors.name;
@@ -74,25 +74,26 @@ export async function fillNexus(meta: TorrentMeta, config: SiteConfig): Promise<
         });
     } catch { }
 
-    if (meta.torrentBase64 || meta.torrentUrl) {
+    const injectTorrentFile = async () => {
+        if (!meta.torrentBase64 && !meta.torrentUrl) return;
         const fileInputSelector = overrides.torrentInput || formSelectors.torrent;
         const fileInput = $(fileInputSelector)[0] as HTMLInputElement | undefined;
-        if (fileInput) {
-            try {
-                const { TorrentService } = await import('../../services/TorrentService');
-                const result = await TorrentService.buildForwardTorrentFile(meta, config.name, null);
-                if (result) {
-                    TorrentService.injectFileIntoInput(fileInput, result.file);
-                } else if (meta.torrentBase64 && meta.torrentFilename) {
-                    const file = TorrentService.base64ToFile(meta.torrentBase64, meta.torrentFilename);
-                    TorrentService.injectFileIntoInput(fileInput, file);
-                }
-                lockNameAfterFileInject();
-            } catch (e) {
-                console.error('[Auto-Feed] File Injection Failed:', e);
+        if (!fileInput) return;
+        try {
+            const { TorrentService } = await import('../../services/TorrentService');
+            const result = await TorrentService.buildForwardTorrentFile(meta, config.name, null);
+            if (result) {
+                TorrentService.injectFileIntoInput(fileInput, result.file);
+            } else if (meta.torrentBase64 && meta.torrentFilename) {
+                const file = TorrentService.base64ToFile(meta.torrentBase64, meta.torrentFilename);
+                TorrentService.injectFileIntoInput(fileInput, file);
             }
+            lockNameAfterFileInject();
+        } catch (e) {
+            console.error('[Auto-Feed] File Injection Failed:', e);
         }
-    }
+    };
+    injectTorrentFile().catch((e) => console.error('[Auto-Feed] File Injection Failed:', e));
 
     // After we possibly replaced `meta.title` from torrent internal name, (re)derive key selectors.
     // This helps on targets where `type/medium/codec/resolution/audio` are mandatory.

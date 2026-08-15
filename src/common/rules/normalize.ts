@@ -1,6 +1,6 @@
 import { TorrentMeta } from '../../types/TorrentMeta';
 import { getAudioCodecSel, getCodecSel, getMediumSel, getStandardSel, getType } from './text';
-import { getMediainfoPictureFromDescr } from './media';
+import { cleanMediaInfoText, getMediainfoPictureFromDescr } from './media';
 import { getSmallDescrFromDescr, getSourceSelFromDescr } from './helpers';
 import { addThanks } from './teams';
 import { dealWithTitle, dealWithSubtitle } from './title';
@@ -293,6 +293,9 @@ export function normalizeMeta(meta: TorrentMeta, forwardSite?: string): TorrentM
     let descr = out.description || '';
 
     descr = descr.replace(/%3A/g, ':').replace(/%2F/g, '/');
+    if (out.fullMediaInfo) {
+        out.fullMediaInfo = cleanMediaInfoText(out.fullMediaInfo);
+    }
     // PTer uses a signed redirect wrapper for outbound links; keep the target URL clean for downstream parsing.
     descr = descr.replace(/https?:\/\/pterclub\.net\/link\.php\?sign=.*?&target=/gi, '');
     descr = descr.replace('[quote][/quote]', '').replace('[b][/b]', '').replace(/\n\n+/, '\n\n');

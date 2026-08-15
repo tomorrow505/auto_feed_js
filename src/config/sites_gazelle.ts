@@ -10,6 +10,13 @@ export const GazelleSites: SiteConfig[] = [
         description: 'GreatPosterWall'
     },
     {
+        name: 'SC',
+        type: SiteType.Gazelle,
+        keywords: ['secret-cinema.pw'],
+        baseUrl: 'https://secret-cinema.pw/',
+        description: 'Secret Cinema'
+    },
+    {
         name: 'PTP',
         // PTP is a Gazelle (GZ) site. Keep a dedicated engine type for PTP-specific logic,
         // but group/configure it under the Gazelle site list for settings parity.

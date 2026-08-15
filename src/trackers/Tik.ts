@@ -7,6 +7,7 @@ import { extractImdbId } from '../common/rules/links';
 import { SettingsService, getEffectiveTmdbApiKey } from '../services/SettingsService';
 import { GMAdapter } from '../services/GMAdapter';
 import { ImageHostService } from '../services/ImageHostService';
+import { ImdbAspectRatioService } from '../services/ImdbAspectRatioService';
 
 const TIK_BASE_CONTENT = `
 [center][img]{poster}[/img]
@@ -61,6 +62,8 @@ function uniqKeepOrder(items: string[]): string[] {
     }
     return out;
 }
+
+const TITLE_REAPPLY_DELAYS = [0, 120, 380, 900, 1800, 3000, 4500, 6500] as const;
 
 function parseRuntimeMinutesFromIso8601Duration(dur: string): number | null {
     const m = (dur || '').match(/^PT(?:(\d+)H)?(?:(\d+)M)?/i);
@@ -222,10 +225,7 @@ async function fetchImdbBasics(imdbUrl: string): Promise<{
     try {
         const resp = await GMAdapter.xmlHttpRequest({
             method: 'GET',
-            url,
-            headers: {
-                'accept-language': 'en-US,en;q=0.9'
-            }
+            url
         });
         const html = resp?.responseText || '';
         if (!html) return {};
@@ -372,7 +372,11 @@ async function fetchImdbBasics(imdbUrl: string): Promise<{
         }
         if (!aspect_ratio) {
             try {
-                aspect_ratio = normalizeAspectRatioText(html.match(/"aspectRatio"\s*:\s*"([^"]+)"/i)?.[1]?.trim() || '');
+                aspect_ratio = normalizeAspectRatioText(
+                    html.match(/Aspect ratio[\s\S]{0,120}?([0-9.]+\s*:\s*[0-9.]+)/i)?.[1]?.trim() ||
+                    html.match(/"aspectRatio"\s*:\s*"([^"]+)"/i)?.[1]?.trim() ||
+                    ''
+                );
             } catch {}
         }
 
@@ -474,8 +478,7 @@ async function fetchImdbTechnicalAspectRatio(imdbId: string, imdbUrl?: string): 
     try {
         const resp = await GMAdapter.xmlHttpRequest({
             method: 'GET',
-            url: techUrl,
-            headers: { 'accept-language': 'en-US,en;q=0.9' }
+            url: techUrl
         });
         const html = resp?.responseText || '';
         if (!html) return '';
@@ -528,11 +531,13 @@ export class TikEngine extends Unit3DClassicEngine {
     }
 
     async fill(meta: TorrentMeta): Promise<void> {
-        await super.fill(meta);
+        const rawDescrForTitle = `${meta.fullMediaInfo || ''}\n${meta.description || ''}`.trim();
+        const expectedTikTitle = this.buildTikTargetTitle(meta, rawDescrForTitle);
+        await super.fill({ ...meta, targetTitle: expectedTikTitle || meta.title || '' });
 
         try {
             const title = meta.title || '';
-            const descr = `${meta.fullMediaInfo || ''}\n${meta.description || ''}`.trim();
+            const descr = rawDescrForTitle;
             const autotype = document.querySelector('#autotype') as HTMLSelectElement | HTMLInputElement | null;
             if (autotype) {
                 let v = '';
@@ -562,10 +567,9 @@ export class TikEngine extends Unit3DClassicEngine {
                 try { el.dispatchEvent(new Event('change', { bubbles: true })); } catch {}
             };
 
-            const titleInput = document.querySelector('input#title, input[name="title"], input#titleauto') as HTMLInputElement | null;
             const bbcode = document.querySelector('textarea#bbcode-description, textarea[name="description"], textarea#upload-form-description, textarea#description') as HTMLTextAreaElement | null;
 
-            const rawDescr = `${meta.fullMediaInfo || ''}\n${meta.description || ''}`.trim();
+            const rawDescr = rawDescrForTitle;
             const infos = getMediainfoPictureFromDescr(rawDescr, { mediumSel: meta.mediumSel });
             const screenshots = (infos.picInfo || '').trim();
 
@@ -624,34 +628,48 @@ export class TikEngine extends Unit3DClassicEngine {
                 else if (standard) format = standard;
             }
 
-            let codecTag = 'AVC';
+            let codecTag = standard === '4K' || medium === 'UHD' || format === '2160p' ? 'HEVC' : 'AVC';
             if (codec === 'MPEG-2') codecTag = 'MPEG-2';
             else if (codec === 'VC-1') codecTag = 'VC-1';
             else if (codec === 'H265') codecTag = 'HEVC';
 
-            const searchName = getSearchName(meta.title || '').trim();
-            let torrentName = searchName;
-            if (year) torrentName += ` (${year})`;
-            if (format) torrentName += ` ${format}`;
-            if (source) torrentName += ` ${source}`;
-            if (!/DVD/i.test(medium)) torrentName += ` ${codecTag}`;
-            torrentName = torrentName.replace(/\s+/g, ' ').trim();
+            const sourceTitle = (meta.title || '').trim();
+            const torrentName = expectedTikTitle;
 
-            if (titleInput && torrentName) {
+            const normalizeTitleValue = (value: string) => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+            const sourceTitleValue = normalizeTitleValue(sourceTitle);
+            let preservedTikTitle = '';
+            const applyTikFallbackTitle = () => {
+                const titleInput = document.querySelector('input#title, input[name="title"], input#titleauto, input#upload-form-title') as HTMLInputElement | null;
+                if (!titleInput || !torrentName) return;
+                const current = (titleInput.value || '').trim();
+                const currentValue = normalizeTitleValue(current);
+                if (current && currentValue !== sourceTitleValue) {
+                    preservedTikTitle = current;
+                    return;
+                }
+                if (preservedTikTitle) {
+                    titleInput.value = preservedTikTitle;
+                    fire(titleInput);
+                    return;
+                }
                 titleInput.value = torrentName;
                 fire(titleInput);
-            }
+            };
+            applyTikFallbackTitle();
+            TITLE_REAPPLY_DELAYS.forEach((ms) => window.setTimeout(applyTikFallbackTitle, ms));
 
-            const imdbTechAspect = (!imdbBasics.aspect_ratio && !tmdbBasics.aspect_ratio)
-                ? await fetchImdbTechnicalAspectRatio(imdbId, imdbUrl)
+            const cachedImdbAspect = !/DVD/i.test(medium) ? await ImdbAspectRatioService.getCachedAspectRatio(imdbId) : '';
+            const mediaAspect = !/DVD/i.test(medium) ? normalizeAspectRatioText(parseAspectRatioFallback(rawDescr) || '') : '';
+            const imdbTechAspect = !/DVD/i.test(medium) && !cachedImdbAspect && !imdbBasics.aspect_ratio
+                ? await ImdbAspectRatioService.fetchAspectRatio(imdbId || imdbUrl) || await fetchImdbTechnicalAspectRatio(imdbId, imdbUrl)
                 : '';
-            const aspect_ratio = normalizeAspectRatioText(
-                imdbBasics.aspect_ratio ||
-                tmdbBasics.aspect_ratio ||
-                imdbTechAspect ||
-                parseAspectRatioFallback(rawDescr) ||
-                ''
-            );
+            const waitedImdbAspect = !/DVD/i.test(medium) && !cachedImdbAspect && !imdbBasics.aspect_ratio && !imdbTechAspect
+                ? await ImdbAspectRatioService.waitForCachedAspectRatio(imdbId, 8000)
+                : '';
+            const aspect_ratio = /DVD/i.test(medium)
+                ? normalizeAspectRatioText(parseAspectRatioFallback(rawDescr) || '')
+                : normalizeAspectRatioText(mediaAspect || cachedImdbAspect || imdbBasics.aspect_ratio || imdbTechAspect || waitedImdbAspect || '');
             const bitrate = parseBitrateFallback(rawDescr) || '';
 
             const tpl = tikTemplateFormat(TIK_BASE_CONTENT, {
@@ -678,5 +696,43 @@ export class TikEngine extends Unit3DClassicEngine {
         } catch (e) {
             console.warn('[Auto-Feed][Tik] Template fill skipped:', e);
         }
+    }
+
+    private buildTikTargetTitle(meta: TorrentMeta, rawDescr: string): string {
+        const year = (meta.title || '').match(/(19|20)\d{2}/g)?.pop() || '';
+        const medium = meta.mediumSel || '';
+        const standard = meta.standardSel || '';
+        const codec = meta.codecSel || '';
+        const size = getSizeFromDescr(rawDescr);
+
+        let format = '';
+        let source = '';
+
+        if (/DVD/i.test(medium)) {
+            format = /NTSC/i.test(meta.title || '') || /NTSC/i.test(rawDescr) ? 'NTSC' : 'PAL';
+            source = /dvd9/i.test(meta.title || '') ? 'DVD9' : 'DVD5';
+        } else {
+            if (size > 0 && size <= 23.28) source = 'BD25';
+            else if (size > 23.28 && size < 46.57) source = 'BD50';
+            else if (size > 46.57 && size < 61.47) source = 'BD66';
+            else if (size >= 61.47) source = 'BD100';
+
+            if (standard === '4K') format = '2160p';
+            else if (standard) format = standard;
+        }
+
+        let codecTag = standard === '4K' || medium === 'UHD' || format === '2160p' ? 'HEVC' : 'AVC';
+        if (codec === 'MPEG-2') codecTag = 'MPEG-2';
+        else if (codec === 'VC-1') codecTag = 'VC-1';
+        else if (codec === 'H265') codecTag = 'HEVC';
+
+        const sourceTitle = (meta.title || '').trim();
+        const searchName = getSearchName(sourceTitle).trim();
+        let out = searchName;
+        if (year) out += ` (${year})`;
+        if (source) out += ` ${source}`;
+        if (format) out += ` ${format}`;
+        if (!/DVD/i.test(medium)) out += ` ${codecTag}`;
+        return out.replace(/\s+/g, ' ').trim();
     }
 }

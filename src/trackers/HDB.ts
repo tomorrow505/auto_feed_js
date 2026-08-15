@@ -5,13 +5,138 @@ import { SiteConfig } from '../types/SiteConfig';
 import { htmlToBBCode } from '../utils/htmlToBBCode';
 import { extractImdbId, extractTmdbId, matchLink } from '../common/rules/links';
 import { getAudioCodecSel, getCodecSel, getMediumSel, getStandardSel, getType } from '../common/rules/text';
-import { getMediainfoPictureFromDescr } from '../common/rules/media';
+import { cleanMediaInfoText, getMediainfoPictureFromDescr } from '../common/rules/media';
 import { HtmlFetchService } from '../services/HtmlFetchService';
-import { StorageService } from '../services/StorageService';
 
 export class HDBEngine extends BaseEngine {
     constructor(config: SiteConfig, url: string) {
         super(config, url);
+    }
+
+    private cleanHdbMediaInfo(raw: string): string {
+        let text = String(raw || '').replace(/\r/g, '').trim();
+        if (!text) return '';
+        try {
+            const doc = new DOMParser().parseFromString(text, 'text/html');
+            const picked =
+                (doc.querySelector('pre, code, textarea') as HTMLElement | null)?.textContent ||
+                doc.body?.textContent ||
+                '';
+            if (picked && picked.trim().length > 40) text = picked;
+        } catch {}
+        text = cleanMediaInfoText(text);
+        return /(General|Unique ID|Complete name|Video|Audio|Text|Format\s*:|Bit rate\s*:|Duration\s*:)/i.test(text)
+            ? text
+            : '';
+    }
+
+    private getHdbReleaseNameFromMediaInfo(raw: string): string {
+        const text = cleanMediaInfoText(raw);
+        if (!text) return '';
+
+        const release =
+            text.match(/RELEASE\.?NAME\s*:\s*([^\r\n]+)/i)?.[1] ||
+            text.match(/Complete\s+name\s*:\s*([^\r\n]+)/i)?.[1] ||
+            '';
+        if (!release) return '';
+
+        let name = release
+            .split(/[\\/]/)
+            .filter(Boolean)
+            .pop() || release;
+        name = name
+            .replace(/\.(?:mkv|mp4|avi|m2ts|ts|iso|vob|ifo)$/i, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        return name;
+    }
+
+    private getHdbNamesFromDownload(downloadLink: string, downloadText: string): { completeName: string; releaseName: string } {
+        let filename = String(downloadText || '').trim();
+        if (!filename && downloadLink) {
+            try {
+                const path = new URL(downloadLink, this.currentUrl).pathname;
+                filename = decodeURIComponent(path.split('/').filter(Boolean).pop() || '');
+            } catch {
+                filename = decodeURIComponent(String(downloadLink || '').split('?')[0].split('/').pop() || '');
+            }
+        }
+        filename = filename
+            .replace(/[\\/:*?"<>|]/g, (ch) => (ch === '/' || ch === '\\' ? '.' : ''))
+            .replace(/\s+/g, ' ')
+            .trim();
+        if (!filename) return { completeName: '', releaseName: '' };
+
+        const completeName = filename.replace(/\.torrent$/i, '').trim();
+        const releaseName = completeName
+            .replace(/\.(?:mkv|mp4|avi|m2ts|ts|iso|vob|ifo)$/i, '')
+            .trim();
+        return { completeName, releaseName };
+    }
+
+    private buildHdbFallbackMediaInfo(completeName: string, technicalSummary: string): string {
+        const tech = cleanMediaInfoText(technicalSummary)
+            .replace(/^HDB Technical Information\s*/i, '')
+            .trim();
+        if (!completeName) return tech ? `HDB Technical Information\n${tech}` : '';
+
+        const lines = ['General', `Complete name : ${completeName}`];
+        if (/\.mkv$/i.test(completeName)) lines.push('Format : Matroska');
+        else if (/\.mp4$/i.test(completeName)) lines.push('Format : MPEG-4');
+        else if (/\.avi$/i.test(completeName)) lines.push('Format : AVI');
+        else if (/\.m2ts$/i.test(completeName)) lines.push('Format : BDAV');
+        else if (/\.ts$/i.test(completeName)) lines.push('Format : MPEG-TS');
+
+        if (tech) {
+            lines.push('', 'HDB Technical Information', tech);
+        }
+        return lines.join('\n').trim();
+    }
+
+    private ensureHdbCompleteName(mediaInfo: string, completeName: string): string {
+        const clean = cleanMediaInfoText(mediaInfo);
+        if (!clean || !completeName || /Complete\s+name\s*:/i.test(clean)) return clean;
+        if (/^General\s*$/im.test(clean)) {
+            return clean.replace(/^General\s*$/im, `General\nComplete name : ${completeName}`);
+        }
+        return `General\nComplete name : ${completeName}\n\n${clean}`.trim();
+    }
+
+    private async fetchHdbMediaInfo(details: HTMLElement | null): Promise<string> {
+        try {
+            const href =
+                (details?.querySelector('a[href*="/details/mediainfo"]') as HTMLAnchorElement | null)?.href ||
+                (document.querySelector('a[href*="/details/mediainfo"]') as HTMLAnchorElement | null)?.href ||
+                '';
+            if (!href) return '';
+            const url = new URL(href, this.currentUrl).href;
+            const raw = await HtmlFetchService.getText(url, { withCredentials: true });
+            return this.cleanHdbMediaInfo(raw);
+        } catch (e) {
+            console.warn('[Auto-Feed][HDB] Mediainfo log fetch failed:', e);
+            return '';
+        }
+    }
+
+    private extractHdbTechnicalSummary(details: HTMLElement | null): string {
+        if (!details) return '';
+        const label = Array.from(details.querySelectorAll('div.label')).find((el) =>
+            /Technical Information/i.test(el.textContent || '')
+        ) as HTMLElement | undefined;
+        const block = label?.nextElementSibling as HTMLElement | null;
+        if (!block) return '';
+        const rows = Array.from(block.querySelectorAll('tr'));
+        const lines: string[] = [];
+        rows.forEach((row) => {
+            const th = row.querySelector('th');
+            const td = row.querySelector('td');
+            const key = (th?.textContent || '').replace(/\s+/g, ' ').trim();
+            const value = (td?.textContent || '').replace(/\s+/g, ' ').trim();
+            if (key && value) lines.push(`${key}: ${value}`);
+        });
+        if (!lines.length) return '';
+        return ['HDB Technical Information', ...lines].join('\n');
     }
 
     async parse(): Promise<TorrentMeta> {
@@ -42,14 +167,6 @@ export class HDBEngine extends BaseEngine {
         if (tagDescr) {
             descrEl = tagDescr;
         }
-        // HDB screenshot picker (legacy parity): allow clicking `t.hdbits.org/*.jpg` thumbs to select which
-        // images get forwarded (converted to `i.hdbits.org/*.png`).
-        try {
-            if (descrEl && document.body.dataset.autofeedHdbImgPick !== '1') {
-                this.setupHdbSelectableImages(descrEl);
-                document.body.dataset.autofeedHdbImgPick = '1';
-            }
-        } catch { }
         if (details) {
             const cells = Array.from(details.querySelectorAll('td, th'));
             for (const cell of cells) {
@@ -69,6 +186,13 @@ export class HDBEngine extends BaseEngine {
                         const next = cell.nextElementSibling as HTMLElement | null;
                         if (next) {
                             synopsis = (next.textContent || '').trim();
+                            if (synopsis) break;
+                        }
+                        const row = cell.parentElement as HTMLTableRowElement | null;
+                        const nextRow = row?.nextElementSibling as HTMLTableRowElement | null;
+                        const nextRowCell = nextRow?.querySelector('td, th') as HTMLElement | null;
+                        if (nextRowCell) {
+                            synopsis = (nextRowCell.textContent || '').trim();
                             if (synopsis) break;
                         }
                     }
@@ -123,10 +247,13 @@ export class HDBEngine extends BaseEngine {
             if (imdbId) imdbUrl = `https://www.imdb.com/title/${imdbId}/`;
         }
 
+        const downloadAnchor = $('a[href*="download.php"]').first()[0] as HTMLAnchorElement | undefined;
+        const fallbackDownloadAnchor = $('a[href*="download"]').first()[0] as HTMLAnchorElement | undefined;
         const downloadLink =
-            $('a[href*="download.php"]').first().attr('href') ||
-            $('a[href*="download"]').first().attr('href') ||
+            downloadAnchor?.getAttribute('href') ||
+            fallbackDownloadAnchor?.getAttribute('href') ||
             '';
+        const downloadText = (downloadAnchor?.textContent || fallbackDownloadAnchor?.textContent || '').trim();
 
         let torrentUrl = '';
         if (downloadLink) {
@@ -137,6 +264,19 @@ export class HDBEngine extends BaseEngine {
             }
         }
 
+        const downloadNames = this.getHdbNamesFromDownload(downloadLink, downloadText);
+        const fetchedMediaInfo = await this.fetchHdbMediaInfo(details);
+        const technicalSummary = fetchedMediaInfo ? '' : this.extractHdbTechnicalSummary(details);
+        const releaseNameFromMedia = this.getHdbReleaseNameFromMediaInfo(fetchedMediaInfo);
+        const releaseNameFromDownload = downloadNames.releaseName;
+        if (releaseNameFromMedia || releaseNameFromDownload) {
+            title = releaseNameFromMedia || releaseNameFromDownload;
+        }
+        const mediaInfoForMeta =
+            this.ensureHdbCompleteName(fetchedMediaInfo, downloadNames.completeName) ||
+            this.buildHdbFallbackMediaInfo(downloadNames.completeName, technicalSummary) ||
+            technicalSummary;
+
         const meta: TorrentMeta = {
             title,
             description,
@@ -144,6 +284,9 @@ export class HDBEngine extends BaseEngine {
             sourceUrl: this.currentUrl,
             images: []
         };
+        if (mediaInfoForMeta) {
+            meta.fullMediaInfo = mediaInfoForMeta;
+        }
 
         if (imdbUrl) {
             meta.imdbUrl = imdbUrl;
@@ -252,10 +395,14 @@ export class HDBEngine extends BaseEngine {
         try {
             const info = getMediainfoPictureFromDescr(description);
             if (info.mediainfo) {
+                meta.fullMediaInfo = info.mediainfo;
                 const rebuilt = `${info.mediainfo ? `[quote]${info.mediainfo}[/quote]\n\n` : ''}${info.picInfo || ''}`.trim();
                 if (rebuilt) {
                     meta.description = rebuilt;
                 }
+            } else if (meta.fullMediaInfo) {
+                const picInfo = info.picInfo || '';
+                meta.description = `${meta.fullMediaInfo ? `[quote]${meta.fullMediaInfo}[/quote]\n\n` : ''}${picInfo || description || ''}`.trim();
             } else {
                 meta.description = description;
             }
@@ -277,108 +424,17 @@ export class HDBEngine extends BaseEngine {
             }
             const picMatches = (meta.description || '').match(/\[img\](.*?)\[\/img\]/g);
             if (picMatches) {
-                // Legacy parity: when the source provides lots of internal thumbs (HDB),
-                // users typically select which ones to rehost. Start with empty `meta.images`
-                // and let the click-picker populate it; rehosting falls back to parsing `description`.
-                if ((meta.description || '').match(/i\.hdbits\.org\/.*\.png/i)) {
-                    meta.images = [];
-                } else {
-                    meta.images = picMatches
-                        .map((item) => item.match(/\[img\](.*?)\[\/img\]/)?.[1])
-                        .filter((v): v is string => !!v);
-                }
+                // Keep source URLs untouched for normal page viewing. The
+                // image-host bridge converts HDB thumbs to authenticated PNG
+                // downloads only when a rehost operation actually needs files.
+                meta.images = picMatches
+                    .map((item) => item.match(/\[img\](.*?)\[\/img\]/)?.[1])
+                    .filter((v): v is string => !!v);
             }
         } catch { }
 
         this.log(`Parsed: ${meta.title}`);
         return meta;
-    }
-
-    private setupHdbSelectableImages(descrEl: HTMLElement) {
-        const styleId = 'autofeed-hdb-imgpick-style';
-        if (!document.getElementById(styleId)) {
-            const st = document.createElement('style');
-            st.id = styleId;
-            st.textContent = `
-                .autofeed-hdb-imgpick { cursor: pointer; position: relative; display: inline-block; }
-                .autofeed-hdb-imgpick img { outline: 2px solid transparent; outline-offset: 2px; }
-                .autofeed-hdb-imgpick.autofeed-hdb-imgpick-on img { outline-color: #2ecc71; }
-                .autofeed-hdb-imgpick.autofeed-hdb-imgpick-on::after {
-                    content: "SELECTED";
-                    position: absolute;
-                    top: 6px;
-                    left: 6px;
-                    background: rgba(46, 204, 113, 0.9);
-                    color: #fff;
-                    font-size: 11px;
-                    padding: 2px 6px;
-                    border-radius: 3px;
-                    pointer-events: none;
-                }
-            `.trim();
-            document.head.appendChild(st);
-        }
-
-        const imgs = Array.from(descrEl.querySelectorAll('img')) as HTMLImageElement[];
-        const pickable = imgs.filter((img) => {
-            const src = img.getAttribute('src') || img.getAttribute('data-src') || img.src || '';
-            return /https:\/\/t\.hdbits\.org\/.*\.jpg(\?|$)/i.test(src);
-        });
-        if (!pickable.length) return;
-
-        const toFull = (thumb: string) => {
-            let u = (thumb || '').trim();
-            if (!u) return '';
-            u = u.replace(/^https:\/\/t\.hdbits\.org\//i, 'https://i.hdbits.org/');
-            u = u.replace(/\.jpg(\?.*)?$/i, '.png');
-            return u;
-        };
-
-        const updateStoredImages = async (fullUrl: string, on: boolean) => {
-            if (!fullUrl) return;
-            const cur = (await StorageService.load()) || null;
-            if (!cur) return;
-            const next = { ...cur };
-            const list = Array.isArray(next.images) ? next.images.slice() : [];
-            const idx = list.indexOf(fullUrl);
-            if (on) {
-                if (idx < 0) list.push(fullUrl);
-            } else {
-                if (idx >= 0) list.splice(idx, 1);
-            }
-            next.images = list;
-            await StorageService.save(next);
-        };
-
-        pickable.forEach((img) => {
-            const thumb = img.getAttribute('src') || img.getAttribute('data-src') || img.src || '';
-            const full = toFull(thumb);
-            const wrap = document.createElement('span');
-            wrap.className = 'autofeed-hdb-imgpick';
-
-            // Wrap the image to allow overlay and click.
-            const parent = img.parentElement;
-            if (!parent) return;
-            parent.insertBefore(wrap, img);
-            wrap.appendChild(img);
-
-            // Prevent navigation when the image sits inside an <a>.
-            const anchor = wrap.closest('a') as HTMLAnchorElement | null;
-            if (anchor) {
-                anchor.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-            }
-
-            wrap.addEventListener('click', async (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const on = !wrap.classList.contains('autofeed-hdb-imgpick-on');
-                wrap.classList.toggle('autofeed-hdb-imgpick-on', on);
-                await updateStoredImages(full, on);
-            });
-        });
     }
 
     async fill(meta: TorrentMeta): Promise<void> {

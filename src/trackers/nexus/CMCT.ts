@@ -135,6 +135,22 @@ export class CMCTEngine extends NexusPHPEngine {
 
     protected async afterFill(meta: TorrentMeta): Promise<void> {
         try {
+            const preferredLink =
+                (meta.doubanUrl || '').trim() ||
+                (meta.doubanId ? `https://movie.douban.com/subject/${meta.doubanId}/` : '') ||
+                (meta.imdbUrl || '').trim() ||
+                (meta.imdbId ? `https://www.imdb.com/title/${meta.imdbId}/` : '');
+            if (preferredLink) {
+                const linkInputs = Array.from(document.querySelectorAll('input[name="url"], input#url')) as HTMLInputElement[];
+                linkInputs.forEach((input) => {
+                    input.value = preferredLink;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            }
+        } catch {}
+
+        try {
             const tas = Array.from(document.querySelectorAll('textarea')) as HTMLTextAreaElement[];
             if (tas.length >= 3) {
                 const info = getMediainfoPictureFromDescr(meta.description || '', { mediumSel: meta.mediumSel });

@@ -244,8 +244,12 @@ export function getExclusiveSourceWarnings(meta: TorrentMeta): string[] {
     if (source === 'TJUPT' && !!document.querySelector('#tag .tag-exclusive')) {
         warnings.push('TJUPT 标签包含 exclusive（禁转）。');
     }
-    if (source === 'PTer' && !!document.querySelector('#kdescr a[href*="tag_exclusive=yes"], a[href*="tag_exclusive=yes"]')) {
-        warnings.push('PTer 标签包含 `tag_exclusive=yes`（禁转）。');
+    if (source === 'PTer') {
+        const exclusiveSelect = document.querySelector('select[name="tag_exclusive"]') as HTMLSelectElement | null;
+        const exclusiveValue = String(exclusiveSelect?.value || '').trim().toLowerCase();
+        if (exclusiveValue === 'yes') {
+            warnings.push('PTer 标签 `tag_exclusive` 标记为 `yes`（禁转）。');
+        }
     }
     if (['HDDolby', 'HDHome', 'PThome', 'Audiences'].includes(source)) {
         const hasTag = !!document.querySelector('span.txz, span.tjz');
@@ -292,6 +296,7 @@ export function buildKgLegacyInfo(meta: TorrentMeta) {
         descr: String(meta.description || '').replace(/\u00a0/g, ' '),
         full_mediainfo: String(meta.fullMediaInfo || '').replace(/\u00a0/g, ' '),
         torrent_url: meta.torrentUrl || '',
+        torrent_base64: meta.torrentBase64 || '',
         torrent_name: meta.torrentFilename || meta.torrentName || meta.title || 'autofeed',
         medium_sel: meta.mediumSel || '',
         standard_sel: meta.standardSel || '',

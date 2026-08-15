@@ -4,6 +4,16 @@ import { SiteConfig } from '../types/SiteConfig';
 import { NexusPHPEngine } from './NexusPHP';
 import { extractImdbId, matchLink } from '../common/rules/links';
 
+const TTG_REAPPLY_DELAYS = [0, 220, 520, 1000, 1800, 2800, 3600, 5000] as const;
+
+const formatTtgTitle = (title: string): string => {
+    let out = String(title || '').trim();
+    if (!out) return '';
+    out = out.replace(/(5\.1|2\.0|7\.1|1\.0)/, (data) => data.replace('.', '{@}'));
+    out = out.replace(/h\.(26(5|4))/i, 'H{@}$1');
+    return out;
+};
+
 // Dedicated engine entry for TTG.
 // Keep it separate from generic Nexus so site quirks can be patched in one file.
 export class TTGEngine extends NexusPHPEngine {
@@ -63,9 +73,7 @@ export class TTGEngine extends NexusPHPEngine {
 
         const imdbId = meta.imdbId || extractImdbId(meta.imdbUrl || '') || '';
         const subtitle = (meta.smallDescr || meta.subtitle || '').trim();
-        const ttgName = (meta.title || '')
-            .replace(/(5\.1|2\.0|7\.1|1\.0)/g, (m) => m.replace('.', '{@}'))
-            .replace(/h\.(26(5|4))/gi, 'H{@}$1');
+        const ttgName = formatTtgTitle((meta.title || '').trim());
         const rawType = meta.type || '';
         const type = (() => {
             if (/电影|電影|movie/i.test(rawType)) return '电影';
@@ -153,16 +161,6 @@ export class TTGEngine extends NexusPHPEngine {
             } catch { }
         };
 
-        const retry = (fn: () => void, times = 12, delayMs = 220) => {
-            let i = 0;
-            const tick = () => {
-                i += 1;
-                try { fn(); } catch { }
-                if (i < times) setTimeout(tick, delayMs);
-            };
-            tick();
-        };
-
         const setSelect = (sel: string, value: string) => {
             if (!value) return;
             const el = document.querySelector(sel) as HTMLSelectElement | null;
@@ -174,11 +172,42 @@ export class TTGEngine extends NexusPHPEngine {
             } catch { }
         };
 
-        retry(() => {
-            setInput('input[name="name"], input#name', ttgName, true);
+        const normalizeValue = (value: string) => String(value || '').replace(/\s+/g, ' ').trim().toLowerCase();
+        const initialTitleValue = normalizeValue(ttgName);
+        let preservedTtgTitle = '';
+
+        const applyTitle = () => {
+            const titleInput = document.querySelector('input[name="name"], input#name') as HTMLInputElement | null;
+            if (!titleInput || !ttgName) return;
+            const current = (titleInput.value || '').trim();
+            const currentValue = normalizeValue(current);
+            if (current && currentValue !== initialTitleValue) {
+                preservedTtgTitle = current;
+                return;
+            }
+            if (preservedTtgTitle) {
+                titleInput.value = preservedTtgTitle;
+                try {
+                    titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+                } catch { }
+                return;
+            }
+            titleInput.value = ttgName;
+            try {
+                titleInput.dispatchEvent(new Event('input', { bubbles: true }));
+                titleInput.dispatchEvent(new Event('change', { bubbles: true }));
+            } catch { }
+        };
+
+        const apply = () => {
+            applyTitle();
             setInput('input[name="subtitle"]', subtitle, true);
             setInput('input[name="imdb_c"]', imdbId, true);
             setSelect('select[name="type"], #type', ttgTypeVal);
-        });
+        };
+
+        apply();
+        TTG_REAPPLY_DELAYS.forEach((ms) => window.setTimeout(apply, ms));
     }
 }

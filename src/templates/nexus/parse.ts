@@ -45,6 +45,21 @@ export async function parseNexus(config: SiteConfig, currentUrl: string): Promis
         return el.length ? el[0] : null;
     };
 
+    const extractStructuredMediaInfo = (root: Element | null): string => {
+        if (!root) return '';
+        const candidates = Array.from(
+            root.querySelectorAll('fieldset, blockquote, pre, code, .spoiler-content, .codemain, .spoiler_body, .code')
+        ) as HTMLElement[];
+        const hits = candidates
+            .map((el) => (el.textContent || '').replace(/\u00a0/g, ' ').replace(/\r/g, '').trim())
+            .map((text) => text.replace(/^引用\s*/i, '').replace(/^quote\s*/i, '').trim())
+            .filter((text) => text.length > 40)
+            .filter((text) => /(DISC INFO:|\.MPLS|Disc Title|Disc Label|Video Codec|Unique ID|^General\s*$|Complete name|Format\s*:)/im.test(text));
+
+        hits.sort((a, b) => b.length - a.length);
+        return hits[0] || '';
+    };
+
     let title = getText(configSelectors.title) || $(selectors.title).text().trim();
     if (!title) {
         title = $(selectors.titleFallback).text().trim();
@@ -63,7 +78,7 @@ export async function parseNexus(config: SiteConfig, currentUrl: string): Promis
         getElement(selectors.descriptionFallback);
 
     let description = descrEl ? htmlToBBCode(descrEl) : '';
-    let fullMediaInfo = '';
+    let fullMediaInfo = extractStructuredMediaInfo(descrEl);
 
     const meta: TorrentMeta = {
         title,

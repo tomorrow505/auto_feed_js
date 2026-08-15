@@ -16,6 +16,21 @@ import {
     resolveFaviconUrl
 } from './shared';
 
+    const withForwardTimeout = <T,>(promise: Promise<T>, ms: number): Promise<T> => (
+        new Promise<T>((resolve, reject) => {
+            const timer = window.setTimeout(() => reject(new Error('forward timeout')), ms);
+            promise
+                .then((value) => {
+                    window.clearTimeout(timer);
+                    resolve(value);
+                })
+                .catch((error) => {
+                    window.clearTimeout(timer);
+                    reject(error);
+                });
+        })
+    );
+
     export async function renderForwardRow(container: JQuery, meta: TorrentMeta, settings: AppSettings) {
         container.empty();
 
@@ -96,8 +111,8 @@ import {
                     if (!ok) return;
                 }
 
-                const baseUploadUrl = a.dataset.uploadHref || a.href;
-                let targetUrl = baseUploadUrl;
+                const fallbackUploadUrl = a.dataset.uploadHref || a.href;
+                let targetUrl = fallbackUploadUrl;
                 const win = window.open('about:blank', '_blank');
                 const go = () => {
                     try {
@@ -110,16 +125,29 @@ import {
 
                 (async () => {
                     try {
+                        const baseUploadUrl = await ForwardLinkService.resolveUploadUrl(site, meta, {
+                            chdBaseUrl: settings.chdBaseUrl,
+                            tlBaseUrl: settings.tlBaseUrl,
+                            lang: settings.uiLanguage
+                        });
                         const metaToSave: any = { ...meta };
                         if (metaToSave.torrentUrl && !metaToSave.torrentBase64) {
                             const { TorrentService } = await import('../TorrentService');
-                            const base64 = await TorrentService.download(metaToSave.torrentUrl);
-                            metaToSave.torrentBase64 = base64;
+                            try {
+                                const base64 = await withForwardTimeout(TorrentService.download(metaToSave.torrentUrl), 7000);
+                                metaToSave.torrentBase64 = base64;
+                            } catch (err) {
+                                console.warn('[Auto-Feed] Torrent predownload timed out; target page will retry.', err);
+                            }
                         }
                         const token = StorageService.generateHandoffToken();
                         targetUrl = StorageService.attachHandoffToken(baseUploadUrl, token);
                         await StorageService.saveHandoff(metaToSave, token);
                         await StorageService.save(metaToSave);
+                        await StorageService.savePendingForward(site.name);
+                        try {
+                            if (win) win.name = StorageService.buildWindowForwardMarker(site.name, token);
+                        } catch {}
                         if (site.name === 'KG') {
                             const { GMAdapter } = await import('../GMAdapter');
                             await GMAdapter.setValue('kg_info', JSON.stringify(buildKgLegacyInfo(metaToSave)));

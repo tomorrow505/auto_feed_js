@@ -1,6 +1,7 @@
 export interface TorrentMeta {
     // Basic Info
     title: string;
+    targetTitle?: string; // Optional site-specific display title used only when filling target forms
     subtitle?: string;
     smallDescr?: string; // Legacy small description (副标题)
     description: string; // BBCode
@@ -11,6 +12,7 @@ export interface TorrentMeta {
     audioCodec?: string;
     processing?: string; // HDR, DoVi, etc.
     medium?: 'Blu-ray' | 'Encode' | 'WEB-DL' | 'Remux' | 'DVD' | 'HDTV';
+    aspectRatio?: string;
 
     // Legacy/Derived Fields (keep for parity with old script)
     type?: string; // 电影/剧集/纪录/综艺/动漫/音乐/体育/MV/学习/软件/游戏/书籍

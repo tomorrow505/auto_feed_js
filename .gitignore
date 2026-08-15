@@ -22,7 +22,6 @@ auto_feed.user.js
 dist/
 
 # Local-only dev helpers (do not commit)
-scripts/dev-full.js
 scripts/generate-loader.js
 scripts/postbuild-copy.js
 scripts/verify-torrent-service.ts
@@ -33,3 +32,4 @@ legacy_extract/out/
 # Local reverse-engineering/reference material (keep local only)
 archive/
 legacy_extract/
+agent.md

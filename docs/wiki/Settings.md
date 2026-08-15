@@ -13,11 +13,11 @@
   - 外部数据源：IMDb->豆瓣方式、PTGen 来源
   - 域名别名：CHD 域名、TorrentLeech 域名
   - 快搜模板编辑器（支持 legacy 模板行：`<a ...>` / `名称|URL` / 纯 URL）
-  - 图床 API Key：PTPImg / Freeimage
+  - 图床 API Key：PTPImg / Freeimage / ImgBB
 - `Sites`
   - 启用站点
   - 常用站点（收藏）
-  - 列表页快搜开关（PTP/HDB/HDT/UHD）
+  - 列表页快搜开关（PTP/HDB/HDT）
 - `Remote`
   - 远程侧边栏开关
   - 默认跳检、推送前确认

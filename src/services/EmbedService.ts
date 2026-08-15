@@ -364,6 +364,84 @@ export class EmbedService {
             return { kind: 'table-body', tableBody: tbody, leftClass };
         }
 
+        // HDT does not always expose a Nexus-style Action row. Provide a stable host near the
+        // torrent header so source pages still get forwarding links and tools.
+        if (adapter.siteName === 'HDT') {
+            const detailsTable = document.querySelector('table.listadetails') as HTMLTableElement | null;
+            if (detailsTable) {
+                const rows = Array.from(detailsTable.querySelectorAll('tr')) as HTMLTableRowElement[];
+                const anchor =
+                    rows.find((tr) => /^(Tools?|Actions?)\s*:?$/i.test((tr.querySelector('td,th')?.textContent || '').trim())) ||
+                    rows.find((tr) => /download\.php|bookmark|thanks|report/i.test(tr.innerHTML || '')) ||
+                    rows.find((tr) => /^(Torrent|Info Hash|Category)\s*:?$/i.test((tr.querySelector('td,th')?.textContent || '').trim())) ||
+                    null;
+                if (anchor) return { kind: 'after-tr', afterTr: anchor, colSpan: getColSpanForRow(anchor) };
+            }
+
+            const existing = document.getElementById('autofeed-hdt-host') as HTMLElement | null;
+            if (existing) {
+                const tb = existing.querySelector('tbody') as HTMLTableSectionElement | null;
+                if (tb) return { kind: 'table-body', tableBody: tb, leftClass: '' };
+            }
+            const mount =
+                (document.querySelector('img.torrents')?.parentElement as HTMLElement | null) ||
+                (document.querySelector('#content, .content, #main, .main') as HTMLElement | null) ||
+                document.body;
+            if (mount) {
+                const host = document.createElement('div');
+                host.id = 'autofeed-hdt-host';
+                host.dataset.autofeedEmbed = scopeKey;
+                host.style.margin = '12px 0';
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                const tbody = document.createElement('tbody');
+                table.appendChild(tbody);
+                host.appendChild(table);
+                if (mount === document.body) mount.insertBefore(host, mount.firstChild);
+                else mount.insertAdjacentElement('afterend', host);
+                return { kind: 'table-body', tableBody: tbody, leftClass: '' };
+            }
+        }
+
+        // TJUPT can render detail pages without a reliable "Action" label row. Anchor around
+        // the main description block, matching the legacy behavior of inserting inside details.
+        if (adapter.siteName === 'TJUPT') {
+            const dlTable = findNexusDetailsTableByDownloadLink();
+            const anchor = dlTable ? findNexusAnchorRow(dlTable) : null;
+            if (anchor) return { kind: 'after-tr', afterTr: anchor, colSpan: getColSpanForRow(anchor) };
+
+            const actionRow = Array.from(document.querySelectorAll('tr')).find((tr) => {
+                const first = tr.querySelector('td, th') as HTMLElement | null;
+                return /^(行为|行為|操作|Action|Actions)\b/i.test((first?.textContent || '').trim());
+            }) as HTMLTableRowElement | undefined;
+            if (actionRow) return { kind: 'after-tr', afterTr: actionRow, colSpan: getColSpanForRow(actionRow) };
+
+            const descr = document.getElementById('kdescr') || document.getElementById('description');
+            const tr = descr?.closest('tr') as HTMLTableRowElement | null;
+            if (tr) return { kind: 'after-tr', afterTr: tr, colSpan: getColSpanForRow(tr) };
+            const existing = document.getElementById('autofeed-tjupt-host') as HTMLElement | null;
+            if (existing) {
+                const tb = existing.querySelector('tbody') as HTMLTableSectionElement | null;
+                if (tb) return { kind: 'table-body', tableBody: tb, leftClass: '' };
+            }
+            const title = document.getElementById('top') || document.querySelector('h1#top, h1') as HTMLElement | null;
+            if (title?.parentElement) {
+                const host = document.createElement('div');
+                host.id = 'autofeed-tjupt-host';
+                host.dataset.autofeedEmbed = scopeKey;
+                host.style.margin = '12px 0';
+                const table = document.createElement('table');
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                const tbody = document.createElement('tbody');
+                table.appendChild(tbody);
+                host.appendChild(table);
+                title.insertAdjacentElement('afterend', host);
+                return { kind: 'table-body', tableBody: tbody, leftClass: '' };
+            }
+        }
+
         // PTP: insert after the specific torrent row.
         if (adapter.siteName === 'PTP') {
             const u = new URL(window.location.href);
@@ -424,6 +502,23 @@ export class EmbedService {
                 return { kind: 'after-tr', afterTr: q, colSpan: getColSpanForRow(q), layout: 'full-width' };
             }
             return { kind: 'after-tr', afterTr: asTr, colSpan: getColSpanForRow(asTr), layout: 'full-width' };
+        }
+
+        // SC often opens a group page without torrentid. Legacy still mounts the transfer block under
+        // the first concrete torrent row so the page can be used as a source immediately.
+        if (adapter.siteName === 'SC') {
+            const rows = Array.from(document.querySelectorAll('#torrent_details tr, table.torrent_table tr, tr[id^="torrent"]')) as HTMLTableRowElement[];
+            const row = rows.find((tr) => {
+                const id = tr.id || '';
+                return (/torrent[_-]?\d+/i.test(id) || tr.querySelector('a[href*="download"], a[href*="torrentid="]')) &&
+                    !!tr.querySelector('a[href*="download"], a[href*="torrentid="]');
+            });
+            if (row) return { kind: 'after-tr', afterTr: row, colSpan: getColSpanForRow(row), layout: 'full-width' };
+            const tbody = document.querySelector('#torrent_details tbody, table.torrent_table tbody') as HTMLTableSectionElement | null;
+            if (tbody) {
+                const first = tbody.querySelector('tr') as HTMLTableRowElement | null;
+                return { kind: 'table-body', tableBody: tbody, layout: 'full-width', colSpan: first ? getColSpanForRow(first) : 1 };
+            }
         }
 
         // Any site with torrentid=...: try to locate the matching torrent row and inject BELOW it.

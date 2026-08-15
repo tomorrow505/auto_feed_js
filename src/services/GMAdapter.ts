@@ -12,6 +12,7 @@ type GMRequest = {
     onerror?: (error: any) => void;
     ontimeout?: () => void;
     onprogress?: (event: any) => void;
+    timeout?: number;
 };
 
 const hasGMObject = typeof GM !== 'undefined';

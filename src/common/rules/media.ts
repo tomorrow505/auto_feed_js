@@ -31,7 +31,26 @@ export interface MediaInfoResult {
 }
 
 const IMG_REGEX = /(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/ig;
-const MEDIAINFO_KEYWORDS = /General|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率|DISC INFO:|\.MPLS|Video Codec|Disc Label/i;
+const MEDIAINFO_KEYWORDS = /General|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率|DISC INFO:|\.MPLS|Video Codec|Disc Title|Disc Label/i;
+const MEDIAINFO_BBCODE_TAGS = /\[\/?(?:b|i|u|s|code|quote|font|size|color|align|center|left|right|spoiler|hide|mediainfo|bdinfo|pre|write|plain|nfo)(?:=[^\]]*)?\]\n?/gi;
+
+export function cleanMediaInfoText(raw: string): string {
+    let text = String(raw || '')
+        .replace(/\r/g, '')
+        .replace(/\u00a0/g, ' ')
+        .trim();
+    if (!text) return '';
+
+    text = text
+        .replace(MEDIAINFO_BBCODE_TAGS, '')
+        .replace(/^引用.{0,5}\n?/i, '')
+        .replace(/^Quote\s*/i, '')
+        .replace(/^Mediainfo log\s*/i, '')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+
+    return text;
+}
 
 export function getMediainfoPictureFromDescr(
     descr: string,
@@ -65,11 +84,17 @@ export function getMediainfoPictureFromDescr(
     descr = `${descr}\n\n${imgInfo}`;
 
     try {
+        const wrappedMediaBlocks =
+            descr.match(new RegExp(`\\[(quote|code|mediainfo|bdinfo|hide|spoiler)(?:=[^\\]]*)?\\][\\s\\S]*?(${MEDIAINFO_KEYWORDS.source})[\\s\\S]*?\\[\\/\\1\\]`, 'gi')) ||
+            [];
         if (descr.match(/DISC INFO:|.MPLS|Video Codec|Disc Label/i) && (options?.mediumSel === 'UHD' || options?.mediumSel === 'BluRay' || options?.mediumSel === 'Blu-ray')) {
-            mediainfo = descr.match(/\[quote.*?\][\s\S]*?(DISC INFO|.MPLS|Video Codec|Disc Label)[\s\S]*?\[\/quote\]/i)?.[0] || '';
+            mediainfo =
+                wrappedMediaBlocks.find((block) => /(DISC INFO|.MPLS|Video Codec|Disc Title|Disc Label)/i.test(block)) ||
+                descr.match(/\[quote.*?\][\s\S]*?(DISC INFO|.MPLS|Video Codec|Disc Title|Disc Label)[\s\S]*?\[\/quote\]/i)?.[0] ||
+                '';
         } else if (descr.match(/General|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率/i)) {
             const matches = descr.match(/\[quote.*?\][\s\S]*?(General|RELEASE.NAME|RELEASE DATE|Unique ID|RESOLUTiON|Bitrate|帧　率|音频码率|视频码率)[\s\S]*?\[\/quote\]/gi);
-            mediainfo = matches ? matches.join('\n\n') : '';
+            mediainfo = wrappedMediaBlocks.length ? wrappedMediaBlocks.join('\n\n') : (matches ? matches.join('\n\n') : '');
             if (mediainfo.match(/\.VOB|\.IFO/i)) {
                 info.multiMediainfos = mediainfo.replace(/\[\/?quote\]/g, '');
             }
@@ -85,7 +110,7 @@ export function getMediainfoPictureFromDescr(
         mediainfo = mediainfo.slice(mediainfo.search(/\[quote\]/) + 7);
     }
     mediainfo = mediainfo.replace(/\[\/quote\]/i, '');
-    mediainfo = mediainfo.replace(/\[\/?(font|size|quote|color).{0,80}?\]/gi, '');
+    mediainfo = cleanMediaInfoText(mediainfo);
 
     let imgs = descr.split(/\[\/quote\]/).pop() || '';
     const imgMatches = imgs.match(/(\[url=.*?\])?\[img\].*?\[\/img\](\[\/url\])?/g);
@@ -101,7 +126,7 @@ export function getMediainfoPictureFromDescr(
     } catch (err) {
         imgs = '';
     }
-    info.mediainfo = mediainfo.trim();
+    info.mediainfo = cleanMediaInfoText(mediainfo);
     info.picInfo = imgs.trim();
     return info;
 }

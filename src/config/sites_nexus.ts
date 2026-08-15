@@ -95,6 +95,23 @@ export const NexusSites: SiteConfig[] = [
         description: 'Audiences'
     },
     {
+        name: 'TJUPT',
+        type: SiteType.NexusPHP,
+        keywords: ['tjupt.org'],
+        baseUrl: 'https://www.tjupt.org/',
+        description: '北洋园 PT',
+        selectors: {
+            title: ['#top', 'h1#top', 'h1'],
+            description: ['#kdescr', '#description'],
+            nameInput: 'input[name="name"]',
+            smallDescrInput: 'input[name="small_descr"]',
+            descrInput: 'textarea#descr',
+            imdbInput: 'input[name="url"][type="text"]',
+            doubanInput: 'input[name="external_url"], input#external_url',
+            torrentInput: 'input[name="file"], input[type="file"]#file'
+        }
+    },
+    {
         name: 'FRDS',
         type: SiteType.NexusPHP,
         keywords: ['keepfrds.com'],
@@ -111,18 +128,4 @@ export const NexusSites: SiteConfig[] = [
             imdbSearch: true
         }
     },
-    {
-        name: 'HDB',
-        type: SiteType.HDB,
-        keywords: ['hdbits.org'],
-        baseUrl: 'https://hdbits.org/',
-        description: 'HDBits'
-    },
-    {
-        name: 'KG',
-        type: SiteType.KG,
-        keywords: ['karagarga.in'],
-        baseUrl: 'https://karagarga.in/',
-        description: 'Karagarga'
-    }
 ];

@@ -12,6 +12,7 @@ export enum SiteType {
     PTP = 'PTP',
     HDB = 'HDB',
     KG = 'KG',
+    HDT = 'HDT',
     Avistaz = 'Avistaz',
     General = 'General'
 }

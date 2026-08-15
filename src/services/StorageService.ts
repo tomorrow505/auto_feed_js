@@ -5,9 +5,17 @@ const STORAGE_KEY = 'auto_feed_current_meta';
 const HANDOFF_PREFIX = 'auto_feed_handoff_';
 const HANDOFF_TOKEN_PARAM = 'autofeed_token';
 const HANDOFF_TTL_MS = 2 * 60 * 60 * 1000;
+const PENDING_FORWARD_KEY = 'auto_feed_pending_forward';
+const PENDING_FORWARD_TTL_MS = 20 * 60 * 1000;
+const WINDOW_NAME_PREFIX = 'autofeed-forward:';
 
 type HandoffPayload = {
     meta: TorrentMeta;
+    createdAt: number;
+};
+
+type PendingForwardPayload = {
+    siteName: string;
     createdAt: number;
 };
 
@@ -59,8 +67,57 @@ export const StorageService = {
         await GMAdapter.setValue(STORAGE_KEY, '');
     },
 
+    async savePendingForward(siteName: string): Promise<void> {
+        const payload: PendingForwardPayload = {
+            siteName: String(siteName || '').trim(),
+            createdAt: Date.now()
+        };
+        await GMAdapter.setValue(PENDING_FORWARD_KEY, JSON.stringify(payload));
+    },
+
+    async clearPendingForward(): Promise<void> {
+        await GMAdapter.deleteValue(PENDING_FORWARD_KEY);
+    },
+
+    async consumePendingForward(siteName: string): Promise<boolean> {
+        const raw = await GMAdapter.getValue<string | null>(PENDING_FORWARD_KEY, null);
+        if (!raw) return false;
+        try {
+            const payload = JSON.parse(raw) as PendingForwardPayload;
+            if (!payload?.siteName || !payload?.createdAt) return false;
+            if (Date.now() - Number(payload.createdAt) > PENDING_FORWARD_TTL_MS) {
+                await GMAdapter.deleteValue(PENDING_FORWARD_KEY);
+                return false;
+            }
+            if (payload.siteName !== siteName) return false;
+            await GMAdapter.deleteValue(PENDING_FORWARD_KEY);
+            return true;
+        } catch {
+            await GMAdapter.deleteValue(PENDING_FORWARD_KEY);
+            return false;
+        }
+    },
+
     generateHandoffToken(): string {
         return randomToken();
+    },
+
+    buildWindowForwardMarker(siteName: string, token: string): string {
+        return `${WINDOW_NAME_PREFIX}${String(siteName || '').trim()}:${String(token || '').trim()}`;
+    },
+
+    consumeWindowForwardToken(siteName?: string): string | null {
+        const raw = String(window.name || '').trim();
+        if (!raw.startsWith(WINDOW_NAME_PREFIX)) return null;
+        const rest = raw.slice(WINDOW_NAME_PREFIX.length);
+        const sep = rest.indexOf(':');
+        if (sep < 0) return null;
+        const markerSite = rest.slice(0, sep).trim();
+        const token = rest.slice(sep + 1).trim();
+        if (!markerSite || !token) return null;
+        if (siteName && markerSite !== siteName) return null;
+        try { window.name = ''; } catch {}
+        return token;
     },
 
     getHandoffTokenFromUrl(url = window.location.href): string | null {

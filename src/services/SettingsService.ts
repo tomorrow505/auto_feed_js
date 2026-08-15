@@ -5,7 +5,7 @@ import { DEFAULT_QUICK_SEARCH_TEMPLATES } from '../common/quickSearch';
 export interface AppSettings {
     ptpImgApiKey: string;
     freeimageApiKey: string;
-    gifyuApiKey: string;
+    imgbbApiKey: string;
     doubanCookie: string;
     tmdbApiKey: string;
     chdBaseUrl: string;
@@ -37,6 +37,7 @@ export interface AppSettings {
     showSearchOnList: {
         PTP: boolean;
         HDB: boolean;
+        HDT: boolean;
     };
     uiLanguage: 'zh' | 'en';
 }
@@ -72,7 +73,7 @@ export interface RemoteServerConfig {
 const DEFAULT_SETTINGS: AppSettings = {
     ptpImgApiKey: '',
     freeimageApiKey: '',
-    gifyuApiKey: '',
+    imgbbApiKey: '',
     doubanCookie: '',
     tmdbApiKey: '',
     chdBaseUrl: 'https://chdbits.co/',
@@ -100,11 +101,12 @@ const DEFAULT_SETTINGS: AppSettings = {
     quickSearchList: DEFAULT_QUICK_SEARCH_TEMPLATES.slice(),
     quickSearchPresets: [],
     enabledSites: SiteCatalogService.getDefaultEnabledSiteNames(),
-    favoriteSites: ['PTer', 'CHDBits', 'HDSky', 'CMCT', 'Audiences', 'BLU', 'Tik', 'KG']
+    favoriteSites: ['PTer', 'CHDBits', 'HDSky', 'CMCT', 'Audiences', 'BLU', 'Tik', 'KG', 'SC', 'TJUPT', 'HDT']
         .filter((name) => SiteCatalogService.getSupportedSiteNames().includes(name)),
     showSearchOnList: {
         PTP: true,
-        HDB: false
+        HDB: false,
+        HDT: false
     },
     uiLanguage: 'zh'
 };
@@ -113,23 +115,34 @@ export class SettingsService {
     private static KEY = 'auto_feed_settings';
 
     private static migrate(settings: AppSettings): AppSettings {
+        const migrated = settings as AppSettings & { gifyuApiKey?: string };
+        if (!migrated.imgbbApiKey && migrated.gifyuApiKey) {
+            migrated.imgbbApiKey = migrated.gifyuApiKey;
+        }
+        delete migrated.gifyuApiKey;
         // Rename site key: `pterclub` -> `PTer` (legacy parity + torrent `source` field correctness).
         const rename = (v: string) => (v === 'pterclub' ? 'PTer' : v);
         const supported = new Set(SiteCatalogService.getSupportedSiteNames());
         const enabledSet = new Set((settings.enabledSites || []).map(rename).filter((x) => supported.has(x)));
-        // Legacy parity: KG is a commonly used forwarding target and should be available by default.
-        if (supported.has('KG')) enabledSet.add('KG');
+        // Keep newly restored high-priority legacy sites enabled for users with older saved settings.
+        // Otherwise they are present in code but never appear in the source-page forwarding row.
+        ['KG', 'SC', 'TJUPT', 'HDT'].forEach((name) => {
+            if (supported.has(name)) enabledSet.add(name);
+        });
         const enabledSites = Array.from(enabledSet);
 
         const favoriteSet = new Set((settings.favoriteSites || []).map(rename).filter((x) => enabledSet.has(x)));
-        if (enabledSet.has('KG')) favoriteSet.add('KG');
+        ['KG', 'SC', 'TJUPT', 'HDT'].forEach((name) => {
+            if (enabledSet.has(name)) favoriteSet.add(name);
+        });
         const favoriteSites = Array.from(favoriteSet);
         const listQuickSearch = settings.showSearchOnList as any;
         const showSearchOnList = {
             PTP: listQuickSearch?.PTP === undefined ? DEFAULT_SETTINGS.showSearchOnList.PTP : !!listQuickSearch.PTP,
-            HDB: listQuickSearch?.HDB === undefined ? DEFAULT_SETTINGS.showSearchOnList.HDB : !!listQuickSearch.HDB
+            HDB: listQuickSearch?.HDB === undefined ? DEFAULT_SETTINGS.showSearchOnList.HDB : !!listQuickSearch.HDB,
+            HDT: listQuickSearch?.HDT === undefined ? DEFAULT_SETTINGS.showSearchOnList.HDT : !!listQuickSearch.HDT
         };
-        return { ...settings, enabledSites, favoriteSites, showSearchOnList };
+        return { ...migrated, enabledSites, favoriteSites, showSearchOnList };
     }
 
     static async load(): Promise<AppSettings> {

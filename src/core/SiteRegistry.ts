@@ -32,12 +32,17 @@ import { FRDSEngine } from '../trackers/nexus/FRDS';
 import { NexusSites } from '../config/sites_nexus';
 import { GazelleSites } from '../config/sites_gazelle';
 import { Unit3DSites } from '../config/sites_unit3d';
+import { SpecialSites } from '../config/sites_special';
+import { SCEngine } from '../trackers/SC';
+import { TJUPTEngine } from '../trackers/TJUPT';
+import { HDTEngine } from '../trackers/HDT';
 
 // Registries for configs
 const siteConfigs: SiteConfig[] = [
     ...NexusSites,
     ...GazelleSites,
-    ...Unit3DSites
+    ...Unit3DSites,
+    ...SpecialSites
 ];
 
 // Registry for Engine definitions (Classes)
@@ -51,7 +56,8 @@ const engineMap: Record<string, new (config: SiteConfig, url: string) => BaseEng
     [SiteType.BHD]: BHDEngine,
     [SiteType.PTP]: PTPEngine,
     [SiteType.HDB]: HDBEngine,
-    [SiteType.KG]: KGEngine
+    [SiteType.KG]: KGEngine,
+    [SiteType.HDT]: HDTEngine
 };
 
 // Site-specific engines override framework-level engines.
@@ -79,7 +85,10 @@ const siteEngineMap: Record<string, new (config: SiteConfig, url: string) => Bas
     RED: REDEngine,
     OPS: OPSEngine,
     DIC: DICEngine,
-    Tik: TikEngine
+    Tik: TikEngine,
+    SC: SCEngine,
+    TJUPT: TJUPTEngine,
+    HDT: HDTEngine
 };
 
 export class SiteRegistry {

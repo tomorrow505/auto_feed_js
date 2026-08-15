@@ -3,6 +3,23 @@ import { GMAdapter } from './GMAdapter';
 
 export class TorrentService {
     private static DEFAULT_ANNOUNCE = 'https://hudbt.hust.edu.cn/announce.php';
+    private static REQUEST_TIMEOUT_MS = 20000;
+
+    private static withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+        let timer = 0;
+        return new Promise<T>((resolve, reject) => {
+            timer = window.setTimeout(() => reject(new Error(`${label} timeout`)), ms);
+            promise
+                .then((value) => {
+                    window.clearTimeout(timer);
+                    resolve(value);
+                })
+                .catch((error) => {
+                    window.clearTimeout(timer);
+                    reject(error);
+                });
+        });
+    }
 
     private static getPageFileCtor(): typeof File {
         try {
@@ -30,11 +47,12 @@ export class TorrentService {
      * @returns Promise resolving to the Base64 string of the file content.
      */
     static async download(url: string, progressCallback?: (percent: number) => void): Promise<string> {
-        return new Promise((resolve, reject) => {
+        return this.withTimeout(new Promise((resolve, reject) => {
             GMAdapter.xmlHttpRequest({
                 method: 'GET',
                 url: url,
                 responseType: 'blob',
+                timeout: this.REQUEST_TIMEOUT_MS,
                 onprogress: (e: any) => {
                     if (e.lengthComputable && progressCallback) {
                         const percent = Math.round((e.loaded / e.total) * 100);
@@ -58,7 +76,7 @@ export class TorrentService {
                 onerror: (err: any) => reject(new Error(`Network error downloading torrent: ${err}`)),
                 ontimeout: () => reject(new Error('Timeout downloading torrent')),
             });
-        });
+        }), this.REQUEST_TIMEOUT_MS + 3000, 'torrent predownload');
     }
 
     /**
@@ -123,11 +141,16 @@ export class TorrentService {
     static async downloadBinaryString(url: string): Promise<string> {
         // Legacy parity: prefer `arraybuffer` and convert bytes -> binary string.
         // Using `overrideMimeType` + responseText is fragile (can corrupt bytes or return HTML).
-        const response = await GMAdapter.xmlHttpRequest({
-            method: 'GET',
-            url,
-            responseType: 'arraybuffer'
-        });
+        const response = await this.withTimeout(
+            GMAdapter.xmlHttpRequest({
+                method: 'GET',
+                url,
+                responseType: 'arraybuffer',
+                timeout: this.REQUEST_TIMEOUT_MS
+            }),
+            this.REQUEST_TIMEOUT_MS + 3000,
+            'torrent download'
+        );
         const buf = (response && response.response) as ArrayBuffer;
         if (!buf || !(buf instanceof ArrayBuffer) || buf.byteLength === 0) {
             throw new Error('Empty torrent response');
@@ -328,7 +351,7 @@ export class TorrentService {
             }
         }
 
-        if (['GPW', 'RED', 'OPS', 'DIC'].includes(forwardSite)) {
+        if (['GPW', 'RED', 'OPS', 'DIC', 'SC'].includes(forwardSite)) {
             const input =
                 (document.querySelector('input[name="file_input"]') as HTMLInputElement | null) ||
                 (document.querySelector('input[name="file"]') as HTMLInputElement | null) ||
@@ -342,6 +365,14 @@ export class TorrentService {
                     fileEl.dispatchEvent(new Event('change', { bubbles: true }));
                     fileEl.dispatchEvent(new Event('input', { bubbles: true }));
                 }
+                return true;
+            }
+        }
+
+        if (forwardSite === 'HDT') {
+            const input = document.querySelector('input[name="torrent"], input[name="file"], input[name="torrentfile"], input[type="file"]#torrent, input[type="file"]') as HTMLInputElement | null;
+            if (input) {
+                this.injectFileIntoInput(input, file);
                 return true;
             }
         }

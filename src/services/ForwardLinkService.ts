@@ -4,6 +4,8 @@ import { SiteCatalogService } from './SiteCatalogService';
 import { SiteConfig, SiteType } from '../types/SiteConfig';
 import { extractDoubanId, extractImdbId, extractTmdbId, matchLink } from '../common/rules/links';
 import { getSearchName } from '../common/rules/search';
+import { ImdbAspectRatioService } from './ImdbAspectRatioService';
+import { GMAdapter } from './GMAdapter';
 
 export interface ForwardLinkOptions {
     chdBaseUrl?: string;
@@ -46,6 +48,7 @@ const buildUploadUrl = (site: SiteConfig, options?: ForwardLinkOptions): string 
     // Legacy parity: Monika uses `/upload/1` (not Unit3D `/torrents/create`).
     if (site.name === 'Monika') return joinUrl(base, 'upload/1');
     if (site.name === 'BHD') return joinUrl(base, 'upload');
+    if (site.name === 'HDB') return joinUrl(base, 'upload');
     if (site.name === 'MTeam') return joinUrl(base, 'upload');
     // OpenCD uses a dedicated upload plugin page.
     if (site.name === 'OpenCD') return joinUrl(base, 'plugin_upload.php');
@@ -76,8 +79,17 @@ const buildSearchUrl = (site: SiteConfig, meta: TorrentMeta, options?: ForwardLi
         // Legacy parity: MTeam browse keyword is title-based, not IMDb id.
         MTeam: () => joinUrl(base, `browse?keyword=${searchName}`),
         PTP: () => imdbId ? joinUrl(base, `torrents.php?searchstr=${imdbId}`) : joinUrl(base, `torrents.php?searchstr=${searchName}`),
+        SC: () => imdbId
+            ? joinUrl(base, `torrents.php?action=advanced&searchsubmit=1&filter_cat=1&cataloguenumber=${encodeURIComponent(imdbId)}`)
+            : joinUrl(base, `torrents.php?searchstr=${searchName}`),
         HDB: () => joinUrl(base, `browse.php?search=${imdbId || searchName}`),
-        KG: () => imdbId ? joinUrl(base, `browse.php?search=${imdbId}&search_type=imdb`) : joinUrl(base, `browse.php?search=${searchName}`)
+        KG: () => imdbId ? joinUrl(base, `browse.php?search=${imdbId}&search_type=imdb`) : joinUrl(base, `browse.php?search=${searchName}`),
+        TJUPT: () => imdbId
+            ? joinUrl(base, `torrents.php?incldead=0&search_area=4&search=${encodeURIComponent(imdbId)}&sort=5&type=desc`)
+            : joinUrl(base, `torrents.php?incldead=0&search_area=0&search=${searchName}&sort=5&type=desc`),
+        HDT: () => imdbId
+            ? joinUrl(base, `torrents.php?search=${encodeURIComponent(imdbId)}&options=2&order=size&by=DESC`)
+            : joinUrl(base, `torrents.php?search=${searchName}&options=3&order=size&by=DESC`)
     };
     if (specialMap[site.name]) return specialMap[site.name]();
 
@@ -100,6 +112,73 @@ const buildSearchUrl = (site: SiteConfig, meta: TorrentMeta, options?: ForwardLi
     return joinUrl(base, `torrents.php?search=${imdbId || searchName}`);
 };
 
+const normalizeMovieKey = (value: string) => String(value || '')
+    .toLowerCase()
+    .replace(/&amp;/g, '&')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const extractYear = (meta: TorrentMeta): string => {
+    const text = `${meta.title || ''} ${meta.subtitle || ''} ${meta.smallDescr || ''} ${meta.description || ''}`;
+    return text.match(/\b(19\d{2}|20\d{2})\b/)?.[1] || '';
+};
+
+const extractGroupIdFromHtml = (html: string, siteName: string, meta?: TorrentMeta): string => {
+    if (!html) return '';
+    try {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        if (siteName === 'SC') {
+            const imdbId = meta ? (meta.imdbId || extractImdbId(meta.imdbUrl || '') || '') : '';
+            const imdbNo = imdbId.replace(/^tt/i, '');
+            const titleKey = meta ? normalizeMovieKey(getSearchName(meta.title || '', meta.type) || meta.title || '') : '';
+            const year = meta ? extractYear(meta) : '';
+            const candidates = Array.from(doc.querySelectorAll(
+                'div.torrent_card_container, div.torrent_card, .group, table.torrent_table tr, tr'
+            )) as HTMLElement[];
+
+            for (const candidate of candidates) {
+                const link = candidate.querySelector('a[href*="torrents.php?id="], a[href*="?id="]') as HTMLAnchorElement | null;
+                const id = link?.href?.match(/[?&]id=(\d+)/i)?.[1] || '';
+                if (!id) continue;
+
+                const blob = `${candidate.textContent || ''} ${candidate.innerHTML || ''}`;
+                const blobKey = normalizeMovieKey(blob);
+                const exactImdb = imdbId && (blob.includes(imdbId) || (!!imdbNo && blob.includes(imdbNo)));
+                const exactTitle = titleKey && blobKey.includes(titleKey) && (!year || blobKey.includes(year));
+                if (exactImdb || exactTitle) return id;
+            }
+            return '';
+        }
+        if (siteName === 'PTP') {
+            const link = doc.querySelector('a[href*="torrents.php?id="], a.basic-movie-list__movie__cover-link[href*="id="]') as HTMLAnchorElement | null;
+            return link?.href?.match(/[?&]id=(\d+)/i)?.[1] || '';
+        }
+    } catch {}
+    return html.match(/torrents\.php\?id=(\d+)/i)?.[1] || html.match(/[?&]id=(\d+)/i)?.[1] || '';
+};
+
+const resolveGazelleMovieUploadUrl = async (
+    site: SiteConfig,
+    meta: TorrentMeta,
+    options?: ForwardLinkOptions
+): Promise<string> => {
+    const base = resolveBaseUrl(site, options);
+    const baseUpload = joinUrl(base, 'upload.php');
+    const searchUrl = buildSearchUrl(site, meta, options);
+    try {
+        const res = await GMAdapter.xmlHttpRequest({ method: 'GET', url: searchUrl, timeout: 12000 });
+        const finalUrl = String(res?.finalUrl || res?.responseURL || '');
+        const finalGroupId = finalUrl.match(/[?&]id=(\d+)/i)?.[1] || '';
+        const htmlGroupId = extractGroupIdFromHtml(String(res?.responseText || ''), site.name, meta);
+        const groupId = finalGroupId || htmlGroupId;
+        return groupId ? `${baseUpload}?groupid=${encodeURIComponent(groupId)}` : baseUpload;
+    } catch (e) {
+        console.warn(`[Auto-Feed][${site.name}] group upload lookup failed, using plain upload.php`, e);
+        return baseUpload;
+    }
+};
+
 export class ForwardLinkService {
     static getUploadUrl(site: SiteConfig, options?: ForwardLinkOptions): string {
         return buildUploadUrl(site, options);
@@ -107,6 +186,13 @@ export class ForwardLinkService {
 
     static getSearchUrl(site: SiteConfig, meta: TorrentMeta, options?: ForwardLinkOptions): string {
         return buildSearchUrl(site, meta, options);
+    }
+
+    static async resolveUploadUrl(site: SiteConfig, meta: TorrentMeta, options?: ForwardLinkOptions): Promise<string> {
+        if (site.name === 'PTP' || site.name === 'SC') {
+            return resolveGazelleMovieUploadUrl(site, meta, options);
+        }
+        return buildUploadUrl(site, options);
     }
 
     static injectForwardLinks(
@@ -292,6 +378,17 @@ export class ForwardLinkService {
                                         metaToSave.torrentFilename = `${safeName}.torrent`;
                                     }
                                 }
+
+                                try {
+                                    const imdbId = extractImdbId(metaToSave.imdbId || metaToSave.imdbUrl || '');
+                                    const cachedAspect = imdbId ? await ImdbAspectRatioService.getCachedAspectRatio(imdbId) : '';
+                                    if (cachedAspect) {
+                                        metaToSave.aspectRatio = cachedAspect;
+                                    } else if (metaToSave.imdbUrl) {
+                                        ImdbAspectRatioService.primeFromImdbUrl(metaToSave.imdbUrl);
+                                    }
+                                } catch {}
+
                                 const { StorageService } = await import('./StorageService');
                                 const token = StorageService.generateHandoffToken();
                                 targetUrl = StorageService.attachHandoffToken(url, token);

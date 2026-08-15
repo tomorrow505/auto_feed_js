@@ -1,14 +1,28 @@
 import $ from 'jquery';
 import { Unit3DEngine } from './unit3d';
 import { TorrentMeta } from '../types/TorrentMeta';
-import { getType } from '../common/rules/text';
+import { getStandardSel, getType } from '../common/rules/text';
 import { extractImdbId, extractTmdbId, matchLink } from '../common/rules/links';
 import { SettingsService, getEffectiveTmdbApiKey } from '../services/SettingsService';
 import { GMAdapter } from '../services/GMAdapter';
+import { cleanMediaInfoText } from '../common/rules/media';
 
 export class Unit3DClassicEngine extends Unit3DEngine {
     async parse(): Promise<TorrentMeta> {
         this.log('Parsing Unit3D Classic page...');
+
+        const readHtmlBlockText = (el: Element | undefined | null): string => {
+            if (!el) return '';
+            const html = (el as HTMLElement).innerHTML || '';
+            if (!html) return (el.textContent || '').trim();
+            return html
+                .replace(/<br\s*\/?>/gi, '\n')
+                .replace(/<\/p>/gi, '\n')
+                .replace(/<[^>]+>/g, '')
+                .replace(/\r/g, '')
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+        };
 
         const meta = await super.parse();
 
@@ -80,38 +94,76 @@ export class Unit3DClassicEngine extends Unit3DEngine {
             }
         }
 
+        const getClassicDescriptionPanel = () => {
+            const header = $('h2.panel__heading')
+                .filter((_, el) => /Description|描述/i.test($(el).text()))
+                .first();
+            if (!header.length) return $();
+            const panel = header.closest('.panel');
+            if (panel.length) return panel.find('.panel__body').first();
+            return header.parent().next();
+        };
+
         let mediainfo = '';
         try {
             mediainfo = $('code[x-ref="mediainfo"]').text().trim();
             if (!mediainfo) {
                 mediainfo = $('code[x-ref="bdinfo"]').text().trim();
             }
+            if (!mediainfo) {
+                const descPanel = getClassicDescriptionPanel();
+                const codeText =
+                    readHtmlBlockText(descPanel.find('pre code').first()[0]) ||
+                    readHtmlBlockText(descPanel.find('pre').first()[0]) ||
+                    readHtmlBlockText(descPanel.find('code').first()[0]) ||
+                    '';
+                const cleaned = cleanMediaInfoText(codeText);
+                if (cleaned.match(/General|Unique ID|Complete name|DISC INFO:|Disc Label|Playlist|Video:|Audio:/i)) {
+                    mediainfo = cleaned;
+                } else {
+                    const panelText = cleanMediaInfoText(descPanel.text().trim());
+                    if (panelText.match(/General|Unique ID|Complete name|DISC INFO:|Disc Label|Playlist|Video:|Audio:/i)) {
+                        mediainfo = panelText;
+                    }
+                }
+            }
         } catch {}
+        if (mediainfo) {
+            meta.fullMediaInfo = cleanMediaInfoText(mediainfo);
+        }
 
         let imgUrls = '';
         try {
-            const descPanel = $('h2.panel__heading:contains("Description"), h2.panel__heading:contains("描述")')
-                .parent()
-                .next();
+            const descPanel = getClassicDescriptionPanel();
             descPanel.find('img').each((_, img) => {
                 const el = img as HTMLImageElement;
                 const parent = el.parentElement as HTMLAnchorElement | null;
                 const href = parent?.href;
                 const src = el.getAttribute('data-src') || el.getAttribute('src') || el.src || '';
                 if (!src) return;
+                if (src.match(/favicon|logo|avatar|icon/i)) return;
                 if (href) {
                     imgUrls += `[url=${href}][img]${src}[/img][/url] `;
                 } else {
+                    if (!src.match(/\.(png|jpe?g|webp|gif)(\?|$)/i)) return;
                     imgUrls += `[img]${src}[/img] `;
                 }
                 meta.images.push(src);
             });
         } catch {}
 
-        if (!meta.description && (mediainfo || imgUrls)) {
-            meta.description = `${mediainfo ? `[quote]\n${mediainfo}\n[/quote]\n\n` : ''}${imgUrls}`.trim();
+        if ((meta.fullMediaInfo || imgUrls) && (!meta.description || !meta.description.match(/\[img\]|\[quote\]/i))) {
+            const fullMediaInfo = meta.fullMediaInfo || mediainfo;
+            meta.description = `${fullMediaInfo ? `[quote]\n${fullMediaInfo}\n[/quote]\n\n` : ''}${imgUrls}`.trim();
             meta.description = meta.description.replace(/https:\/\/wsrv\.nl\/\?n=-1&url=/g, '');
         }
+
+        try {
+            const resolutionText = $('li.torrent__resolution, .torrent__resolution').first().text().trim();
+            if (resolutionText && !meta.standardSel) {
+                meta.standardSel = getStandardSel(resolutionText) || resolutionText;
+            }
+        } catch {}
 
         // ACM / Monika / DTR / HDOli tables
         const detailTables = $('.table-responsive table, .shoutbox table');

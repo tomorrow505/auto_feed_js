@@ -15,7 +15,7 @@ export const App = () => {
     const [settings, setSettings] = useState<AppSettings>({
         ptpImgApiKey: '',
         freeimageApiKey: '',
-        gifyuApiKey: '',
+        imgbbApiKey: '',
         doubanCookie: '',
         tmdbApiKey: '',
         chdBaseUrl: 'https://chdbits.co/',
@@ -46,7 +46,8 @@ export const App = () => {
         favoriteSites: [],
         showSearchOnList: {
             PTP: true,
-            HDB: false
+            HDB: false,
+            HDT: false
         },
         uiLanguage: 'zh'
     });
@@ -527,7 +528,7 @@ export const App = () => {
                                 <div className="af-row">
                                     <span className="af-label">{t.listPageQuickSearch}</span>
                                     <div className="af-segmented">
-                                        {(['PTP', 'HDB'] as const).map((key) => (
+                                        {(['PTP', 'HDB', 'HDT'] as const).map((key) => (
                                             <div
                                                 key={key}
                                                 className={`af-segment-opt ${settings.showSearchOnList?.[key] ? 'active' : ''}`}
@@ -636,7 +637,7 @@ export const App = () => {
                                 <div className="af-card-header">{t.servicesApiKeys}</div>
                                 <InputRow label="PtpImg API Key" value={settings.ptpImgApiKey} onInput={v => setAndPersist({ ...settings, ptpImgApiKey: v })} />
                                 <InputRow label="Freeimage API Key" value={settings.freeimageApiKey} onInput={v => setAndPersist({ ...settings, freeimageApiKey: v })} />
-                                <InputRow label="Gifyu API Key" value={settings.gifyuApiKey} onInput={v => setAndPersist({ ...settings, gifyuApiKey: v })} />
+                                <InputRow label="ImgBB API Key" value={settings.imgbbApiKey} onInput={v => setAndPersist({ ...settings, imgbbApiKey: v })} />
                             </div>
                         </div>
                     )}

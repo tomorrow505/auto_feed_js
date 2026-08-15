@@ -4,7 +4,7 @@ import { SiteConfig } from '../types/SiteConfig';
 import { extractImdbId } from '../common/rules/links';
 import { getMediumSel } from '../common/rules/text';
 import { getSizeFromDescr } from '../common/rules/helpers';
-import { getMediainfoPictureFromDescr } from '../common/rules/media';
+import { cleanMediaInfoText, getMediainfoPictureFromDescr } from '../common/rules/media';
 import { full_bdinfo2summary } from '../utils/mediaInfo';
 import { HtmlFetchService } from '../services/HtmlFetchService';
 import { ImageHostService } from '../services/ImageHostService';
@@ -73,6 +73,21 @@ function formatTpl(tpl: string, kv: Record<string, string>): string {
     for (const [key, value] of Object.entries(kv)) {
         out = out.replace(new RegExp(`\\{${key}\\}`, 'g'), value ?? '');
     }
+    return out;
+}
+
+function normalizeYearText(v: string): string {
+    const text = String(v || '').trim();
+    const m = text.match(/\b(19|20)\d{2}\b/);
+    return m ? m[0] : '';
+}
+
+function sanitizeKgIntroYear(text: string, fallbackYear: string): string {
+    const safeYear = normalizeYearText(fallbackYear);
+    let out = String(text || '');
+    out = out.replace(/Year:\s*-1\b/g, safeYear ? `Year: ${safeYear}` : 'Year:');
+    if (!safeYear) return out;
+    out = out.replace(/Year:\s*$/m, `Year: ${safeYear}`);
     return out;
 }
 
@@ -173,6 +188,11 @@ function parseStepFromTitle(): number {
         const n = parseInt(stepOf, 10);
         return Number.isFinite(n) ? n : 0;
     }
+    const uploadStep = title.match(/Upload\s*(\d+)\s*$/i)?.[1] || '';
+    if (uploadStep) {
+        const n = parseInt(uploadStep, 10);
+        return Number.isFinite(n) ? n : 0;
+    }
     if (/step/i.test(title)) {
         const m = title.match(/(\d+)\s*$/);
         if (!m?.[1]) return 0;
@@ -186,16 +206,18 @@ function detectKgUploadStep(): number {
     const fromTitle = parseStepFromTitle();
     if (fromTitle >= 1 && fromTitle <= 3) return fromTitle;
 
-    const hasTitle = !!document.querySelector('input[name="title"], input#title');
-    const hasLink = !!document.querySelector('input[name="link"], input[name="internet"]');
+    const titleInput = document.querySelector('input[name="title"], input#title') as HTMLInputElement | null;
+    const linkInput = document.querySelector('input[name="link"], input[name="internet"]') as HTMLInputElement | null;
     const hasDescr = !!document.querySelector('textarea[name="descr"], textarea[name="description"]');
     const hasRip = !!document.querySelector('#ripspecs, textarea[name="ripspecs"]');
-    const hasFile = !!document.querySelector('input[type="file"]');
+    const hasFile = !!document.querySelector('form[action*="takeupload"] input[type="file"], input[type="file"]');
+    const hasVisibleTitle = !!titleInput && titleInput.type !== 'hidden';
+    const hasVisibleLink = !!linkInput && linkInput.type !== 'hidden';
 
     // Prefer form-shape detection over title text: KG title often ends with "... of 3".
-    if (hasDescr || hasRip || hasLink) return 2;
-    if (hasFile && !hasDescr && !hasRip && !hasLink) return 3;
-    if (hasTitle && !hasLink && !hasDescr && !hasRip) return 1;
+    if (hasFile && !hasDescr && !hasRip) return 3;
+    if (hasDescr || hasRip || hasVisibleLink) return 2;
+    if (hasVisibleTitle && !hasVisibleLink && !hasDescr && !hasRip) return 1;
     return 0;
 }
 
@@ -592,6 +614,70 @@ function getScreenshotsFullSizeFromDescr(descr: string, mediumSel?: string): str
     }
 }
 
+function extractImageUrlsFromBbcode(descr: string): string[] {
+    const matches = String(descr || '').match(/\[img\](.*?)\[\/img\]/gi) || [];
+    return uniq(
+        matches
+            .map((block) => block.match(/\[img\](.*?)\[\/img\]/i)?.[1] || '')
+            .map((url) => ImageHostService.getFullSizeUrl(String(url || '').trim()))
+            .filter(Boolean)
+    );
+}
+
+async function probeImageSize(url: string): Promise<{ url: string; width: number; height: number } | null> {
+    const src = String(url || '').trim();
+    if (!src) return null;
+
+    return await new Promise((resolve) => {
+        const img = new window.Image();
+        let settled = false;
+        const finish = (value: { url: string; width: number; height: number } | null) => {
+            if (settled) return;
+            settled = true;
+            window.clearTimeout(timer);
+            img.onload = null;
+            img.onerror = null;
+            resolve(value);
+        };
+        const timer = window.setTimeout(() => finish(null), 4500);
+        img.onload = () => finish({
+            url: src,
+            width: img.naturalWidth || img.width || 0,
+            height: img.naturalHeight || img.height || 0
+        });
+        img.onerror = () => finish(null);
+        img.src = src;
+    });
+}
+
+async function pickPosterCandidate(urls: string[]): Promise<string> {
+    const candidates = uniq(urls.map((url) => String(url || '').trim()).filter(Boolean));
+    if (!candidates.length) return '';
+
+    const probed = (await Promise.all(candidates.map((url) => probeImageSize(url))))
+        .filter((item): item is { url: string; width: number; height: number } => !!item && item.width > 0 && item.height > 0);
+
+    const posters = probed
+        .filter((item) => item.height / item.width >= 1.2)
+        .sort((a, b) => {
+            const areaDiff = b.width * b.height - a.width * a.height;
+            if (areaDiff !== 0) return areaDiff;
+            return (b.height / b.width) - (a.height / a.width);
+        });
+
+    return posters[0]?.url || '';
+}
+
+async function resolveKgPoster(meta: TorrentMeta, imdbPoster: string, mergedDescr: string): Promise<string> {
+    if (imdbPoster) return imdbPoster;
+
+    const candidates = [
+        ...(Array.isArray(meta.images) ? meta.images : []),
+        ...extractImageUrlsFromBbcode(mergedDescr)
+    ];
+    return await pickPosterCandidate(candidates);
+}
+
 function extractSubtitleListFromSummary(summary: string): string[] {
     const out: string[] = [];
     const text = String(summary || '');
@@ -668,6 +754,35 @@ function sanitizeKgRipSpecs(value: string): string {
         last = trimmed;
     }
     return out.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function extractKgMediaInfoText(root: HTMLElement): string {
+    const mediaRe = /(General|Unique ID|Complete name|Format\s*:|Duration\s*:|DISC INFO:|Disc Title|Disc Label|\.MPLS|Video Codec|RELEASE\.NAME|RESOLUTiON|Bitrate)/i;
+    const mediaStartRe = /^(General|DISC INFO:|Disc Title|Disc Label|RELEASE\.NAME|Video Codec)\b/i;
+    const candidates: string[] = [];
+
+    const push = (value: string) => {
+        const cleaned = cleanMediaInfoText(value);
+        if (cleaned && mediaRe.test(cleaned)) candidates.push(cleaned);
+    };
+
+    try {
+        root.querySelectorAll('.mediainfo, pre, code, textarea, .codemain, .code, .quote, .bbcode').forEach((el) => {
+            push((el.textContent || '').trim());
+        });
+    } catch {}
+
+    const text = (root.textContent || '').trim();
+    try {
+        const wrapped = text.match(/\[(?:code|mediainfo|bdinfo|quote|hide)(?:=[^\]]*)?\][\s\S]*?\[\/(?:code|mediainfo|bdinfo|quote|hide)\]/gi) || [];
+        wrapped.forEach(push);
+    } catch {}
+    push(text);
+
+    if (!candidates.length) return '';
+    const prioritized = candidates.filter((item) => mediaStartRe.test(item));
+    const pool = prioritized.length ? prioritized : candidates;
+    return pool.reduce((best, cur) => (cur.length > best.length ? cur : best), pool[0]).trim();
 }
 
 function buildKgRipspecs(meta: TorrentMeta): { ripspecs: string; subs: string; forceDvdr: boolean; forceHdrip3: boolean } {
@@ -852,13 +967,35 @@ async function buildKgTorrentFile(meta: Partial<TorrentMeta>, announce: string):
     let filename = rawName || 'autofeed';
 
     let built: { blob: Blob; name: string } | null = null;
-    if (meta.torrentUrl && meta.torrentUrl.match(/^d8:announce/)) {
-        built = buildBlobFromTorrent(meta.torrentUrl, announce, 'KG');
-    } else if (meta.torrentUrl) {
-        built = await getBlob(meta.torrentUrl, announce, 'KG');
-    } else if (meta.torrentBase64) {
-        const binary = TorrentService.base64ToBinaryString(meta.torrentBase64);
-        built = buildBlobFromTorrent(binary, announce, 'KG');
+    const errors: unknown[] = [];
+
+    if (meta.torrentBase64) {
+        try {
+            const binary = TorrentService.base64ToBinaryString(meta.torrentBase64);
+            built = buildBlobFromTorrent(binary, announce, 'KG');
+        } catch (error) {
+            errors.push(error);
+        }
+    }
+
+    if (!built && meta.torrentUrl && meta.torrentUrl.match(/^d8:announce/)) {
+        try {
+            built = buildBlobFromTorrent(meta.torrentUrl, announce, 'KG');
+        } catch (error) {
+            errors.push(error);
+        }
+    }
+
+    if (!built && meta.torrentUrl) {
+        try {
+            built = await getBlob(meta.torrentUrl, announce, 'KG');
+        } catch (error) {
+            errors.push(error);
+        }
+    }
+
+    if (!built && errors.length) {
+        throw errors[errors.length - 1];
     }
     if (!built) return null;
 
@@ -871,18 +1008,132 @@ async function buildKgTorrentFile(meta: Partial<TorrentMeta>, announce: string):
 
 function fillKgTorrentLegacy(file: File): boolean {
     const input =
+        (document.querySelector('form[action*="takeupload"] input[type="file"][name="file"]') as HTMLInputElement | null) ||
+        (document.querySelector('form[action*="takeupload"] input[type="file"]') as HTMLInputElement | null) ||
         (document.querySelector('input[name="file"]') as HTMLInputElement | null) ||
-        (document.querySelector('input[type="file"][name="file"]') as HTMLInputElement | null);
+        (document.querySelector('input[type="file"][name="file"]') as HTMLInputElement | null) ||
+        (document.querySelector('input[type="file"]') as HTMLInputElement | null);
     if (!input) return false;
 
     try {
-        const container = new DataTransfer();
+        let container: DataTransfer | null = null;
+        try {
+            const PageDataTransfer = (window as any)?.DataTransfer;
+            if (typeof PageDataTransfer === 'function') container = new PageDataTransfer() as DataTransfer;
+        } catch {}
+        if (!container) {
+            try {
+                const ev = new ClipboardEvent('');
+                container = ev.clipboardData as unknown as DataTransfer;
+            } catch {}
+        }
+        if (!container) return false;
+
         container.items.add(file);
-        input.files = container.files;
+        let assigned = false;
+        try {
+            const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'files')?.set;
+            if (setter) {
+                setter.call(input, container.files);
+                assigned = true;
+            }
+        } catch {}
+        if (!assigned) {
+            try {
+                input.files = container.files;
+                assigned = true;
+            } catch {}
+        }
+        if (!assigned) return false;
+
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
         return !!input.files?.length;
     } catch {
         return false;
     }
+}
+
+function bytesToBase64(bytes: Uint8Array): string {
+    let out = '';
+    const chunk = 0x8000;
+    for (let i = 0; i < bytes.length; i += chunk) {
+        const part = bytes.subarray(i, i + chunk);
+        out += String.fromCharCode(...part);
+    }
+    return btoa(out);
+}
+
+async function fillKgTorrentViaPageContext(file: File): Promise<boolean> {
+    const selectors = [
+        'form[action*="takeupload"] input[type="file"][name="file"]',
+        'form[action*="takeupload"] input[type="file"]',
+        'input[name="file"]',
+        'input[type="file"][name="file"]',
+        'input[type="file"]'
+    ];
+    const buffer = await file.arrayBuffer();
+    const payload = bytesToBase64(new Uint8Array(buffer));
+    const marker = `autofeed-kg-file-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+    return await new Promise<boolean>((resolve) => {
+        const cleanup = () => window.removeEventListener(marker, onDone as EventListener);
+        const onDone = (event: Event) => {
+            cleanup();
+            const detail = (event as CustomEvent<{ ok?: boolean }>).detail || {};
+            resolve(!!detail.ok);
+        };
+        window.addEventListener(marker, onDone as EventListener, { once: true });
+
+        const script = document.createElement('script');
+        script.textContent = `
+            (() => {
+                try {
+                    const selectors = ${JSON.stringify(selectors)};
+                    const input = selectors.map((selector) => document.querySelector(selector)).find(Boolean);
+                    if (!(input instanceof HTMLInputElement)) {
+                        window.dispatchEvent(new CustomEvent(${JSON.stringify(marker)}, { detail: { ok: false } }));
+                        return;
+                    }
+
+                    const raw = atob(${JSON.stringify(payload)});
+                    const bytes = new Uint8Array(raw.length);
+                    for (let i = 0; i < raw.length; i += 1) bytes[i] = raw.charCodeAt(i);
+
+                    const pageFile = new File([bytes], ${JSON.stringify(file.name)}, { type: ${JSON.stringify(file.type || 'application/x-bittorrent')} });
+                    const transfer = new DataTransfer();
+                    transfer.items.add(pageFile);
+
+                    let assigned = false;
+                    try {
+                        const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'files')?.set;
+                        if (setter) {
+                            setter.call(input, transfer.files);
+                            assigned = true;
+                        }
+                    } catch {}
+                    if (!assigned) {
+                        try {
+                            input.files = transfer.files;
+                            assigned = true;
+                        } catch {}
+                    }
+
+                    if (assigned) {
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                        input.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
+                    window.dispatchEvent(new CustomEvent(${JSON.stringify(marker)}, { detail: { ok: assigned && !!input.files?.length } }));
+                } catch {
+                    window.dispatchEvent(new CustomEvent(${JSON.stringify(marker)}, { detail: { ok: false } }));
+                } finally {
+                    document.currentScript?.remove();
+                }
+            })();
+        `;
+        (document.documentElement || document.head || document.body).appendChild(script);
+    });
 }
 
 async function fillKgStep2(workingMeta: TorrentMeta, title: string, baseImdbUrl: string) {
@@ -894,6 +1145,9 @@ async function fillKgStep2(workingMeta: TorrentMeta, title: string, baseImdbUrl:
     const linkInput =
         (document.querySelector('input[name="link"]') as HTMLInputElement | null) ||
         (document.querySelector('input[name="internet"]') as HTMLInputElement | null);
+    const yearInput =
+        (document.querySelector('input[name="year"]') as HTMLInputElement | null) ||
+        (document.querySelector('input#year') as HTMLInputElement | null);
     const countrySelect =
         (document.querySelector('select[name="country_id"]') as HTMLSelectElement | null) ||
         (document.querySelector('select[name*="country"], select[id*="country"]') as HTMLSelectElement | null);
@@ -934,7 +1188,7 @@ async function fillKgStep2(workingMeta: TorrentMeta, title: string, baseImdbUrl:
     const imdbGenres = imdb.genres.length ? imdb.genres : omdb.genres;
     const imdbCountries = imdb.countries.length ? imdb.countries : omdb.countries;
     const imdbTitle = imdb.title || omdb.title;
-    const imdbYear = imdb.year || omdb.year;
+    const imdbYear = normalizeYearText(imdb.year || omdb.year);
     const imdbDate = imdb.date || omdb.date;
     const imdbScore = imdb.score || omdb.score;
     const imdbDirector = imdb.director || omdb.director;
@@ -942,6 +1196,10 @@ async function fillKgStep2(workingMeta: TorrentMeta, title: string, baseImdbUrl:
     const imdbCast = imdb.cast || omdb.cast;
     const imdbEnDescr = imdb.enDescr || omdb.enDescr || extractSynopsisFromSource(mergedSource);
     const imdbPoster = imdb.poster || omdb.poster;
+    const displayYear =
+        imdbYear ||
+        normalizeYearText(tmdb.year) ||
+        normalizeYearText((workingMeta.title || '').match(/\b(19|20)\d{2}\b/)?.[0] || '');
     const mediaLang = uniq([
         ...parseLangListFromMedia(mergedSource, 'audio'),
         ...parseLangListFromMedia(mergedSource, 'sub')
@@ -963,15 +1221,21 @@ async function fillKgStep2(workingMeta: TorrentMeta, title: string, baseImdbUrl:
 
     const directorValue = imdbDirector || (titleInput?.value?.trim() || title || 'Unknown');
     directorInputs.forEach((input) => setFormValue(input, directorValue, { force: false }));
+    if (yearInput && displayYear) {
+        setFormValue(yearInput, displayYear);
+        KG_REAPPLY_DELAYS.forEach((ms) => window.setTimeout(() => {
+            setFormValue(yearInput, displayYear);
+        }, ms));
+    }
     if (langInput) setFormValue(langInput, languageText);
 
     if (descrBox) {
         const shots = getScreenshotsFullSizeFromDescr(mergedDescr, workingMeta.mediumSel);
-        const poster = imdbPoster || workingMeta.images?.[0] || '';
-        setFormValue(descrBox, formatTpl(KG_INTRO_BASE_CONTENT, {
+        const poster = await resolveKgPoster(workingMeta, imdbPoster, mergedDescr);
+        const intro = sanitizeKgIntroYear(formatTpl(KG_INTRO_BASE_CONTENT, {
             poster,
             title: imdbTitle || title,
-            year: imdbYear || tmdb.year || ((workingMeta.title || '').match(/\b(19|20)\d{2}\b/)?.[0] || ''),
+            year: displayYear,
             genres: imdbGenres.join(', '),
             date: imdbDate,
             score: imdbScore,
@@ -983,7 +1247,11 @@ async function fillKgStep2(workingMeta: TorrentMeta, title: string, baseImdbUrl:
             cast: imdbCast,
             en_descr: imdbEnDescr,
             screenshots: shots
-        }).trim());
+        }).trim(), displayYear);
+        setFormValue(descrBox, intro);
+        KG_REAPPLY_DELAYS.forEach((ms) => window.setTimeout(() => {
+            setFormValue(descrBox, sanitizeKgIntroYear(String(descrBox.value || intro), displayYear));
+        }, ms));
     }
     if (subsInput && !subsInput.value.trim()) setFormValue(subsInput, 'None');
 
@@ -1034,24 +1302,30 @@ async function fillKgStep3(workingMeta: TorrentMeta) {
         (document.querySelector('input[value*="announce"]') as HTMLInputElement | null)?.value ||
         '';
     const cached = (await StorageService.load()) as Partial<TorrentMeta> | null;
-    const built = await buildKgTorrentFile({
-        ...cached,
-        ...workingMeta,
-        title: workingMeta.title || cached?.title || '',
-        torrentUrl: workingMeta.torrentUrl || cached?.torrentUrl || '',
-        torrentBase64: workingMeta.torrentBase64 || cached?.torrentBase64 || '',
-        torrentFilename: workingMeta.torrentFilename || workingMeta.torrentName || cached?.torrentFilename || cached?.torrentName || '',
-        torrentName: workingMeta.torrentName || workingMeta.torrentFilename || cached?.torrentName || cached?.torrentFilename || ''
-    }, announce);
+    let built: { file: File; filename: string } | null = null;
+    try {
+        built = await buildKgTorrentFile({
+            ...cached,
+            ...workingMeta,
+            title: workingMeta.title || cached?.title || '',
+            torrentUrl: workingMeta.torrentUrl || cached?.torrentUrl || '',
+            torrentBase64: workingMeta.torrentBase64 || cached?.torrentBase64 || '',
+            torrentFilename: workingMeta.torrentFilename || workingMeta.torrentName || cached?.torrentFilename || cached?.torrentName || '',
+            torrentName: workingMeta.torrentName || workingMeta.torrentFilename || cached?.torrentName || cached?.torrentFilename || ''
+        }, announce);
+    } catch (error) {
+        console.warn('[Auto-Feed][KG] Build torrent file failed:', error);
+    }
 
     if (built?.file) {
-        const inject = () => {
-            if (!fillKgTorrentLegacy(built.file)) {
-                console.warn('[Auto-Feed][KG] Legacy input[name=file] inject failed:', built?.filename || '');
+        const inject = async () => {
+            const injectedFromPage = await fillKgTorrentViaPageContext(built.file);
+            if (!injectedFromPage && !fillKgTorrentLegacy(built.file)) {
+                console.warn('[Auto-Feed][KG] Torrent file inject failed:', built?.filename || '');
             }
         };
-        inject();
-        KG_STEP3_RETRY_DELAYS.forEach((ms) => window.setTimeout(inject, ms));
+        void inject();
+        KG_STEP3_RETRY_DELAYS.forEach((ms) => window.setTimeout(() => { void inject(); }, ms));
     } else {
         console.warn('[Auto-Feed][KG] No torrent data available for step3 injection.');
     }
@@ -1116,14 +1390,20 @@ export async function parseKG(_config: SiteConfig, currentUrl: string): Promise<
                     const a = next.getElementsByTagName('a')[0];
                     const t = (a?.textContent || '').trim();
                     if (t) meta.title = t;
-                    const mi = next.getElementsByClassName('mediainfo')[0] as HTMLElement | undefined;
-                    const text = (mi?.textContent || next.textContent || '').trim();
-                    if (text) meta.description = `[quote]${text}[/quote]\n\n${imgsStr}`;
+                    const text = extractKgMediaInfoText(next) || (next.textContent || '').trim();
+                    const mediaText = cleanMediaInfoText(text);
+                    if (mediaText) {
+                        meta.fullMediaInfo = mediaText;
+                        meta.description = `[quote]${mediaText}[/quote]\n\n${imgsStr}`;
+                    }
                 } catch {
                     const h = $('h1').first().text().trim();
                     if (h.includes('-')) meta.title = h.split('-').pop()?.trim() || meta.title;
-                    const text = (next.textContent || '').trim();
-                    if (text) meta.description = `[quote]${text}[/quote]\n\n${imgsStr}`;
+                    const text = cleanMediaInfoText((next.textContent || '').trim());
+                    if (text) {
+                        meta.fullMediaInfo = text;
+                        meta.description = `[quote]${text}[/quote]\n\n${imgsStr}`;
+                    }
                 }
             } else if (key === 'Source') {
                 const v = (next.textContent || '').trim();

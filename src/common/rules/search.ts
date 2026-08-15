@@ -12,7 +12,7 @@ export function getSearchName(name: string, type?: string): string {
         const year = searchName.match(/(19|20)\d{2}/g)?.pop();
         if (year) searchName = searchName.split(year)[0];
     }
-    searchName = searchName.replace(/repack|Extended|cut/gi, '');
-    searchName = searchName.split(/aka/i)[0];
+    searchName = searchName.replace(/\b(repack|extended|cut)\b/gi, '');
+    searchName = searchName.replace(/(.+?)\s+(?:a\.?\s*k\.?\s*a\.?|aka)\s*[:：-]?\s+.*$/i, '$1');
     return searchName.trim();
 }

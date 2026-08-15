@@ -99,15 +99,15 @@ export class QuickLinkService {
             imgbox: 'IMGBOX',
             hostik: 'Hostik',
             free: 'FREEIMAGE',
-            gifyu: 'GIFYU',
+            imgbb: 'IMGBB',
             needPtpKey: '未设置 PTPIMG API Key',
             needFreeKey: '未设置 Freeimage API Key',
-            needGifyuKey: '未设置 Gifyu API Key',
+            needImgbbKey: '未设置 ImgBB API Key',
             okFull: '已转换为原图链接',
             okPtp: '已转存至 PTPIMG',
             okPix: '已转存至 Pixhost',
             okFree: '已转存至 Freeimage',
-            okGifyu: '已转存至 Gifyu'
+            okImgbb: '已转存至 ImgBB'
         } : {
             section: 'Images: ',
             toolbox: 'Image Tools',
@@ -118,15 +118,15 @@ export class QuickLinkService {
             imgbox: 'IMGBOX',
             hostik: 'Hostik',
             free: 'FREEIMAGE',
-            gifyu: 'GIFYU',
+            imgbb: 'IMGBB',
             needPtpKey: 'PTPIMG API Key not set',
             needFreeKey: 'Freeimage API Key not set',
-            needGifyuKey: 'Gifyu API Key not set',
+            needImgbbKey: 'ImgBB API Key not set',
             okFull: 'Converted to full-size links',
             okPtp: 'Rehosted to PTPIMG',
             okPix: 'Rehosted to Pixhost',
             okFree: 'Rehosted to Freeimage',
-            okGifyu: 'Rehosted to Gifyu'
+            okImgbb: 'Rehosted to ImgBB'
         };
 
         const toolsDiv = $('<div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; border-top:1px dashed #ddd; padding-top:8px; margin-top:6px;"></div>');
@@ -197,6 +197,13 @@ export class QuickLinkService {
         const pix = makeTool(t.pix);
         pix.on('click', async (e) => {
             e.preventDefault();
+            const imageSources = [meta.description || '', ...(Array.isArray(meta.images) ? meta.images : [])];
+            if (ImageHostService.hasHdbImageSource(imageSources)) {
+                // HDB rejects server-side hotlink pulls. Use the legacy local
+                // download -> File -> Pixhost uploader bridge instead.
+                await ImageHostService.prepareAndOpen(meta, 'pixhost');
+                return;
+            }
             const before = meta.description || '';
             meta.description = await ImageHostService.rehostDescriptionToPixhost(meta.description || '');
             await StorageService.save(meta);
@@ -237,22 +244,22 @@ export class QuickLinkService {
             alert(t.okFree);
         });
 
-        const gifyu = makeTool(t.gifyu);
-        gifyu.on('click', async (e) => {
+        const imgbb = makeTool(t.imgbb);
+        imgbb.on('click', async (e) => {
             e.preventDefault();
             const before = meta.description || '';
             const settings = await SettingsService.load();
-            if (!settings.gifyuApiKey) {
-                alert(t.needGifyuKey);
+            if (!settings.imgbbApiKey) {
+                alert(t.needImgbbKey);
                 return;
             }
-            meta.description = await ImageHostService.rehostDescriptionToGifyu(meta.description || '', settings.gifyuApiKey);
+            meta.description = await ImageHostService.rehostDescriptionToImgbb(meta.description || '', settings.imgbbApiKey);
             await StorageService.save(meta);
-            showLinks(lang === 'zh' ? 'GIFYU 结果' : 'GIFYU Result', before, meta.description || '');
-            alert(t.okGifyu);
+            showLinks(lang === 'zh' ? 'IMGBB 结果' : 'IMGBB Result', before, meta.description || '');
+            alert(t.okImgbb);
         });
 
-        toolsDiv.append(toolbox, fullSize, ptp, pix, imgbox, hdb, hostik, freeimage, gifyu);
+        toolsDiv.append(toolbox, fullSize, ptp, pix, imgbox, hdb, hostik, freeimage, imgbb);
         container.append(toolsDiv);
     }
 
@@ -456,7 +463,11 @@ export class QuickLinkService {
         ].join(';');
 
         const body = document.createElement('div');
-        body.style.cssText = 'display:flex; flex-direction:column; gap: 10px; padding: 10px 12px; flex: 1; overflow: hidden;';
+        body.style.cssText = 'display:flex; flex-direction:column; gap: 10px; padding: 10px 12px; flex: 1; min-height: 0; overflow: hidden;';
+
+        // Any other toolbar action should first restore the normal compact
+        // layout, so the result box is immediately reachable after preview.
+        let collapsePreview: () => void = () => { };
 
         const mkBtn = (label: string, onClick: () => void) => {
             const b = document.createElement('button');
@@ -471,7 +482,10 @@ export class QuickLinkService {
                 'cursor: pointer',
                 'font-size: 12px'
             ].join(';');
-            b.onclick = onClick;
+            b.onclick = () => {
+                if (label !== t.preview) collapsePreview();
+                onClick();
+            };
             return b;
         };
 
@@ -497,7 +511,17 @@ export class QuickLinkService {
         picture.value = initialTags.length ? initialTags.join('\n') : (meta.description || '');
 
         const imgsToShow = document.createElement('div');
-        imgsToShow.style.cssText = 'display:none; margin-top:10px;';
+        imgsToShow.style.cssText = [
+            'display:none',
+            'margin-top:10px',
+            'padding:8px',
+            'border:1px solid rgba(0,0,0,0.18)',
+            'border-radius:4px',
+            'background:rgba(255,255,255,0.72)',
+            'overflow-y:auto',
+            'overflow-x:hidden',
+            'overscroll-behavior:contain'
+        ].join(';');
 
         const result = document.createElement('textarea');
         result.id = 'autofeed-result';
@@ -526,10 +550,16 @@ export class QuickLinkService {
         note.style.cssText = 'color:#b00000; font-weight:700; margin-bottom:8px; font-size:12px;';
         note.innerHTML = t.note;
 
+        // The preview is inserted inside the input area. When it is open, let
+        // that area grow naturally so the result box moves below the preview
+        // instead of sharing the same fixed half-height and clipping it.
+        let applyPreviewLayout: (expanded: boolean) => void = () => { };
+        let updatePreviewSizing: () => void = () => { };
+
         // Controls (match legacy behavior closely)
         const btnPreview = mkBtn(t.preview, () => {
             if (imgsToShow.style.display !== 'none') {
-                imgsToShow.style.display = 'none';
+                collapsePreview();
                 return;
             }
             const originStr = picture.value || '';
@@ -541,10 +571,14 @@ export class QuickLinkService {
             urls.forEach((u) => {
                 const img = document.createElement('img');
                 img.src = u;
-                img.style.cssText = 'max-width: 100%; display:block; margin: 0 0 8px;';
+                img.style.cssText = 'max-width:100%; width:auto; height:auto; display:block; margin:0 0 8px;';
+                img.addEventListener('load', () => updatePreviewSizing());
+                img.addEventListener('error', () => updatePreviewSizing());
                 imgsToShow.appendChild(img);
             });
             imgsToShow.style.display = 'block';
+            applyPreviewLayout(true);
+            updatePreviewSizing();
         });
 
         const btnGetSource = mkBtn(t.full, () => {
@@ -580,7 +614,7 @@ export class QuickLinkService {
                 alert(t.missingShots);
                 return;
             }
-            if (urls[0] && urls[0].match(/t\.hdbits\.org/i)) {
+            if (ImageHostService.hasHdbImageSource(urls)) {
                 const name = this.guessGalleryName(meta, meta.description || '').trim();
                 await ImageHostService.queueImages(urls, name || undefined);
                 window.open('https://pixhost.to/', '_blank');
@@ -617,7 +651,7 @@ export class QuickLinkService {
             let urls = this.extractImgUrlsFromTags(tags).map((u) => ImageHostService.getFullSizeUrl(u));
             if (!urls.length) return;
             urls = await ImageHostService.prependCoverForHostik(urls, meta);
-            const name = this.guessGalleryName(meta, meta.description || '').trim();
+            const name = ImageHostService.getHostikAlbumName(meta);
             await ImageHostService.queueImages(urls, name || undefined);
             window.open('https://hostik.cinematik.net/index.php?/add_photos', '_blank');
         });
@@ -723,7 +757,7 @@ export class QuickLinkService {
         pickRow.appendChild(document.createTextNode(t.end));
 
         const inputBlock = document.createElement('div');
-        inputBlock.style.cssText = 'display:flex; flex-direction:column; flex: 1; overflow:hidden;';
+        inputBlock.style.cssText = 'display:flex; flex-direction:column; flex: 1; min-height:0; overflow:visible;';
         inputBlock.appendChild(inputLabel);
         inputBlock.appendChild(picture);
         inputBlock.appendChild(imgsToShow);
@@ -732,6 +766,63 @@ export class QuickLinkService {
         outBlock.style.cssText = 'display:flex; flex-direction:column; flex: 1; overflow:hidden;';
         outBlock.appendChild(resultLabelRow);
         outBlock.appendChild(result);
+
+        applyPreviewLayout = (expanded) => {
+            if (expanded) {
+                panel.style.height = 'auto';
+                panel.style.maxHeight = 'none';
+                panel.style.overflow = 'visible';
+                overlay.style.alignItems = 'flex-start';
+                panel.style.margin = '12px auto';
+                inputBlock.style.flex = '0 0 auto';
+                inputBlock.style.overflow = 'visible';
+                outBlock.style.flex = '0 0 auto';
+                outBlock.style.overflow = 'visible';
+                outBlock.style.marginTop = '12px';
+                body.style.flex = '0 0 auto';
+                body.style.overflow = 'visible';
+            } else {
+                panel.style.height = 'calc(100vh - 60px)';
+                panel.style.maxHeight = '860px';
+                panel.style.overflow = 'hidden';
+                overlay.style.alignItems = 'center';
+                panel.style.margin = '0 auto';
+                inputBlock.style.flex = '1 1 0';
+                inputBlock.style.overflow = 'visible';
+                outBlock.style.flex = '1 1 0';
+                outBlock.style.overflow = 'hidden';
+                outBlock.style.marginTop = '0';
+                body.style.flex = '1 1 auto';
+                body.style.overflow = 'hidden';
+                imgsToShow.style.minHeight = '0';
+                imgsToShow.style.height = 'auto';
+            }
+        };
+
+        updatePreviewSizing = () => {
+            if (imgsToShow.style.display === 'none') return;
+            const panelWidth = panel.getBoundingClientRect().width || 0;
+            const previewWidth = Math.max(240, panelWidth - 40);
+            const images = Array.from(imgsToShow.querySelectorAll('img')) as HTMLImageElement[];
+            const tallestImageHeight = images.reduce((tallest, img) => {
+                if (!img.naturalWidth || !img.naturalHeight) return tallest;
+                const displayWidth = Math.min(previewWidth, img.naturalWidth);
+                return Math.max(tallest, displayWidth * img.naturalHeight / img.naturalWidth);
+            }, 0);
+            // Keep at least a 4:3 preview frame, while allowing the panel to
+            // grow to the actual aspect ratio of the tallest loaded image.
+            // Additional images scroll inside this frame, never on the outer
+            // dialog or the page behind it.
+            const frameHeight = Math.max(previewWidth * 0.75, tallestImageHeight);
+            imgsToShow.style.height = `${Math.ceil(frameHeight)}px`;
+            imgsToShow.style.minHeight = `${Math.ceil(frameHeight)}px`;
+        };
+
+        collapsePreview = () => {
+            if (imgsToShow.style.display === 'none') return;
+            imgsToShow.style.display = 'none';
+            applyPreviewLayout(false);
+        };
 
         body.appendChild(note);
         body.appendChild(pickRow);
