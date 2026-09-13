@@ -18,7 +18,7 @@ npm run dev
 ```
 
 本地安装脚本入口：
-- `http://127.0.0.1:5174/auto-feed.user.js`
+- `http://127.0.0.1:5174/auto-feed-refactor.user.js`
 
 构建检查：
 
@@ -143,6 +143,8 @@ git add .
 git commit -m "feat: add <site> support"
 git push origin feature/<site>-support
 ```
+
+先在 `refactor-dev` 完成真实站点验证和同架构回归；确认稳定后，再将整理好的修复或适配提交到原项目 `dev` 主线。
 
 PR 描述建议包含：
 1. 改动站点与架构类型

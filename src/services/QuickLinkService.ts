@@ -646,14 +646,7 @@ export class QuickLinkService {
         });
 
         const btnHostik = mkBtn(t.hostik, async () => {
-            const originStr = picture.value || '';
-            const tags = this.extractImgTags(originStr);
-            let urls = this.extractImgUrlsFromTags(tags).map((u) => ImageHostService.getFullSizeUrl(u));
-            if (!urls.length) return;
-            urls = await ImageHostService.prependCoverForHostik(urls, meta);
-            const name = ImageHostService.getHostikAlbumName(meta);
-            await ImageHostService.queueImages(urls, name || undefined);
-            window.open('https://hostik.cinematik.net/index.php?/add_photos', '_blank');
+            await ImageHostService.prepareAndOpen(meta, 'hostik');
         });
 
         const sourceStr = document.createElement('input');

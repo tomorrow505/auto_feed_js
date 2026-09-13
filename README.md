@@ -1,16 +1,23 @@
-# Auto-Feed Refactor
+# Auto-Feed 重构版｜PT一键转种助手
 
-原作者：**tomorrow505**  
-当前维护：**gawain**
+仓库地址：<https://github.com/tomorrow505/auto_feed_js/tree/dev>
 
-仓库地址：<https://github.com/Gawain12/auto_feed_js>
+这是从原版 **Auto-Feed** 演进而来的新版重构项目。当前开发重点是重新整理站点适配、信息提取、自动填表、图片处理和远程推送等模块，让结构更清晰、功能更容易维护和扩展；原版脚本主要作为现有功能和兼容行为的参考。欢迎更多开发者一起参与新版的站点适配和功能完善。
 
-这是一个面向 PT 转载场景的重构版脚本，目标是在保留原版核心体验的基础上，提供更清晰的站点适配结构与更稳定的转发流程。
+This is the refactored version evolved from the original **Auto-Feed** project. Current work focuses on reorganizing site adapters, metadata extraction, form filling, image handling, and remote pushing into clearer, more maintainable modules. The original script is mainly used as a reference for existing behavior and compatibility. Contributions to the refactored version are welcome.
 
-## 当前进度（2026-03-22）
-- 非音乐站点主链路（解析 -> 缓存 -> 预填）已基本稳定。
-- 音乐站点（RED / OPS / DIC / OpenCD）已接入，但仍在持续完善。
+## 分支关系
+- 原项目 `main`：旧版 legacy，主要作为行为和兼容规则的参考。
+- 原项目 `dev`：新版主线，相对稳定；经过验证的修复和适配再向这里提交 PR。
+- `refactor-dev`：更快的开发与验证分支，先在这里完成适配、测试和问题修复。
+
+## 当前进度（2026-09-13）
+- 新版主线以原项目 `dev` 为准，`refactor-dev` 主要用于更快验证近期改动；近期提交主要集中在兼容性和稳定性修复，而不是增加新的大功能。
+- 非音乐站点主链路（解析 -> 缓存 -> 预填）已基本稳定，Tik 的标题、编码和目标站填充逻辑也已按实际流程持续修正。
+- HDB / PTP 的媒体信息、海报和源信息位置已补齐多种页面场景；SC / HDT / TJUPT 已补充源站与目标站链路，但仍需要更多站点实测。
 - Monika（MDU）转发链路已按上游源码规则对齐修复（上传路径、搜索参数、关键表单映射）。
+- 图片托管与远程推送持续完善，已覆盖 Hostik / hdbimg 等桥接场景，以及 qBittorrent / Transmission / Deluge 推送。
+- 音乐站点（RED / OPS / DIC / OpenCD）已接入，但仍在持续补齐双向转发字段和边缘规则；部分小站和历史功能仍处于迁移或待回归阶段。
 - 快速搜索已按 `archive/auto_feed.legacy.user.js` 对齐（含 `nzbs.in`、字幕站等独立搜索站点）。
 - 详细状态见：[`docs/wiki/FEATURE_PARITY.md`](docs/wiki/FEATURE_PARITY.md)
 
@@ -34,13 +41,19 @@
 ### 图片处理工具
 ![图片处理工具](docs/images/image_tools.png)
 
-## 安装（Release）
+## 安装与版本
 1. 安装 Tampermonkey。
 2. 安装脚本：
-   - Dev（随 `refactor-dev` 分支自动更新）  
+   - 快速开发验证版（`refactor-dev`，更新更快，可能包含待验证改动）
      <https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js>
-   - Stable（打 Tag `v*` 后）  
+   - 发布版（打 Tag `v*` 后）
      <https://github.com/Gawain12/auto_feed_js/releases/latest/download/auto_feed.user.js>
+   - 新版主线源码（原项目 `dev`）
+     <https://github.com/tomorrow505/auto_feed_js/tree/dev>
+
+## 参与开发
+
+新版欢迎 contributor 参与站点适配、问题修复和功能完善。建议先在 `refactor-dev` 完成开发与真实站点回归，确认稳定后再向原项目 `dev` 提交 PR。
 
 ## 使用引导
 1. 打开支持站点的种子详情页。
@@ -57,25 +70,21 @@
 命令：
 ```bash
 npm install
-npm run build
-```
-
-默认本地安装入口：
-- `file:///absolute/path/to/auto_feed_js/dist/auto-feed-refactor.user.js`
-
-说明：
-- `npm run build` 会生成完整脚本 `dist/auto_feed.user.js` 和轻量 loader `dist/auto-feed-refactor.user.js`。
-- loader 的 `@require` 默认指向本机 `dist/auto_feed.user.js`，不依赖 `127.0.0.1:5174` 服务常驻。
-- loader 每次构建会追加本地构建版本号，打开本地入口时 Tampermonkey 会识别为 `Update`。
-- Chrome/Tampermonkey 使用 `file://` 脚本时，需要在扩展管理页给 Tampermonkey 开启“允许访问文件网址”。
-
-需要临时热更新预览时，再启动本地服务：
-```bash
 npm run dev
 ```
 
-临时服务入口：
+本地只保留一个动态调试入口：
 - `http://127.0.0.1:5174/auto-feed-refactor.user.js`
+- 启动：`npm run dev`
+- 停止：终端按 `Ctrl+C`
+
+说明：
+- `npm run dev` 会监听 `src/` 和构建配置，自动重新构建。
+- 调试入口是独立的 `[Local Debug]` 脚本，会通过本地 loader 加载完整 bundle，不会覆盖正式版。
+- `dist/auto_feed.user.js` 和 `dist/auto-feed-refactor.user.js` 都是构建产物，不要再分别安装成第三个长期版本。
+- `npm run build` 只用于发布前构建检查；日常使用安装已发布的 GreasyFork 脚本，需要验证最新改动时使用动态调试入口。
+
+发布前不需要额外拷贝一份全量测试版。需要验证最终构建时，先运行 `npm run build`，再用动态调试入口测试；如果必须同时对比正式版，请使用另一个浏览器配置文件。
 
 后台常驻（screen）：
 ```bash

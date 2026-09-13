@@ -1019,7 +1019,7 @@ export class ImageHostService {
         return this.tryInjectImageQueueBridge();
     }
 
-    private static getHostikOriginalUrl(url: string, withDotSegment = false): string {
+    private static getHostikOriginalUrl(url: string): string {
         const raw = String(url || '').trim();
         if (!raw) return '';
         try {
@@ -1030,9 +1030,6 @@ export class ImageHostService {
                     .replace('/i.php?', '')
                     .replace('/_data/i/upload/', '/upload/')
                     .replace(/-(?:sq|th|me|la|xl|sm)\.(png|jpe?g|gif|webp)(\?.*)?$/i, '.$1');
-                if (withDotSegment) {
-                    normalized = normalized.replace('/upload/', '/./upload/');
-                }
                 return `${parsed.origin}${normalized}`;
             }
             return parsed.toString();
@@ -1045,10 +1042,73 @@ export class ImageHostService {
         return /hostik\.cinematik\.net\/(?:i\.php\?\/upload\/|_data\/i\/upload\/|upload\/)/i.test(String(url || ''));
     }
 
+    private static getHostikImageKey(url: string): string {
+        const raw = String(url || '').trim();
+        if (!raw) return '';
+        try {
+            const parsed = new URL(raw, window.location.href);
+            const path = parsed.pathname === '/i.php' && parsed.search.startsWith('?/')
+                ? parsed.search.slice(1)
+                : parsed.pathname;
+            return decodeURIComponent(path.split('/').pop() || '')
+                .replace(/-(?:sq|th|me|la|xl|sm)(?=\.[^.]+$)/i, '')
+                .toLowerCase();
+        } catch {
+            return raw.split('/').pop()?.toLowerCase() || '';
+        }
+    }
+
+    private static getHostikCoverScore(item: { full: string; thumb: string }, index: number): number {
+        const full = this.getHostikOriginalUrl(item.full);
+        let score = index === 0 ? 1 : 0;
+        if (/\.jpe?g(?:\?|$)/i.test(full)) score += 100;
+        else if (/\.png(?:\?|$)/i.test(full)) score += 10;
+
+        // Posters are normally portrait while screenshots are normally 16:9.
+        // Use dimensions only as a secondary signal because thumbnails may not
+        // have finished loading when the result is assembled.
+        if (typeof document !== 'undefined') {
+            const thumbKey = this.getHostikImageKey(item.thumb || item.full);
+            const image = Array.from(document.querySelectorAll('#uploadedPhotos img, img'))
+                .map((node) => node as HTMLImageElement)
+                .find((node) => this.getHostikImageKey(node.currentSrc || node.src) === thumbKey);
+            const width = image?.naturalWidth || image?.width || 0;
+            const height = image?.naturalHeight || image?.height || 0;
+            if (width > 0 && height > 0) {
+                const ratio = width / height;
+                if (ratio < 0.9) score += 60;
+                if (ratio < 0.75) score += 15;
+                if (ratio > 1.3) score -= 20;
+            }
+        }
+        return score;
+    }
+
+    private static chooseHostikCoverIndex(items: Array<{ full: string; thumb: string }>): number {
+        if (items.length < 2) return 0;
+        let winner = 0;
+        let bestScore = Number.NEGATIVE_INFINITY;
+        items.forEach((item, index) => {
+            const score = this.getHostikCoverScore(item, index);
+            if (score > bestScore) {
+                bestScore = score;
+                winner = index;
+            }
+        });
+        return winner;
+    }
+
     private static buildHostikImageTags(thumbUrls: string[]): string[] {
-        return thumbUrls.map((thumb, index) => {
-            const full = this.getHostikOriginalUrl(thumb, index !== 0);
-            return index === 0 ? `[img]${full}[/img]` : `[url=${full}][img]${thumb}[/img][/url]`;
+        const pairs = thumbUrls.map((thumb) => ({
+            full: this.getHostikOriginalUrl(thumb),
+            thumb: String(thumb || '').trim()
+        })).filter((pair) => pair.full && pair.thumb);
+        const coverIndex = this.chooseHostikCoverIndex(pairs);
+        const ordered = pairs.length > 1
+            ? [pairs[coverIndex], ...pairs.filter((_, index) => index !== coverIndex)]
+            : pairs;
+        return ordered.map((pair, index) => {
+            return index === 0 ? `[img]${pair.full}[/img]` : `[url=${pair.full}][img]${pair.thumb}[/img][/url]`;
         });
     }
 
@@ -1072,8 +1132,17 @@ export class ImageHostService {
 
     private static buildHostikTikSectionFromPairs(pairs: Array<{ full: string; thumb: string }>): string {
         if (!pairs.length) return '';
-        const cover = `[img]${pairs[0].full}[/img]`;
-        const shots = pairs.slice(1).map((pair) => `[url=${pair.full}][img]${pair.thumb}[/img][/url]`);
+        const normalized = pairs.map((pair) => ({
+            full: this.getHostikOriginalUrl(pair.full),
+            thumb: String(pair.thumb || '').trim()
+        })).filter((pair) => pair.full && pair.thumb);
+        if (!normalized.length) return '';
+        const coverIndex = this.chooseHostikCoverIndex(normalized);
+        const ordered = normalized.length > 1
+            ? [normalized[coverIndex], ...normalized.filter((_, index) => index !== coverIndex)]
+            : normalized;
+        const cover = `[img]${ordered[0].full}[/img]`;
+        const shots = ordered.slice(1).map((pair) => `[url=${pair.full}][img]${pair.thumb}[/img][/url]`);
         const shotLines: string[] = [];
         for (let i = 0; i < shots.length; i += 2) {
             shotLines.push(shots.slice(i, i + 2).join(' '));
@@ -1214,6 +1283,37 @@ export class ImageHostService {
             if (progress.total <= 0) return false;
             return progress.uploaded < progress.total;
         };
+        const isLoadedHostikImage = (url: string) => {
+            const key = this.getHostikImageKey(url);
+            if (!key) return false;
+            const image = Array.from(document.querySelectorAll('#uploadedPhotos img, img'))
+                .map((node) => node as HTMLImageElement)
+                .find((node) => this.getHostikImageKey(node.currentSrc || node.src) === key);
+            if (!image) return true;
+            return (image.naturalWidth || image.width || image.clientWidth || 0) > 0 &&
+                (image.naturalHeight || image.height || image.clientHeight || 0) > 0;
+        };
+        const normalizePendingToken = (url: string) => {
+            try {
+                const parsed = new URL(url, window.location.href);
+                return decodeURIComponent(parsed.pathname.split('/').pop() || '')
+                    .replace(/\.(?:png|jpe?g|gif|webp)$/i, '')
+                    .replace(/[^a-z0-9]+/gi, '')
+                    .toLowerCase();
+            } catch {
+                return String(url || '')
+                    .replace(/\.(?:png|jpe?g|gif|webp)(?:\?.*)?$/i, '')
+                    .replace(/[^a-z0-9]+/gi, '')
+                    .toLowerCase();
+            }
+        };
+        const pendingTokens = (pending?.urls || []).map(normalizePendingToken).filter(Boolean);
+        const matchesPendingUpload = (image: HTMLImageElement) => {
+            if (!pendingTokens.length) return false;
+            const title = normalizePendingToken(image.title || '');
+            if (!title || title === 'null') return false;
+            return pendingTokens.some((token) => token === title || token.includes(title) || title.includes(token));
+        };
         const collectFromCodeTextareas = () => {
             const textareas = Array.from(document.querySelectorAll('textarea'))
                 .map((node) => node as HTMLTextAreaElement)
@@ -1222,7 +1322,7 @@ export class ImageHostService {
             let best: Array<{ full: string; thumb: string }> = [];
             textareas.forEach((value) => {
                 const pairs = this.parseHostikLinkedImageTags(value)
-                    .filter((pair) => this.isHostikUploadUrl(pair.thumb));
+                    .filter((pair) => this.isHostikUploadUrl(pair.thumb) && isLoadedHostikImage(pair.thumb));
                 const standalone: Array<{ full: string; thumb: string }> = [];
                 const standaloneRe = /\[img(?:=[^\]]+)?\](https?:\/\/hostik\.cinematik\.net\/[^\[\s]+)\[\/img\]/gi;
                 let match: RegExpExecArray | null;
@@ -1232,7 +1332,9 @@ export class ImageHostService {
                     // [/img][/url] pair as a second standalone image.
                     if (/\[url=[^\]]+\]\s*$/i.test(prefix)) continue;
                     const url = String(match[1] || '').trim();
-                    if (url && this.isHostikUploadUrl(url)) standalone.push({ full: url, thumb: url });
+                    if (url && this.isHostikUploadUrl(url) && isLoadedHostikImage(url)) {
+                        standalone.push({ full: url, thumb: url });
+                    }
                 }
                 const merged = [...standalone, ...pairs].filter((item, index, items) =>
                     items.findIndex((candidate) => candidate.full === item.full && candidate.thumb === item.thumb) === index
@@ -1247,7 +1349,7 @@ export class ImageHostService {
             .map((node) => node as HTMLImageElement)
             .filter((img) => {
                 const src = String(img.currentSrc || img.src || '').trim();
-                return this.isHostikUploadUrl(src);
+                return this.isHostikUploadUrl(src) && isLoadedHostikImage(src);
             });
         const attemptBuild = async () => {
             if (isUploadStillRunning()) return null;
@@ -1256,8 +1358,8 @@ export class ImageHostService {
             if (linkedTags.length) {
                 const pickedPairs = expected > 0 ? linkedTags.slice(0, Math.min(expected, linkedTags.length)) : linkedTags.slice();
                 if (pickedPairs.length) {
-                    const normalizedPairs = pickedPairs.map((pair, index) => ({
-                        full: this.getHostikOriginalUrl(pair.full, index !== 0),
+                    const normalizedPairs = pickedPairs.map((pair) => ({
+                        full: this.getHostikOriginalUrl(pair.full),
                         thumb: String(pair.thumb || '').trim()
                     })).filter((pair) => pair.full && pair.thumb);
                     if (expected > 0 && normalizedPairs.length < expected) {
@@ -1277,33 +1379,18 @@ export class ImageHostService {
             if (!available) return null;
             const progress = readUploadProgress();
             if (progress && progress.total > 0 && available < progress.total) return null;
-            const picked = expected > 0 ? images.slice(-Math.min(expected, available)) : images.slice();
+            const matchedPending = expected > 0 ? images.filter(matchesPendingUpload) : [];
+            const candidateImages = expected > 0 && matchedPending.length >= expected ? matchedPending : images;
+            const picked = expected > 0 ? candidateImages.slice(0, Math.min(expected, candidateImages.length)) : candidateImages.slice();
             if (!picked.length) return null;
-            const coverIndex = (() => {
-                let winner = 0;
-                let minRatio = Number.POSITIVE_INFINITY;
-                picked.forEach((img, index) => {
-                    const width = img.naturalWidth || img.clientWidth || 0;
-                    const height = img.naturalHeight || img.clientHeight || 1;
-                    const ratio = width > 0 && height > 0 ? width / height : Number.POSITIVE_INFINITY;
-                    if (ratio < minRatio) {
-                        minRatio = ratio;
-                        winner = index;
-                    }
-                });
-                return minRatio < 0.9 ? winner : 0;
-            })();
             const orderedThumbs = picked
                 .map((img) => String(img.currentSrc || img.src || '').trim())
                 .filter(Boolean);
-            const coverThumb = orderedThumbs[coverIndex];
-            const shots = orderedThumbs.filter((_, index) => index !== coverIndex);
-            const normalized = [coverThumb, ...shots].filter(Boolean);
-            if (expected > 0 && normalized.length < expected) return null;
-            if (!normalized.length) return null;
+            if (expected > 0 && orderedThumbs.length < expected) return null;
+            if (!orderedThumbs.length) return null;
             return {
-                imageBlock: this.buildHostikTikSection(normalized),
-                signature: normalized.join('|')
+                imageBlock: this.buildHostikTikSection(orderedThumbs),
+                signature: orderedThumbs.join('|')
             };
         };
 

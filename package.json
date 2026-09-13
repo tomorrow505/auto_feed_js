@@ -1,19 +1,16 @@
 {
   "name": "auto-feed-refactor",
   "private": true,
-  "author": "tomorrow505, gawain",
-  "version": "4.0.3",
+  "author": "tomorrow505, Gawain",
+  "version": "5.0.0",
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev-full.js --watch",
-    "dev:full": "node scripts/dev-full.js --watch",
     "dev:screen": "bash scripts/dev-full-screen.sh start",
     "dev:screen:stop": "bash scripts/dev-full-screen.sh stop",
     "dev:screen:attach": "bash scripts/dev-full-screen.sh attach",
     "dev:screen:status": "bash scripts/dev-full-screen.sh status",
-    "dev:loader": "node scripts/vite.mjs",
-    "build": "tsc && node scripts/vite.mjs build && node scripts/postbuild-userscripts.mjs",
-    "preview": "node scripts/vite.mjs preview"
+    "build": "tsc && node scripts/vite.mjs build && node scripts/postbuild-userscripts.mjs"
   },
   "dependencies": {
     "preact": "^10.0.0",

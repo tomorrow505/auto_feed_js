@@ -12,6 +12,8 @@ const loaderPath = path.join(dist, 'auto-feed-refactor.user.js');
 const localRequireUrl = (process.env.AUTO_FEED_LOCAL_REQUIRE_URL || pathToFileURL(fullPath).href).trim();
 const localLoaderUrl = (process.env.AUTO_FEED_LOCAL_LOADER_URL || pathToFileURL(loaderPath).href).trim();
 const localLoaderVersion = (process.env.AUTO_FEED_LOCAL_LOADER_VERSION || '').trim();
+const localDebugName = (process.env.AUTO_FEED_LOCAL_DEBUG_NAME || 'Auto-Feed｜PT一键转种助手（重构版） [Local Debug]').trim();
+const localDebugNamespace = (process.env.AUTO_FEED_LOCAL_DEBUG_NAMESPACE || 'https://github.com/Gawain12/auto_feed_js#local-debug').trim();
 
 const full = fs.readFileSync(fullPath, 'utf8');
 const headerMatch = full.match(/\/\/ ==UserScript==[\s\S]*?\/\/ ==\/UserScript==/);
@@ -23,6 +25,22 @@ const lines = headerMatch[0].split('\n');
 // Keep the metadata block small and stable: the loader itself is local, and it
 // pulls the full bundled userscript from disk instead of depending on a dev server.
 const withoutLocalUrls = lines.filter((line) => !/^\s*\/\/\s*@(require|downloadURL|updateURL)\b/i.test(line));
+const replaceMetadataValue = (key, value) => {
+    const pattern = new RegExp(`^\\s*\\/\\/\\s*@${key}\\s+`, 'i');
+    const index = withoutLocalUrls.findIndex((line) => pattern.test(line));
+    if (index === -1) return;
+    withoutLocalUrls[index] = withoutLocalUrls[index].replace(
+        new RegExp(`(^\\s*\\/\\/\\s*@${key}\\s+).+$`, 'i'),
+        `$1${value}`
+    );
+};
+
+// Keep the local debug installation separate from the published script. Without
+// its own identity, Tampermonkey can replace the formal installation with the
+// local loader when both are installed at the same time.
+replaceMetadataValue('name', localDebugName);
+replaceMetadataValue('namespace', localDebugNamespace);
+
 const versionIdx = withoutLocalUrls.findIndex((line) => /^\s*\/\/\s*@version\s+/i.test(line));
 if (versionIdx !== -1) {
     const baseVersion = withoutLocalUrls[versionIdx].replace(/^\s*\/\/\s*@version\s+/i, '').trim();

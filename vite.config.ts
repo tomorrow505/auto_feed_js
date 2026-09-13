@@ -9,6 +9,7 @@ import { Unit3DSites } from './src/config/sites_unit3d';
 import { SpecialSites } from './src/config/sites_special';
 
 const localUserscriptUrl = (process.env.AUTOFEED_USERSCRIPT_URL || '').trim();
+const localUserscriptVersion = (process.env.AUTOFEED_USERSCRIPT_VERSION || '').trim();
 const userscriptSelfUrl =
     localUserscriptUrl ||
     'https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js';
@@ -83,14 +84,22 @@ export default defineConfig({
         monkey({
             entry: 'src/main.ts',
             userscript: {
-                name: 'Auto-Feed Refactored',
-                namespace: 'https://greasyfork.org/zh-CN/scripts/424132-auto-feed',
-                version: pkg.version,
-                description: 'PT一键转种脚本 - Refactored Version',
-                author: 'tomorrow505, gawain',
+                name: {
+                    '': 'Auto-Feed｜PT一键转种助手（重构版）',
+                    en: 'Auto-Feed Refactored｜PT Cross-Site Torrent Assistant'
+                },
+                // Use a new namespace so this refactored build is published as a separate
+                // Greasy Fork script and never replaces the original script.
+                namespace: 'https://github.com/tomorrow505/auto_feed_js',
+                version: localUserscriptVersion || pkg.version,
+                description: {
+                    '': '原版 Auto-Feed（tomorrow505）的重构版。支持跨站一键转种、自动填写标题与简介、媒体信息和图片处理，并支持快速搜索与远程推送。',
+                    en: 'A refactored version of the original Auto-Feed by tomorrow505. Supports cross-site torrent forwarding, automatic form filling, media information and image handling, quick search, and remote pushing.'
+                },
+                author: 'tomorrow505, Gawain',
                 license: 'GPL-3.0 License',
-                homepageURL: 'https://github.com/Gawain12/auto_feed_js',
-                supportURL: 'https://github.com/Gawain12/auto_feed_js/issues',
+                homepageURL: 'https://github.com/tomorrow505/auto_feed_js/tree/dev',
+                supportURL: 'https://greasyfork.org/zh-CN/scripts/424132-auto-feed/feedback',
                 // For local development you can override with:
                 // AUTOFEED_USERSCRIPT_URL=http://127.0.0.1:5174/auto-feed.user.js
                 downloadURL: userscriptSelfUrl,

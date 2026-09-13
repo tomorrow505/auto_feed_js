@@ -106,10 +106,8 @@ const startServer = () => {
     });
 
     server.listen({ port, host: '127.0.0.1' }, () => {
-      console.log(`[Auto-Feed] Full script dev server: http://127.0.0.1:${port}/auto-feed.user.js`);
-      console.log(`[Auto-Feed] (compat) http://127.0.0.1:${port}/auto_feed.user.js`);
-      console.log(`[Auto-Feed] Loader URL: http://127.0.0.1:${port}/auto-feed-refactor.user.js`);
-      console.log(`[Auto-Feed] Monkey install URL: http://127.0.0.1:${port}/__vite-plugin-monkey.install.user.js?origin=http%3A%2F%2F127.0.0.1%3A${port}`);
+      console.log(`[Auto-Feed] Local debug URL: http://127.0.0.1:${port}/auto-feed-refactor.user.js`);
+      console.log('[Auto-Feed] The full bundle is loaded internally by the debug loader.');
     });
   };
 

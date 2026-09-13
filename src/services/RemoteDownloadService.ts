@@ -48,17 +48,17 @@ export class RemoteDownloadService {
     }
 
     private static buildMenuItem(type: 'qb' | 'tr' | 'de', serverName: string, serverUrl: string) {
-        const menu = $(`<li class="menu-item"></li>`);
+        const menu = $(`<li class="af-remote-menu-item"></li>`);
         menu.attr('data-server', serverName);
         menu.attr('data-type', type);
 
         const prefix = type.toUpperCase()[0];
-        const link = $(`<a target="_blank"></a>`);
+        const link = $(`<a class="af-remote-server-link" target="_blank"></a>`);
         link.attr('href', serverUrl || '#');
         link.text(`${prefix}-${serverName}`);
 
         const safeId = `${type}-${serverName}`.replace(/[^a-zA-Z0-9_-]/g, '_');
-        const submenu = $(`<ul class="submenu" id="autofeed-ul-${safeId}"></ul>`);
+        const submenu = $(`<ul class="af-remote-submenu" id="autofeed-ul-${safeId}"></ul>`);
 
         menu.append(link);
         menu.append(submenu);
@@ -71,7 +71,7 @@ export class RemoteDownloadService {
         entry: { label: string; path: string }
     ) {
         const li = $('<li></li>');
-        const a = $(`<a href="#" class="${cls}"></a>`);
+        const a = $(`<a href="#" class="af-remote-path-link ${cls}"></a>`);
         a.attr('data-path', entry.path || '');
         a.attr('data-label', entry.label || 'default');
         a.attr('title', entry.path || '(client default)');
@@ -194,9 +194,9 @@ export class RemoteDownloadService {
 
         $('body').append(`
             <div id="autofeed-remote-sidebar">
-                <div class="sidebar-header">
+                <div class="af-remote-sidebar-header">
                     <span>远程推送</span>
-                    <div class="download-icon">
+                    <div class="af-remote-download-icon">
                         <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="24" height="20" viewBox="0,0,256,256">
                             <g transform=""><g fill="none" fill-rule="nonzero" stroke="none" stroke-width="none" stroke-linecap="butt" stroke-linejoin="none" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path transform="scale(5.12,5.12)" d="M50,32c0,4.96484 -4.03516,9 -9,9h-30c-6.06641,0 -11,-4.93359 -11,-11c0,-4.97266 3.32422,-9.30469 8.01563,-10.59375c0.30859,-6.34375 5.56641,-11.40625 11.98438,-11.40625c4.01953,0 7.79688,2.05469 10.03516,5.40625c0.96875,-0.27344 1.94531,-0.40625 2.96484,-0.40625c5.91016,0 10.75,4.6875 10.98828,10.54297c3.52734,1.19141 6.01172,4.625 6.01172,8.45703z" id="strokeMainSVG" fill="#2c3e50" stroke="#2c3e50" stroke-width="2" stroke-linejoin="round"></path><g transform="scale(5.12,5.12)" fill="#ffffff" stroke="none" stroke-width="1" stroke-linejoin="miter"><path d="M43.98828,23.54297c-0.23828,-5.85547 -5.07812,-10.54297 -10.98828,-10.54297c-1.01953,0 -1.99609,0.13281 -2.96484,0.40625c-2.23828,-3.35156 -6.01562,-5.40625 -10.03516,-5.40625c-6.41797,0 -11.67578,5.0625 -11.98437,11.40625c-4.69141,1.28906 -8.01562,5.62109 -8.01562,10.59375c0,6.06641 4.93359,11 11,11h30c4.96484,0 9,-4.03516 9,-9c0,-3.83203 -2.48437,-7.26562 -6.01172,-8.45703zM25,35.41406l-6.70703,-6.70703l1.41406,-1.41406l4.29297,4.29297v-11.58594h2v11.58594l4.29297,-4.29297l1.41406,1.41406z"></path></g></g></g>
                         </svg>
@@ -211,22 +211,23 @@ export class RemoteDownloadService {
         const sidebar = document.getElementById('autofeed-remote-sidebar') as HTMLElement | null;
         if (sidebar) {
             sidebar.style.opacity = String(opts.opacity);
+            this.positionSidebarByDefault(sidebar);
         }
         this.enableDrag();
 
         $('body').append(`
-            <div class="autofeed-remote-dialog hide">
-                <div class="dialog0">
-                    <div class="dialog-header0">
-                        <span class="dialog-title0">是否跳过检验？</span>
-                        <button class="close-btn"></button>
+            <div id="autofeed-remote-dialog" class="af-remote-dialog">
+                <div class="af-remote-dialog-box">
+                    <div class="af-remote-dialog-header">
+                        <span class="af-remote-dialog-title">是否跳过检验？</span>
+                        <button class="af-remote-close-btn" type="button" aria-label="关闭"></button>
                     </div>
-                    <div class="dialog-body0">
-                        <span class="dialog-message">请谨慎选择，如果因为跳检造成做假种或者下载量增加后果自负！！</span>
+                    <div class="af-remote-dialog-body">
+                        <span class="af-remote-dialog-message">请谨慎选择，如果因为跳检造成做假种或者下载量增加后果自负！！</span>
                     </div>
-                    <div class="dialog-footer0">
-                        <input type="button" class="qb-btn" id="autofeed-confirm" value="跳过检验" />
-                        <input type="button" class="qb-btn ml50" id="autofeed-cancel" value="直接下载" />
+                    <div class="af-remote-dialog-footer">
+                        <input type="button" class="af-remote-dialog-btn" id="autofeed-confirm" value="跳过检验" />
+                        <input type="button" class="af-remote-dialog-btn af-remote-dialog-cancel" id="autofeed-cancel" value="直接下载" />
                     </div>
                 </div>
             </div>
@@ -268,17 +269,17 @@ export class RemoteDownloadService {
         });
 
         const dialogBox = (yesCallback: () => void, noCallback: () => void) => {
-            $('.autofeed-remote-dialog').removeClass('hide').addClass('show');
+            $('#autofeed-remote-dialog').addClass('show');
             $('#autofeed-confirm').off('click').on('click', () => {
-                $('.autofeed-remote-dialog').addClass('hide');
+                $('#autofeed-remote-dialog').removeClass('show');
                 yesCallback();
             });
             $('#autofeed-cancel').off('click').on('click', () => {
-                $('.autofeed-remote-dialog').addClass('hide');
+                $('#autofeed-remote-dialog').removeClass('show');
                 noCallback();
             });
-            $('.close-btn').off('click').on('click', () => {
-                $('.autofeed-remote-dialog').addClass('hide');
+            $('#autofeed-remote-dialog .af-remote-close-btn').off('click').on('click', () => {
+                $('#autofeed-remote-dialog').removeClass('show');
             });
         };
 
@@ -297,10 +298,10 @@ export class RemoteDownloadService {
             }
         };
 
-        $('.qb_download').on('click', async (e) => {
+        $list.on('click', '.qb_download', async (e) => {
             e.preventDefault();
             const $target = $(e.currentTarget);
-            const serverName = $target.closest('.menu-item').data('server');
+            const serverName = $target.closest('.af-remote-menu-item').data('server');
             const path = String($target.attr('data-path') || '');
             const label = String($target.attr('data-label') || $target.find('.af-remote-path-label').text() || 'default');
             const server = qb[serverName];
@@ -313,10 +314,10 @@ export class RemoteDownloadService {
             else run(opts.skipDefault);
         });
 
-        $('.tr_download').on('click', async (e) => {
+        $list.on('click', '.tr_download', async (e) => {
             e.preventDefault();
             const $target = $(e.currentTarget);
-            const serverName = $target.closest('.menu-item').data('server');
+            const serverName = $target.closest('.af-remote-menu-item').data('server');
             const path = String($target.attr('data-path') || '');
             const label = String($target.attr('data-label') || $target.find('.af-remote-path-label').text() || 'default');
             const server = tr[serverName];
@@ -329,10 +330,10 @@ export class RemoteDownloadService {
             else run(opts.skipDefault);
         });
 
-        $('.de_download').on('click', async (e) => {
+        $list.on('click', '.de_download', async (e) => {
             e.preventDefault();
             const $target = $(e.currentTarget);
-            const serverName = $target.closest('.menu-item').data('server');
+            const serverName = $target.closest('.af-remote-menu-item').data('server');
             const path = String($target.attr('data-path') || '');
             const label = String($target.attr('data-label') || $target.find('.af-remote-path-label').text() || 'default');
             const server = de[serverName];
@@ -345,34 +346,97 @@ export class RemoteDownloadService {
             else run(opts.skipDefault);
         });
 
-        const menuItems = document.querySelectorAll<HTMLLIElement>('.menu-item');
+        const sidebarEl = document.getElementById('autofeed-remote-sidebar');
+        if (!sidebarEl) return;
+
+        const menuItems = sidebarEl.querySelectorAll<HTMLLIElement>('.af-remote-menu-item');
 
         menuItems.forEach((item: HTMLLIElement) => {
-            // Select the submenu within the current menu item
-            const submenu = item.querySelector<HTMLElement>('.submenu');
+            const submenu = item.querySelector<HTMLElement>('.af-remote-submenu');
             if (!submenu) return;
-            item.addEventListener('mouseenter', (e: MouseEvent) => {
-                // Get the bounding rectangle of the parent menu item
+
+            let hideTimer: number | null = null;
+            const hide = () => {
+                if (hideTimer !== null) window.clearTimeout(hideTimer);
+                hideTimer = null;
+                submenu.style.display = 'none';
+            };
+            const scheduleHide = () => {
+                if (hideTimer !== null) window.clearTimeout(hideTimer);
+                hideTimer = window.setTimeout(() => {
+                    if (!item.matches(':hover') && !submenu.matches(':hover')) hide();
+                }, 180);
+            };
+            const show = () => {
+                if (hideTimer !== null) window.clearTimeout(hideTimer);
+                hideTimer = null;
+
+                // Measure after display, then place the submenu beside the sidebar.
                 const rect: DOMRect = item.getBoundingClientRect();
+                sidebarEl.querySelectorAll<HTMLElement>('.af-remote-submenu').forEach((other) => {
+                    if (other !== submenu) other.style.display = 'none';
+                });
                 submenu.style.display = 'block';
                 submenu.style.position = 'fixed';
-                const sidebar = document.getElementById('autofeed-remote-sidebar') as HTMLElement;
-                if (sidebar) {
-                    const sidebarHeight: number = sidebar.offsetHeight;
-                    const calculatedTop: number = rect.top - (window.innerHeight / 2) + (sidebarHeight / 2);
-                    submenu.style.top = `${calculatedTop}px`;
+                const sidebarRect = sidebarEl.getBoundingClientRect();
+                const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 1280;
+                const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 800;
+                const margin = 6;
+                const gap = 8;
+                const submenuWidth = submenu.getBoundingClientRect().width || 180;
+                const submenuHeight = submenu.offsetHeight || 160;
+
+                let left = sidebarRect.left - submenuWidth - gap;
+                // If there isn't room on the left (common on narrow/mobile viewports),
+                // open on the right and clamp to the viewport.
+                if (left < margin) left = sidebarRect.right + gap;
+                if (left + submenuWidth > viewportWidth - margin) {
+                    left = Math.max(margin, viewportWidth - submenuWidth - margin);
                 }
-                const gap: number = -20;
-                submenu.style.right = `${window.innerWidth - rect.left + gap}px`;
-                submenu.style.left = 'auto';
-            });
-            item.addEventListener('mouseleave', () => {
-                submenu.style.display = 'none';
+                let top = rect.top;
+                if (top + submenuHeight > viewportHeight - margin) {
+                    top = Math.max(margin, viewportHeight - submenuHeight - margin);
+                }
+                if (top < margin) top = margin;
+
+                submenu.style.left = `${left}px`;
+                submenu.style.top = `${top}px`;
+                submenu.style.right = 'auto';
+            };
+
+            item.addEventListener('mouseenter', show);
+            item.addEventListener('mouseleave', scheduleHide);
+            submenu.addEventListener('mouseenter', show);
+            submenu.addEventListener('mouseleave', scheduleHide);
+            item.addEventListener('click', (e) => {
+                const target = e.target as HTMLElement | null;
+                if (target?.closest('.af-remote-submenu')) return;
+                e.preventDefault();
+                if (submenu.style.display === 'block') hide(); else show();
             });
         });
     }
 
-    private static DRAG_KEY = 'autofeed_remote_sidebar_pos';
+    // v2 intentionally starts from a clean viewport-relative position. The
+    // previous key could contain coordinates captured while the old transform
+    // based layout was active, which put the sidebar off-screen after resize.
+    private static DRAG_KEY = 'autofeed_remote_sidebar_pos_v2';
+
+    private static positionSidebarByDefault(sidebar: HTMLElement) {
+        const vw = window.innerWidth || document.documentElement.clientWidth || 1280;
+        const vh = window.innerHeight || document.documentElement.clientHeight || 800;
+        const margin = 8;
+        const clamped = this.clampSidebarPos(
+            sidebar,
+            vw - sidebar.offsetWidth - margin,
+            (vh - sidebar.offsetHeight) / 2
+        );
+        sidebar.style.left = `${clamped.x}px`;
+        sidebar.style.top = `${clamped.y}px`;
+        sidebar.style.right = 'auto';
+        sidebar.style.transform = 'none';
+    }
+
     private static clampSidebarPos(sidebar: HTMLElement, x: number, y: number): { x: number; y: number } {
         const vw = window.innerWidth || document.documentElement.clientWidth || 1280;
         const vh = window.innerHeight || document.documentElement.clientHeight || 800;
@@ -390,7 +454,7 @@ export class RemoteDownloadService {
     private static enableDrag() {
         const sidebar = document.getElementById('autofeed-remote-sidebar') as HTMLElement | null;
         if (!sidebar) return;
-        const header = sidebar.querySelector('.sidebar-header') as HTMLElement | null;
+        const header = sidebar.querySelector('.af-remote-sidebar-header') as HTMLElement | null;
         if (!header) return;
 
         // Restore position
@@ -445,6 +509,7 @@ export class RemoteDownloadService {
             sidebar.style.top = `${clamped.y}px`;
         };
         window.addEventListener('resize', onResize, { passive: true });
+        window.visualViewport?.addEventListener('resize', onResize, { passive: true });
 
         header.addEventListener('mousedown', (e) => {
             // Only left click
@@ -986,225 +1051,246 @@ export class RemoteDownloadService {
     private static injectStyles() {
         GMAdapter.setValue; // noop to keep bundler aware
         const style = `
-        .autofeed-remote-dialog {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(4px);
-            z-index: 999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        .autofeed-remote-dialog.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        #autofeed-remote-toast {
-            position: fixed;
-            top: 5%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-            text-align: center;
+        #autofeed-remote-sidebar,
+        #autofeed-remote-sidebar * {
+            box-sizing: border-box;
         }
         #autofeed-remote-sidebar {
-            position: fixed;
-            top: 50%;
+            all: initial;
+            position: fixed !important;
+            top: 8px;
             right: 8px;
-            transform: translateY(-50%);
-            width: 80px;
-            max-width: calc(100vw - 16px);
-            box-sizing: border-box;
-            background-color: #243447;
-            border: 1px solid rgba(255,255,255,0.10);
-            border-radius: 10px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.28);
-            z-index: 9999;
+            left: auto;
+            bottom: auto;
+            transform: none;
+            width: 86px !important;
+            max-width: calc(100vw - 12px) !important;
+            max-height: calc(100vh - 12px) !important;
+            overflow: visible !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #243447 !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.28) !important;
+            color: #ecf0f1 !important;
+            font: 13px/1.2 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+            z-index: 2147483640 !important;
         }
-        #autofeed-remote-sidebar .sidebar-header {
-            color: #ecf0f1;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            font-size: 11px;
-            font-weight: 600;
-            text-align: center;
-            padding: 8px 4px 6px;
-            margin-bottom: 4px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
+        #autofeed-remote-sidebar ul,
+        #autofeed-remote-sidebar li {
+            list-style: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
         }
-        #autofeed-remote-sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            border-radius: 8px 8px 8px 8px;
+        #autofeed-remote-sidebar .af-remote-sidebar-header {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 4px !important;
+            width: 100% !important;
+            padding: 8px 4px 6px !important;
+            margin: 0 0 4px !important;
+            color: #ecf0f1 !important;
+            font: 600 11px/1.2 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+            text-align: center !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+            user-select: none !important;
         }
-        #autofeed-remote-list li {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            width: 100%;
-            border-radius: 8px 8px 8px 8px;
+        #autofeed-remote-sidebar .af-remote-download-icon,
+        #autofeed-remote-sidebar .af-remote-download-icon svg {
+            display: block !important;
+            width: 24px !important;
+            height: 20px !important;
+            margin: 0 !important;
         }
-        #autofeed-remote-list > li:first-child > a {
-            border-top-left-radius: 8px;
-            border-top-right-radius: 8px;
+        #autofeed-remote-sidebar #autofeed-remote-list {
+            width: 100% !important;
+            overflow: visible !important;
         }
-        #autofeed-remote-list > li:last-child > a {
-            border-bottom-left-radius: 8px;
-            border-bottom-right-radius: 8px;
+        #autofeed-remote-sidebar .af-remote-menu-item {
+            position: static !important;
+            display: block !important;
+            width: 100% !important;
         }
-        #autofeed-remote-list li a {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 11px 6px;
-            text-decoration: none;
-            color: #ecf0f1;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        #autofeed-remote-sidebar .af-remote-server-link,
+        #autofeed-remote-sidebar .af-remote-path-link {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            min-height: 40px !important;
+            padding: 11px 6px !important;
+            color: #ecf0f1 !important;
+            font: 600 13px/1.2 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+            text-align: center !important;
+            text-decoration: none !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            cursor: pointer !important;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out !important;
         }
-        #autofeed-remote-list li a:hover {
-            background-color: #2d4258;
+        #autofeed-remote-sidebar .af-remote-server-link:hover,
+        #autofeed-remote-sidebar .af-remote-server-link:focus,
+        #autofeed-remote-sidebar .af-remote-path-link:hover,
+        #autofeed-remote-sidebar .af-remote-path-link:focus {
+            background: #2d4258 !important;
+            color: #fff !important;
         }
-
-        #autofeed-remote-status {
-            padding: 8px 8px;
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-            color: #ecf0f1;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            font-size: 12px;
-            line-height: 1.15;
-            background: rgba(0, 0, 0, 0.08);
-            word-break: break-word;
+        #autofeed-remote-sidebar .af-remote-menu-item:first-child .af-remote-server-link {
+            border-radius: 8px 8px 0 0 !important;
         }
-        #autofeed-remote-status[data-kind="ok"] { color: #b6f7c1; }
-        #autofeed-remote-status[data-kind="err"] { color: #ffd0d0; }
-        
-        #autofeed-remote-sidebar .submenu {
+        #autofeed-remote-sidebar .af-remote-menu-item:last-child .af-remote-server-link {
+            border-radius: 0 0 8px 8px !important;
+        }
+        #autofeed-remote-sidebar .af-remote-submenu {
             display: none;
-            position: absolute;
-            left: -100%;
-            width: 80px;
-            background-color: #1f2d3d;
-            border-radius: 8px;
-            box-shadow: -4px 0 10px rgba(0, 0, 0, 0.15);
-            z-index: 10;
-            overflow: hidden;
+            position: fixed !important;
+            width: 80px !important;
+            min-width: 80px !important;
+            max-width: 80px !important;
+            max-height: calc(100vh - 12px) !important;
+            overflow: auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: #1f2d3d !important;
+            border-radius: 8px !important;
+            box-shadow: -4px 0 10px rgba(0,0,0,0.15) !important;
+            z-index: 2147483641 !important;
         }
-        #autofeed-remote-sidebar .submenu li a {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #bdc3c7;
-            padding: 12px 10px;
-            font-size: 13px;
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+        #autofeed-remote-sidebar .af-remote-submenu .af-remote-path-link {
+            justify-content: center !important;
+            min-height: 36px !important;
+            padding: 12px 10px !important;
+            color: #bdc3c7 !important;
+            font-size: 13px !important;
+            text-align: center !important;
+            border-radius: 0 !important;
         }
-        #autofeed-remote-sidebar .submenu li a:hover,
-        #autofeed-remote-sidebar .submenu li a:focus {
-            background-color: #2d4258;
-            color: #ecf0f1;
+        #autofeed-remote-status {
+            display: none;
+            width: 100% !important;
+            padding: 8px !important;
+            border-top: 1px solid rgba(255,255,255,0.12) !important;
+            color: #ecf0f1 !important;
+            font: 12px/1.15 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+            background: rgba(0,0,0,0.08) !important;
+            word-break: break-word !important;
         }
-        .dialog0 {
-            width: 90%;
-            max-width: 300px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
+        #autofeed-remote-status[data-kind="ok"] { color: #b6f7c1 !important; }
+        #autofeed-remote-status[data-kind="err"] { color: #ffd0d0 !important; }
+
+        #autofeed-remote-dialog {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 12px !important;
+            background: rgba(0,0,0,0.3) !important;
+            backdrop-filter: blur(4px) !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            z-index: 2147483642 !important;
+            transition: opacity 0.2s ease, visibility 0.2s ease !important;
         }
-        .dialog-header0 {
-            padding: 6px 8px;
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            position: relative;
+        #autofeed-remote-dialog.show {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
         }
-        .dialog-title0 {
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
+        #autofeed-remote-dialog .af-remote-dialog-box {
+            width: min(90vw, 300px) !important;
+            max-height: calc(100vh - 24px) !important;
+            overflow: hidden !important;
+            background: #fff !important;
+            border-radius: 16px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
         }
-        .close-btn {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 24px;
-            height: 24px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
+        #autofeed-remote-dialog .af-remote-dialog-header {
+            position: relative !important;
+            display: flex !important;
+            align-items: center !important;
+            min-height: 42px !important;
+            padding: 6px 42px 6px 12px !important;
+            background: linear-gradient(135deg,#6e8efb,#a777e3) !important;
         }
-        .close-btn::after {
+        #autofeed-remote-dialog .af-remote-dialog-title {
+            color: #fff !important;
+            font: 600 16px/1.2 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+        }
+        #autofeed-remote-dialog .af-remote-close-btn {
+            position: absolute !important;
+            top: 50% !important;
+            right: 12px !important;
+            width: 24px !important;
+            height: 24px !important;
+            padding: 0 !important;
+            transform: translateY(-50%) !important;
+            background: rgba(255,255,255,0.2) !important;
+            border: 0 !important;
+            border-radius: 50% !important;
+            cursor: pointer !important;
+        }
+        #autofeed-remote-dialog .af-remote-close-btn::after {
             content: "×";
-            color: white;
-            font-size: 20px;
-            line-height: 1;
+            color: #fff !important;
+            font-size: 20px !important;
+            line-height: 1 !important;
         }
-        .dialog-body0 {
-            padding: 18px;
-            line-height: 1.2;
-            color: #333;
-            font-size: 15px;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid #f0f0f0;
+        #autofeed-remote-dialog .af-remote-dialog-body {
+            display: flex !important;
+            align-items: center !important;
+            min-height: 40px !important;
+            padding: 18px !important;
+            color: #333 !important;
+            font: 15px/1.2 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+            border-bottom: 1px solid #f0f0f0 !important;
         }
-        .dialog-footer0 {
-            padding: 12px 25px;
-            display: flex;
-            justify-content: center;
-            background: white;
+        #autofeed-remote-dialog .af-remote-dialog-footer {
+            display: flex !important;
+            justify-content: center !important;
+            gap: 12px !important;
+            padding: 12px !important;
+            background: #fff !important;
         }
-        .qb-btn {
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            min-width: 80px;
-            padding: 6px 10px;
-            min-height: 30px;
-            line-height: 1.0;
+        #autofeed-remote-dialog .af-remote-dialog-btn {
+            min-width: 80px !important;
+            min-height: 30px !important;
+            padding: 6px 10px !important;
+            border: 0 !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            font: 500 14px/1 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
         }
         #autofeed-confirm {
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            color: white;
-            box-shadow: 0 4px 6px rgba(103, 119, 239, 0.2);
+            background: linear-gradient(135deg,#6e8efb,#a777e3) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 6px rgba(103,119,239,0.2) !important;
         }
         #autofeed-cancel {
-            background: #e6f0ff;
-            color: #4a90e2;
-            border: 1px solid #c1d7f5;
-            margin-left: 15px;
+            margin: 0 !important;
+            background: #e6f0ff !important;
+            color: #4a90e2 !important;
+            border: 1px solid #c1d7f5 !important;
         }
-        .hide {
-            display: none !important;
-        }
-        .ml50 {
-            margin-left: 50px;
+        #autofeed-remote-toast {
+            position: fixed !important;
+            top: 5% !important;
+            left: 50% !important;
+            transform: translate(-50%,-50%) !important;
+            padding: 1px !important;
+            background: #4caf50 !important;
+            color: #fff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+            z-index: 2147483643 !important;
+            font: 14px/1.2 Arial, sans-serif !important;
+            text-align: center !important;
         }
         `;
 

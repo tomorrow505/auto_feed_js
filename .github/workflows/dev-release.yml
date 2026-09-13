@@ -25,7 +25,9 @@ jobs:
 
       - name: Read version
         id: pkg
-        run: echo "version=$(node -p 'require(\"./package.json\").version' | tr -d '\n')" >> "$GITHUB_OUTPUT"
+        run: |
+          base_version="$(node -p 'require("./package.json").version' | tr -d '\n')"
+          echo "version=${base_version}.${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: Install
         run: npm ci
@@ -34,6 +36,7 @@ jobs:
         run: npm run build
         env:
           AUTOFEED_USERSCRIPT_URL: https://github.com/Gawain12/auto_feed_js/releases/download/dev/auto_feed.user.js
+          AUTOFEED_USERSCRIPT_VERSION: ${{ steps.pkg.outputs.version }}
 
       - name: Update dev tag
         run: |
