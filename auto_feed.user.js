@@ -17861,25 +17861,11 @@ function auto_feed() {
             }
         }
 
-        else if (forward_site == 'PThome' || forward_site == 'Audiences'){
+        else if (forward_site == 'PThome'){
             var browsecat = $('#browsecat');
-            if (forward_site == 'PThome') {
-                var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
-                                 '体育': 407, '软件': 411, '学习': 412, '游戏': 410, 'MV': 408,};
-            } else {
-                var type_dict = {'电影': 401, '剧集': 402, '动漫': 409, '综艺': 403, '音乐': 408, '纪录': 406,
-                                 '体育': 407, '软件': 411, '学习': 412, '游戏': 410, '书籍': 405, 'MV': 108};
-                if (raw_info.type == '动漫') {
-                    type_dict['动漫'] = 401;
-                    if (raw_info.name.match(/S\d+|E\d+/) || raw_info.descr.match(/◎集.*?数.*?\d+/)) {
-                        type_dict['动漫'] = 402;
-                    }
-                    $('input[name="tags[]"][value="dh"]').attr('checked', true);
-                }
-                if (raw_info.type == '动漫' || raw_info.descr.match(/◎类.*?别.*动画/)) {
-                    $('#qr').parent().append('<font color="red" style="margin-left:5px"><b> 疑似动画，确认是否剧集并勾选标签。</b></font>')
-                }
-            }
+            var type_dict = {'电影': 401, '剧集': 402, '动漫': 405, '综艺': 403, '音乐': 408, '纪录': 404,
+                                '体育': 407, '软件': 411, '学习': 412, '游戏': 410, 'MV': 408,};
+
             browsecat.val(409);
             if (type_dict.hasOwnProperty(raw_info.type)){
                 var index = type_dict[raw_info.type];
@@ -17895,10 +17881,6 @@ function auto_feed() {
                     raw_info.audiocodec_sel = raw_info.descr.match(/m4a|mp3/i)[0].toUpperCase();
                 }
                 document.getElementById('specialcat').dispatchEvent(evt);
-            }
-            if (raw_info.type == '书籍' && forward_site == 'Audiences' && raw_info.descr.match(/m4a|mp3/i)) {
-                raw_info.audiocodec_sel = raw_info.descr.match(/m4a|mp3/i)[0].toUpperCase();
-                browsecat.val(404);
             }
 
             var medium_box = $('select[name="medium_sel"]');
@@ -17986,6 +17968,158 @@ function auto_feed() {
                 var index = standard_dict[raw_info.standard_sel];
                 standard_box.options[index].selected = true;
             }
+        }
+
+        else if (forward_site == 'Audiences'){
+            console.log("--->" + forward_site)
+
+            // 1. 定义每个 aria-label 对应的键值字典 (Name <-> Value)
+            const dropdownDicts = {
+                "类型": {
+                    "请选择": "0", "电影": "401", "剧集": "402", "综艺": "403", "纪录片": "406",
+                    "音乐": "408", "有声书": "404", "电子书": "405", "体育": "407", "游戏": "410",
+                    "学习": "412", "其他": "409"
+                },
+                "媒介*": {
+                    "请选择": "0", "UHD Blu-ray 原盘": "12", "UHD Blu-ray DIY": "13", "Blu-ray 原盘": "1",
+                    "Blu-ray DIY": "14", "REMUX": "3", "Encode": "15", "HDTV": "5",
+                    "WEB-DL": "10", "DVD 原盘": "2", "CD": "8", "Track": "9", "Other": "11"
+                },
+                "编码*": {
+                    "请选择": "0", "H.265(HEVC)": "6", "H.264(AVC)": "1", "VC-1": "2",
+                    "MPEG-2": "4", "AV1": "7", "Other": "5"
+                },
+                "音频编码*": {
+                    "请选择": "0", "DTS:X": "25", "TrueHD Atmos": "26", "DTS-HD MA": "19", "TrueHD": "20",
+                    "LPCM": "21", "DTS": "3", "DD/AC3": "18", "OPUS": "27", "AAC": "6",
+                    "FLAC": "1", "APE": "2", "WAV": "22", "MP3": "23", "M4A": "24", "Other": "7"
+                },
+                "分辨率*": {
+                    "请选择": "0", "8K": "10", "4K": "5", "1080p": "1", "1080i": "2",
+                    "3": "720p", "SD": "4", "None": "11"
+                }
+            };
+
+            /**
+            * 填充 HTML 下拉框通用函数
+            * @param {string} ariaLabel - 目标下拉框的 aria-label ("类型", "媒介*", 等)
+            * @param {string|number} targetValueOrName - 可以传中文文本 (如 "电影")，也可以传对应的 Value (如 "401")
+            */
+            function selectDropdownByDict(ariaLabel, targetValueOrName) {
+                // 1. 获取当前 ariaLabel 对应的字典
+                const dict = dropdownDicts[ariaLabel];
+                if (!dict) {
+                    console.error(`未在字典中找到 ${ariaLabel} 的配置`);
+                    return;
+                }
+
+                // 2. 自动兼容：无论是传 Value 还是传 Name，统一解析出对应的 targetValue 和 targetName
+                let targetValue = "";
+                let targetName = "";
+
+                const keyStr = String(targetValueOrName).trim();
+                if (dict[keyStr] !== undefined) {
+                    // 传入的是 Name（如 "电影"）
+                    targetName = keyStr;
+                    targetValue = dict[keyStr];
+                } else {
+                    // 传入的是 Value（如 "401"），在字典里反查 Name
+                    const foundEntry = Object.entries(dict).find(([_, val]) => String(val) === keyStr);
+                    if (foundEntry) {
+                        targetName = foundEntry[0];
+                        targetValue = foundEntry[1];
+                    } else {
+                        console.error(`在 ${ariaLabel} 字典中未能解析出: ${targetValueOrName}`);
+                        return;
+                    }
+                }
+
+                // 3. 定位 DOM 元素
+                const triggerBtn = document.querySelector(`.upload-dd .ui-dropdown-trigger[aria-label="${ariaLabel}"]`);
+                if (!triggerBtn) {
+                    console.error(`页面未找到 aria-label="${ariaLabel}" 的组件`);
+                    return;
+                }
+                const container = triggerBtn.closest('.upload-dd');
+                const targetLink = container.querySelector(`.ui-dropdown-list a[data-value="${targetValue}"]`);
+
+                if (!targetLink) {
+                    console.error(`HTML 结构中未找到 data-value="${targetValue}" 的 <a> 节点`);
+                    return;
+                }
+
+                // 4. 填充 HTML 内容及样式更新
+                const hiddenInput = container.querySelector('.ui-dropdown-value');
+                const triggerText = triggerBtn.querySelector('.ui-dropdown-trigger__text');
+
+                hiddenInput.value = targetValue;
+                triggerText.textContent = targetName;
+
+                // 清除并重新设置选中状态样式
+                container.querySelectorAll('.ui-dropdown-list li').forEach(li => li.classList.remove('is-selected'));
+                targetLink.closest('li').classList.add('is-selected');
+
+                // 5. 触发 change 事件
+                hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            if (raw_info.type == '动漫') {
+                raw_info.type = "电影"
+                $('input[name="tags[]"][value="dh"]').attr('checked', true);
+            };
+            selectDropdownByDict("类型", raw_info.type);
+
+            //媒介
+            switch(raw_info.medium_sel){
+                case 'UHD':
+                    selectDropdownByDict("媒介*", "UHD Blu-ray 原盘");
+                    break;
+                case 'Blu-ray':
+                    selectDropdownByDict("媒介*", "Blu-ray 原盘");
+                    break;
+                case 'DVD': selectDropdownByDict("媒介*", "DVD 原盘"); break;
+                case 'Remux': selectDropdownByDict("媒介*", "REMUX"); break;
+                case 'HDTV': selectDropdownByDict("媒介*", "HDTV"); break;
+                case 'Encode': selectDropdownByDict("媒介*", "Encode"); break;
+                case 'WEB-DL': selectDropdownByDict("媒介*", "WEB-DL"); break;
+                case 'CD': selectDropdownByDict("媒介*", "CD");
+            }
+
+            //视频编码
+            switch (raw_info.codec_sel){
+                case 'H265': case 'X265': selectDropdownByDict("编码*", "H.265(HEVC)"); break;
+                case 'H264': case 'X264': selectDropdownByDict("编码*", "H.264(AVC)"); break;
+                case 'VC-1': selectDropdownByDict("编码*", "VC-1"); break;
+                case 'MPEG-2': case 'MPEG-4': selectDropdownByDict("编码*", "MPEG-2");
+                case 'AV1': selectDropdownByDict("编码*", "AV1");
+            }
+
+            //音频编码
+            switch (raw_info.audiocodec_sel){
+                case 'DTS:X': case 'DTS-HDMA:X 7.1': selectDropdownByDict("音频编码*", "DTS:X"); break;
+                case 'Atmos': selectDropdownByDict("音频编码*", "TrueHD Atmos"); break;
+                case 'DTS-HDMA': selectDropdownByDict("音频编码*", "DTS-HD MA"); break;
+                case 'TrueHD': selectDropdownByDict("音频编码*", "TrueHD"); break;
+                case 'LPCM': selectDropdownByDict("音频编码*", "LPCM"); break;
+                case 'DTS': selectDropdownByDict("音频编码*", "DTS"); break;
+                case 'AC3': selectDropdownByDict("音频编码*", "DD/AC3"); break;
+                case 'AAC': selectDropdownByDict("音频编码*", "AAC"); break;
+                case 'Flac': selectDropdownByDict("音频编码*", "FLAC"); break;
+                case 'APE': selectDropdownByDict("音频编码*", "APE"); break;
+                case 'WAV': selectDropdownByDict("音频编码*", "WAV"); break;
+                case 'MP3': selectDropdownByDict("音频编码*", "MP3"); break;
+                case 'M4A': selectDropdownByDict("音频编码*", "M4A");
+            };
+
+            //分辨率
+            switch (raw_info.standard_sel){
+                case '8K': selectDropdownByDict("分辨率*", "8K"); break;
+                case '4K': case '2160p': selectDropdownByDict("分辨率*", "4K"); break;
+                case '1080p': selectDropdownByDict("分辨率*", "1080p"); break;
+                case '1080i': selectDropdownByDict("分辨率*", "1080i"); break;
+                case '720p': selectDropdownByDict("分辨率*", "720p"); break;
+                case 'SD': selectDropdownByDict("分辨率*", "SD");
+            };
         }
 
         else if (forward_site == 'HDHome'){
