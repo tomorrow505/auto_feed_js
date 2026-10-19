@@ -23266,7 +23266,7 @@ function auto_feed() {
                             if (data.length) {
                                 data = data[0];
                                 if (data.title.match(/AKA/)) {
-                                    var data_name = data.title.split('AKA').slice(0, 2).join(' / ');
+                                    var data_name = data.title.split('AKA').slice(0, 2).map(title => title.trim()).reverse().join(' / ');
                                     torrent_name = torrent_name.replace(search_name, data_name);
                                     $('#title').val(torrent_name);
                                 }
