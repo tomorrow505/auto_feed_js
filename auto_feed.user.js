@@ -102,7 +102,7 @@
 // @require      https://greasyfork.org/scripts/444988-music-helper/code/music-helper.js?version=1268106
 // @icon         https://kp.m-team.cc//favicon.ico
 // @run-at       document-end
-// @version      2.1.1.4
+// @version      2.1.1.5
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setClipboard
 // @grant        GM_setValue
@@ -1012,7 +1012,7 @@ const default_site_info = {
     'HDArea': {'url': 'https://hdarea.club/', 'enable': 1},
     'HDB': {'url': 'https://hdbits.org/', 'enable': 1},
     'HDCity': {'url': 'https://hdcity.city/', 'enable': 1},
-    'HDDolby': {'url': 'https://www.hddolby.com/', 'enable': 1},
+    'HDDolby': {'url': 'https://www.uhddolby.com/', 'enable': 1},
     'HDF': {'url': 'https://hdf.world/', 'enable': 1},
     'HDfans': {'url': 'http://hdfans.org/', 'enable': 1},
     'HDHome': {'url': 'https://hdhome.org/', 'enable': 1},
@@ -9343,7 +9343,7 @@ function auto_feed() {
             }
 
             if ($('.nexus-media-info-raw').length || $('#kmediainfo').length) {
-                var mediainfo = $('.nexus-media-info-raw').text() ? $('.nexus-media-info-raw').text(): $('#kmediainfo').text();
+                var mediainfo = $('.nexus-media-info-raw pre').text() || $('.nexus-media-info-raw').text() || $('#kmediainfo').text();
                 if ($('.spoiler-content').length) {
                     mediainfo = $('.spoiler-content').text();
                 }
