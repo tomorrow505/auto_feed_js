@@ -11726,14 +11726,21 @@ function auto_feed() {
                 if (!raw_info.small_descr) { raw_info.small_descr = detail.smallDescr; }
                 if (!raw_info.url) { raw_info.url = detail.descr.match(/title\/tt\d+/) ? match_link('imdb', detail.descr): detail.imdb; reBuildHref(raw_info, forward_r);}
                 if (!raw_info.db_url) { raw_info.db_url = detail.douban; }
-                if (!raw_info.descr) {
-                    raw_info.descr = detail.descr;
-                    try{
-                        raw_info.descr = raw_info.descr.replace(/\*\*(.*?)\*\*/g, `$1`);
-                    } catch (Err) {}
-                    try{
-                        raw_info.descr = raw_info.descr.replace(/!\[\]\((.*?)\)/g, `[img]$1[/img]\n`);
-                    } catch (Err) {}
+                if (!raw_info.descr || raw_info.descr.match(/\[img\]\[\/img\]/)) {
+                    if (!raw_info.descr) {
+                        raw_info.descr = detail.descr;
+                        try{
+                            raw_info.descr = raw_info.descr.replace(/\*\*(.*?)\*\*/g, `$1`);
+                        } catch (Err) {}
+                        try{
+                            raw_info.descr = raw_info.descr.replace(/!\[\]\((.*?)\)/g, `[img]$1[/img]\n`);
+                        } catch (Err) {}
+                    } else {
+                        var imgs = detail.descr.match(/\[img\].*?\[\/img\]/g);
+                        raw_info.descr.match(/\[img\].*?\[\/img\]/g).forEach((item, index)=>{
+                            raw_info.descr = raw_info.descr.replace(item, imgs[index])
+                        });
+                    }
                 }
                 raw_info.type = $('span[class*="ant-typography"]:contains(類別)').text().get_type();
                 if (detail.mediainfo) {
