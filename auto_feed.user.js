@@ -4855,7 +4855,21 @@ function fill_torrent(forward_site, container, name) {
             $('#form_item_title')[0].dispatchEvent(evt);
         });
     } else if (forward_site == 'YemaPT') {
-        ant_form_instance?.setFieldsValue({ 'fileList': [...container.files].map(f =>{ f.originFileObj = f; return f}) }); //files要转为数组，并且添加originFileObj属性为自身
+        const firstFile = container.files?.[0];
+        if (!firstFile) {
+            console.warn('auto_feed: YemaPT torrent file was not created.');
+            return;
+        }
+        // YemaPT 新版发种页接收 Ant Design UploadFile，不要在原生 File 上创建循环引用。
+        const uploadFile = {
+            uid: `auto-feed-${firstFile.name}-${firstFile.lastModified}`,
+            name: firstFile.name,
+            size: firstFile.size,
+            type: firstFile.type,
+            status: 'done',
+            originFileObj: firstFile
+        };
+        ant_form_instance?.setFieldsValue({ 'fileList': [uploadFile] });
     } else if (forward_site == 'RouSi') {
         var i_evt = new Event("change", { bubbles: true, cancelable: false });
         $('input[accept=".torrent"]')[0].files = container.files;
@@ -17443,7 +17457,7 @@ function auto_feed() {
 
                 // 匿名
                 if (if_uplver) {
-                    torrentForm?.setFieldsValue({ 'anonymous': 'y' });
+                    torrentForm?.setFieldsValue({ 'uploadUserAnonymous': 'y' });
                 }
 
                 if (raw_info.dburl) {
