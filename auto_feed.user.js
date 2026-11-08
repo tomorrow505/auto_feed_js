@@ -14,6 +14,7 @@
 // @match        http*://*/upload*php*
 // @match        https://pixhost.to*
 // @match        https://*/upload/*
+// @match        https://rousi.pro/upload*
 // @match        https://*.open.cd/plugin_upload.php*
 // @match        https://www.myanonamouse.net/t/*
 // @match        https://img.hdbits.org/
@@ -31,7 +32,6 @@
 // @match        https://kp.m-team.cc/upload*
 // @match        https://zp.m-team.io/upload*
 // @match        https://zp.m-team.io/detail*
-// @match        https://rousi.pro/upload*
 // @match        https://blutopia.cc/torrents/create*
 // @match        https://secret-cinema.pw/torrents.php?id=*
 // @match        https://filelist.io/*
@@ -1011,6 +1011,7 @@ const default_site_info = {
     'HaiDan': {'url': 'https://www.haidan.video/', 'enable': 1},
     'HDArea': {'url': 'https://hdarea.club/', 'enable': 1},
     'HDB': {'url': 'https://hdbits.org/', 'enable': 1},
+    'HDChina': {'url': "https://hdwing.org/", 'enable': 1},
     'HDCity': {'url': 'https://hdcity.city/', 'enable': 1},
     'HDDolby': {'url': 'https://www.uhddolby.com/', 'enable': 1},
     'HDF': {'url': 'https://hdf.world/', 'enable': 1},
@@ -3415,7 +3416,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         container.appendChild(brDiv);
     }
 
-    if (['PHD','avz', 'CNZ', 'FileList', 'TTG'].indexOf(site) > -1) {
+    if (['PHD','avz', 'CNZ', 'FileList', 'HDChina', 'TTG'].indexOf(site) > -1) {
         var download_button = document.createElement('input');
 
         var select_img = document.createElement("input");
@@ -3595,7 +3596,7 @@ function init_buttons_for_transfer(container, site, mode, raw_info) {
         }
     }
 
-    if (['HDB','PHD','avz', 'CNZ', 'FileList', 'TTG'].indexOf(site) > -1) {
+    if (['HDB','PHD','avz', 'CNZ', 'FileList', 'HDChina', 'TTG'].indexOf(site) > -1) {
         var width = textarea.style.width.match(/\d+/)[0];
         if (site == 'PHD' || site == 'avz' || site == 'CNZ') {
             textarea.style.width = `${parseInt(width) + 90}px`;
@@ -4872,8 +4873,8 @@ function fill_torrent(forward_site, container, name) {
         ant_form_instance?.setFieldsValue({ 'fileList': [uploadFile] });
     } else if (forward_site == 'RouSi') {
         var i_evt = new Event("change", { bubbles: true, cancelable: false });
-        $('input[accept=".torrent"]')[0].files = container.files;
-        $('input[accept=".torrent"]')[0].dispatchEvent(i_evt);
+        $('#torrent-file')[0].files = container.files;
+        $('#torrent-file')[0].dispatchEvent(i_evt);
     } else {
         $('input[name=file]')[0].files = container.files;
     }
@@ -9402,7 +9403,7 @@ function auto_feed() {
                 }
             }
 
-            if (origin_site == 'TTG'){
+            if (origin_site == 'HDChina' || origin_site == 'TTG'){
                 if (raw_info.descr.search(/主.*演/i) < 0 && raw_info.descr.search(/类.*别/i) < 0){
                     var douban_content = document.getElementsByClassName('douban_content');
                     if (douban_content[0]){
@@ -9414,7 +9415,9 @@ function auto_feed() {
                 }
                 if (raw_info.descr.match(/https:\/\/img.hdchina.org\/images/) || raw_info.descr.match(/https?:\/\/tu.totheglory.im\/files/)) {
                     douban_button_needed = true;
-                    if (origin_site == 'TTG'){
+                    if (origin_site == 'HDChina') {
+                        var img = Array.from(document.getElementById("kdescr").getElementsByTagName('img'));
+                    } else if (origin_site == 'TTG'){
                         var img = Array.from(document.getElementById("kt_d").getElementsByTagName('img'));
                     } else {
                         var img = Array.from(document.getElementById("kdescr").getElementsByTagName('img'));
@@ -9428,7 +9431,11 @@ function auto_feed() {
                             var isChecked = el.hasClass("imgChked"),
                             imgEl = el.children()[0];
                             var img_src = '';
-                            img_src = imgEl.parentNode.parentNode.href;
+                            if (origin_site == 'HDChina') {
+                                img_src = imgEl.src.replace('.md', '');
+                            } else {
+                                img_src = imgEl.parentNode.parentNode.href;
+                            }
                             if (isChecked) {
                                 raw_info.images.push(img_src);
                             } else {
@@ -9463,6 +9470,9 @@ function auto_feed() {
             } else if (origin_site == 'TTG') {
                 raw_info.torrent_name = $('a[href*="dl"]:contains(torrent)').text();
                 raw_info.torrent_url = $('a[href*="dl"]:contains(点击复制到剪切板)').attr('href');
+            } else if (origin_site == 'HDChina') {
+                raw_info.torrent_name = $('a.torrentdown_button').attr('title');
+                raw_info.torrent_url = $('#clip_target').attr("href");
             } else if (origin_site == 'ZMPT') {
                 raw_info.torrent_name = $('a[href*="download.php"]:contains(torrent)').text();
                 raw_info.torrent_url = $('#content').text().trim();
@@ -11382,7 +11392,16 @@ function auto_feed() {
                 }
             }
 
-            if (origin_site == 'HUDBT'){
+            if (origin_site == 'HDChina') {
+                if (tds[i].innerHTML == '字幕') {
+                    table = tds[i].parentNode.parentNode;
+                    insert_row = table.insertRow(i / 2 + 1);
+                    if (douban_button_needed){
+                        douban_box = table.insertRow(i / 2 + 1);
+                    }
+                }
+            }
+            else if (origin_site == 'HUDBT'){
                 if (!is_inserted){
                     if (['行为'].indexOf(tds[i].textContent) >-1 ) {
                         table = tds[i].parentNode;
@@ -12739,6 +12758,17 @@ function auto_feed() {
             }
         }
 
+        if (origin_site == 'HDChina') {
+            raw_info.small_descr = document.getElementsByTagName("h3")[0].textContent;
+            var movie_info = $('.info_box ul').eq(2).html();
+            raw_info.type = movie_info.get_type();
+            raw_info.medium_sel = movie_info.medium_sel();
+            raw_info.codec_sel = movie_info.codec_sel();
+            raw_info.audiocodec_sel = movie_info.audiocodec_sel();
+            raw_info.standard_sel = movie_info.standard_sel();
+            raw_info.descr = raw_info.descr.replace(/\[size=3\]\[color=green\]\[font=Microsoft YaHei\][\s\S]*$/i, '');
+        }
+
         if (raw_info.descr.match(/\[quote\]\[quote\]([\s\S]*?)\[\/quote\]\[\/quote\]/)) {
             raw_info.descr = raw_info.descr.replace(/\[quote\]\[quote\]([\s\S]*?)\[\/quote\]\[\/quote\]/, function(data) {
                 return data.replace(/^\[quote\]/, '\n\n').replace(/\[\/quote\]$/, '\n');
@@ -13740,10 +13770,17 @@ function auto_feed() {
 
             if (search_mode){
                 if (origin_site == 'FRDS' || raw_info.name.match(/frds/i)) {
-                    if (['CMCT', 'OurBits', 'HDSky'].indexOf(e.target.id) > -1) {
+                    if (['CMCT', 'OurBits', 'HDChina', 'HDSky'].indexOf(e.target.id) > -1) {
                         e.preventDefault();
                         alert('不支持该站资源转发！');
                         return;
+                    }
+                } else if (raw_info.name.match(/chd$|chdbits|chdweb|chdtv|chdpad|chdhktv/i)) {
+                    if (['HDChina'].indexOf(this.id) > -1) {
+                        if (!confirm('该资源可能触发禁止发布规则(岛资源禁转到HDC)，确定发布？')) {
+                            e.preventDefault();
+                            return;
+                        }
                     }
                 } else if (raw_info.name.match(/Audies$|-ADE$|-ADWeb$/i)) {
                     if (['PTT'].indexOf(this.id) > -1) {
@@ -15252,7 +15289,7 @@ function auto_feed() {
         }
         for (i = 0; i < allinput.length; i++) {
             if (allinput[i].name == 'name' && forward_site != 'GPW' && forward_site != 'OpenCD') { //填充标题
-                if (['NanYang', 'CMCT', 'iTS', 'NPUPT', 'xthor'].indexOf(forward_site) > -1) {
+                if (['HDChina', 'NanYang', 'CMCT', 'iTS', 'NPUPT', 'xthor'].indexOf(forward_site) > -1) {
                     allinput[i].value = raw_info.name.replace(/\s/g, ".");
                 } else if (forward_site == 'TTG') {
                     raw_info.name = raw_info.name.replace(/(5\.1|2\.0|7\.1|1\.0)/, function(data){
@@ -17855,6 +17892,186 @@ function auto_feed() {
                 var index = source_dict[raw_info.source_sel];
                 $("select[name='processing_sel']").val(index);
             }
+        }
+
+        else if (forward_site == 'HDChina'){
+            switch (raw_info.type){
+                case '电影':
+                    if (raw_info.medium_sel == 'Blu-ray' || raw_info.medium_sel == 'UHD'){
+                        if (raw_info.standard_sel == '4K'){
+                            $('#browsecat').val('410');
+                        } else{
+                            $('#browsecat').val('20');
+                        }
+                    } else {
+                        if (raw_info.standard_sel == '720p'){
+                            $('#browsecat').val('9');
+                        } else if(raw_info.standard_sel == '1080i'){
+                            $('#browsecat').val('16');
+                        } else if (raw_info.standard_sel == '1080p'){
+                            $('#browsecat').val('17');
+                        } else if (raw_info.standard_sel == '4K'){
+                            $('#browsecat').val('410');
+                        }
+                    }
+                    break;
+                case '剧集':
+                    switch (raw_info.source_sel){
+                        case '大陆': case '台湾': case '香港': case '港台':
+                            if (raw_info.name.match(/(complete|S\d{2}[^E])/i) && (!raw_info.name.match(/E\d{2,3}/i))) { //合集
+                                $('#browsecat').val('22');
+                            } else {
+                                $('#browsecat').val('25');
+                            }
+                            break;
+
+                        case '日本':
+                            if (raw_info.name.match(/(complete|S\d{2}[^E])/i)) {
+                                $('#browsecat').val('23');
+                            } else {
+                                $('#browsecat').val('24');
+                            }
+                            break;
+                        case '韩国':
+                            if (raw_info.name.match(/(complete|S\d{2}[^E])/i)) {
+                                $('#browsecat').val('23');
+                            } else {
+                                $('#browsecat').val('24');
+                            }
+                            break;
+
+                        case '欧美':
+                            if (raw_info.name.match(/(S\d{2}E\d{2})/i)) {
+                                $('#browsecat').val('13');
+                            } else {
+                                $('#browsecat').val('21');
+                            }
+                            break;
+                    }
+                    break;
+                case '音乐':
+                    if (raw_info.small_descr.match(/音乐会/i)){
+                        $('#browsecat').val('402');
+                    } else {
+                        $('#browsecat').val('408');
+                    }
+                    break;
+                case 'MV': $('#browsecat').val('406'); break;
+                case '综艺': $('#browsecat').val('401'); break;
+                case '动漫': $('#browsecat').val('14'); break;
+                case '学习': $('#browsecat').val('404'); break;
+                case '纪录': $('#browsecat').val('5'); break;
+                case '动漫': $('#browsecat').val('14'); break;
+                case '体育': $('#browsecat').val('15'); break;
+                case '书籍': $('#browsecat').val('404');
+            }
+            if (raw_info.name.match(/(pad$|ipad)/i)){
+                $('#browsecat').val('27');
+            }
+            $('#share_rule').val('3');
+
+            //格式
+            $("select[name='standard_sel']").val('10'); //默认其它
+            switch (raw_info.standard_sel){
+                case '8K': $("select[name='standard_sel']").val('19'); break;
+                case '4K': $("select[name='standard_sel']").val('17'); break;
+                case '1080p': $("select[name='standard_sel']").val('11'); break;
+                case '1080i': $("select[name='standard_sel']").val('12'); break;
+                case '720p': $("select[name='standard_sel']").val('13'); break;
+                case 'SD': $("select[name='standard_sel']").val('15');
+            }
+
+            $("select[name='medium_sel']").val('15');  //默认其它
+            if (raw_info.name.match(/MiniBD/i)) {
+                $("select[name='medium_sel']").val('2');
+            }
+            else {
+                switch (raw_info.medium_sel){
+                    case 'UHD': case 'Blu-ray':
+                        $("select[name='medium_sel']").val('11'); break;
+                    case 'HDTV': $("select[name='medium_sel']").val('13'); break;
+                    case 'WEB-DL': $("select[name='medium_sel']").val('21'); break;
+                    case 'Encode': $("select[name='medium_sel']").val('5'); break;
+                    case 'Remux': $("select[name='medium_sel']").val('6'); break;
+                    case 'DVD':
+                        if (raw_info.name.match(/DVDR/i)) {
+                            $("select[name='medium_sel']").val('4');
+                        } else if (raw_info.name.match(/HD.?DVD/i)){
+                            $("select[name='medium_sel']").val('12');
+                        } else {
+                            $("select[name='medium_sel']").val('14');
+                        }
+                        break;
+                    case 'CD': $("select[name='medium_sel']").val('1');
+                }
+            }
+
+            switch (raw_info.codec_sel){
+                case 'H265': case 'X265':
+                    $("select[name='codec_sel']").val('10'); break;
+                case 'H264':
+                    $("select[name='codec_sel']").val('1'); break;
+                case 'X264':
+                    $("select[name='codec_sel']").val('6'); break;
+                case 'XVID':
+                    $("select[name='codec_sel']").val('3'); break;
+                case 'VC-1':
+                    $("select[name='codec_sel']").val('2'); break;
+                case 'MPEG-2': case 'MPEG-4':
+                    $("select[name='codec_sel']").val('4'); break;
+                case '':
+                    $("select[name='codec_sel']").val('5');
+            }
+
+            //音频编码
+            $("select[name='audiocodec_sel']").val('7'); //默认其它
+            switch (raw_info.audiocodec_sel){
+                case 'DTS-HDMA:X 7.1':
+                    $("select[name='audiocodec_sel']").val('14'); break;
+                case 'DTS-HDMA':
+                    $("select[name='audiocodec_sel']").val('12'); break;
+                case 'Atmos':
+                    $("select[name='audiocodec_sel']").val('15'); break;
+                case 'TrueHD':
+                    $("select[name='audiocodec_sel']").val('13'); break;
+                case 'LPCM':
+                    $("select[name='audiocodec_sel']").val('11'); break;
+                case 'DTS': case 'DTS-HD': case 'DTS-HDHR':
+                    if (raw_info.name.match(/DTS.?X[^ \d]/i)){
+                        $("select[name='audiocodec_sel']").val('14');
+                    } else {
+                        $("select[name='audiocodec_sel']").val('3');
+                    }
+                    break;
+                case 'AC3':
+                    $("select[name='audiocodec_sel']").val('8');
+                    if (raw_info.name.match(/atmos/i)) {
+                        $("select[name='audiocodec_sel']").val('15');
+                    }
+                    break;
+                case 'AAC':
+                    $("select[name='audiocodec_sel']").val('6'); break;
+                case 'Flac':
+                    $("select[name='audiocodec_sel']").val('1'); break;
+                case 'APE':
+                    $("select[name='audiocodec_sel']").val('2'); break;
+                case 'MP3':
+                    $("select[name='audiocodec_sel']").val('4'); break;
+                case 'WAV':
+                    $("select[name='audiocodec_sel']").val('9');
+            }
+            if (raw_info.descr.match(/Format : MPEG Audio/)) {
+                $("select[name='audiocodec_sel']").val('4');
+            }
+
+            //海报，从简介获取
+            reg_img = raw_info.descr.match(/\[img\](.*?)\[\/img\][\s\S]+?(主.{0,12}演|译.{0,12}名)/i);
+            if (reg_img){
+                $('#cover').val(reg_img[1]);
+            }
+
+            $("select[name='team_sel']").val('5');
+            check_team(raw_info, 'team_sel');
         }
 
         else if (forward_site == 'PThome'){
@@ -21314,117 +21531,244 @@ function auto_feed() {
         }
 
         else if (forward_site == 'RouSi') {
-            var type_dict = {'电影': 'movie', '剧集': 'tv', '动漫': 'animation', '综艺': 'variety', '音乐': 'music', '纪录': 'documentary', '体育': 'sports', '软件': 'software', '学习': 'ebook'};
-            var r_type = 'other';
-            if (type_dict.hasOwnProperty(raw_info.type)){
-                r_type = type_dict[raw_info.type];
-            }
-            var standard_dict = {'8K': '其它', '4320p': '其它', '4K': '4K / 2160p', '1080p': '1080p', '1080i': '1080i', '720p': '720p', 'SD': 'SD', '480p': 'SD'};
-            var r_standard = '其它';
-            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
-                r_standard = standard_dict[raw_info.standard_sel];
-            }
-            var r_source = '其它';
-            switch (raw_info.medium_sel){
-                case 'Blu-ray': case 'Remux': case 'Encode': r_source = 'Blu-ray'; break;
-                case 'UHD': r_source = 'UHD Blu-ray'; break;
-                case 'WEB-DL': r_source = 'WEB-DL'; break;
-                case 'HDTV': r_source = 'HDTV'; break;
-                case 'DVD': r_source = 'DVDRip'; break;
-            }
-            var r_country = '其他';
-            const regions = ["大陆", "香港", "台湾", "日本", "韩国", "美国", "英国", "法国", "德国", "意大利", "西班牙", "俄罗斯", "新西兰", "加拿大", "印度", "泰国", "澳大利亚"];
-            var reg_region = raw_info.descr.match(/◎(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地|◎產.{0,5}?地)([^\r\n]+)/);
-            if (!reg_region) {
-                reg_region = raw_info.descr.match(/(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地|◎產.{0,5}?地)([^\r\n]+)/);
-            }
-            if (reg_region) {
-                region = reg_region[2].split('/')[0].trim();
-                if (regions.indexOf(region) > -1) {
-                    r_country = region;
+            const RousiForm = (() => {
+                const $ = window.jQuery;
+                if (!$) {
+                    throw new Error("请先加载 jQuery");
                 }
-            }
-            if (raw_info.source_sel == '大陆') {
-                r_country = '大陆';
-            }
-            function smartFill(input, value, type = 'input') {
-                const el = (typeof input === 'string') ? document.querySelector(input) : input;
-                if (!el) {
-                    console.warn(`未找到元素!!`);
-                    return;
-                }
-                switch (type) {
-                    case 'checkbox':
-                        const targetState = !!value; 
-                        if (el.checked !== targetState) {
-                            // 直接触发点击，这会带动框架内部的状态更新
-                            el.click(); 
-                        }
-                        el.dispatchEvent(new Event('change', { bubbles: true }));
-                        break;
-                    case 'input': case 'textarea':
-                        const proto = el.tagName === 'TEXTAREA' 
-                            ? window.HTMLTextAreaElement.prototype 
-                            : window.HTMLInputElement.prototype;
-                        const setter = Object.getOwnPropertyDescriptor(proto, "value")?.set;
-                        if (setter) {
-                            setter.call(el, value);
-                        } else {
-                            el.value = value;
-                        }
-                        el.dispatchEvent(new Event('input', { bubbles: true }));
-                        el.dispatchEvent(new Event('change', { bubbles: true }));
-                        break;
-                    case 'select':
-                        el.value = value;
-                        el.dispatchEvent(new Event('change', { bubbles: true }));
-                        break;
-                }
-            }
-            function autoClickCategories(introText) {
-                const categoryMatch = introText.match(/◎类.*?别\s+([^\n\r]+)/);
-                if (!categoryMatch) {
-                    console.warn("未在简介中找到类别信息");
-                    return;
-                }
-                const targetCategories = categoryMatch[1].split(/[ /／]+/).map(s => s.trim());
-                console.log("识别到的类型:", targetCategories);
-                const buttons = document.querySelectorAll('div.flex.flex-wrap.gap-2 button[type="button"]');
+                const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+                //     .normalize('NFKC')
+                //     .replace(/\s+/g, '')
+                //     .toLowerCase();
+                async function waitFor(find, message, timeout = 20000) {
+                    const deadline = Date.now() + timeout;
 
-                buttons.forEach(btn => {
-                    const btnText = btn.textContent.trim();
-                    if (targetCategories.includes(btnText)) {
-                        btn.click();
-                        console.log(`已点击按钮: ${btnText}`);
+                    while (Date.now() < deadline) {
+                        const result = find();
+                        if (result) return result;
+                        await sleep(50);
                     }
-                });
-            }
-            const fileWatcher = setInterval(() => {
-                const fileInput = document.querySelector('input[type="file"]');
-                if (!fileInput) return;
-                if (fileInput.files && fileInput.files.length > 0) {
-                    clearInterval(fileWatcher);
-                    smartFill('input[placeholder="种子标题"]', raw_info.name, 'input');
-                    smartFill('input[placeholder="副标题"]', raw_info.small_descr, 'input');
-                    setTimeout(() => {
-                        smartFill('input[placeholder="填入 IMDb 链接"]', raw_info.url, 'input');
-                        smartFill('input[placeholder="填入 豆瓣 链接"]', raw_info.dburl, 'input');
-                        autoClickCategories(raw_info.descr);
-                        smartFill('textarea[placeholder="粘贴 MediaInfo 或 BDInfo 信息"]', mediainfo_mteam, 'textarea');
-                        smartFill('textarea[placeholder*="种子描述"]', raw_info.descr, 'textarea');
-                        if (if_uplver) {
-                            const anonCheckbox = Array.from(document.querySelectorAll('label'))
-                                .find(l => l.innerText.includes('匿名上传'))
-                                ?.querySelector('input');
-                            smartFill(anonCheckbox, true, 'checkbox');
-                        }
-                    }, 1500);
-                    smartFill(document.querySelectorAll('select')[0], r_type, 'select');
-                    smartFill(document.querySelectorAll('select')[1], r_country, 'select');
-                    smartFill(document.querySelectorAll('select')[2], r_standard, 'select');
-                    smartFill(document.querySelectorAll('select')[3], r_source, 'select');
+
+                    throw new Error(message);
                 }
-            }, 1000);
+
+                // 1. 普通文本。适用于 input 和 textarea，兼容 React 受控组件。
+                async function fillText(selector, value) {
+                    if (value == null) return;
+                    const element = await waitFor(
+                        () => $(selector).get(0),
+                        `找不到文本框 ${selector}`
+                    );
+                    const prototype = element instanceof HTMLTextAreaElement
+                        ? HTMLTextAreaElement.prototype
+                        : HTMLInputElement.prototype;
+
+                    Object.getOwnPropertyDescriptor(prototype, 'value')
+                        .set.call(element, String(value));
+
+                    element.dispatchEvent(new Event('input', { bubbles: true }));
+                    element.dispatchEvent(new Event('change', { bubbles: true }));
+                    await sleep(0);
+                }
+
+                async function selectDropdown(selector, value) {
+                    if (value == null || value === '') return;
+
+                    const text = String(value).trim();
+                    const trigger = await waitFor(
+                        () => $(selector).get(0),
+                        `找不到下拉框 ${selector}`
+                    );
+
+                    if ($(trigger).find('[data-slot="select-value"]').text().trim() === text) {
+                        return;
+                    }
+                    trigger.click();
+                    const option = await waitFor(() => {
+                        const listbox = document.getElementById(
+                            trigger.getAttribute('aria-controls') || ''
+                        );
+
+                        const $options = listbox
+                            ? $(listbox).find('[role="option"]')
+                            : $('[role="listbox"]:visible [role="option"]');
+
+                        return $options.filter(function () {
+                            return $(this).text().trim() === text;
+                        }).get(0);
+                    }, `${selector} 找不到选项 ${text}`);
+
+                    option.click();
+
+                    await waitFor(
+                        () => $(selector)
+                            .find('[data-slot="select-value"]')
+                            .text().trim() === text,
+                        `${selector} 选择未生效 ${text}`
+                    );
+                }
+
+                async function selectPressed(selector, genres) {
+                    for (const genre of genres) {
+                        const button = $(selector).find('button').filter(function () {
+                            return $(this).text().trim() === genre.trim();
+                        }).get(0);
+
+                        if (button && button.getAttribute('aria-pressed') !== 'true') {
+                            button.click();
+                            await sleep(0);
+                        }
+                    }
+                }
+
+                // BBCode 转换覆盖此前示例中的标签。
+                function bbcodeToMarkdown(text) {
+                    return String(text ?? '')
+                        .replace(/\[img\]([\s\S]*?)\[\/img\]/gi, '![]($1)')
+                        .replace(
+                            /\[url=([^\]]+)\]([\s\S]*?)\[\/url\]/gi,
+                            '[$2]($1)'
+                        )
+                        .replace(/\[url\]([\s\S]*?)\[\/url\]/gi, '<$1>')
+                        .replace(/\[b\]([\s\S]*?)\[\/b\]/gi, '**$1**')
+                        .replace(/\[i\]([\s\S]*?)\[\/i\]/gi, '*$1*')
+                        .replace(/\[\/?color(?:=[^\]]+)?\]/gi, '')
+                        .replace(/\[quote\]([\s\S]*?)\[\/quote\]/gi, (_, content) =>
+                            '\n' + content.trim().split(/\r?\n/)
+                                .map(line => '> ' + line).join('\n') + '\n'
+                        )
+                        .trim();
+                }
+
+                // 4. Markdown。format 可传 markdown 或 bbcode。
+                async function fillMarkdown(content, format = 'markdown') {
+                    const text = format === 'bbcode'
+                        ? bbcodeToMarkdown(content)
+                        : content;
+
+                    await fillText('#torrent-description', text);
+                }
+
+                return {
+                    fillText,
+                    selectDropdown,
+                    selectPressed,
+                    fillMarkdown
+                };
+            
+            })();
+
+            function setAnonymous(checked = true) {
+                const checkbox = document.querySelector(
+                    '[role="checkbox"][aria-labelledby="torrent-anonymous-label"]'
+                );
+
+                if (checkbox &&
+                    (checkbox.getAttribute('aria-checked') === 'true') !== checked) {
+                    checkbox.click();
+                }
+            }
+
+            var type_sel = '其他';
+            var type_dict = {'电影': '电影', '剧集': '电视剧', '动漫': '动漫', '综艺': '综艺', '音乐': '音乐', '纪录': '纪录片',
+                    '体育': '体育', 'MV': '音乐', '软件': '软件'};
+            if (type_dict.hasOwnProperty(raw_info.type)){
+                type_sel = type_dict[raw_info.type];
+            }
+            var region_sel = '其他';
+            var region_dict = {'欧美': '欧美', '大陆': '大陆', '香港': '香港', '台湾': '台湾', '日本': '日本', '韩国': '韩国',
+                               '印度': '印度', '': '其他'};
+            if (region_dict.hasOwnProperty(raw_info.source_sel)){
+                region_sel = region_dict[raw_info.source_sel];
+            }
+            if (region_sel == '其他' || region_sel == '欧美' || region_sel == '港台' || region_sel == '日韩') {
+                var reg_region = raw_info.descr.match(/◎(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地|◎產.{0,5}?地)([^\r\n]+)/);
+                if (! reg_region) {
+                    reg_region = raw_info.descr.match(/(地.{0,10}?区|国.{0,10}?家|产.{0,10}?地|◎產.{0,5}?地)([^\r\n]+)/);
+                }
+                if (reg_region) {
+                    region_sel = reg_region[2].split('/')[0].trim();
+                    reg_region = RegExp(us_ue, 'i');
+                    if (region_sel.match(/香港/)){
+                        region_sel = '香港';
+                    } else if (region_sel.match(/台湾|臺灣/)){
+                        region_sel = '台湾';
+                    } else if (region_sel.match(/日本/)){
+                        region_sel = '日本';
+                    } else if (region_sel.match(/韩国/)){
+                        region_sel = '韩国';
+                    } else if (region_sel.match(/印度/) && !region_sel.match(/印度尼西亚/)){
+                        region_sel = '印度';
+                    } else if (region_sel.match(/中国|大陆/)){
+                        region_sel = '大陆';
+                    } else if (region_sel.match(/美国|英国|法国|德国|意大利|西班牙|俄罗斯|新西兰|加拿大|泰国|澳大利亚/)){
+                        region_sel = region_sel;
+                    } else {
+                        region_sel = '其他';
+                    }
+                }
+            }
+
+            var standard_sel = '其他';
+            var standard_dict = {'4K': '4K / 2160p', '2160p': '4K / 2160p', '1080p': '1080p', '1080i': '1080i', '720p': '720p', 'SD': 'SD', '480p': 'SD'};
+            if (standard_dict.hasOwnProperty(raw_info.standard_sel)){
+                standard_sel = standard_dict[raw_info.standard_sel];
+            }
+
+            var medium_sel = '其他';
+            switch (raw_info.medium_sel){
+                case 'Blu-ray': medium_sel = 'Blu-ray'; break;
+                case 'UHD': medium_sel = 'UHD Blu-ray'; break;
+                case 'Remux': medium_sel = 'Blu-ray'; break;
+                case 'Encode': medium_sel = 'Blu-ray'; break;
+                case 'WEB-DL': medium_sel = 'WEB-DL'; break;
+                case 'HDTV': medium_sel = 'HDTV'; break;
+                case 'DVD': medium_sel = 'DVDRip'; break;
+            }
+
+            const genreMatch = String(raw_info.descr || '').match(
+                /◎\s*类\s*别[\s：:]*([^\r\n]+)/
+            );
+            var genres = genreMatch ? genreMatch[1].trim() : '';
+            genres = genres.split(/[\s,，、\/]+/).map(g => g.trim()).filter(g => g.length > 0);
+
+            // data 为你已经解析出的 JSON 对象。
+            async function fillRousiUpload(info) {
+                const form = RousiForm;
+                await form.fillText('#torrent-title', info.name);
+                await form.fillText('#torrent-subtitle', info.small_descr);
+                await form.fillText('#torrent-imdb-id', info.url);
+                await form.fillText('#torrent-douban-id', info.dburl);
+                await form.selectDropdown(
+                    '#torrent-category',
+                    type_sel
+                );
+                await form.selectDropdown(
+                    '#torrent-facet-region',
+                    region_sel
+                );
+                await form.selectDropdown(
+                    '#torrent-facet-resolution',
+                    standard_sel
+                );
+                await form.selectDropdown(
+                    '#torrent-facet-source',
+                    medium_sel
+                );
+                await form.selectPressed(
+                    '[aria-labelledby="torrent-facet-genre-label"]',
+                    genres
+                );
+                await form.fillMarkdown(info.descr, 'bbcode');
+                await form.fillText('#torrent-media-info', mediainfo_mteam);
+                if (if_uplver) {
+                    setAnonymous(true);
+                }
+            }
+
+            fillRousiUpload({
+                ...raw_info
+            });
         }
 
 	    else if (forward_site == '财神') {
